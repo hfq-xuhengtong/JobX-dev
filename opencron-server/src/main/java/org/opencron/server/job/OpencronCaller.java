@@ -29,7 +29,7 @@ import org.opencron.common.job.Response;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.rpc.InvokeCallback;
-import org.opencron.rpc.support.AbstractRpcInvoker;
+import org.opencron.rpc.support.AbstractInvoker;
 import org.opencron.server.domain.Agent;
 import org.opencron.server.service.AgentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class OpencronCaller extends AbstractRpcInvoker {
+public class OpencronCaller extends AbstractInvoker {
 
     @Autowired
     private AgentService agentService;

@@ -25,7 +25,7 @@ import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
 
 
-public interface RpcInvoker {
+public interface Invoker {
 
     Response sentSync(Request request) throws Exception;
 

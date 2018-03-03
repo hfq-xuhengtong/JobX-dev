@@ -27,7 +27,7 @@ import org.opencron.common.job.Response;
 import org.opencron.common.job.RpcType;
 import org.opencron.rpc.Client;
 import org.opencron.rpc.InvokeCallback;
-import org.opencron.rpc.RpcInvoker;
+import org.opencron.rpc.Invoker;
 
 
 /**
@@ -36,7 +36,7 @@ import org.opencron.rpc.RpcInvoker;
  * @date 2016-03-27
  */
 
-public abstract class AbstractRpcInvoker implements RpcInvoker {
+public abstract class AbstractInvoker implements Invoker {
 
     //同步调用
     public Response sentSync(Request request) {
