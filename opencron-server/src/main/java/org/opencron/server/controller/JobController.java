@@ -148,7 +148,24 @@ public class JobController extends BaseController {
             /**
              * 将数据库中持久化的作业和当前修改的合并,当前修改的属性覆盖持久化的属性...
              */
-            BeanUtils.copyProperties(job1, job, "jobName", "cronType", "cronExp", "command", "comment","successExit", "redo", "runCount", "jobType", "runModel", "warning", "mobiles", "emailAddress", "timeout");
+            BeanUtils.copyProperties(
+                    job1,
+                    job,
+                    "jobName",
+                    "cronType",
+                    "cronExp",
+                    "command",
+                    "comment",
+                    "successExit",
+                    "redo",
+                    "runCount",
+                    "jobType",
+                    "runModel",
+                    "warning",
+                    "mobiles",
+                    "emailAddress",
+                    "timeout"
+            );
         }
 
         //单任务
