@@ -49,7 +49,7 @@
             host:function () {
                 var _host = $("#host").val();
                 if (!_host) {
-                    opencron.tipError("#host","请填写机器host!");
+                    opencron.tipError("#host","请填写主机地址!");
                     this.status = false;
                 }else{
                     if (!opencron.testIp(_host)) {
@@ -351,10 +351,10 @@
                     </c:if>
 
                     <div class="form-group">
-                        <label for="host" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;机&nbsp;&nbsp;器&nbsp;&nbsp;host&nbsp;&nbsp;<b>*</b></label>
+                        <label for="host" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;主机地址&nbsp;&nbsp;<b>*</b></label>
                         <div class="col-md-10">
                             <input type="text" class="form-control input-sm" id="host" name="host">
-                            <span class="tips" tip="必填项,执行器Host为IP地址,或者可以连接到该Agent的网址">必填项,执行器Host为IP地址,或者可以连接到该Agent的网址</span>
+                            <span class="tips" tip="必填项,主机地址为IP地址,或者可以连接到该Agent的网址">必填项,执行器Host为IP地址,或者可以连接到该Agent的网址</span>
                         </div>
                     </div>
                     <br>

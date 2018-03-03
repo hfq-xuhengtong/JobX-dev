@@ -87,7 +87,7 @@ public class VerifyController extends BaseController {
         if (!ping) {
             logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), port));
         }
-        return Status.create(ping);
+         return Status.create(ping);
     }
 
     @RequestMapping(value = "guid.do", method = RequestMethod.POST)

@@ -1,47 +1,48 @@
+/**
+ * Copyright (c) 2015 The Opencron Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.opencron.rpc.mina;
 
 import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.future.IoFuture;
-import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.DefaultSocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
 import org.opencron.common.logging.LoggerFactory;
-import org.opencron.common.util.HttpUtils;
 import org.opencron.rpc.Client;
 import org.opencron.rpc.InvokeCallback;
 import org.opencron.rpc.Promise;
+import org.opencron.rpc.support.AbstractClient;
 import org.slf4j.Logger;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class MinaClient implements Client {
+public class MinaClient extends AbstractClient implements Client {
 
     private static Logger logger = LoggerFactory.getLogger(MinaClient.class);
-
-    private NioSocketConnector connector;
-
-    protected final ConcurrentHashMap<Integer, Promise> promiseTable = new ConcurrentHashMap<Integer, Promise>(256);
-
-    private final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
-
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public MinaClient() {
         this.connect();
     }
 
     @Override
-    public void connect() {
-
+    public void doConnect() {
         connector = new NioSocketConnector();
         connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Request.class, Response.class)));
         connector.setHandler(new MinaClientHandler(new Promise.Getter() {
@@ -50,29 +51,11 @@ public class MinaClient implements Client {
                 return promiseTable.get(id);
             }
         }));
-
         connector.setConnectTimeoutMillis(5000);
-
         DefaultSocketSessionConfig sessionConfiguration = (DefaultSocketSessionConfig) connector.getSessionConfig();
         sessionConfiguration.setTcpNoDelay(true);
         sessionConfiguration.setKeepAlive(true);
         sessionConfiguration.setWriteTimeout(5);
-
-        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(5, new ThreadFactory() {
-            private final AtomicInteger idGenerator = new AtomicInteger(0);
-
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "MinaRPC " + this.idGenerator.incrementAndGet());
-            }
-        });
-
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                scanPromiseTable();
-            }
-        }, 500, 500, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -87,28 +70,9 @@ public class MinaClient implements Client {
     public Response sentSync(final Request request) throws Exception {
         final ConnectFuture connect = getOrCreateConnect(request);
         if (connect != null && connect.isConnected()) {
-            final Promise promise = new Promise(request.getTimeOut());
-            this.promiseTable.put(request.getId(), promise);
+            Promise promise = new Promise(request.getTimeOut());
             //写数据
-            connect.addListener(new IoFutureListener() {
-                @Override
-                public void operationComplete(IoFuture future) {
-                    if (future.isDone()) {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[opencron] MinaRPC sentSync success, request id:{}", request.getId());
-                        }
-                        promise.setSendRequestSuccess(true);
-                        return;
-                    } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[opencron] MinaRPC sentSync failure, request id:{}", request.getId());
-                        }
-                        promiseTable.remove(request.getId());
-                        promise.setSendRequestSuccess(false);
-                        promise.setFailure(connect.getException());
-                    }
-                }
-            });
+            connect.addListener(new AbstractClient.ChannelListener(request,promise,null));
             connect.getSession().write(request);
             return promise.get();
         } else {
@@ -120,20 +84,7 @@ public class MinaClient implements Client {
     public void sentOneway(final Request request) throws Exception {
         ConnectFuture connect = getOrCreateConnect(request);
         if (connect != null && connect.isConnected()) {
-            connect.addListener(new IoFutureListener() {
-                @Override
-                public void operationComplete(IoFuture future) {
-                    if (future.isDone()) {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[opencron] MinaRPC sentOneway success, request id:{}", request.getId());
-                        }
-                    } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[opencron] MinaRPC sentOneway failure, request id:{}", request.getId(), future);
-                        }
-                    }
-                }
-            });
+            connect.addListener(new AbstractClient.ChannelListener(request,null,null));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC channel not active. request id:" + request.getId());
@@ -144,90 +95,12 @@ public class MinaClient implements Client {
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
         final ConnectFuture connect = getOrCreateConnect(request);
         if (connect != null && connect.isConnected()) {
-            final Promise promise = new Promise(request.getTimeOut(), callback);
-            this.promiseTable.put(request.getId(), promise);
-            //写数据
-            connect.addListener(new IoFutureListener<IoFuture>() {
-                @Override
-                public void operationComplete(IoFuture future) {
-                    if (future.isDone()) {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[opencron] MinaRPC sentAsync success, request id:{}", request.getId());
-                        }
-                        promise.setSendRequestSuccess(true);
-                        return;
-                    } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[opencron] MinaRPC sentAsync failure, request id:{}", request.getId());
-                        }
-                        promiseTable.remove(request.getId());
-                        promise.setSendRequestSuccess(false);
-                        promise.setFailure(connect.getException());
-                        //回调
-                        callback.failure(connect.getException());
-                    }
-                }
-            });
+            Promise promise = new Promise(request.getTimeOut(), callback);
+            connect.addListener(new AbstractClient.ChannelListener(request,promise,callback));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC sentAsync channel not active. request id:" + request.getId());
         }
     }
 
-
-    private ConnectFuture getOrCreateConnect(Request request) {
-
-        ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
-
-        if (connectWrapper != null) {
-            if (connectWrapper.isActive()) {
-                return connectWrapper.getConnectFuture();
-            }
-            connectWrapper.close();
-        }
-
-        synchronized (this) {
-            // 发起异步连接操作
-            ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
-            connectWrapper = new ConnectWrapper(connectFuture);
-            this.connectTable.put(request.getAddress(), connectWrapper);
-        }
-
-        if (connectWrapper != null) {
-            ConnectFuture connectFuture = connectWrapper.getConnectFuture();
-            long timeout = 5000;
-            if (connectFuture.awaitUninterruptibly(timeout)) {
-                if (connectWrapper.isActive()) {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[opencron] MinaRPC getOrCreateConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
-                    }
-                    return connectWrapper.getConnectFuture();
-                } else {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("[opencron] MinaRPC getOrCreateConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
-                    }
-                }
-            } else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("[opencron] MinaRPC getOrCreateConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, connectFuture);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 定时清理超时Future
-     **/
-    private void scanPromiseTable() {
-        Iterator<Map.Entry<Integer, Promise>> it = this.promiseTable.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Integer, Promise> next = it.next();
-            Promise rep = next.getValue();
-
-            if ((rep.getBeginTimestamp() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {  //超时
-                it.remove();
-            }
-        }
-    }
 }

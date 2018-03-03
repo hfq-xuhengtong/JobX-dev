@@ -138,7 +138,7 @@
             resizeImage: false,
             previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
             initialCaption: "请选择要上传的文件",
-            maxFileSize:104857600,//文件最大100M
+            maxFileSize:1024*1024*100,//文件最大100M
             allowedFileExtensions : null,
             elErrorContainer: '#errorBlock',
             uploadExtraData: function() {

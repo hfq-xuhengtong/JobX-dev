@@ -31,14 +31,14 @@ import java.util.concurrent.*;
 public class Promise {
 
     private static final CancellationException CANCELLED = new CancellationException();
-    private volatile boolean sendRequestSuccess = true;
+    private volatile boolean sendDone = true;
     private volatile boolean haveResult;
     private volatile Response result;
-    private volatile Throwable exc;
+    private volatile Throwable cause;
     private CountDownLatch latch;
 
     //处理开始时间
-    private final long beginTimestamp = System.currentTimeMillis();
+    private final long beginTime = System.currentTimeMillis();
 
     /**
      * 超时时间
@@ -64,8 +64,8 @@ public class Promise {
 
     public void execCallback() {
         if (isDone()) {
-            if (this.exc != null) {
-                this.callback.failure(this.exc);
+            if (this.cause != null) {
+                this.callback.failure(this.cause);
             } else {
                 this.callback.success(this.result);
             }
@@ -77,7 +77,7 @@ public class Promise {
     }
 
     public boolean isCancelled() {
-        return this.exc == CANCELLED;
+        return this.cause == CANCELLED;
     }
 
     public boolean isDone() {
@@ -103,7 +103,7 @@ public class Promise {
 
         synchronized (this) {
             if (!this.haveResult) {
-                this.exc = throwable;
+                this.cause = throwable;
                 this.haveResult = true;
                 if (this.latch != null) {
                     this.latch.countDown();
@@ -142,11 +142,11 @@ public class Promise {
     }
 
     private Response returnResult() throws ExecutionException {
-        if (this.exc != null) {
-            if (this.exc == CANCELLED) {
+        if (this.cause != null) {
+            if (this.cause == CANCELLED) {
                 throw new CancellationException();
             } else {
-                throw new ExecutionException(this.exc);
+                throw new ExecutionException(this.cause);
             }
         } else {
             return this.result;
@@ -166,16 +166,16 @@ public class Promise {
         }
     }
 
-    public boolean isSendRequestSuccess() {
-        return sendRequestSuccess;
+    public boolean isSendDone() {
+        return sendDone;
     }
 
-    public void setSendRequestSuccess(boolean sendRequestSuccess) {
-        this.sendRequestSuccess = sendRequestSuccess;
+    public void setSendDone(boolean sendDone) {
+        this.sendDone = sendDone;
     }
 
-    public long getBeginTimestamp() {
-        return beginTimestamp;
+    public long getBeginTime() {
+        return beginTime;
     }
 
     public long getTimeoutMillis() {
