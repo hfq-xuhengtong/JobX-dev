@@ -72,7 +72,7 @@ public class MinaClient extends AbstractClient implements Client {
         if (connect != null && connect.isConnected()) {
             Promise promise = new Promise(request.getTimeOut());
             //写数据
-            connect.addListener(new AbstractClient.ChannelListener(request,promise,null));
+            connect.addListener(new AbstractClient.FutureListener(request,promise,null));
             connect.getSession().write(request);
             return promise.get();
         } else {
@@ -84,7 +84,7 @@ public class MinaClient extends AbstractClient implements Client {
     public void sentOneway(final Request request) throws Exception {
         ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            connect.addListener(new AbstractClient.ChannelListener(request,null,null));
+            connect.addListener(new AbstractClient.FutureListener(request,null,null));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC channel not active. request id:" + request.getId());
@@ -96,7 +96,7 @@ public class MinaClient extends AbstractClient implements Client {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             Promise promise = new Promise(request.getTimeOut(), callback);
-            connect.addListener(new AbstractClient.ChannelListener(request,promise,callback));
+            connect.addListener(new AbstractClient.FutureListener(request,promise,callback));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC sentAsync channel not active. request id:" + request.getId());

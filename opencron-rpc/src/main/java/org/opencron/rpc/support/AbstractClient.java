@@ -111,17 +111,17 @@ public abstract class AbstractClient {
             if (connectFuture.awaitUninterruptibly(timeout)) {
                 if (connectWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[opencron] MinaRPC getOrCreateConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
+                        logger.info("[opencron] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
                     }
                     return connectWrapper.getConnectFuture();
                 } else {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("[opencron] MinaRPC getOrCreateConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
+                        logger.warn("[opencron] MinaRPC getConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
                     }
                 }
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[opencron] MinaRPC getOrCreateConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, connectFuture);
+                    logger.warn("[opencron] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, connectFuture);
                 }
             }
         }
@@ -148,29 +148,29 @@ public abstract class AbstractClient {
             if (channelFuture.awaitUninterruptibly(timeout)) {
                 if (channelWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[opencron] NettyRPC createChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
+                        logger.info("[opencron] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
                     }
                     return channelWrapper.getChannel();
                 } else {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("[opencron] NettyRPC createChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
+                        logger.warn("[opencron] NettyRPC getChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
                     }
                 }
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[opencron] NettyRPC createChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, channelFuture);
+                    logger.warn("[opencron] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, channelFuture);
                 }
             }
         }
         return null;
     }
 
-    public class ChannelListener implements ChannelFutureListener,IoFutureListener {
+    public class FutureListener implements ChannelFutureListener,IoFutureListener {
         private Promise promise;
         private Request request;
         private InvokeCallback callback;
 
-        public ChannelListener(Request request,Promise promise,InvokeCallback callback){
+        public FutureListener(Request request,Promise promise,InvokeCallback callback){
             this.request = request;
             this.callback = callback;
             this.promise = promise;
