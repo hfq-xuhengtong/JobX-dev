@@ -78,6 +78,7 @@ public class Job implements Serializable {
     //运行超时的截止时间
     private Integer timeout;
 
+    private String token;//api调用的认证token
 
     public Long getJobId() {
         return jobId;
@@ -263,6 +264,14 @@ public class Job implements Serializable {
         this.timeout = timeout;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     public String toString() {
         return "Job{" +
@@ -285,9 +294,11 @@ public class Job implements Serializable {
                 ", lastChild=" + lastChild +
                 ", warning=" + warning +
                 ", mobiles='" + mobiles + '\'' +
+                ", pause=" + pause +
                 ", emailAddress='" + emailAddress + '\'' +
                 ", deleted=" + deleted +
                 ", timeout=" + timeout +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

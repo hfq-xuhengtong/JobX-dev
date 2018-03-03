@@ -27,6 +27,7 @@ import org.opencron.common.exception.PingException;
 import org.opencron.common.job.Action;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
+import org.opencron.common.util.HttpClientUtils;
 import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.domain.Record;
 import org.opencron.server.domain.Agent;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -117,12 +119,14 @@ public class ExecuteService implements Job {
 
         Record record = new Record(job, execType);
         record.setJobType(JobType.SINGLETON.getCode());//单一任务
+
+        Response response = null;
         try {
             //执行前先保存
             record = recordService.merge(record);
             //执行前先检测一次通信是否正常
             checkPing(job, record);
-            Response response = responseToRecord(job, record);
+            response = responseToRecord(job, record);
             recordService.merge(record);
             if (!response.isSuccess()) {
                 //当前的单一任务只运行一次未设置重跑.
@@ -142,6 +146,24 @@ public class ExecuteService implements Job {
                 noticeService.notice(job, null);
             }
             this.loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e);
+        }
+
+        //api方式调度,回调结果数据给调用方
+        if ( execType.getStatus() == ExecType.API.getStatus() && job.getCallbackURL()!=null ) {
+            try {
+                HttpClientUtils.httpGetRequest(
+                        job.getCallbackURL(),
+                        ParamsMap.map().put(
+                                "jobId", job.getJobId(),
+                                "startTime", response.getStartTime(),
+                                "endTime", response.getEndTime(),
+                                "success", response.isSuccess(),
+                                "message", response.getMessage()
+                        )
+                );
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
         }
         return record.getSuccess().equals(ResultStatus.SUCCESSFUL.getStatus());
     }

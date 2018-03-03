@@ -374,6 +374,22 @@ public class JobController extends BaseController {
         return Status.create(jobService.pauseJob(jobBean));
     }
 
+    /**
+     * 更新任务的api调用认证token
+     * @param jobId
+     * @return
+     */
+    @RequestMapping(value = "token.do", method = RequestMethod.POST)
+    @ResponseBody
+    public Status token(Long jobId) {
+        Job job = jobService.getJob(jobId);
+        if (job!=null) {
+            job.setToken(CommonUtils.uuid());
+            jobService.merge(job);
+        }
+        return Status.TRUE;
+    }
+
     @RequestMapping(value = "batchexec.do", method = RequestMethod.POST)
     @ResponseBody
     public Status batchExec(HttpSession session, String command, String agentIds) {

@@ -6,7 +6,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="text/javascript" src="${contextPath}/static/js/clipboard.js?resId=${resourceId}"></script> <!-- jQuery Library -->
 
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var clipboard =  new Clipboard('#copy-btn',{
+                text:function () {
+                    return "${contextPath}/api/run?jobId=${job.jobId}&token=${job.token}";
+                }
+            });
+            clipboard.on('success', function (e) {
+                e.clearSelection();
+                $("#copy-btn").text(" 已复制");
+                setTimeout(function () {
+                    $("#copy-btn").text("");
+                }, 2000);
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -62,6 +79,13 @@
             <tr>
                 <td class="item"><i class="glyphicon glyphicon-filter"></i>&nbsp;时间规则：</td>
                 <td>${job.cronExp}</td>
+            </tr>
+
+            <tr>
+                <td class="item"><i class="glyphicon glyphicon-link"></i>&nbsp;API&nbsp;地 址：</td>
+                <td>
+                    ${contextPath}/api/run?jobId=${job.jobId}&token=${job.token}&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-copy" id="copy-btn" data-clipboard-action="copy" aria-label="已复制"></i>
+                </td>
             </tr>
 
             <tr>

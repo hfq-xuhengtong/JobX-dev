@@ -25,10 +25,7 @@ import org.hibernate.Query;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.server.dao.QueryDao;
-import org.opencron.server.domain.Agent;
-import org.opencron.server.domain.Config;
-import org.opencron.server.domain.Role;
-import org.opencron.server.domain.User;
+import org.opencron.server.domain.*;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,10 +46,12 @@ public class ConfigService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JobService jobService;
+
     public Config getSysConfig() {
         return queryDao.hqlUniqueQuery("from Config where configid = 1");
     }
-
 
     public void update(Config config) {
         queryDao.save(config);
@@ -68,6 +67,19 @@ public class ConfigService {
             query.executeUpdate();
         }catch (Exception e) {
             //skip
+        }
+
+        /**
+         * for version 1.1.0 update to version 1.2.0(api support,init token)
+         */
+        List<Job> jobs = queryDao.createQuery("from Job where token=null").list();
+        if (CommonUtils.notEmpty(jobs)) {
+            for (Job job:jobs) {
+                if (job.getToken()==null) {
+                    job.setToken(CommonUtils.uuid());
+                }
+                jobService.merge(job);
+            }
         }
 
         //init config

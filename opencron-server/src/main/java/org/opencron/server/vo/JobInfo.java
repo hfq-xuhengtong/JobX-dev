@@ -87,6 +87,10 @@ public class JobInfo implements Serializable {
 
     private Boolean deleted;
 
+    private String token;
+
+    private String callbackURL;
+
     public JobInfo() {
     }
 
@@ -351,5 +355,21 @@ public class JobInfo implements Serializable {
 
     public void setPause(Boolean pause) {
         this.pause = pause;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getCallbackURL() {
+        return callbackURL;
+    }
+
+    public void setCallbackURL(String callbackURL) {
+        this.callbackURL = callbackURL;
     }
 }

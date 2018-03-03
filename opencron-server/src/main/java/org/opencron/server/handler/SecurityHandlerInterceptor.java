@@ -71,6 +71,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                 || requestURI.contains("/static/")
                 || requestURI.contains("/WEB-INF")
                 || requestURI.contains("/login")
+                || requestURI.contains("/api")
                 || requestURI.contains("/upload")
                 || requestURI.contains("/agent/autoreg")) {
 

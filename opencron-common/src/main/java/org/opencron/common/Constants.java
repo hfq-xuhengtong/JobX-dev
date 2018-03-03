@@ -203,11 +203,11 @@ public class Constants {
     }
 
     public enum ExecType implements Serializable {
-
         AUTO(0x0, "auto", "自动模式,系统调用"),
         OPERATOR(0x1, "operator", "手动模式,手动调用"),
-        RERUN(0x2, "rerun", "重跑模式"),
-        BATCH(0x3, "batch", "现场执行");
+        API(0x2, "api", "api模式,通过接口调用"),
+        RERUN(0x3, "rerun", "重跑模式"),
+        BATCH(0x4, "batch", "现场执行");
 
         private Integer status;
         private String name;

@@ -247,9 +247,29 @@
                 var redo = $("#sredo").val();
                 window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize ;
             },
+            token:function (jobId) {
+                swal({
+                        title: "",
+                        text: "您确定要更新该任务的token吗?",
+                        type: "warning",
+                        showCancelButton: true,
+                        closeOnConfirm: false,
+                        confirmButtonText: "更新"
+                    },function () {
+                        ajax({
+                            type: "post",
+                            url: "${contextPath}/job/token.do",
+                            data: {
+                                "jobId": jobId,
+                            }
+                        },function (data) {
+                            alertMsg("更新token成功!");
+                        });
+                });
+            },
             pauseJob:function (id,status) {
                 var msg = status?"暂停":"恢复";
-                alertModal({
+                swal({
                     title: "",
                     text: "您确定要"+msg+"这个作业吗？",
                     type: "warning",
@@ -595,6 +615,12 @@
                                 </c:otherwise>
                             </c:choose>
                             &nbsp;
+
+                            <c:if test="${r.jobType eq 0}">
+                                <a title="更新token" href="#" onclick="jobObj.token(${r.jobId})">
+                                    <i class="glyphicon glyphicon-refresh"></i>
+                                </a>
+                            </c:if>&nbsp;
 
                             <span id="execButton_${r.jobId}">
                                 <a href="#" title="执行" onclick="jobObj.executeJob('${r.jobId}')">
