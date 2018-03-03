@@ -86,11 +86,12 @@ https://tomcat.apache.org
 
 Browser 
 IE10+
+
    
 ## 安装步骤
 
- opencron分为两个opencron-server端和opencron-agent端，opencron-server端即为一个web可视化的中央管理调度平台,opencron-agent为要管理的任务的机器,每个要纳入中央统一管理的机器都必须安装opencron-agent, opencron-agent在要管理的服务器中安装执行完后，可以直接在opencron-server添加当前的机器.
-
+ opencron分为两个opencron-server端和opencron-agent端，opencron-server端即为一个web可视化的中央管理调度平台,opencron-agent为要管理的任务的机器
+ agent和server都依赖zookeeper,安装部署opencron之前必须先安装和启动zookeeper,server和agent必须连接同一个zookeeper
 
 ## opencron-agent 安装步骤:
 ```
@@ -106,6 +107,9 @@ IE10+
    jdbc.url=jdbc:mysql://${you_mysql_host}:3306/opencron?useUnicode=true&characterEncoding=UTF-8
    jdbc.username=${user}
    jdbc.password=${password}
+   
+3):修改server端的zookeeper地址
+  opencron.registry=zookeeper://${zookeeper_host}:2181
 
 3):进入源码目录并执行编译:
 > cd opencron
@@ -126,7 +130,8 @@ IE10+
     |  monitor.sh          #实时监控获取数据需要的脚本,由系统调度
     |  kill.sh             #kill任务时需要的脚本,由系统调度
     ---conf/
-    | log4j.properties     #log4j配置文件
+       conf.properties     #agent配置文件 
+    |  log4j.properties    #log4j配置文件
     ---lib/
     | *.jar                #agent运行需要的jar文件
     ---temp/
@@ -135,22 +140,25 @@ IE10+
     | opencron.out         #项目启动会产生的Log文件
     
     > tar -xzvf opencron-agent-${version}.tar.gz
-    1)启动opencron-agent 进入opencron-agent/bin
+    1)修改conf/conf.properties里的配置信息
+        #zookepper注册中心
+        opencron.registry=zookeeper://${zookeeper_host}:2181
+        #agent Ip,确保server可以通过此ip访问到该agent(主要实现agent自动注册)
+        opencron.host=127.0.0.1
+    2)启动opencron-agent 进入opencron-agent/bin
     > cd opencron-agent/bin
     > sh startup.sh
-    这里可以接受四个参数，分别是服务启动的端口和密码(默认端口是:1577,默认密码:opencron)以及agent自动注册的url和密码 
+    这里可以接受两个参数，分别是服务启动的端口和密码(默认端口是:1577,默认密码:opencron)以及agent自动注册的url和密码 
     如要指定参数启动命令如下:
-    > sh startup.sh -P10001 -p123456 -shttp://127.0.0.1:8080 -kopencron@2016
+    > sh startup.sh -P10001 -p123456
     参数说明:
     -P (大写的p)为agent启动的端口，选填，如果不输入默认启动端口是1577
     -p (小写的p)为当前agent的连接密码,选填，如果不输入默认连接该机器的密码是opencron
     以下两个参数为agent自动注册需要的两个参数（选填）
-    -s 填写opencron-server部署之后的访问地址 
-    -k 填写自动发现的密码,对应 opencron-server/src/main/resources/config.properties 里的opencron.autoRegKey
+    该脚本启动之后agent就自动注册到server端了
     更多详细的启动信息请查看logs/opencron.out
     
-    
-    2)停止opencron-agent 进入opencron-agent/bin 执行：
+    3)停止opencron-agent 进入opencron-agent/bin 执行：
     > cd opencron-agent/bin
     > sh shutdown.sh
 
@@ -179,7 +187,7 @@ IE10+
           >  cd ${tomcat_home}/webapps/ROOT 
           >  jar -xvf server.war 
           >  rm -rf server.war
-        5:更改jdbc配置信息 
+        5:更改jdbc和zookeeper配置信息 
           > vi ${tomcat_home}/webapps/ROOT/WEB-INF/classes/config.properties
         6:完成启动
      2):通过配置server.xml外部指向
@@ -252,12 +260,8 @@ IE10+
         启动tomcat,打开浏览器以$ip:$port的方式访问,如:  http://192.168.0.188:8080   
         
   不论哪种方式部署,第一次会自动创建表,默认初始用户名opencron,密码opencron,第一次登陆会提示修改密码.
-    
       
-3):进入到opencron的管理端第一件要做的事情就是添加要管理的执行器.在菜单的第二栏点击"执行器管理"->添加执行器,执行器ip，
-就是上面你部署的opencron-agent的机器ip，端口号是要连接的opencron-agent的启动端口，密码也是opencron-agent端的连接密码,
-输入ip,端口和密码后点击"检查通信",如果成功则server和agnet端已经成功通信，server可以管理agent了,添加保持即可.
-如果连接失败，先检查agent端启动是否成功,查看logs中的详情
+3):进入到opencron的管理端,如果agent也启动了,应该可以直接在server的执行器页面看到agent,则添加任务即可...
 
 ```  
 
