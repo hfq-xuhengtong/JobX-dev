@@ -90,7 +90,7 @@ IE10+
    
 ## 安装步骤
 
- opencron分为两个opencron-server端和opencron-agent端，opencron-server端即为一个web可视化的中央管理调度平台,opencron-agent为要管理的任务的机器
+ opencron分为两个opencron-server端和opencron-agent端,opencron-server端即为一个web可视化的中央管理调度平台,opencron-agent为要管理的任务的机器
  agent和server都依赖zookeeper,安装部署opencron之前必须先安装和启动zookeeper,server和agent必须连接同一个zookeeper
 
 ## opencron-agent 安装步骤:
@@ -165,7 +165,7 @@ IE10+
 ## opencron-server 部署步骤:
 
 ```
-1):编译好项目源码找到
+1):编译好项目源码
 
 2):部署启动server
   由两种部署方式,  
