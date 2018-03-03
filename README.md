@@ -99,18 +99,16 @@ IE10+
 1)下载源码: 
 > git clone https://github.com/wolfboys/opencron.git
 
-2):修改server端的jdbc连接信息
+2):修改server端的jdbc和zookeeper连接信息
    1:创建数据,数据库名字可以是opencron或者其他
    2:进入opencron-server/src/main/resources 修改config.properties里的jdbc连接信息
    
    jdbc.driver=com.mysql.jdbc.Driver
-   jdbc.url=jdbc:mysql://${you_mysql_host}:3306/opencron?useUnicode=true&characterEncoding=UTF-8
+   jdbc.url=jdbc:mysql://${mysql_host}:3306/opencron?useUnicode=true&characterEncoding=UTF-8
    jdbc.username=${user}
    jdbc.password=${password}
    
-3):修改server端的zookeeper地址
-  opencron.registry=zookeeper://${zookeeper_host}:2181
-
+   opencron.registry=zookeeper://${zookeeper_host}:2181
 3):进入源码目录并执行编译:
 > cd opencron
 > sh build.sh
