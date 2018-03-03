@@ -87,7 +87,7 @@ public abstract class AbstractClient {
         }, 500, 500, TimeUnit.MILLISECONDS);
     }
 
-    public ConnectFuture getOrCreateConnect(Request request) {
+    public ConnectFuture getConnect(Request request) {
 
         ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
 
@@ -128,7 +128,7 @@ public abstract class AbstractClient {
         return null;
     }
 
-    public Channel getOrCreateChannel(Bootstrap bootstrap,Request request) {
+    public Channel getChannel(Bootstrap bootstrap,Request request) {
 
         ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
 
@@ -222,12 +222,12 @@ public abstract class AbstractClient {
                 if (promise!=null) {
                     promiseTable.remove(request.getId());
                     promise.setSendDone(false);
-                    promise.setFailure(getOrCreateConnect(request).getException());
+                    promise.setFailure(getConnect(request).getException());
                 }
 
                 //回调
                 if (callback!=null) {
-                    callback.failure(getOrCreateConnect(request).getException());
+                    callback.failure(getConnect(request).getException());
                 }
             }
         }

@@ -68,7 +68,7 @@ public class MinaClient extends AbstractClient implements Client {
 
     @Override
     public Response sentSync(final Request request) throws Exception {
-        final ConnectFuture connect = getOrCreateConnect(request);
+        final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             Promise promise = new Promise(request.getTimeOut());
             //写数据
@@ -82,7 +82,7 @@ public class MinaClient extends AbstractClient implements Client {
 
     @Override
     public void sentOneway(final Request request) throws Exception {
-        ConnectFuture connect = getOrCreateConnect(request);
+        ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             connect.addListener(new AbstractClient.ChannelListener(request,null,null));
             connect.getSession().write(request);
@@ -93,7 +93,7 @@ public class MinaClient extends AbstractClient implements Client {
 
     @Override
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
-        final ConnectFuture connect = getOrCreateConnect(request);
+        final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             Promise promise = new Promise(request.getTimeOut(), callback);
             connect.addListener(new AbstractClient.ChannelListener(request,promise,callback));

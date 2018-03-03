@@ -86,7 +86,7 @@ public class NettyClient extends AbstractClient implements Client {
 
     @Override
     public Response sentSync(final Request request) throws Exception {
-        Channel channel = getOrCreateChannel(this.bootstrap,request);
+        Channel channel = super.getChannel(this.bootstrap,request);
         if (channel != null && channel.isActive()) {
             final Promise promise = new Promise(request.getTimeOut());
             channel.writeAndFlush(request).addListener(new AbstractClient.ChannelListener(request,promise,null));
@@ -98,7 +98,7 @@ public class NettyClient extends AbstractClient implements Client {
 
     @Override
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
-        Channel channel = getOrCreateChannel(this.bootstrap,request);
+        Channel channel = super.getChannel(this.bootstrap,request);
         if (channel != null && channel.isActive()) {
             final Promise promise = new Promise(request.getTimeOut(), callback);
             channel.writeAndFlush(request).addListener(new AbstractClient.ChannelListener(request,promise,callback));
@@ -109,7 +109,7 @@ public class NettyClient extends AbstractClient implements Client {
 
     @Override
     public void sentOneway(final Request request) throws Exception {
-        Channel channel = getOrCreateChannel(this.bootstrap,request);
+        Channel channel = super.getChannel(this.bootstrap,request);
         if (channel != null && channel.isActive()) {
             channel.writeAndFlush(request).addListener(new AbstractClient.ChannelListener(null,null,null));
         } else {
