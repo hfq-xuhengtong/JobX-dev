@@ -128,7 +128,7 @@ public abstract class AbstractClient {
         return null;
     }
 
-    public Channel getChannel(Bootstrap bootstrap,Request request) {
+    public Channel getChannel(Bootstrap bootstrap, Request request) {
 
         ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
 
@@ -165,16 +165,16 @@ public abstract class AbstractClient {
         return null;
     }
 
-    public class FutureListener implements ChannelFutureListener,IoFutureListener {
+    public class FutureListener implements ChannelFutureListener, IoFutureListener {
         private Promise promise;
         private Request request;
         private InvokeCallback callback;
 
-        public FutureListener(Request request,Promise promise,InvokeCallback callback){
+        public FutureListener(Request request, Promise promise, InvokeCallback callback) {
             this.request = request;
             this.callback = callback;
             this.promise = promise;
-            if (request!=null) {
+            if (request != null) {
                 promiseTable.put(request.getId(), promise);
             }
         }
@@ -185,7 +185,7 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
                 }
-                if (promise!=null) {
+                if (promise != null) {
                     promise.setSendDone(true);
                 }
                 return;
@@ -193,13 +193,13 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] NettyRPC sent failure, request id:{}", request.getId());
                 }
-                if (this.promise!=null) {
+                if (this.promise != null) {
                     promiseTable.remove(request.getId());
                     promise.setSendDone(false);
                     promise.setFailure(future.cause());
                 }
                 //回调
-                if (callback!=null) {
+                if (callback != null) {
                     callback.failure(future.cause());
                 }
             }
@@ -211,7 +211,7 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] MinaRPC sent success, request id:{}", request.getId());
                 }
-                if (promise!=null) {
+                if (promise != null) {
                     promise.setSendDone(true);
                 }
                 return;
@@ -219,14 +219,14 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] MinaRPC sent failure, request id:{}", request.getId());
                 }
-                if (promise!=null) {
+                if (promise != null) {
                     promiseTable.remove(request.getId());
                     promise.setSendDone(false);
                     promise.setFailure(getConnect(request).getException());
                 }
 
                 //回调
-                if (callback!=null) {
+                if (callback != null) {
                     callback.failure(getConnect(request).getException());
                 }
             }
