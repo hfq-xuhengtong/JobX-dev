@@ -10,7 +10,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            setInterval(function(){
+            setInterval(function() {
 
                 $("#highlight").fadeOut(3000,function(){
                     $(this).show();
