@@ -177,7 +177,7 @@ public class TerminalService {
 
     public PageBean<Terminal> getPageBeanByUser(PageBean pageBean, Long userId) {
         String hql = "from  Terminal where userId = ? order by ";
-        pageBean.verifyOrderBy("name", "name", "host", "port", "logintime");
+        pageBean.verifyOrderBy("name", "name", "host", "port","sshType", "logintime");
         hql += pageBean.getOrderBy() + " " + pageBean.getOrder();
         return queryDao.hqlPageQuery(hql, pageBean, userId);
     }
