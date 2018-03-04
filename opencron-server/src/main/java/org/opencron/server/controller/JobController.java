@@ -23,9 +23,11 @@ package org.opencron.server.controller;
 
 import java.util.*;
 
+import org.apache.zookeeper.data.Stat;
 import org.opencron.common.Constants;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.common.util.StringUtils;
+import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.domain.Job;
 import org.opencron.server.job.OpencronTools;
 import org.opencron.server.service.*;
@@ -398,13 +400,13 @@ public class JobController extends BaseController {
      */
     @RequestMapping(value = "token.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status token(Long jobId) {
+    public ParamsMap token(Long jobId) {
         Job job = jobService.getJob(jobId);
         if (job!=null) {
             job.setToken(CommonUtils.uuid());
-            jobService.merge(job);
+            job = jobService.merge(job);
         }
-        return Status.TRUE;
+        return ParamsMap.map().set("token",job.getToken());
     }
 
     @RequestMapping(value = "batchexec.do", method = RequestMethod.POST)

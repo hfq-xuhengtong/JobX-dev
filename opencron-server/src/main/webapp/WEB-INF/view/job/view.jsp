@@ -15,6 +15,8 @@
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
 
+    <script type="text/javascript" src="${contextPath}/static/js/clipboard.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -247,24 +249,15 @@
                 var redo = $("#sredo").val();
                 window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize ;
             },
-            token:function (jobId) {
-                swal({
-                        title: "",
-                        text: "您确定要更新该任务的token吗?",
-                        type: "warning",
-                        showCancelButton: true,
-                        closeOnConfirm: false,
-                        confirmButtonText: "更新"
-                    },function () {
-                        ajax({
-                            type: "post",
-                            url: "${contextPath}/job/token.do",
-                            data: {
-                                "jobId": jobId,
-                            }
-                        },function (data) {
-                            alertMsg("更新token成功!");
-                        });
+            copyURL:function (jobId,token) {
+                var clipboard =  new Clipboard('.fa-copy',{
+                    text:function () {
+                        return "${contextPath}/api/run?jobId="+jobId+"&token="+token+"&url=";
+                    }
+                });
+                clipboard.on('success', function (e) {
+                    e.clearSelection();
+                    alertMsg("已经复制接口URL到剪切板");
                 });
             },
             pauseJob:function (id,status) {
@@ -617,8 +610,8 @@
                             &nbsp;
 
                             <c:if test="${r.jobType eq 0}">
-                                <a title="更新token" href="#" onclick="jobObj.token(${r.jobId})">
-                                    <i class="glyphicon glyphicon-refresh"></i>
+                                <a title="复制URL" href="#" onclick="jobObj.copyURL(${r.jobId},'${r.token}')">
+                                    <i class="fa fa-copy"></i>
                                 </a>
                             </c:if>&nbsp;
 

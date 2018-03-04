@@ -9,10 +9,11 @@
     <script type="text/javascript" src="${contextPath}/static/js/clipboard.js?resId=${resourceId}"></script> <!-- jQuery Library -->
 
     <script type="text/javascript">
+        token = "${job.token}";
         $(document).ready(function () {
             var clipboard =  new Clipboard('#copy-btn',{
                 text:function () {
-                    return "${contextPath}/api/run?jobId=${job.jobId}&token=${job.token}";
+                    return "${contextPath}/api/run?jobId=${job.jobId}&token="+token+"&url=";
                 }
             });
             clipboard.on('success', function (e) {
@@ -23,6 +24,29 @@
                 }, 2000);
             });
         });
+
+        function changeToken(jobId) {
+            swal({
+                title: "",
+                text: "您确定要更新该任务的token吗?",
+                type: "warning",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                confirmButtonText: "更新"
+            },function () {
+                ajax({
+                    type: "post",
+                    url: "${contextPath}/job/token.do",
+                    data: {
+                        "jobId": jobId,
+                    }
+                },function (data) {
+                    alertMsg("更新token成功!");
+                    token = data.token;
+                    $("#token").text(data.token);
+                });
+            });
+        }
     </script>
 </head>
 
@@ -84,7 +108,14 @@
             <tr>
                 <td class="item"><i class="glyphicon glyphicon-link"></i>&nbsp;API&nbsp;地 址：</td>
                 <td>
-                    ${contextPath}/api/run?jobId=${job.jobId}&token=${job.token}&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-copy" id="copy-btn" data-clipboard-action="copy" aria-label="已复制"></i>
+                    ${contextPath}/api/run?jobId=${job.jobId}&token=<span id="token">${job.token}</span>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <c:if test="${job.jobType eq 0}">
+                            <a title="更新token" href="#" >
+                                <i class="glyphicon glyphicon-refresh" onclick="changeToken(${job.jobId})" title="更新token"></i>
+                            </a>&nbsp;&nbsp;
+                        </c:if>
+                        <i class="fa fa-copy" id="copy-btn" data-clipboard-action="copy" aria-label="已复制"></i>
                 </td>
             </tr>
 

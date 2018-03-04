@@ -140,7 +140,7 @@ public class JobService {
     }
 
     private synchronized void flushJob() {
-        OpencronTools.CACHE.put(Constants.PARAM_CACHED_JOB_ID_KEY, queryDao.sqlQuery(Job.class, "SELECT * FROM T_JOB WHERE deleted=0"));
+        OpencronTools.CACHE.put(Constants.PARAM_CACHED_JOB_ID_KEY, queryDao.hqlQuery("from Job where deleted = false"));
     }
 
     public PageBean<JobInfo> getJobInfoPage(HttpSession session, PageBean pageBean, JobInfo job) {
