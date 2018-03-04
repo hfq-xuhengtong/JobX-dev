@@ -157,8 +157,9 @@
                     <option value="">全部</option>
                     <option value="0" ${execType eq 0 ? 'selected' : ''}>自动</option>
                     <option value="1" ${execType eq 1 ? 'selected' : ''}>手动</option>
-                    <option value="2" ${execType eq 2 ? 'selected' : ''}>重跑</option>
-                    <option value="3" ${execType eq 3 ? 'selected' : ''}>现场</option>
+                    <option value="2" ${execType eq 2 ? 'selected' : ''}>API</option>
+                    <option value="2" ${execType eq 3 ? 'selected' : ''}>重跑</option>
+                    <option value="3" ${execType eq 4 ? 'selected' : ''}>现场</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <label for="queryTime">开始时间：</label>
@@ -204,8 +205,9 @@
                     <td>
                         <c:if test="${r.execType eq 0}"><span class="label label-default">&nbsp;&nbsp;自&nbsp;动&nbsp;&nbsp;</span></c:if>
                         <c:if test="${r.execType eq 1}"><span class="label label-info">&nbsp;&nbsp;手&nbsp;动&nbsp;&nbsp;</span></c:if>
-                        <c:if test="${r.execType eq 2}"><span class="label label-warning">&nbsp;&nbsp;重&nbsp;跑&nbsp;&nbsp;</span></c:if>
-                        <c:if test="${r.execType eq 3}"><span class="label label-default" style="color: green;font-weight:bold">&nbsp;&nbsp;现&nbsp;场&nbsp;&nbsp;</span></c:if>
+                        <c:if test="${r.execType eq 2}"><span class="label label-info">&nbsp;&nbsp;API&nbsp;&nbsp;</span></c:if>
+                        <c:if test="${r.execType eq 3}"><span class="label label-warning">&nbsp;&nbsp;重&nbsp;跑&nbsp;&nbsp;</span></c:if>
+                        <c:if test="${r.execType eq 4}"><span class="label label-default" style="color: green;font-weight:bold">&nbsp;&nbsp;现&nbsp;场&nbsp;&nbsp;</span></c:if>
                     </td>
 
                     <td style="width: 25%" title="${cron:escapeHtml(r.command)}">
