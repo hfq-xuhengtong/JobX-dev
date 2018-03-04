@@ -84,8 +84,9 @@
                 <td>
                     <c:if test="${record.execType eq 0}">自动</c:if>
                     <c:if test="${record.execType eq 1}">手动</c:if>
-                    <c:if test="${record.execType eq 2}">重跑</c:if>
-                    <c:if test="${record.execType eq 3}">现场</c:if>
+                    <c:if test="${record.execType eq 2}">接口</c:if>
+                    <c:if test="${record.execType eq 3}">重跑</c:if>
+                    <c:if test="${record.execType eq 4}">现场</c:if>
                 </td>
 
                 <td><i class="glyphicon glyphicon-repeat"></i>&nbsp;重跑次数</td>
