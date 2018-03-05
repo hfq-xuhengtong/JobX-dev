@@ -73,15 +73,15 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
-    private final String SERVER_ID;
+    private final String SERVER_ID = uuid();
 
-    private final URL registryURL;
+    private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
 
-    private final String registryPath;
+    private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + this.SERVER_ID;
 
-    private final RegistryService registryService;
+    private final RegistryService registryService = new RegistryService();
 
-    private final ZookeeperClient zookeeperClient;
+    private final ZookeeperClient zookeeperClient = registryService.getZKClient(registryURL);
 
     private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
@@ -95,14 +95,6 @@ public class OpencronRegistry {
     private volatile boolean destroy = false;
 
     private Lock lock = new ReentrantLock();
-
-    public OpencronRegistry() {
-        this.SERVER_ID = uuid();
-        this.registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + this.SERVER_ID;
-        this.registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
-        this.registryService = new RegistryService();
-        this.zookeeperClient = registryService.getZKClient(registryURL);
-    }
 
     @PostConstruct
     public void initialize() throws Exception {
