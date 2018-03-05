@@ -327,25 +327,39 @@ public class OpencronRegistry {
         this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
     }
 
-    public synchronized void jobDispatch(Long jobId) throws Exception {
-        this.jobs.put(jobId, jobId);
-        this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
-        JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
-        Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
-        switch (cronType) {
-            case CRONTAB:
-                this.opencronCollector.add(jobInfo);
-                break;
-            case QUARTZ:
-                this.schedulerService.put(jobInfo);
-                break;
+    public synchronized void jobDispatch(Long jobId) {
+        try {
+            this.lock.lock();
+            this.jobs.put(jobId, jobId);
+            this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+            JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
+            Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
+            switch (cronType) {
+                case CRONTAB:
+                    this.opencronCollector.add(jobInfo);
+                    break;
+                case QUARTZ:
+                    this.schedulerService.put(jobInfo);
+                    break;
+            }
+        }catch (Exception e) {
+            new RuntimeException(e);
+        }finally {
+            this.lock.unlock();
         }
     }
 
-    private synchronized void jobRemove(Long jobId) throws SchedulerException {
-        this.jobs.remove(jobId);
-        this.opencronCollector.remove(jobId);
-        this.schedulerService.remove(jobId);
+    private void jobRemove(Long jobId) {
+        try {
+            this.lock.lock();
+            this.jobs.remove(jobId);
+            this.opencronCollector.remove(jobId);
+            this.schedulerService.remove(jobId);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }finally {
+            this.lock.unlock();
+        }
     }
 
     private void dispatchedInfo(Integer serverSize) {
