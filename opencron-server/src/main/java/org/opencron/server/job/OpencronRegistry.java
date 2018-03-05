@@ -31,16 +31,15 @@ import org.opencron.registry.zookeeper.ChildListener;
 import org.opencron.registry.zookeeper.ZookeeperClient;
 import org.opencron.server.domain.Agent;
 import org.opencron.server.domain.Job;
-import org.opencron.server.service.AgentService;
-import org.opencron.server.service.ExecuteService;
-import org.opencron.server.service.JobService;
-import org.opencron.server.service.SchedulerService;
+import org.opencron.server.service.*;
 import org.opencron.server.vo.JobInfo;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -62,6 +61,9 @@ public class OpencronRegistry {
     private JobService jobService;
 
     @Autowired
+    private ConfigService configService;
+
+    @Autowired
     private SchedulerService schedulerService;
 
     @Autowired
@@ -77,15 +79,15 @@ public class OpencronRegistry {
 
     private ZookeeperClient zookeeperClient;
 
-    private final String SERVER_ID = uuid();
+    private String SERVER_ID;
 
     private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
 
     private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + SERVER_ID;
 
-    private Map<String,String> agents = new ConcurrentHashMap<String, String>(0);
+    private Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
-    private Map<String,String> jobs = new ConcurrentHashMap<String, String>(0);
+    private Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
 
     private List<String> servers = new ArrayList<String>(0);
 
@@ -96,11 +98,35 @@ public class OpencronRegistry {
 
     private Lock lock = new ReentrantLock();
 
-    public void agentRegister() {
+    @PostConstruct
+    public void initialize() throws Exception {
+
+        //初始化数据库...
+        configService.initDB();
+
+        //init job...
+        schedulerService.initJob();
+
+        this.initEnv();
+
+        this.registryAgent();
+
+        this.registryServer();
+
+        this.registryJob();
+
+    }
+
+    public void initEnv(){
+
+        this.SERVER_ID = uuid();
+
+        this.zookeeperClient = registryService.getZKClient(registryURL);
+
         //server第一次启动检查所有的agent是否可用
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
-            for (Agent agent:agentList) {
+            for (Agent agent : agentList) {
                 boolean ping = executeService.ping(agent);
                 if (!agent.getStatus().equals(ping)) {
                     agent.setStatus(ping);
@@ -109,9 +135,32 @@ public class OpencronRegistry {
             }
         }
 
-        this.getZkClient();
+        //扫描agent自动注册到server
+        List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
+        if (CommonUtils.notEmpty(children)) {
+            for (String agent : children) {
+                agents.put(agent, agent);
+                if (logger.isInfoEnabled()) {
+                    logger.info("[opencron] agent auto connected! info:{}", agent);
+                }
+                agentService.doConnect(agent);
+            }
+        }
 
-        //agent添加,删除监控...
+        //初始化,将job添加到zookeeper
+        List<Job> jobList = jobService.getScheduleJob();
+        for (Job job : jobList) {
+            Long jobId = job.getJobId();
+            ConsistentHash<String> hash = new ConsistentHash<String>(servers);
+            if (SERVER_ID.equals(hash.get(jobId))) {
+                registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+            }
+        }
+
+    }
+
+    public void registryAgent() {
+
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_AGENT_PATH, new ChildListener() {
             @Override
             public void childChanged(String path, List<String> children) {
@@ -121,21 +170,21 @@ public class OpencronRegistry {
                 if (destroy) return;
 
                 if (agents.isEmpty()) {
-                    for (String agent:children) {
-                        agents.put(agent,agent);
+                    for (String agent : children) {
+                        agents.put(agent, agent);
                         if (logger.isInfoEnabled()) {
                             logger.info("[opencron] agent connected! info:{}", agent);
                         }
                         agentService.doConnect(agent);
                     }
-                }else {
-                    Map<String,String> unAgents = new ConcurrentHashMap<String, String>(agents);
-                    for (String agent:children) {
+                } else {
+                    Map<String, String> unAgents = new ConcurrentHashMap<String, String>(agents);
+                    for (String agent : children) {
                         unAgents.remove(agent);
                         if (!agents.containsKey(agent)) {
                             //新增...
-                            agents.put(agent,agent);
-                            logger.info("[opencron] agent connected! info:{}",agent);
+                            agents.put(agent, agent);
+                            logger.info("[opencron] agent connected! info:{}", agent);
                             agentService.doConnect(agent);
                         }
                     }
@@ -150,13 +199,9 @@ public class OpencronRegistry {
                 lock.unlock();
             }
         });
-
-
     }
 
-    public void serverRegister() {
-
-        this.getZkClient();
+    public void registryServer() {
 
         //server监控增加和删除
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_SERVER_PATH, new ChildListener() {
@@ -176,23 +221,19 @@ public class OpencronRegistry {
 
                     List<Job> jobList = jobService.getScheduleJob();
 
-                    for (Job job:jobList) {
-                        String jobId = job.getJobId().toString();
+                    for (Job job : jobList) {
+                        Long jobId = job.getJobId();
                         //该任务落在当前的机器上
-                        if ( SERVER_ID.equals(hash.get(jobId)) ) {
+                        if (SERVER_ID.equals(hash.get(jobId))) {
                             if (!jobs.containsKey(jobId)) {
-                                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+jobId);
-                                registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+jobId,true);
-                                jobs.put(jobId,jobId);
-                                jobDispatch(job.getJobId());
+                                jobDispatch(jobId);
                             }
-                        }else {
-                            jobs.remove(jobId);
-                            jobRemove(job.getJobId().toString());
+                        } else {
+                            jobRemove(jobId);
                         }
                     }
 
-                    printDispatchedJob(children.size());
+                    dispatchedInfo(children.size());
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -202,38 +243,23 @@ public class OpencronRegistry {
             }
         });
 
+        //将server加入到注册中心
+        this.registryService.register(registryURL, registryPath, true);
+
         //register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] run shutdown hook now...");
                 }
-                registryService.unregister(registryURL,registryPath);
+                registryService.unregister(registryURL, registryPath);
             }
         }, "OpencronShutdownHook"));
-
-        //扫描agent自动注册到server
-        List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
-        if (CommonUtils.notEmpty(children)) {
-            for (String agent:children) {
-                agents.put(agent,agent);
-                if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] agent auto connected! info:{}", agent);
-                }
-                agentService.doConnect(agent);
-            }
-        }
-
-        //将server加入到注册中心
-        registryService.register(registryURL,registryPath,true);
 
     }
 
 
-    public void jobRegister() {
-
-        this.getZkClient();
-
+    public void registryJob() {
         //job的监控
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
             @Override
@@ -244,28 +270,23 @@ public class OpencronRegistry {
 
                     if (destroy) return;
 
-                    Map<String, String> unJobs = new HashMap<String, String>(jobs);
+                    Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
+
+                    ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
                     for (String job : children) {
-                        unJobs.remove(job);
-                        if (!jobs.containsKey(job)) {
-                            ConsistentHash<String> hash = new ConsistentHash<String>(servers);
-                            if (hash.get(job).equals(SERVER_ID)) {
-                                //该server重新注册job
-                                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job);
-                                registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job,true);
-                                jobs.put(job, job);
-                                jobDispatch(job);
-                            }
+                        Long jobId = toLong(job);
+                        unJobs.remove(jobId);
+                        if (!jobs.containsKey(jobId) && hash.get(jobId).equals(SERVER_ID)) {
+                            jobDispatch(jobId);
                         }
                     }
 
-                    for (String job : unJobs.keySet()) {
-                        jobs.remove(job);
+                    for (Long job : unJobs.keySet()) {
                         jobRemove(job);
                     }
 
-                    printDispatchedJob(serverSize);
+                    dispatchedInfo(serverSize);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -276,18 +297,10 @@ public class OpencronRegistry {
             }
         });
 
-        List<Job> jobList = jobService.getScheduleJob();
-        for (Job job:jobList) {
-            ConsistentHash<String> hash = new ConsistentHash<String>(servers);
-            if (hash.get(job).equals(SERVER_ID)) {
-                registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId(),true);
-            }else {
-                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId());
-            }
-        }
     }
 
-    public void destroyAll() {
+    @PreDestroy
+    public void destroy() {
         destroy = true;
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] run destroy now...");
@@ -295,56 +308,53 @@ public class OpencronRegistry {
 
         //job unregister
         if (CommonUtils.notEmpty(jobs)) {
-            for (String job:jobs.keySet()) {
-                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+ job);
+            for (Long job : jobs.keySet()) {
+                this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + job);
             }
         }
 
         //server unregister
-        registryService.unregister(registryURL,registryPath);
+        this.registryService.unregister(registryURL, registryPath);
     }
 
     //job新增的时候手动触发.....
-    public void jobRegister(Serializable jobId) {
-        registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+jobId,true);
+    public void jobRegister(Long jobId) {
+        this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
     }
 
     //job删除的时候手动触发.....
-    public void jobUnRegister(Serializable jobId) {
-        registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+jobId);
+    public void jobUnRegister(Long jobId) {
+        this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
     }
 
-    public void jobDispatch(Serializable jobId) throws Exception {
-        JobInfo jobInfo = jobService.getJobInfoById(CommonUtils.toLong(jobId));
+    public synchronized void jobDispatch(Long jobId) throws Exception {
+        this.jobs.put(jobId, jobId);
+        this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+        JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
         Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
         switch (cronType) {
             case CRONTAB:
-                opencronCollector.add(jobInfo);
+                this.opencronCollector.add(jobInfo);
                 break;
             case QUARTZ:
-                schedulerService.put(jobInfo);
+                this.schedulerService.put(jobInfo);
                 break;
         }
     }
 
-    private void jobRemove(String jobId) throws SchedulerException {
-        opencronCollector.remove(toLong(jobId));
-        schedulerService.remove(jobId);
+    private synchronized void jobRemove(Long jobId) throws SchedulerException {
+        this.jobs.remove(jobId);
+        this.opencronCollector.remove(jobId);
+        this.schedulerService.remove(jobId);
     }
 
-    public void getZkClient() {
-        if (this.zookeeperClient == null) {
-            this.zookeeperClient = registryService.getZKClient(registryURL);
-        }
-    }
-
-    private void printDispatchedJob(Integer serverSize) {
+    private void dispatchedInfo(Integer serverSize) {
         logger.info(
                 "[opencron] serverChanged At {},previous serverSize:{},current serverSize:{},jobs:[{}]",
                 DateUtils.formatFullDate(new Date()),
                 this.serverSize,
                 serverSize,
-                StringUtils.join(this.jobs.keySet().toArray(new String[0]),"|")
+                StringUtils.join(this.jobs.keySet().toArray(new String[0]), "|")
         );
         this.serverSize = serverSize;
     }

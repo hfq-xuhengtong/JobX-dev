@@ -57,7 +57,7 @@ public class ConfigService {
         queryDao.save(config);
     }
 
-    public void initDataBase() {
+    public void initDB() {
 
         /**
          * for version 1.1.0 update to version 1.2.0(ip rename to host)
