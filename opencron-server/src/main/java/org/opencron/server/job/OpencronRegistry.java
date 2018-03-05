@@ -112,7 +112,7 @@ public class OpencronRegistry {
             }
         }
 
-        this.initZookeeperClient();
+        this.getZkClient();
 
         //agent添加,删除监控...
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_AGENT_PATH, new ChildListener() {
@@ -159,9 +159,7 @@ public class OpencronRegistry {
 
     public void serverRegister() {
 
-        this.initZookeeperClient();
-        //将server加入到注册中心
-        registryService.register(registryURL,registryPath,true);
+        this.getZkClient();
 
         //server监控增加和删除
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_SERVER_PATH, new ChildListener() {
@@ -202,6 +200,16 @@ public class OpencronRegistry {
             }
         });
 
+        //register shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                if (logger.isInfoEnabled()) {
+                    logger.info("[opencron] run shutdown hook now...");
+                }
+                registryService.unregister(registryURL,registryPath);
+            }
+        }, "OpencronShutdownHook"));
+
         //扫描agent自动注册到server
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
         if (CommonUtils.notEmpty(children)) {
@@ -214,24 +222,15 @@ public class OpencronRegistry {
             }
         }
 
-        //register shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
-                if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] run shutdown hook now...");
-                }
-                registryService.unregister(registryURL,registryPath);
-            }
-        }, "OpencronShutdownHook"));
+        //将server加入到注册中心
+        registryService.register(registryURL,registryPath,true);
 
     }
 
     public void jobRegister() {
-        this.initZookeeperClient();
-        List<Job> jobList = jobService.getScheduleJob();
-        for (Job job:jobList) {
-            registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId(),true);
-        }
+
+        this.getZkClient();
+
         //job的监控
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
             @Override
@@ -266,6 +265,11 @@ public class OpencronRegistry {
 
             }
         });
+
+        List<Job> jobList = jobService.getScheduleJob();
+        for (Job job:jobList) {
+            registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId(),true);
+        }
     }
 
     public void destroyAll() {
@@ -313,8 +317,10 @@ public class OpencronRegistry {
         schedulerService.remove(jobId);
     }
 
-    public void initZookeeperClient() {
-        this.zookeeperClient = registryService.getZKClient(registryURL);
+    public void getZkClient() {
+        if (this.zookeeperClient == null) {
+            this.zookeeperClient = registryService.getZKClient(registryURL);
+        }
     }
 }
     
