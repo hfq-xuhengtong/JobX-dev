@@ -181,6 +181,8 @@ public class OpencronRegistry {
                         //该任务落在当前的机器上
                         if ( SERVER_ID.equals(hash.get(jobId)) ) {
                             if (!jobs.containsKey(jobId)) {
+                                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+jobId);
+                                registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+jobId,true);
                                 jobs.put(jobId,jobId);
                                 jobDispatch(job.getJobId());
                             }
@@ -249,11 +251,15 @@ public class OpencronRegistry {
                         if (!jobs.containsKey(job)) {
                             ConsistentHash<String> hash = new ConsistentHash<String>(servers);
                             if (hash.get(job).equals(SERVER_ID)) {
+                                //该server重新注册job
+                                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job);
+                                registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job,true);
                                 jobs.put(job, job);
                                 jobDispatch(job);
                             }
                         }
                     }
+
                     for (String job : unJobs.keySet()) {
                         jobs.remove(job);
                         jobRemove(job);
@@ -272,7 +278,12 @@ public class OpencronRegistry {
 
         List<Job> jobList = jobService.getScheduleJob();
         for (Job job:jobList) {
-            registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId(),true);
+            ConsistentHash<String> hash = new ConsistentHash<String>(servers);
+            if (hash.get(job).equals(SERVER_ID)) {
+                registryService.register(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId(),true);
+            }else {
+                registryService.unregister(registryURL,Constants.ZK_REGISTRY_JOB_PATH+"/"+job.getJobId());
+            }
         }
     }
 
