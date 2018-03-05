@@ -140,19 +140,19 @@ public class JobController extends BaseController {
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
-    public String save(HttpSession session, Job job, HttpServletRequest request) throws Exception {
-        job.setCommand(DigestUtils.passBase64(job.getCommand()));
-        job.setDeleted(false);
-        if (job.getJobId() != null) {
-            Job job1 = jobService.getJob(job.getJobId());
-            if (!jobService.checkJobOwner(session, job1.getUserId()))
+    public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
+        jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));
+        jobParam.setDeleted(false);
+        if (jobParam.getJobId() != null) {
+            Job job = jobService.getJob(jobParam.getJobId());
+            if (!jobService.checkJobOwner(session, job.getUserId()))
                 return "redirect:/job/view.htm";
             /**
              * 将数据库中持久化的作业和当前修改的合并,当前修改的属性覆盖持久化的属性...
              */
             BeanUtils.copyProperties(
-                    job1,
                     job,
+                    jobParam,
                     "jobName",
                     "cronType",
                     "cronExp",
@@ -171,10 +171,10 @@ public class JobController extends BaseController {
         }
 
         //单任务
-        if (Constants.JobType.SINGLETON.getCode().equals(job.getJobType())) {
-            job.setUserId(OpencronTools.getUserId(session));
-            job.setLastChild(false);
-            job = jobService.merge(job);
+        if (Constants.JobType.SINGLETON.getCode().equals(jobParam.getJobType())) {
+            jobParam.setUserId(OpencronTools.getUserId(session));
+            jobParam.setLastChild(false);
+            jobParam = jobService.merge(jobParam);
         } else { //流程任务
             Map<String, String[]> map = request.getParameterMap();
             Object[] jobName = map.get("child.jobName");
@@ -197,7 +197,7 @@ public class JobController extends BaseController {
                 /**
                  * 新增并行和串行,子任务和最顶层的父任务一样
                  */
-                child.setRunModel(job.getRunModel());
+                child.setRunModel(jobParam.getRunModel());
                 child.setJobName(StringUtils.htmlEncode((String) jobName[i]));
                 child.setAgentId(Long.parseLong((String) agentId[i]));
                 child.setCommand(DigestUtils.passBase64((String) command[i]));
@@ -220,14 +220,14 @@ public class JobController extends BaseController {
                 return "redirect:/job/view.htm";
             }
 
-            if (job.getUserId() == null) {
-                job.setUserId(OpencronTools.getUserId(session));
+            if (jobParam.getUserId() == null) {
+                jobParam.setUserId(OpencronTools.getUserId(session));
             }
 
-            jobService.saveFlowJob(job, children);
+            jobService.saveFlowJob(jobParam, children);
         }
 
-        schedulerService.syncTigger(job.getJobId());
+        schedulerService.syncTigger(jobParam.getJobId());
 
         return "redirect:/job/view.htm";
     }
