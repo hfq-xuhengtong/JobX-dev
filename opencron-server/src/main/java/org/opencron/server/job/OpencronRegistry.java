@@ -75,19 +75,19 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
-    private RegistryService registryService = new RegistryService();
+    private final String SERVER_ID;
 
-    private ZookeeperClient zookeeperClient;
+    private final URL registryURL;
 
-    private String SERVER_ID;
+    private final String registryPath;
 
-    private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
+    private final RegistryService registryService;
 
-    private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + SERVER_ID;
+    private final ZookeeperClient zookeeperClient;
 
-    private Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
+    private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
-    private Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
+    private final Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
 
     private List<String> servers = new ArrayList<String>(0);
 
@@ -98,9 +98,16 @@ public class OpencronRegistry {
 
     private Lock lock = new ReentrantLock();
 
+    public OpencronRegistry() {
+        this.SERVER_ID = uuid();
+        this.registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + this.SERVER_ID;
+        this.registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
+        this.registryService = new RegistryService();
+        this.zookeeperClient = registryService.getZKClient(registryURL);
+    }
+
     @PostConstruct
     public void initialize() throws Exception {
-
         //初始化数据库...
         configService.initDB();
 
@@ -117,12 +124,7 @@ public class OpencronRegistry {
 
     }
 
-    public void initEnv(){
-
-        this.SERVER_ID = uuid();
-
-        this.zookeeperClient = registryService.getZKClient(registryURL);
-
+    public void initEnv() {
         //server第一次启动检查所有的agent是否可用
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
@@ -342,9 +344,9 @@ public class OpencronRegistry {
                     this.schedulerService.put(jobInfo);
                     break;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             new RuntimeException(e);
-        }finally {
+        } finally {
             this.lock.unlock();
         }
     }
@@ -355,9 +357,9 @@ public class OpencronRegistry {
             this.jobs.remove(jobId);
             this.opencronCollector.remove(jobId);
             this.schedulerService.remove(jobId);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
-        }finally {
+        } finally {
             this.lock.unlock();
         }
     }
