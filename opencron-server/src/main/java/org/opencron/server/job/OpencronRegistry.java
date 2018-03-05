@@ -33,14 +33,12 @@ import org.opencron.server.domain.Agent;
 import org.opencron.server.domain.Job;
 import org.opencron.server.service.*;
 import org.opencron.server.vo.JobInfo;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
