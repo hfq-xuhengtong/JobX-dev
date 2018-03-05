@@ -24,9 +24,7 @@ package org.opencron.server.job;
 import net.sf.ehcache.store.chm.ConcurrentHashMap;
 import org.opencron.common.Constants;
 import org.opencron.common.logging.LoggerFactory;
-import org.opencron.common.util.CommonUtils;
-import org.opencron.common.util.ConsistentHash;
-import org.opencron.common.util.PropertyPlaceholder;
+import org.opencron.common.util.*;
 import org.opencron.registry.URL;
 import org.opencron.registry.api.RegistryService;
 import org.opencron.registry.zookeeper.ChildListener;
@@ -44,10 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -93,6 +88,8 @@ public class OpencronRegistry {
     private Map<String,String> jobs = new ConcurrentHashMap<String, String>(0);
 
     private List<String> servers = new ArrayList<String>(0);
+
+    private Integer serverSize = 0;//server集群大小
 
     //在server销毁之前会将server从zookeeper中移除,这有可能会在此触发回调事件,而回调触发的时候server可能已经终止.
     private volatile boolean destroy = false;
@@ -192,6 +189,9 @@ public class OpencronRegistry {
                             jobRemove(job.getJobId().toString());
                         }
                     }
+
+                    printDispatchedJob(children.size());
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -227,6 +227,7 @@ public class OpencronRegistry {
 
     }
 
+
     public void jobRegister() {
 
         this.getZkClient();
@@ -257,6 +258,9 @@ public class OpencronRegistry {
                         jobs.remove(job);
                         jobRemove(job);
                     }
+
+                    printDispatchedJob(serverSize);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -322,5 +326,17 @@ public class OpencronRegistry {
             this.zookeeperClient = registryService.getZKClient(registryURL);
         }
     }
+
+    private void printDispatchedJob(Integer serverSize) {
+        logger.info(
+                "[opencron] serverChanged At {},previous serverSize:{},current serverSize:{},jobs:[{}]",
+                DateUtils.formatFullDate(new Date()),
+                this.serverSize,
+                serverSize,
+                StringUtils.join(this.jobs.keySet().toArray(new String[0]),"|")
+        );
+        this.serverSize = serverSize;
+    }
+
 }
     
