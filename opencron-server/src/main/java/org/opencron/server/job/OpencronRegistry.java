@@ -331,7 +331,7 @@ public class OpencronRegistry {
 
     private void dispatchedInfo(Integer serverSize) {
         logger.info(
-                "[opencron] serverChanged At \"{}\",previous serverSize:{},current serverSize:{}\n\t\tjobs:[ {} ]",
+                "[opencron] serverChanged,print dispatched info, At \n\tdatetime: \"{}\"\n\tprevious serverSize:{}\n\tcurrent serverSize{}\n\tjobs:[ {} ]\n\n",
                 DateUtils.formatFullDate(new Date()),
                 this.serverSize,
                 serverSize,
