@@ -37,8 +37,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -57,9 +55,6 @@ public class OpencronRegistry {
 
     @Autowired
     private JobService jobService;
-
-    @Autowired
-    private ConfigService configService;
 
     @Autowired
     private SchedulerService schedulerService;
@@ -96,25 +91,8 @@ public class OpencronRegistry {
 
     private Lock lock = new ReentrantLock();
 
-    @PostConstruct
     public void initialize() throws Exception {
-        //初始化数据库...
-        configService.initDB();
 
-        //init job...
-        schedulerService.initJob();
-
-        this.initEnv();
-
-        this.registryAgent();
-
-        this.registryServer();
-
-        this.registryJob();
-
-    }
-
-    public void initEnv() {
         //server第一次启动检查所有的agent是否可用
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
@@ -288,10 +266,8 @@ public class OpencronRegistry {
 
             }
         });
-
     }
 
-    @PreDestroy
     public void destroy() {
         destroy = true;
         if (logger.isInfoEnabled()) {
