@@ -145,7 +145,7 @@ public final class SchedulerService {
          * 不能保证修改后的job也同步到crontab或quartz的任务队列里.
          * 因此需要手动调用一次
          */
-        opencronRegistry.jobDispatch(job.getJobId());
+        opencronRegistry.jobDispatch(job.getJobId().toString());
     }
 
     public void syncTigger(Long jobId) throws Exception {
