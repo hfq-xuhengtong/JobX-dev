@@ -80,7 +80,7 @@ public class OpencronRegistry {
 
     private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
-    private final Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
+    private final Map<String, String> jobs = new ConcurrentHashMap<String, String>(0);
 
     private List<String> servers = new ArrayList<String>(0);
 
@@ -192,7 +192,7 @@ public class OpencronRegistry {
                     List<Job> jobList = jobService.getScheduleJob();
 
                     for (Job job : jobList) {
-                        Long jobId = job.getJobId();
+                        String jobId = job.getJobId().toString();
                         //该任务落在当前的机器上
                         if (SERVER_ID.equals(hash.get(jobId))) {
                             if (!jobs.containsKey(jobId)) {
@@ -240,19 +240,18 @@ public class OpencronRegistry {
 
                     if (destroy) return;
 
-                    Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
+                    Map<String, String> unJobs = new HashMap<String, String>(jobs);
 
                     ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
                     for (String job : children) {
-                        Long jobId = toLong(job);
-                        unJobs.remove(jobId);
-                        if (!jobs.containsKey(jobId) && hash.get(jobId).equals(SERVER_ID)) {
-                            jobDispatch(jobId);
+                        unJobs.remove(job);
+                        if (!jobs.containsKey(job) && hash.get(job).equals(SERVER_ID)) {
+                            jobDispatch(job);
                         }
                     }
 
-                    for (Long job : unJobs.keySet()) {
+                    for (String job : unJobs.keySet()) {
                         jobRemove(job);
                     }
 
@@ -276,7 +275,7 @@ public class OpencronRegistry {
 
         //job unregister
         if (CommonUtils.notEmpty(jobs)) {
-            for (Long job : jobs.keySet()) {
+            for (String job : jobs.keySet()) {
                 this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + job);
             }
         }
@@ -295,12 +294,12 @@ public class OpencronRegistry {
         this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
     }
 
-    public synchronized void jobDispatch(Long jobId) {
+    public synchronized void jobDispatch(String jobId) {
         try {
             this.lock.lock();
             this.jobs.put(jobId, jobId);
             this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
-            JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
+            JobInfo jobInfo = this.jobService.getJobInfoById(toLong(jobId));
             Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
             switch (cronType) {
                 case CRONTAB:
@@ -317,11 +316,11 @@ public class OpencronRegistry {
         }
     }
 
-    private void jobRemove(Long jobId) {
+    private void jobRemove(String jobId) {
         try {
             this.lock.lock();
             this.jobs.remove(jobId);
-            this.opencronCollector.remove(jobId);
+            this.opencronCollector.remove(toLong(jobId));
             this.schedulerService.remove(jobId);
         } catch (Exception e) {
             throw new RuntimeException(e);
