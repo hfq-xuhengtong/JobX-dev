@@ -30,6 +30,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.KeeperException.NodeExistsException;
 import org.apache.zookeeper.WatchedEvent;
+import org.opencron.common.Constants;
 import org.opencron.registry.zookeeper.ChildListener;
 import org.opencron.registry.zookeeper.StateListener;
 import org.opencron.registry.URL;
@@ -47,7 +48,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
                     .connectString(url.getAddress())
                     .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))
-                    .connectionTimeoutMs(5000);
+                    .connectionTimeoutMs(Constants.ZK_CONNECTION_TIMEOUT);
             String authority = url.getAuthority();
             if (authority != null && authority.length() > 0) {
                 builder = builder.authorization("digest", authority.getBytes());

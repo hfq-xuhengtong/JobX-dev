@@ -26,6 +26,7 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
+import org.opencron.common.Constants;
 import org.opencron.registry.zookeeper.ChildListener;
 import org.opencron.registry.zookeeper.StateListener;
 import org.opencron.registry.zookeeper.support.AbstractZookeeperClient;
@@ -42,7 +43,7 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
 
     public ZkclientZookeeperClient(URL url) {
         super(url);
-        client = new ZkClient(url.getAddress());
+        client = new ZkClient(url.getAddress(), Constants.ZK_CONNECTION_TIMEOUT);
         client.subscribeStateChanges(new IZkStateListener() {
             public void handleStateChanged(KeeperState state) throws Exception {
                 ZkclientZookeeperClient.this.state = state;

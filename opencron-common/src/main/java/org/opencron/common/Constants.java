@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class Constants {
 
-    public static final int ZK_SESSION_TIMEOUT = 5000;
+    public static final int ZK_CONNECTION_TIMEOUT = 2000;
 
     public static final int RPC_TIMEOUT = 5000;
 
