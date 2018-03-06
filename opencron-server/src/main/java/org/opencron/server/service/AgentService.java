@@ -26,7 +26,6 @@ import java.util.*;
 
 import org.opencron.common.Constants;
 import org.opencron.common.util.CommonUtils;
-import org.opencron.common.util.PropertyPlaceholder;
 import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.User;
 import org.opencron.server.job.OpencronTools;
@@ -36,6 +35,8 @@ import org.opencron.server.domain.Agent;
 import org.opencron.server.vo.JobInfo;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +44,6 @@ import javax.servlet.http.HttpSession;
 
 import static org.opencron.common.util.CommonUtils.isEmpty;
 import static org.opencron.common.util.CommonUtils.notEmpty;
-import static org.opencron.common.util.WebUtils.getIp;
-import static org.opencron.common.util.WebUtils.writeJson;
 
 @Service
 @Transactional

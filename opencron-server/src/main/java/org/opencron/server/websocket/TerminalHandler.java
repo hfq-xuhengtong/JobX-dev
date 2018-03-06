@@ -27,6 +27,7 @@ import java.io.IOException;
 import org.opencron.common.Constants;
 import org.opencron.server.domain.Terminal;
 
+import static org.opencron.common.util.CommonUtils.toInt;
 import static org.opencron.server.service.TerminalService.*;
 
 import org.opencron.server.service.TerminalService;
@@ -54,10 +55,10 @@ public class TerminalHandler extends TextWebSocketHandler {
                 try {
                     session.sendMessage(new TextMessage("Welcome to opencron Terminal! Connect Starting."));
                     getClient(session, terminal);
-                    int cols = Integer.parseInt(session.getAttributes().get("cols").toString());
-                    int rows = Integer.parseInt(session.getAttributes().get("rows").toString());
-                    int width = Integer.parseInt(session.getAttributes().get("width").toString());
-                    int height = Integer.parseInt(session.getAttributes().get("height").toString());
+                    int cols = toInt(session.getAttributes().get("cols").toString());
+                    int rows = toInt(session.getAttributes().get("rows").toString());
+                    int width = toInt(session.getAttributes().get("width").toString());
+                    int height = toInt(session.getAttributes().get("height").toString());
                     terminalClient.openTerminal(cols, rows, width, height);
                     terminalService.login(terminal);
                 } catch (Exception e) {

@@ -23,7 +23,6 @@ package org.opencron.server.controller;
 
 import java.util.*;
 
-import org.apache.zookeeper.data.Stat;
 import org.opencron.common.Constants;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.common.util.StringUtils;

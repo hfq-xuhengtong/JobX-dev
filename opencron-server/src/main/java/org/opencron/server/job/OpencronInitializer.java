@@ -18,21 +18,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.opencron.server.job;
 
-import org.opencron.server.service.*;
+import org.opencron.server.service.ConfigService;
+import org.opencron.server.service.SchedulerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-/**
- * @author benjobs.
- */
+
 
 @Component
-public class OpencronInitiator {
+public class OpencronInitializer {
 
     @Autowired
     private ConfigService configService;
@@ -43,32 +41,27 @@ public class OpencronInitiator {
     @Autowired
     private OpencronRegistry opencronRegistry;
 
-    /**
-     *
-     * @throws Exception
-     */
     @PostConstruct
-    public void initialization() throws Exception {
-
+    public void initialize() throws Exception {
         //初始化数据库...
         configService.initDB();
 
         //init job...
         schedulerService.initJob();
 
-        opencronRegistry.initialize();
+        this.opencronRegistry.initialize();
 
-        opencronRegistry.registryAgent();
+        this.opencronRegistry.registryAgent();
 
-        opencronRegistry.registryServer();
+        this.opencronRegistry.registryServer();
 
-        opencronRegistry.registryJob();
+        this.opencronRegistry.registryJob();
+
     }
 
     @PreDestroy
-    public void destroy() {
-        opencronRegistry.destroy();
+    public void destroy(){
+        this.opencronRegistry.destroy();
     }
-
 
 }

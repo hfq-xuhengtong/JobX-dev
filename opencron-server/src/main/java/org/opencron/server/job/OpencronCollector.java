@@ -23,15 +23,11 @@ package org.opencron.server.job;
 
 import it.sauronsoftware.cron4j.*;
 import org.opencron.common.Constants;
-import org.opencron.common.util.CommonUtils;
-import org.opencron.server.domain.Job;
 import org.opencron.server.service.ExecuteService;
-import org.opencron.server.service.JobService;
 import org.opencron.server.vo.JobInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

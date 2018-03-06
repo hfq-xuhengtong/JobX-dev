@@ -21,6 +21,7 @@
 
 package org.opencron.server.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpSession;
 
 import org.opencron.common.Constants;
@@ -28,7 +29,6 @@ import org.opencron.server.domain.Record;
 import org.opencron.server.service.*;
 import org.opencron.server.tag.PageBean;
 import org.opencron.server.vo.RecordInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;

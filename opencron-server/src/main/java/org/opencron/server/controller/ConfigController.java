@@ -24,7 +24,6 @@ package org.opencron.server.controller;
 import org.opencron.common.Constants;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.server.domain.Config;
-import org.opencron.server.job.OpencronTools;
 import org.opencron.server.service.ConfigService;
 import org.opencron.server.service.RecordService;
 import org.opencron.server.vo.Status;
@@ -35,8 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**

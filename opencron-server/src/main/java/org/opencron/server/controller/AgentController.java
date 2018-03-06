@@ -22,15 +22,12 @@
 package org.opencron.server.controller;
 
 import java.util.List;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.opencron.common.Constants;
-import org.opencron.common.util.CommonUtils;
-import org.opencron.common.util.PropertyPlaceholder;
-import org.opencron.server.job.OpencronTools;
 import org.opencron.server.service.AgentService;
 import org.opencron.server.service.ExecuteService;
 import org.opencron.server.tag.PageBean;
@@ -38,7 +35,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.opencron.server.domain.Agent;
 import org.opencron.server.vo.Status;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
