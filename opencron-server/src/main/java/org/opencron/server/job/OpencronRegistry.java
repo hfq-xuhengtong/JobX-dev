@@ -197,15 +197,16 @@ public class OpencronRegistry {
                     List<Job> jobList = jobService.getScheduleJob();
 
                     for (Job job : jobList) {
+
                         Long jobId = job.getJobId();
+
                         //该任务落在当前的机器上
-                        if (SERVER_ID.equals(hash.get(jobId))) {
-                            if (!jobs.containsKey(jobId)) {
-                                jobDispatch(jobId);
-                            }
+                        if (!jobs.containsKey(jobId) && SERVER_ID.equals(hash.get(jobId))) {
+                            jobDispatch(jobId);
                         } else {
                             jobRemove(jobId);
                         }
+
                     }
 
                     dispatchedInfo(children.size());
@@ -250,11 +251,13 @@ public class OpencronRegistry {
                     ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
                     for (String job : children) {
+
                         Long jobId = toLong(job);
                         unJobs.remove(jobId);
                         if (!jobs.containsKey(jobId) && hash.get(jobId).equals(SERVER_ID)) {
                             jobDispatch(jobId);
                         }
+
                     }
 
                     for (Long job : unJobs.keySet()) {
@@ -271,15 +274,6 @@ public class OpencronRegistry {
             }
         });
 
-        //初始化,将job添加到zookeeper
-        List<Job> jobList = jobService.getScheduleJob();
-        for (Job job : jobList) {
-            Long jobId = job.getJobId();
-            ConsistentHash<String> hash = new ConsistentHash<String>(servers);
-            if (SERVER_ID.equals(hash.get(jobId))) {
-                registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
-            }
-        }
     }
 
     //job新增的时候手动触发.....
@@ -292,10 +286,11 @@ public class OpencronRegistry {
         this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
     }
 
-    public synchronized void jobDispatch(Long jobId) {
+    public void jobDispatch(Long jobId) {
         try {
             this.lock.lock();
             this.jobs.put(jobId, jobId);
+            this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
             this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
             JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
             Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
@@ -329,7 +324,11 @@ public class OpencronRegistry {
 
     private void dispatchedInfo(Integer serverSize) {
         logger.info(
-                "\n\t[opencron] serverChanged,print dispatched info. \n\tdatetime: \"{}\"\n\tprevious serverSize:{}\n\tcurrent serverSize:{}\n\tjobs:[ {} ]\n\n",
+                "\n\t▃▃▃▅▅▅▆▆▆▇▇▇███ [opencron] serverChanged,print dispatched info ███▇▇▇▆▆▆▅▅▅▃▃▃" +
+                "\n\t\t\tdatetime: \"{}\"" +
+                "\n\t\t\tprevious serverSize:{}" +
+                "\n\t\t\tcurrent serverSize:{}" +
+                "\n\t\t\tjobs:[ {} ]\n\n",
                 DateUtils.formatFullDate(new Date()),
                 this.serverSize,
                 serverSize,
@@ -337,6 +336,6 @@ public class OpencronRegistry {
         );
         this.serverSize = serverSize;
     }
-    
+
 }
     
