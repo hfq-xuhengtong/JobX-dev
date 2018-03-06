@@ -52,7 +52,7 @@ public class ConsistentHash<T> {
         if (circle.isEmpty()) {
             return null;
         }
-        long hash = murmurHash.hash64((String) key);
+        long hash = murmurHash.hash64(key.toString());
         if (!circle.containsKey(hash)) {
             SortedMap<Long, T> tailMap = circle.tailMap(hash);
             hash = tailMap.isEmpty() ? circle.firstKey() : tailMap.firstKey();

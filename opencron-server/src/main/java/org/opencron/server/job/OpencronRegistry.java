@@ -80,7 +80,7 @@ public class OpencronRegistry {
 
     private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
-    private final Map<String, String> jobs = new ConcurrentHashMap<String, String>(0);
+    private final Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
 
     private List<String> servers = new ArrayList<String>(0);
 
@@ -125,7 +125,7 @@ public class OpencronRegistry {
 
         //job unregister
         if (CommonUtils.notEmpty(jobs)) {
-            for (String job : jobs.keySet()) {
+            for (Long job : jobs.keySet()) {
                 this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + job);
             }
         }
@@ -197,7 +197,7 @@ public class OpencronRegistry {
                     List<Job> jobList = jobService.getScheduleJob();
 
                     for (Job job : jobList) {
-                        String jobId = job.getJobId().toString();
+                        Long jobId = job.getJobId();
                         //该任务落在当前的机器上
                         if (SERVER_ID.equals(hash.get(jobId))) {
                             if (!jobs.containsKey(jobId)) {
@@ -245,18 +245,19 @@ public class OpencronRegistry {
 
                     if (destroy) return;
 
-                    Map<String, String> unJobs = new HashMap<String, String>(jobs);
+                    Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
 
                     ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
                     for (String job : children) {
-                        unJobs.remove(job);
-                        if (!jobs.containsKey(job) && hash.get(job).equals(SERVER_ID)) {
-                            jobDispatch(job);
+                        Long jobId = toLong(job);
+                        unJobs.remove(jobId);
+                        if (!jobs.containsKey(jobId) && hash.get(jobId).equals(SERVER_ID)) {
+                            jobDispatch(jobId);
                         }
                     }
 
-                    for (String job : unJobs.keySet()) {
+                    for (Long job : unJobs.keySet()) {
                         jobRemove(job);
                     }
 
@@ -279,7 +280,6 @@ public class OpencronRegistry {
                 registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
             }
         }
-
     }
 
     //job新增的时候手动触发.....
@@ -292,12 +292,12 @@ public class OpencronRegistry {
         this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
     }
 
-    public synchronized void jobDispatch(String jobId) {
+    public synchronized void jobDispatch(Long jobId) {
         try {
             this.lock.lock();
             this.jobs.put(jobId, jobId);
             this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
-            JobInfo jobInfo = this.jobService.getJobInfoById(toLong(jobId));
+            JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
             Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
             switch (cronType) {
                 case CRONTAB:
@@ -314,11 +314,11 @@ public class OpencronRegistry {
         }
     }
 
-    private void jobRemove(String jobId) {
+    private void jobRemove(Long jobId) {
         try {
             this.lock.lock();
             this.jobs.remove(jobId);
-            this.opencronCollector.remove(toLong(jobId));
+            this.opencronCollector.remove(jobId);
             this.schedulerService.remove(jobId);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -333,7 +333,7 @@ public class OpencronRegistry {
                 DateUtils.formatFullDate(new Date()),
                 this.serverSize,
                 serverSize,
-                StringUtils.join(this.jobs.keySet().toArray(new String[0]), "|")
+                StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
         this.serverSize = serverSize;
     }
