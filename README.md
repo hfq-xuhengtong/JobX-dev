@@ -5,7 +5,7 @@ V1.2.0 by 2018-xx-xx
 
     1)更换项目rpc调度框架thrift为Netty和Mina
     
-    2)引入zookeeper,agent端心跳检测改为zookeeper通知的方式
+    2)引入zookeeper,更改连续心跳检测机制为zookeeper通知的方式
     
     3)基于zookeeper,agent实现自动注册
     
@@ -84,39 +84,49 @@ http://www.oracle.com/technetwork/java/javase/overview/index.html
 Tomcat server 8.0 or greater
 https://tomcat.apache.org
 
+Zookeeper
+Redis
 Browser 
 IE10+
 
    
-## 安装步骤
+## 安装说明
 
  opencron分为两个opencron-server端和opencron-agent端,opencron-server端即为一个web可视化的中央管理调度平台,opencron-agent为要管理的任务的机器
- agent和server都依赖zookeeper,安装部署opencron之前必须先安装和启动zookeeper,server和agent必须连接同一个zookeeper
+ agent和server都依赖zookeeper,安装部署opencron之前必须先安装和启动zookeeper,server和agent必须连接同一个zookeeper,server端依赖redis
 
-## opencron-agent 安装步骤:
+## 编译步骤:
 ```
 
 1)下载源码: 
-> git clone https://github.com/wolfboys/opencron.git
+> git clone https://github.com/wolfboys/opencron-dev.git
 
-2):修改server端的jdbc和zookeeper连接信息
+2):修改server端的配置信息
    1:创建数据,数据库名字可以是opencron或者其他
    2:进入opencron-server/src/main/resources 修改config.properties里的jdbc连接信息
    
+   #jdbc
    jdbc.driver=com.mysql.jdbc.Driver
    jdbc.url=jdbc:mysql://${mysql_host}:3306/opencron?useUnicode=true&characterEncoding=UTF-8
    jdbc.username=${user}
    jdbc.password=${password}
    
+   #redis
+   redis.host=${redis.host}
+   redis.password=${redis.password}
+   redis.port=${redis.port}
+   
+   #zookeeper
    opencron.registry=zookeeper://${zookeeper_host}:2181
 3):进入源码目录并执行编译:
 > cd opencron
 > sh build.sh
 编译完成的文件在build/dist下
+```
 
-4) 部署agent
+## opencron-agent 部署安装步骤
 
-  执行运行agent.sh即可 或者手动部署agent
+1) 执行运行agent.sh即可 或者手动部署agent
   
     手动部署agent步骤
     
