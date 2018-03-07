@@ -36,10 +36,10 @@
         <li><a href="">监控中心</a></li>
         <li><a href="">Druid监控</a></li>
     </ol>
-    <h4 class="page-title"><i class="fa fa-edit" aria-hidden="true" style="font-style: 30px;"></i>&nbsp;修改设置</h4>
+    <h4 class="page-title"><i class="fa fa-bar-chart" aria-hidden="true" style="font-style: 30px;"></i>&nbsp;修改设置</h4>
 
     <div style="float: right;margin-top: 5px">
-        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i class="fa fa-bar-chart" aria-hidden="true"></i>&nbsp;返回</a>
+        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px">&nbsp;返回</a>
     </div>
 
     <div class="block-area">
