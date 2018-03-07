@@ -43,6 +43,9 @@ public class Agent implements Serializable {
     //代理执行器的Id
     private Long proxyAgent;
 
+    @Deprecated
+    @Transient
+    private String ip;
     private String host;
     private Integer port;
     private String name;
@@ -223,6 +226,16 @@ public class Agent implements Serializable {
 
     public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    @Deprecated
+    public String getIp() {
+        return ip;
+    }
+
+    @Deprecated
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     @Override
