@@ -146,6 +146,21 @@
 				</a>
 			</li>
 
+
+			<li class="dropdown <c:if test="${fn:contains(uri,'/monitor')}">active</c:if>">
+				<a href="#">
+					<i class="fa fa-bar-chart" aria-hidden="true"></i><span class="menu-item">监控中心</span>
+				</a>
+				<ul class="list-unstyled menu-item">
+					<li <c:if test="${fn:contains(uri,'/druid')}">class="active"</c:if>>
+						<a href="${contextPath}/monitor/druid.htm" class="<c:if test="${fn:contains(uri,'druid')}">active</c:if>">MySQL监控</a>
+					</li>
+					<li <c:if test="${fn:contains(uri,'/report')}">class="active"</c:if>>
+						<a href="${contextPath}/monitor/report.htm" class="<c:if test="${fn:contains(uri,'report')}">active</c:if>">机器监控</a>
+					</li>
+				</ul>
+			</li>
+
 			<c:if test="${permission eq true}">
 				<li <c:if test="${fn:contains(uri,'/user')}">class="active"</c:if>>
 					<a href="${contextPath}/user/view.htm">
