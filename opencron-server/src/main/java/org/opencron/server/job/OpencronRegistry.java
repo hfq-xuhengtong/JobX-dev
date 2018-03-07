@@ -290,8 +290,8 @@ public class OpencronRegistry {
         try {
             this.lock.lock();
             this.jobs.put(jobId, jobId);
-            this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
-            this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+            this.jobUnRegister(jobId);
+            this.jobRegister(jobId);
             JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
             Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
             switch (cronType) {
