@@ -153,7 +153,7 @@
 				</a>
 				<ul class="list-unstyled menu-item">
 					<li <c:if test="${fn:contains(uri,'/druid')}">class="active"</c:if>>
-						<a href="${contextPath}/monitor/druid.htm" class="<c:if test="${fn:contains(uri,'druid')}">active</c:if>">MySQL监控</a>
+						<a href="${contextPath}/monitor/druid.htm" class="<c:if test="${fn:contains(uri,'druid')}">active</c:if>">Druid监控</a>
 					</li>
 					<li <c:if test="${fn:contains(uri,'/report')}">class="active"</c:if>>
 						<a href="${contextPath}/monitor/report.htm" class="<c:if test="${fn:contains(uri,'report')}">active</c:if>">机器监控</a>

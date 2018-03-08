@@ -8,13 +8,30 @@
 <meta name="author" content="author:benjobs,wechat:wolfboys,Created by 2016" />
 <head>
     <script type="text/javascript">
-        function reinitIframe(){
+        $(document).ready(function () {
             var iframe = document.getElementById("druid");
+            iframe.onload = function () {
+                var valId = window.setInterval(function(){
+                    var brand = $("#druid").contents().find(".brand");
+                    if ( brand.text() ){
+                        brand.attr("href","javascript:void(0)");
+                        brand.removeAttr("target");
+                        brand.text("Opencron Druid");
+                        window.clearInterval(valId);
+                    }
+                }, 1);
+                var footer = $("#druid").contents().find(".footer");
+                footer.find(".container").remove();
+            }
+        });
+        function reinitIframe() {
             try{
+                var iframe = document.getElementById("druid");
                 var bHeight = iframe.contentWindow.document.body.scrollHeight;
                 var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
                 var height = Math.max(bHeight, dHeight);
                 iframe.height = height;
+                window.frames["druid"].document.getElementById("iframe中控件的ID");
             }catch (ex){}
         }
         window.setInterval("reinitIframe()", 200);
@@ -43,7 +60,7 @@
     </div>
 
     <div class="block-area">
-        <iframe src="${contextPath}/druid/index.html" frameborder="0" scrolling="no" id="druid" width="100%" onload="this.height=100"></iframe>
+        <iframe src="${contextPath}/druid/index.html" frameborder="0" scrolling="no" id="druid" name="druid" width="100%" onload="this.height=100"></iframe>
     </div>
 
 </section>
