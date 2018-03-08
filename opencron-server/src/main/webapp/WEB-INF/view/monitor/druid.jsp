@@ -55,10 +55,6 @@
     </ol>
     <h4 class="page-title"><i class="fa fa-bar-chart" aria-hidden="true" style="font-style: 30px;"></i>&nbsp;Druid监控</h4>
 
-    <div style="float: right;margin-top: 5px">
-        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px">&nbsp;返回</a>
-    </div>
-
     <div class="block-area">
         <iframe src="${contextPath}/druid/index.html" frameborder="0" scrolling="no" id="druid" name="druid" width="100%" onload="this.height=100"></iframe>
     </div>
