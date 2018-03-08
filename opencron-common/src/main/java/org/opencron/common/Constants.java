@@ -113,8 +113,6 @@ public class Constants {
 
     public static final String PARAM_TERMINAL_TOKEN_KEY = "opencron_term_token";
 
-    public static final String PARAM_TERMINAL_CLIENT_PREFIX_KEY = "opencron_term_client_";
-
     public static final String PARAM_TERMINAL_PREFIX_KEY = "opencron_term_";
 
     public static final String PARAM_CSRF_NAME_KEY = "csrf";

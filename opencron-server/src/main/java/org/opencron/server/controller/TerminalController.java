@@ -140,6 +140,7 @@ public class TerminalController extends BaseController {
         if (terminal != null) {
             request.setAttribute("name", terminal.getName() + "(" + terminal.getHost() + ")");
             request.setAttribute("token", token);
+            request.setAttribute("id", terminal.getId());
             request.setAttribute("theme", terminal.getTheme());
             List<Terminal> terminas = termService.getListByUser(terminal.getUser());
             request.setAttribute("terms", terminas);
@@ -149,8 +150,9 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping("reopen.htm")
-    public String reopen(HttpSession session, String token) throws Exception {
-        Terminal terminal = (Terminal) OpencronTools.CACHE.get(token);
+    public String reopen(HttpSession session,Long id, String token) throws Exception {
+        String reKey = id+"_" + token;
+        Terminal terminal = terminalContext.remove(reKey);//reKey
         if (terminal != null) {
             token = CommonUtils.uuid();
             terminalContext.put(token, terminal);

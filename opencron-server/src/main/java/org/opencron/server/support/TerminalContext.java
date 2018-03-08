@@ -42,6 +42,11 @@ public class TerminalContext implements Serializable {
     public void put(String key, Terminal terminal) {
         redisCacheManager.put(Constants.PARAM_TERMINAL_TOKEN_KEY,key);
         redisCacheManager.put(key(key),terminal);
+        /**
+         * 为复制会话
+         */
+        String reKey = terminal.getId()+"_"+key;
+        redisCacheManager.put( key(reKey),terminal);
     }
 
     public Terminal remove(String key) {
