@@ -55,6 +55,8 @@ import static org.opencron.common.util.WebUtils.*;
 
 /**
  * benjobs..
+ * 终端,分布式下有bug,发送命令,上传文件等,均可能发送到另一台server的情况..目前没有特别好的方案
+ * 待解决...
  */
 @Controller
 @RequestMapping("terminal")
@@ -149,6 +151,14 @@ public class TerminalController extends BaseController {
         return "/terminal/error";
     }
 
+    /**
+     * 不能重复复制会话,可以通过ajax的方式重新生成token解决....
+     * @param session
+     * @param id
+     * @param token
+     * @return
+     * @throws Exception
+     */
     @RequestMapping("reopen.htm")
     public String reopen(HttpSession session,Long id, String token) throws Exception {
         String reKey = id+"_" + token;
