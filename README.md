@@ -85,9 +85,12 @@ Tomcat server 8.0 or greater
 https://tomcat.apache.org
 
 Zookeeper
+http://zookeeper.apache.org/
+
 Redis
-Browser 
-IE10+
+https://redis.io/
+
+Browser IE10+
 
    
 ## 安装说明
