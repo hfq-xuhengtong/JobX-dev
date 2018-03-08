@@ -28,7 +28,7 @@ import org.opencron.common.util.DigestUtils;
 import org.opencron.common.util.StringUtils;
 import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.domain.Job;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.opencron.server.service.*;
 import org.opencron.server.tag.PageBean;
 import org.opencron.common.util.CommonUtils;

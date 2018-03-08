@@ -28,9 +28,11 @@ import org.opencron.common.Constants;
 import org.opencron.server.domain.Terminal;
 
 import static org.opencron.common.util.CommonUtils.toInt;
-import static org.opencron.server.service.TerminalService.*;
 
 import org.opencron.server.service.TerminalService;
+import org.opencron.server.support.TerminalClient;
+import org.opencron.server.support.TerminalContext;
+import org.opencron.server.support.TerminalSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -45,12 +47,15 @@ public class TerminalHandler extends TextWebSocketHandler {
     @Autowired
     private TerminalService terminalService;
 
+    @Autowired
+    private TerminalContext terminalContext;
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
         String sshSessionId = (String) session.getAttributes().get(Constants.PARAM_SSH_SESSION_ID_KEY);
         if (sshSessionId != null) {
-            final Terminal terminal = TerminalContext.remove(sshSessionId);
+            final Terminal terminal = terminalContext.remove(sshSessionId);
             if (terminal != null) {
                 try {
                     session.sendMessage(new TextMessage("Welcome to opencron Terminal! Connect Starting."));

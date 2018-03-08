@@ -27,7 +27,7 @@ import org.opencron.common.Constants;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.CookieUtils;
 import org.opencron.server.domain.User;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

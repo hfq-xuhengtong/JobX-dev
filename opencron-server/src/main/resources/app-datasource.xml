@@ -87,10 +87,13 @@
     <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration"/>
 
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-        <property name="maxTotal" value="100" />
-        <property name="maxIdle" value="10" />
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxTotal" value="${redis.maxActive}" />
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
     </bean>
 
+    <!-- 配置JedisConnectionFactory -->
     <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" destroy-method="destroy">
         <property name="hostName" value="${redis.host}"/>
         <property name="port" value="${redis.port}"/>
@@ -98,6 +101,19 @@
         <property name="timeout" value="3000"/>
         <property name="usePool" value="true"/>
         <property name="poolConfig" ref="jedisPoolConfig"/>
+        <property name="database" value="${redis.dbIndex}" />
+    </bean>
+
+    <!-- 配置RedisTemplate -->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory" />
+    </bean>
+
+    <!-- 配置RedisCacheManager -->
+    <bean id="redisCacheManager" class="org.opencron.server.support.RedisCacheManager">
+        <property name="redisTemplate" ref="redisTemplate" />
+        <property name="timeout" value="${redis.expiration}" />
+        <property name="name" value="opencron"/>
     </bean>
 
 </beans>

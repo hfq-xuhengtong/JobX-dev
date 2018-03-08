@@ -28,7 +28,8 @@ import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.Log;
 import org.opencron.server.domain.User;
 import org.opencron.server.handler.SingleLoginListener;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
+import org.opencron.server.support.TerminalSession;
 import org.opencron.server.tag.PageBean;
 import org.opencron.server.vo.LogInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,7 @@ public class HomeService {
                     //拿到已经登录的session,将其踢下线
                     SingleLoginListener.removeUserSession(user.getUserId());
                     //已经登录的用户开启的终端全部关闭...
-                    TerminalService.TerminalSession.exit(session.getId());
+                    TerminalSession.exit(session.getId());
                 }
                 SingleLoginListener.addUserSession(httpSession);
             }

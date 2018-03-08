@@ -30,7 +30,7 @@ import org.opencron.server.domain.Agent;
 import org.opencron.server.domain.Job;
 import org.opencron.server.domain.Log;
 import org.opencron.server.domain.User;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.opencron.server.service.*;
 import org.opencron.server.tag.PageBean;
 import org.opencron.server.vo.ChartInfo;

@@ -27,15 +27,12 @@ import java.util.*;
 import static org.opencron.common.Constants.*;
 
 import org.opencron.common.Constants;
-import org.opencron.common.util.PropertyPlaceholder;
 import org.opencron.common.util.collection.ParamsMap;
-import org.opencron.registry.URL;
-import org.opencron.registry.api.RegistryService;
 import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.Job;
 import org.opencron.server.domain.User;
 import org.opencron.server.job.OpencronCollector;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.opencron.server.tag.PageBean;
 
 
@@ -45,7 +42,6 @@ import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -23,7 +23,7 @@ package org.opencron.server.controller;
 
 import org.opencron.server.domain.Agent;
 import org.opencron.server.domain.Group;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.opencron.server.service.AgentService;
 import org.opencron.server.service.GroupService;
 import org.opencron.server.tag.PageBean;

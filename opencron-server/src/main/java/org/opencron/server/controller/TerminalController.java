@@ -27,8 +27,11 @@ import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.domain.Terminal;
 import org.opencron.server.domain.User;
 
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.opencron.server.service.TerminalService;
+import org.opencron.server.support.TerminalClient;
+import org.opencron.server.support.TerminalContext;
+import org.opencron.server.support.TerminalSession;
 import org.opencron.server.tag.PageBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,7 +51,6 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
-import static org.opencron.server.service.TerminalService.*;
 import static org.opencron.common.util.WebUtils.*;
 
 /**
@@ -60,6 +62,9 @@ public class TerminalController extends BaseController {
 
     @Autowired
     private TerminalService termService;
+
+    @Autowired
+    private TerminalContext terminalContext;
 
     @RequestMapping(value = "ssh.do", method = RequestMethod.POST)
     @ResponseBody
@@ -73,7 +78,7 @@ public class TerminalController extends BaseController {
         if (authStatus.equals(Terminal.AuthStatus.SUCCESS)) {
             String token = CommonUtils.uuid();
             terminal.setUser(user);
-            TerminalContext.put(token, terminal);
+            terminalContext.put(token, terminal);
             OpencronTools.setSshSessionId(session, token);
 
             return ParamsMap.map()
@@ -94,7 +99,7 @@ public class TerminalController extends BaseController {
         if (authStatus.equals(Terminal.AuthStatus.SUCCESS)) {
             String token = CommonUtils.uuid();
             terminal.setUser(user);
-            TerminalContext.put(token, terminal);
+            terminalContext.put(token, terminal);
             OpencronTools.setSshSessionId(session, token);
             return "redirect:/terminal/open.htm?token=" + token;
         } else {
@@ -131,7 +136,7 @@ public class TerminalController extends BaseController {
             request.setAttribute("terminal", terminal);
             return "/terminal/error";
         }
-        Terminal terminal = TerminalContext.get(token);
+        Terminal terminal = terminalContext.get(token);
         if (terminal != null) {
             request.setAttribute("name", terminal.getName() + "(" + terminal.getHost() + ")");
             request.setAttribute("token", token);
@@ -148,7 +153,7 @@ public class TerminalController extends BaseController {
         Terminal terminal = (Terminal) OpencronTools.CACHE.get(token);
         if (terminal != null) {
             token = CommonUtils.uuid();
-            TerminalContext.put(token, terminal);
+            terminalContext.put(token, terminal);
             session.setAttribute(Constants.PARAM_SSH_SESSION_ID_KEY, token);
             return "redirect:/terminal/open.htm?token=" + token;
         }

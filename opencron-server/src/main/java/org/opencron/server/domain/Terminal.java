@@ -21,10 +21,9 @@
 package org.opencron.server.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.common.util.RSAUtils;
-import org.opencron.server.job.OpencronTools;
+import org.opencron.server.support.OpencronTools;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;

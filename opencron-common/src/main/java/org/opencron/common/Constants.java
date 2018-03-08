@@ -111,6 +111,12 @@ public class Constants {
 
     public static final String PARAM_HTTP_SESSION_ID_KEY = "http_session_id";
 
+    public static final String PARAM_TERMINAL_TOKEN_KEY = "opencron_term_token";
+
+    public static final String PARAM_TERMINAL_CLIENT_PREFIX_KEY = "opencron_term_client_";
+
+    public static final String PARAM_TERMINAL_PREFIX_KEY = "opencron_term_";
+
     public static final String PARAM_CSRF_NAME_KEY = "csrf";
 
     public static final String PARAM_LOGIN_MSG_KEY = "loginMsg";

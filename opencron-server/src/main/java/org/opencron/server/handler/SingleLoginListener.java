@@ -23,7 +23,6 @@ package org.opencron.server.handler;
 
 import org.opencron.common.Constants;
 import org.opencron.server.domain.User;
-import org.opencron.server.job.OpencronTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
