@@ -95,7 +95,7 @@ public class ExtensionLoader<T> {
             } else {
                 //当前的获取方法是否指定了spi实现类的Key
                 if (CommonUtils.notEmpty(spiName)) {
-                    instanceClass = EXTENSION_SPIS.get(spiName);
+                    instanceClass = EXTENSION_SPIS.get(getSpiKey(spi.value()));
                 } else {
                     instanceClass = EXTENSION_SPIS.get(spi.value());
                 }
