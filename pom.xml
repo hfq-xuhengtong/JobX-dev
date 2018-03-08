@@ -64,13 +64,13 @@
         <junit.version>4.7</junit.version>
         <slf4j.version>1.7.5</slf4j.version>
         <protostuff.version>1.1.2</protostuff.version>
-        <objenesis.version>2.1</objenesis.version>
+        <objenesis.version>2.6</objenesis.version>
         <asm.version>5.2</asm.version>
         <javassist.version>3.19.0-GA</javassist.version>
         <bytebuddy.version>1.6.3</bytebuddy.version>
         <hessian.version>4.0.38</hessian.version>
         <protostuff.version>1.0.12</protostuff.version>
-        <kryo.version>4.0.0</kryo.version>
+        <kryo.version>4.0.1</kryo.version>
         <fst.version>2.50</fst.version>
         <fastjson.version>1.2.45</fastjson.version>
         <msgpack.version>0.8.12</msgpack.version>
