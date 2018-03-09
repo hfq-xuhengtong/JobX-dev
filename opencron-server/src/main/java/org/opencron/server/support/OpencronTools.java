@@ -35,9 +35,14 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.opencron.common.util.CommonUtils.uuid;
+
 public final class OpencronTools {
 
     private static String resourceId;
+
+
+    public static final String SERVER_ID = uuid();
 
     private static Logger logger = LoggerFactory.getLogger(OpencronTools.class);
 

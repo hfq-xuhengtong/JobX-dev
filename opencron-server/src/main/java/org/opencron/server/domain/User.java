@@ -235,4 +235,5 @@ public class User implements Serializable {
                 ", picExtName='" + picExtName + '\'' +
                 '}';
     }
+
 }

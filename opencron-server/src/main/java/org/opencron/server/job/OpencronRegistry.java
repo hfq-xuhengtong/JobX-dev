@@ -32,6 +32,7 @@ import org.opencron.registry.zookeeper.ZookeeperClient;
 import org.opencron.server.domain.Agent;
 import org.opencron.server.domain.Job;
 import org.opencron.server.service.*;
+import org.opencron.server.support.OpencronTools;
 import org.opencron.server.vo.JobInfo;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,11 +69,10 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
-    private final String SERVER_ID = uuid();
 
     private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
 
-    private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + this.SERVER_ID;
+    private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
 
     private final RegistryService registryService = new RegistryService();
 
@@ -201,7 +201,7 @@ public class OpencronRegistry {
                         Long jobId = job.getJobId();
 
                         //该任务落在当前的机器上
-                        if (!jobs.containsKey(jobId) && SERVER_ID.equals(hash.get(jobId))) {
+                        if (!jobs.containsKey(jobId) && OpencronTools.SERVER_ID.equals(hash.get(jobId))) {
                             jobDispatch(jobId);
                         } else {
                             jobRemove(jobId);
@@ -254,7 +254,7 @@ public class OpencronRegistry {
 
                         Long jobId = toLong(job);
                         unJobs.remove(jobId);
-                        if (!jobs.containsKey(jobId) && hash.get(jobId).equals(SERVER_ID)) {
+                        if (!jobs.containsKey(jobId) && hash.get(jobId).equals(OpencronTools.SERVER_ID)) {
                             jobDispatch(jobId);
                         }
 

@@ -27,11 +27,8 @@ import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.domain.Terminal;
 import org.opencron.server.domain.User;
 
-import org.opencron.server.support.OpencronTools;
+import org.opencron.server.support.*;
 import org.opencron.server.service.TerminalService;
-import org.opencron.server.support.TerminalClient;
-import org.opencron.server.support.TerminalContext;
-import org.opencron.server.support.TerminalSession;
 import org.opencron.server.tag.PageBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -67,6 +64,9 @@ public class TerminalController extends BaseController {
 
     @Autowired
     private TerminalContext terminalContext;
+
+    @Autowired
+    private TerminalProcessor terminalProcessor;
 
     @RequestMapping(value = "ssh.do", method = RequestMethod.POST)
     @ResponseBody
@@ -174,64 +174,24 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping(value = "resize.do", method = RequestMethod.POST)
-    @ResponseBody
-    public boolean resize(String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
-        TerminalClient terminalClient = TerminalSession.get(token);
-        if (terminalClient != null) {
-            terminalClient.resize(cols, rows, width, height);
-        }
-        return true;
+    public void resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
+        terminalProcessor.doWork("resize.do",response,token,cols,rows,width,height);
     }
 
     @RequestMapping(value = "sendAll.do", method = RequestMethod.POST)
-    @ResponseBody
-    public boolean sendAll(String token, String cmd) throws Exception {
-        cmd = URLDecoder.decode(cmd, "UTF-8");
-        TerminalClient terminalClient = TerminalSession.get(token);
-        if (terminalClient != null) {
-            List<TerminalClient> terminalClients = TerminalSession.findClient(terminalClient.getHttpSessionId());
-            for (TerminalClient client : terminalClients) {
-                client.write(cmd);
-            }
-        }
-        return true;
+    public void sendAll(HttpServletResponse response,String token, String cmd) throws Exception {
+        terminalProcessor.doWork("sendAll.do",response,token,cmd);
     }
 
     @RequestMapping(value = "theme.do", method = RequestMethod.POST)
-    public void theme(String token, String theme) throws Exception {
-        TerminalClient terminalClient = TerminalSession.get(token);
-        if (terminalClient != null) {
-            termService.theme(terminalClient.getTerminal(), theme);
-        }
+    public void theme(HttpServletResponse response,String token, String theme) throws Exception {
+        terminalProcessor.doWork("theme.do",response,token,theme);
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     public void upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile[] file, String path) {
-        TerminalClient terminalClient = TerminalSession.get(token);
-        boolean success = true;
-        if (terminalClient != null) {
-            for (MultipartFile ifile : file) {
-                String tmpPath = httpSession.getServletContext().getRealPath("/") + "upload" + File.separator;
-                File tempFile = new File(tmpPath, ifile.getOriginalFilename());
-                try {
-                    ifile.transferTo(tempFile);
-                    if (CommonUtils.isEmpty(path)) {
-                        path = ".";
-                    } else {
-                        if (path.endsWith("/")) {
-                            path = path.substring(0, path.lastIndexOf("/"));
-                        }
-                    }
-                    terminalClient.upload(tempFile.getAbsolutePath(), path + "/" + ifile.getOriginalFilename(), ifile.getSize());
-                    tempFile.delete();
-                } catch (Exception e) {
-                    success = false;
-                }
-            }
-        }
-        writeJson(response, String.format("{\"success\":\"%s\"}", success ? "true" : "false"));
+        terminalProcessor.doWork("upload.do",response,token,httpSession,file,path);
     }
-
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     @ResponseBody
