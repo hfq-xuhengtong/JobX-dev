@@ -25,7 +25,7 @@ public class Status {
 
     private boolean status;
 
-    public Status(boolean status){
+    public Status(boolean status) {
         this.status = status;
     }
 

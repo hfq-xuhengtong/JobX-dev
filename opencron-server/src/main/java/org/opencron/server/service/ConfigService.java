@@ -66,7 +66,7 @@ public class ConfigService {
         try {
             Query query = queryDao.createQuery("update Agent set host=ip where host!=null and ip!=null");
             query.executeUpdate();
-        }catch (Exception e) {
+        } catch (Exception e) {
             //skip
         }
 
@@ -75,8 +75,8 @@ public class ConfigService {
          */
         List<Job> jobs = queryDao.createQuery("from Job where token=null").list();
         if (CommonUtils.notEmpty(jobs)) {
-            for (Job job:jobs) {
-                if (job.getToken()==null) {
+            for (Job job : jobs) {
+                if (job.getToken() == null) {
                     job.setToken(CommonUtils.uuid());
                 }
                 jobService.merge(job);

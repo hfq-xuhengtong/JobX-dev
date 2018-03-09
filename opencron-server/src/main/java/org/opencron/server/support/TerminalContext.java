@@ -36,17 +36,17 @@ public class TerminalContext implements Serializable {
     private RedisCacheManager redisCacheManager;
 
     public Terminal get(String key) {
-        return redisCacheManager.get(key(key),Terminal.class);
+        return redisCacheManager.get(key(key), Terminal.class);
     }
 
     public void put(String key, Terminal terminal) {
-        redisCacheManager.put(Constants.PARAM_TERMINAL_TOKEN_KEY,key);
-        redisCacheManager.put(key(key),terminal);
+        redisCacheManager.put(Constants.PARAM_TERMINAL_TOKEN_KEY, key);
+        redisCacheManager.put(key(key), terminal);
         /**
          * 为复制会话
          */
-        String reKey = terminal.getId()+"_"+key;
-        redisCacheManager.put( key(reKey),terminal);
+        String reKey = terminal.getId() + "_" + key;
+        redisCacheManager.put(key(reKey), terminal);
     }
 
     public Terminal remove(String key) {
@@ -55,11 +55,11 @@ public class TerminalContext implements Serializable {
         return terminal;
     }
 
-    private String key(String key){
+    private String key(String key) {
         return Constants.PARAM_TERMINAL_PREFIX_KEY + key;
     }
 
     public String getToken() {
-        return redisCacheManager.get(Constants.PARAM_TERMINAL_TOKEN_KEY,String.class);
+        return redisCacheManager.get(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
     }
 }

@@ -111,12 +111,12 @@ public class HomeService {
 
     public List<LogInfo> getUnReadMessage(HttpSession session) {
         String hql = "from Log where isread=? AND type=?  and userId = ? order by sendTime desc";
-        return queryDao.hqlPageQuery(hql,1,5, false,Constants.MsgType.WEBSITE.getValue(), OpencronTools.getUserId(session));
+        return queryDao.hqlPageQuery(hql, 1, 5, false, Constants.MsgType.WEBSITE.getValue(), OpencronTools.getUserId(session));
     }
 
     public Integer getUnReadCount(HttpSession session) {
         String hql = "select count(1) from Log where isread=? and type=? and userid = ?";
-        return queryDao.hqlCount(hql, false,Constants.MsgType.WEBSITE.getValue(), OpencronTools.getUserId(session));
+        return queryDao.hqlCount(hql, false, Constants.MsgType.WEBSITE.getValue(), OpencronTools.getUserId(session));
     }
 
     public void saveLog(Log log) {
@@ -130,8 +130,8 @@ public class HomeService {
 
     public void updateAfterRead(Long logId) {
         String hql = "from Log where logId=? and type=?";
-        Log log = queryDao.hqlUniqueQuery(hql,logId,Constants.MsgType.WEBSITE.getValue());
-        if (log!=null) {
+        Log log = queryDao.hqlUniqueQuery(hql, logId, Constants.MsgType.WEBSITE.getValue());
+        if (log != null) {
             log.setIsread(true);
             queryDao.merge(log);
         }

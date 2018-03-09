@@ -82,13 +82,13 @@ public class TerminalClient {
         Constants.SshType sshType = Constants.SshType.getByType(terminal.getSshType());
         switch (sshType) {
             case SSHKEY:
-                if ( notEmpty(terminal.getPrivateKey()) ) {
+                if (notEmpty(terminal.getPrivateKey())) {
                     File keyFile = new File(terminal.getPrivateKeyPath());
                     if (!keyFile.exists()) {
                         //将数据库中的私钥写到用户的机器上
-                        IOUtils.writeFile(keyFile,new ByteArrayInputStream(terminal.getPrivateKey()));
+                        IOUtils.writeFile(keyFile, new ByteArrayInputStream(terminal.getPrivateKey()));
                     }
-                    if ( notEmpty(terminal.getPhrase()) ) {
+                    if (notEmpty(terminal.getPhrase())) {
                         //设置带口令的密钥
                         jSch.addIdentity(terminal.getPrivateKeyPath(), terminal.getPhrase());
                     } else {

@@ -110,42 +110,42 @@ public class BaseDao<T, PK extends Serializable> extends HibernateDao {
      * @return
      */
     public Integer sqlCount(String sql, Object... params) {
-        return sqlIntUniqueResult( preparedCount(sql),params);
+        return sqlIntUniqueResult(preparedCount(sql), params);
     }
 
-    public Integer hqlCount(String hql,Object...params) {
+    public Integer hqlCount(String hql, Object... params) {
         if (hql.toLowerCase().startsWith("from")) {
             hql = "select count(1) " + hql;
-        }else {
+        } else {
             hql = "select count(1) " + hql.substring(hql.toLowerCase().indexOf("from"));
         }
-        hql = hql.replaceAll("\\s+"," ");
+        hql = hql.replaceAll("\\s+", " ");
 
         if (hql.toLowerCase().contains("group by")) {
-            List list = createQuery(hql,params).list();
+            List list = createQuery(hql, params).list();
             if (CommonUtils.isEmpty(list)) return 0;
             return list.size();
-        }else {
-            return hqlIntUniqueResult(hql,params);
+        } else {
+            return hqlIntUniqueResult(hql, params);
         }
     }
 
     public Integer sqlIntUniqueResult(String sql, Object... params) {
-        Object result = createSQLQuery(sql,params).uniqueResult();
-        return result==null?null:toInt(result);
+        Object result = createSQLQuery(sql, params).uniqueResult();
+        return result == null ? null : toInt(result);
     }
 
     private static String preparedCount(String sql) {
-        return  String.format("select count(1) from ( %s ) as t ",sql);
+        return String.format("select count(1) from ( %s ) as t ", sql);
     }
 
     public Long hqlLongUniqueResult(String hql, Object... params) {
-        Object result = createQuery(hql,params).uniqueResult();
-        return result==null?null:toLong(result);
+        Object result = createQuery(hql, params).uniqueResult();
+        return result == null ? null : toLong(result);
     }
 
     public Integer hqlIntUniqueResult(String hql, Object... params) {
-        Object result = createQuery(hql,params).uniqueResult();
-        return result==null?null:toInt(result);
+        Object result = createQuery(hql, params).uniqueResult();
+        return result == null ? null : toInt(result);
     }
 }

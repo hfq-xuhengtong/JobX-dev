@@ -22,7 +22,9 @@
 package org.opencron.server.controller;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -135,7 +137,7 @@ public class AgentController extends BaseController {
     @ResponseBody
     public Status edit(Agent agentParam) {
         Agent agent = agentService.getAgent(agentParam.getAgentId());
-        BeanUtils.copyProperties(agentParam, agent,"machineId", "host","password","deleted","status","proxyAgent","mobiles","emailAddress");
+        BeanUtils.copyProperties(agentParam, agent, "machineId", "host", "password", "deleted", "status", "proxyAgent", "mobiles", "emailAddress");
         if (Constants.ConnType.CONN.getType().equals(agentParam.getProxy())) {
             agent.setProxyAgent(null);
         } else {

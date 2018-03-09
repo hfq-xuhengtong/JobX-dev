@@ -47,9 +47,9 @@ public class QueryDao extends BaseDao {
     }
 
     public <E> PageBean<E> hqlPageQuery(String hql, PageBean pageBean, Object... parameters) {
-        Query query = createQuery(hql,parameters);
+        Query query = createQuery(hql, parameters);
         pageQuery(query, pageBean);
-        int count = hqlCount(hql,parameters);
+        int count = hqlCount(hql, parameters);
         pageBean.setTotalCount(count);
         return pageBean;
     }

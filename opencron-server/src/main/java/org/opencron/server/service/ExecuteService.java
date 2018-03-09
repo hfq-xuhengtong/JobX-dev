@@ -149,7 +149,7 @@ public class ExecuteService implements Job {
         }
 
         //api方式调度,回调结果数据给调用方
-        if ( execType.getStatus() == ExecType.API.getStatus() && job.getCallbackURL()!=null ) {
+        if (execType.getStatus() == ExecType.API.getStatus() && job.getCallbackURL() != null) {
             try {
                 HttpClientUtils.httpGetRequest(
                         job.getCallbackURL(),

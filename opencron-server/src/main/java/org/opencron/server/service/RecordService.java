@@ -219,7 +219,6 @@ public class RecordService {
     }
 
     /**
-     *
      * @param id
      * @return true:running false:noRun
      */
@@ -229,20 +228,20 @@ public class RecordService {
 
         List<Long> jobIds = Arrays.asList(id);
         if (CommonUtils.notEmpty(jobs)) {
-            for (Job job:jobs) {
+            for (Job job : jobs) {
                 jobIds.add(job.getJobId());
             }
         }
 
-        for (Long jobId:jobIds) {
+        for (Long jobId : jobIds) {
             String hql = "select count(1) from Record where jobId=:jobId and status IN (:status)";
             Integer status[] = new Integer[3];
             status[0] = Constants.RunStatus.RUNNING.getStatus();//正在运行
             status[1] = Constants.RunStatus.STOPPING.getStatus();//正在停止
             status[2] = Constants.RunStatus.RERUNNING.getStatus();//正在重跑
 
-            Map params = ParamsMap.map().set("jobId",jobId).set("status",status);
-            boolean running = toLong(queryDao.createQuery(hql,params).uniqueResult()) > 0;
+            Map params = ParamsMap.map().set("jobId", jobId).set("status", status);
+            boolean running = toLong(queryDao.createQuery(hql, params).uniqueResult()) > 0;
             //找到该任务的任务一个单一任务或者流程任务为运行中则返回true
             if (running) {
                 return true;
@@ -312,10 +311,10 @@ public class RecordService {
             User user = OpencronTools.getUser(session);
             hql += " and userId = " + user.getUserId() + " and agentid IN (" + user.getAgentIds() + ")";
         }
-        Map<String,String> params = ParamsMap.map().set("success",status.getStatus())
-                .set("exectype",execType.getStatus())
-                .set("status",Arrays.asList(Constants.RunStatus.STOPED.getStatus(), Constants.RunStatus.DONE.getStatus(), Constants.RunStatus.RERUNDONE.getStatus()));
-        return queryDao.hqlCount(hql,params );
+        Map<String, String> params = ParamsMap.map().set("success", status.getStatus())
+                .set("exectype", execType.getStatus())
+                .set("status", Arrays.asList(Constants.RunStatus.STOPED.getStatus(), Constants.RunStatus.DONE.getStatus(), Constants.RunStatus.RERUNDONE.getStatus()));
+        return queryDao.hqlCount(hql, params);
     }
 
     @Transactional

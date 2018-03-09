@@ -67,7 +67,7 @@ public class AgentService {
     private ConfigService configService;
 
     public List<Agent> getAgentByConnType(Constants.ConnType connType) {
-        return queryDao.hqlQuery("from Agent where deleted=? and status=? and proxy=?", false,true,connType.getType());
+        return queryDao.hqlQuery("from Agent where deleted=? and status=? and proxy=?", false, true, connType.getType());
     }
 
     public List<Agent> getAll() {
@@ -91,7 +91,7 @@ public class AgentService {
             User user = OpencronTools.getUser(session);
             hql += " and agentId in (".concat(user.getAgentIds()).concat(")");
         }
-        return queryDao.hqlQuery(hql, false,status.isValue());
+        return queryDao.hqlQuery(hql, false, status.isValue());
     }
 
     public void getOwnerAgent(HttpSession session, PageBean pageBean) {
@@ -102,7 +102,7 @@ public class AgentService {
         }
         pageBean.verifyOrderBy("name", "name", "host", "port");
         hql += " order by " + pageBean.getOrderBy() + " " + pageBean.getOrder();
-        queryDao.hqlPageQuery(hql,pageBean,false);
+        queryDao.hqlPageQuery(hql, pageBean, false);
     }
 
     public Agent getAgent(Long id) {
@@ -122,16 +122,16 @@ public class AgentService {
         List<User> users = queryDao.hqlQuery(hql, agentId);
         if (isEmpty(users)) {
             //1,
-            users = queryDao.hqlQuery(hql,agentId+",%");
+            users = queryDao.hqlQuery(hql, agentId + ",%");
         }
         if (isEmpty(users)) {
             //,1
-            users = queryDao.hqlQuery(hql,",%"+agentId);
+            users = queryDao.hqlQuery(hql, ",%" + agentId);
         }
 
         if (isEmpty(users)) {
             //,1,
-            users = queryDao.hqlQuery(hql,",%"+agentId+",%");
+            users = queryDao.hqlQuery(hql, ",%" + agentId + ",%");
         }
 
         return isEmpty(users) ? Collections.<User>emptyList() : users;
@@ -191,9 +191,9 @@ public class AgentService {
     public boolean existsName(Long id, String name) {
         String hql = "select count(1) from Agent where deleted=? and name=? ";
         if (notEmpty(id)) {
-            hql += " and agentId !="+id;
+            hql += " and agentId !=" + id;
         }
-        return queryDao.hqlIntUniqueResult(hql,false,name) > 0;
+        return queryDao.hqlIntUniqueResult(hql, false, name) > 0;
     }
 
     public boolean checkDelete(Long id) {
@@ -203,7 +203,7 @@ public class AgentService {
         }
         //检查该执行器是否定义的有任务
         String hql = "select count(1) from Job where deleted=? and agentId=? ";
-        return queryDao.hqlIntUniqueResult(hql,false,id) > 0;
+        return queryDao.hqlIntUniqueResult(hql, false, id) > 0;
     }
 
     public void delete(Long id) {
@@ -216,9 +216,9 @@ public class AgentService {
     public boolean existshost(Long id, String host) {
         String hql = "select count(1) from Agent where deleted=? and host=? ";
         if (notEmpty(id)) {
-            hql += " and agentId != "+id;
+            hql += " and agentId != " + id;
         }
-        return queryDao.hqlIntUniqueResult(hql,false,host) > 0;
+        return queryDao.hqlIntUniqueResult(hql, false, host) > 0;
     }
 
 
@@ -257,12 +257,12 @@ public class AgentService {
             User user = OpencronTools.getUser(session);
             hql += " and agentid in (" + user.getAgentIds() + ")";
         }
-        return queryDao.hqlQuery(hql,false);
+        return queryDao.hqlQuery(hql, false);
     }
 
     public Agent getByHost(String host) {
         String hql = "from Agent where deleted=? and host=?";
-        Agent agent = queryDao.hqlUniqueQuery(hql,false, host);
+        Agent agent = queryDao.hqlUniqueQuery(hql, false, host);
         if (agent != null) {
             agent.setUsers(getAgentUsers(agent));
         }
@@ -272,7 +272,7 @@ public class AgentService {
     public Agent getAgentByMachineId(String machineId) {
         String hql = "from Agent where deleted=? and machineId=?";
         //不能保证macId的唯一性,可能两台机器存在同样的macId,这种概率可以忽略不计,这里为了程序的健壮性...
-        List<Agent> agents = queryDao.hqlQuery(hql,false, machineId);
+        List<Agent> agents = queryDao.hqlQuery(hql, false, machineId);
         if (CommonUtils.notEmpty(agents)) {
             return agents.get(0);
         }
@@ -281,12 +281,13 @@ public class AgentService {
 
     /**
      * 同一个host的机器只能有一条非删除的记录
+     *
      * @param host
      * @return
      */
     private Agent getAgentByHost(String host) {
         String hql = "from Agent where deleted=? and host=?";
-        List<Agent> agents = queryDao.hqlQuery(hql,false, host);
+        List<Agent> agents = queryDao.hqlQuery(hql, false, host);
         if (CommonUtils.notEmpty(agents)) {
             return agents.get(0);
         }
@@ -317,7 +318,7 @@ public class AgentService {
         if (CommonUtils.notEmpty(info)) {
             String macId = info.split("_")[0];
             Agent agent = getAgentByMachineId(macId);
-            if (agent!=null) {
+            if (agent != null) {
                 doDisconnect(agent);
             }
         }
@@ -327,7 +328,7 @@ public class AgentService {
         if (CommonUtils.isEmpty(info)) return;
         String[] array = info.split("_");
         //非法注册信息
-        if (array.length!=2 && array.length!=4) {
+        if (array.length != 2 && array.length != 4) {
             return;
         }
 
@@ -342,10 +343,10 @@ public class AgentService {
         Agent agent = getAgentByMachineId(macId);
         if (array.length == 2) {
             //密码一致
-            if ( agent!=null && agent.getPassword().equals(password)) {
+            if (agent != null && agent.getPassword().equals(password)) {
                 doConnect(agent);
             }
-        }else {
+        } else {
             String host = array[2];
             String port = array[3];
             if (agent == null) {
@@ -370,13 +371,13 @@ public class AgentService {
                     if (executeService.ping(agent)) {
                         merge(agent);
                     }
-                }else {
+                } else {
                     agent.setMachineId(macId);
                     if (agent.getPassword().equals(password)) {
                         doConnect(agent);
                     }
                 }
-            }else {
+            } else {
                 //密码一致
                 if (agent.getPassword().equals(password)) {
                     doConnect(agent);

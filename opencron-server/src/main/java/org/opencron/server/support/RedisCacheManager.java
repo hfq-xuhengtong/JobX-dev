@@ -29,6 +29,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -84,7 +85,7 @@ public class RedisCacheManager implements Cache {
                         return null;
                     }
                     try {
-                        return serializer.decode(value,type);
+                        return serializer.decode(value, type);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -98,7 +99,6 @@ public class RedisCacheManager implements Cache {
             }
         }
     }
-
 
 
     @Override
@@ -164,9 +164,9 @@ public class RedisCacheManager implements Cache {
     }
 
     /**
-     * @see get(Object key, final Class<T> type)
      * @param o
      * @return
+     * @see get(Object key, final Class<T> type)
      */
 
     @Override

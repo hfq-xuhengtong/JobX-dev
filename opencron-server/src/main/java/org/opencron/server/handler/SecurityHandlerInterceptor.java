@@ -139,7 +139,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
 
     private boolean verifyCSRF(HttpServletRequest request) {
 
-        String cookieCSRF = CookieUtils.getCookieValue(request,Constants.PARAM_CSRF_NAME_KEY);
+        String cookieCSRF = CookieUtils.getCookieValue(request, Constants.PARAM_CSRF_NAME_KEY);
         if (CommonUtils.isEmpty(cookieCSRF)) {
             return false;
         }

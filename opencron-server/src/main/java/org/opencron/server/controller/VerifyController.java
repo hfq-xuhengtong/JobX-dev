@@ -87,7 +87,7 @@ public class VerifyController extends BaseController {
         if (!ping) {
             logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), port));
         }
-         return Status.create(ping);
+        return Status.create(ping);
     }
 
     @RequestMapping(value = "guid.do", method = RequestMethod.POST)
@@ -113,8 +113,8 @@ public class VerifyController extends BaseController {
         }
         String macId = executeService.guid(agent);
         if (macId == null) {
-            return ParamsMap.map().set("status",false);
+            return ParamsMap.map().set("status", false);
         }
-        return ParamsMap.map().set("status",true).set("macId",macId);
+        return ParamsMap.map().set("status", true).set("macId", macId);
     }
 }

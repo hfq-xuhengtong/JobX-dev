@@ -84,8 +84,8 @@ public class TerminalController extends BaseController {
             OpencronTools.setSshSessionId(session, token);
 
             return ParamsMap.map()
-                    .set("status","success")
-                    .set("url","/terminal/open.htm?token="+token);
+                    .set("status", "success")
+                    .set("url", "/terminal/open.htm?token=" + token);
         } else {
             return ParamsMap.map().set("status", authStatus.status);
         }
@@ -153,6 +153,7 @@ public class TerminalController extends BaseController {
 
     /**
      * 不能重复复制会话,可以通过ajax的方式重新生成token解决....
+     *
      * @param session
      * @param id
      * @param token
@@ -160,8 +161,8 @@ public class TerminalController extends BaseController {
      * @throws Exception
      */
     @RequestMapping("reopen.htm")
-    public String reopen(HttpSession session,Long id, String token) throws Exception {
-        String reKey = id+"_" + token;
+    public String reopen(HttpSession session, Long id, String token) throws Exception {
+        String reKey = id + "_" + token;
         Terminal terminal = terminalContext.remove(reKey);//reKey
         if (terminal != null) {
             token = CommonUtils.uuid();

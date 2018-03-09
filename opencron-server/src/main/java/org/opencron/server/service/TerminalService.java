@@ -90,10 +90,10 @@ public class TerminalService {
 
     public boolean merge(Terminal term) throws Exception {
         try {
-            if (term.getId()==null) {
+            if (term.getId() == null) {
                 queryDao.save(term);
-            }else {
-                Terminal terminal = queryDao.get(Terminal.class,term.getId());
+            } else {
+                Terminal terminal = queryDao.get(Terminal.class, term.getId());
                 term.setId(terminal.getId());
                 queryDao.merge(term);
             }
@@ -113,20 +113,20 @@ public class TerminalService {
             switch (sshType) {
                 case SSHKEY:
                     //需要读取用户上传的sshKey
-                    if ( terminal.getSshKeyFile()!=null ) {
+                    if (terminal.getSshKeyFile() != null) {
                         //将keyfile读取到数据库
                         terminal.setPrivateKey(terminal.getSshKeyFile().getBytes());
                     }
-                    if ( notEmpty(terminal.getPrivateKey()) ) {
+                    if (notEmpty(terminal.getPrivateKey())) {
                         File keyFile = new File(terminal.getPrivateKeyPath());
                         if (keyFile.exists()) {
                             keyFile.delete();
                         }
                         //将数据库中的私钥写到用户的机器上
 
-                        IOUtils.writeFile(keyFile,new ByteArrayInputStream(terminal.getPrivateKey()));
+                        IOUtils.writeFile(keyFile, new ByteArrayInputStream(terminal.getPrivateKey()));
 
-                        if ( notEmpty(terminal.getPhrase()) ) {
+                        if (notEmpty(terminal.getPhrase())) {
                             //设置带口令的密钥
                             jSch.addIdentity(terminal.getPrivateKeyPath(), terminal.getPhrase());
                         } else {
@@ -170,7 +170,7 @@ public class TerminalService {
 
     public PageBean<Terminal> getPageBeanByUser(PageBean pageBean, Long userId) {
         String hql = "from  Terminal where userId = ? order by ";
-        pageBean.verifyOrderBy("name", "name", "host", "port","sshType", "logintime");
+        pageBean.verifyOrderBy("name", "name", "host", "port", "sshType", "logintime");
         hql += pageBean.getOrderBy() + " " + pageBean.getOrder();
         return queryDao.hqlPageQuery(hql, pageBean, userId);
     }
@@ -190,7 +190,7 @@ public class TerminalService {
             return "error";
         }
 
-        int count = queryDao.createQuery("delete from Terminal where id=?",term.getId()).executeUpdate();
+        int count = queryDao.createQuery("delete from Terminal where id=?", term.getId()).executeUpdate();
         return String.valueOf(count > 0);
     }
 

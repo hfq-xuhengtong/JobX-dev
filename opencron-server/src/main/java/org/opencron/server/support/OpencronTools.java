@@ -97,7 +97,7 @@ public final class OpencronTools {
             if (null == token) {
                 token = CommonUtils.uuid();
                 session.setAttribute(Constants.PARAM_CSRF_NAME_KEY, token);
-                CookieUtils.setCookie(response,Constants.PARAM_CSRF_NAME_KEY,token,-1,request.getServerName());
+                CookieUtils.setCookie(response, Constants.PARAM_CSRF_NAME_KEY, token, -1, request.getServerName());
             }
         }
         return token;

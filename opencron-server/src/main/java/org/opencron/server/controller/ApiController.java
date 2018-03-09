@@ -50,22 +50,22 @@ public class ApiController extends BaseController {
 
     @RequestMapping(value = "run")
     @ResponseBody
-    public Map run(Job jobParams,String url){
-        if (jobParams==null || jobParams.getJobId() == null) {
-            return ParamsMap.map().put("status","404","message","job not found");
+    public Map run(Job jobParams, String url) {
+        if (jobParams == null || jobParams.getJobId() == null) {
+            return ParamsMap.map().put("status", "404", "message", "job not found");
         }
 
         final JobInfo job = jobService.getJobInfoById(jobParams.getJobId());
         if (job == null) {
-            return ParamsMap.map().put("status","404","message","job not found");
+            return ParamsMap.map().put("status", "404", "message", "job not found");
         }
 
         if (jobParams.getToken() == null) {
-            return ParamsMap.map().put("status","401","message","token is null,Unauthorized!");
+            return ParamsMap.map().put("status", "401", "message", "token is null,Unauthorized!");
         }
 
         if (!jobParams.getToken().equalsIgnoreCase(job.getToken())) {
-            return ParamsMap.map().put("status","401","message","token error,Unauthorized!");
+            return ParamsMap.map().put("status", "401", "message", "token error,Unauthorized!");
         }
 
         job.setAgent(agentService.getAgent(job.getAgentId()));
@@ -82,7 +82,7 @@ public class ApiController extends BaseController {
                 }
             }
         }).start();
-        return ParamsMap.map().put("status","200","message","job started");
+        return ParamsMap.map().put("status", "200", "message", "job started");
     }
 
 }

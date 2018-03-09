@@ -245,7 +245,7 @@ public class Terminal implements Serializable {
         }
     }
 
-    public String getPrivateKeyPath(){
+    public String getPrivateKeyPath() {
         return OpencronTools.Auth.getKeyPath().concat("/").concat(this.getHost()).concat("@").concat(this.getUserName()).concat("_id_rsa");
     }
 

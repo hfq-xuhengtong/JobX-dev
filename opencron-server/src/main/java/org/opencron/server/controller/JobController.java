@@ -296,6 +296,7 @@ public class JobController extends BaseController {
 
     /**
      * 检测当前的job是否正在运行中,运行中true,未运行false
+     *
      * @param id
      * @return
      */
@@ -394,6 +395,7 @@ public class JobController extends BaseController {
 
     /**
      * 更新任务的api调用认证token
+     *
      * @param jobId
      * @return
      */
@@ -401,11 +403,11 @@ public class JobController extends BaseController {
     @ResponseBody
     public ParamsMap token(Long jobId) {
         Job job = jobService.getJob(jobId);
-        if (job!=null) {
+        if (job != null) {
             job.setToken(CommonUtils.uuid());
             job = jobService.merge(job);
         }
-        return ParamsMap.map().set("token",job.getToken());
+        return ParamsMap.map().set("token", job.getToken());
     }
 
     @RequestMapping(value = "batchexec.do", method = RequestMethod.POST)

@@ -46,11 +46,11 @@ public class OpencronCollector implements TaskCollector {
 
     @Override
     public synchronized TaskTable getTasks() {
-        return  taskTable = (taskTable == null?new TaskTable():taskTable);
+        return taskTable = (taskTable == null ? new TaskTable() : taskTable);
     }
 
     public synchronized void add(final JobInfo job) {
-        if ( job != null && !exists(job.getJobId()) ) {
+        if (job != null && !exists(job.getJobId())) {
             jobIndex.put(job.getJobId(), jobIndex.size());
             this.getTasks().add(new SchedulingPattern(job.getCronExp()), new Task() {
                 @Override
@@ -66,7 +66,7 @@ public class OpencronCollector implements TaskCollector {
     }
 
     public synchronized void remove(Long jobId) {
-        if ( jobId!=null && jobIndex.get(jobId)!=null ) {
+        if (jobId != null && jobIndex.get(jobId) != null) {
             this.getTasks().remove(jobIndex.get(jobId));
             Integer index = jobIndex.remove(jobId);
             for (Map.Entry<Long, Integer> entry : jobIndex.entrySet()) {

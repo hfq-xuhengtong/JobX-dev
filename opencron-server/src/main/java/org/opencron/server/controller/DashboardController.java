@@ -122,7 +122,7 @@ public class DashboardController extends BaseController {
 
         model.addAttribute("successAutoRecord", successAutoRecord);
         model.addAttribute("successOperRecord", successOperRecord + successBatchRecord);
-        model.addAttribute("successRecord", successAutoRecord + successOperRecord + successBatchRecord );
+        model.addAttribute("successRecord", successAutoRecord + successOperRecord + successBatchRecord);
 
         /**
          * 失败作业
@@ -196,17 +196,17 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map login(HttpSession session, HttpServletRequest request, HttpServletResponse response,@RequestParam String username, @RequestParam String password) throws Exception {
+    public Map login(HttpSession session, HttpServletRequest request, HttpServletResponse response, @RequestParam String username, @RequestParam String password) throws Exception {
 
         //用户信息验证
         int status = homeService.checkLogin(request, username, password);
 
         if (status == 500) {
-            return ParamsMap.map().set("msg","用户名密码错误");
+            return ParamsMap.map().set("msg", "用户名密码错误");
         }
         if (status == 200) {
             //登陆成功了则生成csrf...
-            String csrf = OpencronTools.generateCSRF(request,response);
+            String csrf = OpencronTools.generateCSRF(request, response);
             logger.info("[opencron]login seccussful,generate csrf:{}", csrf);
 
             User user = OpencronTools.getUser(session);
@@ -215,8 +215,8 @@ public class DashboardController extends BaseController {
             byte[] hashPassword = DigestUtils.sha1(DigestUtils.md5Hex(Constants.PARAM_DEF_PASSWORD_KEY).toUpperCase().getBytes(), salt, 1024);
             String hashPass = DigestUtils.encodeHex(hashPassword);
 
-            if (user.getUserName().equals( Constants.PARAM_DEF_USER_KEY) && user.getPassword().equals(hashPass)) {
-                return ParamsMap.map().set("status","edit").set("userId",user.getUserId());
+            if (user.getUserName().equals(Constants.PARAM_DEF_USER_KEY) && user.getPassword().equals(hashPass)) {
+                return ParamsMap.map().set("status", "edit").set("userId", user.getUserId());
             }
 
             if (user.getHeaderpic() != null) {
@@ -226,10 +226,10 @@ public class DashboardController extends BaseController {
                 user.setHeaderPath(getWebUrlPath(request) + "/upload/" + name);
                 session.setAttribute(Constants.PARAM_LOGIN_USER_KEY, user);
             }
-            return ParamsMap.map().set("status","success").set("url","/dashboard.htm");
+            return ParamsMap.map().set("status", "success").set("url", "/dashboard.htm");
         }
 
-        return ParamsMap.map().set("status","error");
+        return ParamsMap.map().set("status", "error");
     }
 
 
@@ -253,13 +253,13 @@ public class DashboardController extends BaseController {
         ParamsMap result = ParamsMap.map();
         //检查后缀
         if (!".BMP,.JPG,.JPEG,.PNG,.GIF".contains(extensionName.toUpperCase())) {
-            return result.set("message","格式错误,请上传(bmp,jpg,jpeg,png,gif)格式的图片").set("state",500);
+            return result.set("message", "格式错误,请上传(bmp,jpg,jpeg,png,gif)格式的图片").set("state", 500);
         }
 
         User user = userService.getUserById(userId);
 
         if (user == null) {
-            return result.set("message","用户信息获取失败").set("state",500);
+            return result.set("message", "用户信息获取失败").set("state", 500);
         }
 
         String rootPath = httpSession.getServletContext().getRealPath("/");
@@ -278,13 +278,13 @@ public class DashboardController extends BaseController {
             Image image = ImageIO.read(picFile);
             if (image == null) {
                 picFile.delete();
-                return result.set("message","格式错误,解析失败,请上传正确的图片").set("state",500);
+                return result.set("message", "格式错误,解析失败,请上传正确的图片").set("state", 500);
             }
 
             //检查文件大小
             if (picFile.length() / 1024 / 1024 > 5) {
                 picFile.delete();
-                return result.set("message","文件错误,上传图片大小不能超过5M").set("state",500);
+                return result.set("message", "文件错误,上传图片大小不能超过5M").set("state", 500);
             }
 
             //旋转并且裁剪
@@ -302,14 +302,14 @@ public class DashboardController extends BaseController {
 
             logger.info(" upload file successful @ " + picName);
 
-            return result.set("result",imgPath).set("state",200);
+            return result.set("result", imgPath).set("state", 200);
 
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("upload exception:" + e.getMessage());
         }
 
-        return result.set("message","未知错误,上传失败").set("state",500);
+        return result.set("message", "未知错误,上传失败").set("state", 500);
     }
 
 

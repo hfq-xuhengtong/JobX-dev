@@ -60,7 +60,7 @@ public class OpencronInitializer {
     }
 
     @PreDestroy
-    public void destroy(){
+    public void destroy() {
         this.opencronRegistry.destroy();
     }
 

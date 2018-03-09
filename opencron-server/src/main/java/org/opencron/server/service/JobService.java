@@ -416,15 +416,15 @@ public class JobService {
     }
 
     public List<Job> getFlowJob(Long id) {
-        return queryDao.hqlQuery("from Job where flowId=?",id);
+        return queryDao.hqlQuery("from Job where flowId=?", id);
     }
 
     public List<Job> getScheduleJob() {
         Integer[] cronTypes = new Integer[2];
         cronTypes[0] = CronType.CRONTAB.getType();
         cronTypes[1] = CronType.QUARTZ.getType();
-        Map params = ParamsMap.map().set("cronType",cronTypes).set("deleted",false);
+        Map params = ParamsMap.map().set("cronType", cronTypes).set("deleted", false);
         String hql = "from Job where cronType in (:cronType) and deleted=:deleted";
-        return queryDao.hqlQuery(hql,params);
+        return queryDao.hqlQuery(hql, params);
     }
 }
