@@ -76,6 +76,7 @@ public class TerminalProcessor {
     @PostConstruct
     public void initialize() throws Exception {
 
+        logger.info("[opencron] Terminal init zookeeper....");
         this.zookeeperClient.addChildListener(registryPath, new ChildListener() {
             @Override
             public void childChanged(String path, List<String> children) {
@@ -87,9 +88,11 @@ public class TerminalProcessor {
                         String serverID = array[2];
                         //该机器
                         if (serverID.equalsIgnoreCase(OpencronTools.SERVER_ID)) {
+                            logger.info("[opencron] Terminal serverId in this webServer");
                             //该实例
                             Object[] param = params.remove(token.concat(methodName));
                             if (CommonUtils.notEmpty(param)) {
+                                logger.info("[opencron] Terminal instance in this webServer");
                                 //unregister
                                 registryService.unregister(registryURL, registryPath + "/" + child);
                                 //反射获取目标方法执行.....
@@ -133,11 +136,10 @@ public class TerminalProcessor {
                 }
             }
         }
-
         //token_method_server
+        logger.info("[opencron] Terminal registry to zookeeper");
         String data = token.concat("_").concat(methodMD5).concat("_").concat(OpencronTools.SERVER_ID);
         this.registryService.register(registryURL, registryPath + "/" + data, true);
-
     }
 
     public void sendAll(HttpServletResponse response, String token, String cmd) throws Exception {
