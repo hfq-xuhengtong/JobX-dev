@@ -37,7 +37,8 @@ import java.io.IOException;
 
 public class KryoSerializer implements Serializer {
 
-    private static final ThreadLocal<Kryo> THREAD_LOCAL = new ThreadLocal<Kryo>() {
+
+    private static final ThreadLocal<Kryo> KryoHolder = new ThreadLocal<Kryo>() {
         @Override
         protected Kryo initialValue() {
             Kryo kryo = new Kryo();
@@ -48,31 +49,31 @@ public class KryoSerializer implements Serializer {
 
     @Override
     public byte[] encode(Object msg) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Output output = new Output(bos);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        Output output = new Output(1024 * 4, -1);
+        output.setOutputStream(byteArrayOutputStream);
         try {
-            Kryo kryo = THREAD_LOCAL.get();
+            Kryo kryo = KryoHolder.get();
             kryo.writeObject(output, msg);
-            bos.flush();
-            output.flush();
             return output.toBytes();
         } finally {
-            bos.close();
             output.close();
         }
     }
 
     @Override
     public <T> T decode(byte[] buf, Class<T> type) throws IOException {
+        if (buf == null) {
+            return null;
+        }
         Input input = null;
         try {
             input = new Input(new ByteArrayInputStream(buf));
-            Kryo kryo = THREAD_LOCAL.get();
+            Kryo kryo = KryoHolder.get();
             return kryo.readObject(input,type);
-        }finally {
-            if (input!=null) {
-                input.close();
-            }
+        } finally {
+            input.close();
         }
     }
+
 }

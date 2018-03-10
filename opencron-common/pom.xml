@@ -112,8 +112,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
+            <groupId>de.javakaffee</groupId>
+            <artifactId>kryo-serializers</artifactId>
         </dependency>
 
         <dependency>
