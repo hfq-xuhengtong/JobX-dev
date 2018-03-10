@@ -37,13 +37,9 @@ import org.opencron.server.vo.Status;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.lang.annotation.*;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
@@ -73,6 +69,15 @@ public class TerminalProcessor {
 
     private Map<String, Method> invokeMethods = new ConcurrentHashMap<String, Method>(0);
 
+    private Map<String, String> methodLock = new ConcurrentHashMap<String, String>(0);
+
+    private final String ZK_TERM_INSTANCE_PREFIX = "term_";
+
+    private final String ZK_TERM_METHOD_PREFIX = "method_";
+
+    //key-->serverid  value-->token
+    private Map<String, String> terminals = new ConcurrentHashMap<String, String>();
+
     @PostConstruct
     public void initialize() throws Exception {
 
@@ -80,29 +85,44 @@ public class TerminalProcessor {
         this.zookeeperClient.addChildListener(registryPath, new ChildListener() {
             @Override
             public synchronized void childChanged(String path, List<String> children) {
+
                 if (CommonUtils.notEmpty(children)) {
+
                     for (String child : children) {
+
                         String array[] = child.split("_");
-                        String token = array[0];
-                        String methodName = array[1];
-                        String serverID = array[2];
-                        //该机器
-                        if (serverID.equalsIgnoreCase(OpencronTools.SERVER_ID)) {
-                            logger.info("[opencron] Terminal serverId in this webServer");
-                            //该实例
-                            Object[] param = methodParams.remove(token.concat(methodName));
-                            if (CommonUtils.notEmpty(param)) {
-                                logger.info("[opencron] Terminal instance in this webServer");
-                                //unregister
-                                registryService.unregister(registryURL, registryPath + "/" + child);
-                                //反射获取目标方法执行.....
-                                try {
-                                    invokeMethods.get(methodName).invoke(param[0],(Object[]) param[1]);//执行方法......
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+
+                        if (child.startsWith(ZK_TERM_INSTANCE_PREFIX)) {
+                            if (array[1].equalsIgnoreCase(OpencronTools.SERVER_ID)) {
+                                terminals.put(array[1], array[2]);
+                            }
+                        } else {
+                            String token = array[0];
+                            //该方法在该机器上
+                            if (terminals.containsValue(token)) {
+                                logger.info("[opencron] Terminal serverId in this webServer");
+                                //该实例
+                                String methodName = array[1];
+
+                                Object[] param = methodParams.remove(token.concat(methodName));
+                                if (CommonUtils.notEmpty(param)) {
+                                    logger.info("[opencron] Terminal instance in this webServer");
+                                    //unregister
+                                    registryService.unregister(registryURL, registryPath + "/" + child);
+                                    //反射获取目标方法执行.....
+                                    try {
+                                        invokeMethods.get(methodName).invoke(param[0], (Object[]) param[1]);//执行方法......
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    } finally {
+                                        //任务完成后移除任务锁
+                                        methodLock.remove(child);
+                                    }
                                 }
+
                             }
                         }
+
                     }
                 }
             }
@@ -129,15 +149,24 @@ public class TerminalProcessor {
     public synchronized void doWork(String methodName, Object... param) {
         String methodMD5 = DigestUtils.md5Hex(methodName);
         String token = (String) param[0];
-        this.methodParams.put(token.concat(methodMD5), new Object[]{this,param});
-        //token_method_server
+
+        this.methodParams.put(token.concat(methodMD5), new Object[]{this, param});
+
         logger.info("[opencron] Terminal registry to zookeeper");
-        String data = token.concat("_").concat(methodMD5).concat("_").concat(OpencronTools.SERVER_ID);
+
+        //method_token_method
+        String data = this.ZK_TERM_METHOD_PREFIX + token.concat("_").concat(methodMD5);
         this.registryService.register(registryURL, registryPath + "/" + data, true);
+
+        //添加任务锁,
+        this.methodLock.put(data, data);
+        while (this.methodLock.containsKey(data)) {
+            //
+        }
     }
 
     @TerminalMethod
-    public void sendAll(HttpServletResponse response,String token, String cmd) throws Exception {
+    public void sendAll(HttpServletResponse response, String token, String cmd) throws Exception {
         cmd = URLDecoder.decode(cmd, Constants.CHARSET_UTF8);
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
@@ -150,7 +179,7 @@ public class TerminalProcessor {
     }
 
     @TerminalMethod
-    public void theme(HttpServletResponse response,String token,String theme) throws Exception {
+    public void theme(HttpServletResponse response, String token, String theme) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
             termService.theme(terminalClient.getTerminal(), theme);
@@ -159,7 +188,7 @@ public class TerminalProcessor {
     }
 
     @TerminalMethod
-    public void resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
+    public void resize(HttpServletResponse response, String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
             terminalClient.resize(cols, rows, width, height);
@@ -168,30 +197,22 @@ public class TerminalProcessor {
     }
 
     @TerminalMethod
-    public void upload(HttpServletResponse response,String token,HttpSession httpSession, @RequestParam(value = "file", required = false) MultipartFile[] file, String path) {
+    public void upload(HttpServletResponse response, String token,String path, String name,long size) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         boolean success = true;
         if (terminalClient != null) {
-            for (MultipartFile ifile : file) {
-                String tmpPath = httpSession.getServletContext().getRealPath("/") + "upload" + File.separator;
-                File tempFile = new File(tmpPath, ifile.getOriginalFilename());
-                try {
-                    ifile.transferTo(tempFile);
-                    if (CommonUtils.isEmpty(path)) {
-                        path = ".";
-                    } else {
-                        if (path.endsWith("/")) {
-                            path = path.substring(0, path.lastIndexOf("/"));
-                        }
-                    }
-                    terminalClient.upload(tempFile.getAbsolutePath(), path + "/" + ifile.getOriginalFilename(), ifile.getSize());
-                    tempFile.delete();
-                } catch (Exception e) {
-                    success = false;
-                }
-            }
+            terminalClient.upload(path, name, size);
         }
         WebUtils.writeJson(response, JSON.toJSONString(new Status(success)));
+    }
+
+    //该实例绑定在该机器下 term@_server_termId
+    public void registry(String termId) {
+        this.registryService.register(registryURL, registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId, true);
+    }
+
+    public void unregistry(String termId) {
+        this.registryService.unregister(registryURL, registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId);
     }
 
 

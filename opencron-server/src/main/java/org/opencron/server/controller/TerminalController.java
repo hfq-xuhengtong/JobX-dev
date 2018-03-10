@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -140,6 +141,8 @@ public class TerminalController extends BaseController {
             request.setAttribute("theme", terminal.getTheme());
             List<Terminal> terminas = termService.getListByUser(terminal.getUser());
             request.setAttribute("terms", terminas);
+            //注册实例
+            terminalProcessor.registry(token);
             return "/terminal/console";
         }
         return "/terminal/error";
@@ -183,8 +186,22 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
-    public void upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile[] file, String path) {
-        terminalProcessor.doWork("upload",response,token,httpSession,file,path);
+    public void upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile file, String path) {
+        String tmpPath = httpSession.getServletContext().getRealPath("/") + "upload" + File.separator;
+        File tempFile = new File(tmpPath, file.getOriginalFilename());
+        try {
+            file.transferTo(tempFile);
+            if (CommonUtils.isEmpty(path)) {
+                path = ".";
+            } else {
+                if (path.endsWith("/")) {
+                    path = path.substring(0, path.lastIndexOf("/"));
+                }
+            }
+            terminalProcessor.doWork("upload",response,token,tempFile.getAbsolutePath(), path + "/" + file.getOriginalFilename(), file.getSize());
+            tempFile.delete();
+        } catch (Exception e) {
+        }
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)

@@ -32,6 +32,7 @@ import static org.opencron.common.util.CommonUtils.toInt;
 import org.opencron.server.service.TerminalService;
 import org.opencron.server.support.TerminalClient;
 import org.opencron.server.support.TerminalContext;
+import org.opencron.server.support.TerminalProcessor;
 import org.opencron.server.support.TerminalSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.CloseStatus;
@@ -50,10 +51,19 @@ public class TerminalHandler extends TextWebSocketHandler {
     @Autowired
     private TerminalContext terminalContext;
 
+    @Autowired
+    private TerminalProcessor terminalProcessor;
+
+    private String sshSessionId;
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
-        String sshSessionId = (String) session.getAttributes().get(Constants.PARAM_SSH_SESSION_ID_KEY);
+        sshSessionId = (String) session.getAttributes().get(Constants.PARAM_SSH_SESSION_ID_KEY);
+
+        //注册实例
+        terminalProcessor.registry(sshSessionId);
+
         if (sshSessionId != null) {
             final Terminal terminal = terminalContext.remove(sshSessionId);
             if (terminal != null) {
@@ -129,6 +139,8 @@ public class TerminalHandler extends TextWebSocketHandler {
         if (terminalClient != null) {
             terminalClient.disconnect();
         }
+        //注册实例
+        terminalProcessor.unregistry(sshSessionId);
     }
 
 }
