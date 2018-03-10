@@ -41,7 +41,6 @@ public final class OpencronTools {
 
     private static String resourceId;
 
-
     public static final String SERVER_ID = uuid();
 
     private static Logger logger = LoggerFactory.getLogger(OpencronTools.class);

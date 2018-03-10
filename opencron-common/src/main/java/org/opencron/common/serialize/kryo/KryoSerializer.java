@@ -48,23 +48,32 @@ public class KryoSerializer implements Serializer {
 
     @Override
     public byte[] encode(Object msg) throws IOException {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             Output output = new Output(bos)) {
-
+        Output output = null;
+        try {
+            output = new Output(new ByteArrayOutputStream());
             Kryo kryo = THREAD_LOCAL.get();
             kryo.writeObject(output, msg);
+            output.flush();
             return output.toBytes();
+        } finally {
+            if (output != null) {
+                output.clear();
+                output.close();
+            }
         }
     }
 
     @Override
     public <T> T decode(byte[] buf, Class<T> type) throws IOException {
-
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-             Input input = new Input(bis)) {
-
+        Input input = null;
+        try {
+            input = new Input(new ByteArrayInputStream(buf));
             Kryo kryo = THREAD_LOCAL.get();
-            return kryo.readObject(input, type);
+            return kryo.readObject(input,type);
+        }finally {
+            if (input!=null) {
+                input.close();
+            }
         }
     }
 }
