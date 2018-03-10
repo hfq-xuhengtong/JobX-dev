@@ -43,17 +43,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.io.File;
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
-import static org.opencron.common.util.WebUtils.*;
-
 /**
  * benjobs..
- * 终端,分布式下有bug,发送命令,上传文件等,均可能发送到另一台server的情况..目前没有特别好的方案
- * 待解决...
  */
 @Controller
 @RequestMapping("terminal")
@@ -70,7 +64,7 @@ public class TerminalController extends BaseController {
 
     @RequestMapping(value = "ssh.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, String> ssh(HttpSession session, Terminal terminal) throws Exception {
+    public Map<String, String> ssh(HttpSession session, Terminal terminal) {
         User user = OpencronTools.getUser(session);
 
         terminal = termService.getById(terminal.getId());
@@ -92,7 +86,7 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping("ssh2.htm")
-    public String ssh2(HttpSession session, Terminal terminal) throws Exception {
+    public String ssh2(HttpSession session, Terminal terminal) {
         User user = OpencronTools.getUser(session);
 
         terminal = termService.getById(terminal.getId());
@@ -113,7 +107,7 @@ public class TerminalController extends BaseController {
 
     @RequestMapping(value = "detail.do", method = RequestMethod.POST)
     @ResponseBody
-    public Terminal detail(Terminal terminal) throws Exception {
+    public Terminal detail(Terminal terminal) {
         return termService.getById(terminal.getId());
     }
 
@@ -161,7 +155,7 @@ public class TerminalController extends BaseController {
      * @throws Exception
      */
     @RequestMapping("reopen.htm")
-    public String reopen(HttpSession session, Long id, String token) throws Exception {
+    public String reopen(HttpSession session, Long id, String token) {
         String reKey = id + "_" + token;
         Terminal terminal = terminalContext.remove(reKey);//reKey
         if (terminal != null) {
@@ -174,23 +168,23 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping(value = "resize.do", method = RequestMethod.POST)
-    public void resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
-        terminalProcessor.doWork("resize.do",response,token,cols,rows,width,height);
+    public void resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) {
+        terminalProcessor.doWork("resize",response,token,cols,rows,width,height);
     }
 
     @RequestMapping(value = "sendAll.do", method = RequestMethod.POST)
-    public void sendAll(HttpServletResponse response,String token, String cmd) throws Exception {
-        terminalProcessor.doWork("sendAll.do",response,token,cmd);
+    public void sendAll(HttpServletResponse response,String token, String cmd) {
+        terminalProcessor.doWork("sendAll",response,token,cmd);
     }
 
     @RequestMapping(value = "theme.do", method = RequestMethod.POST)
-    public void theme(HttpServletResponse response,String token, String theme) throws Exception {
-        terminalProcessor.doWork("theme.do",response,token,theme);
+    public void theme(HttpServletResponse response,String token, String theme) {
+        terminalProcessor.doWork("theme",response,token,theme);
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     public void upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile[] file, String path) {
-        terminalProcessor.doWork("upload.do",response,token,httpSession,file,path);
+        terminalProcessor.doWork("upload",response,token,httpSession,file,path);
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
@@ -209,7 +203,7 @@ public class TerminalController extends BaseController {
 
     @RequestMapping(value = "delete.do", method = RequestMethod.POST)
     @ResponseBody
-    public String delete(HttpSession session, Terminal term) throws Exception {
+    public String delete(HttpSession session, Terminal term) {
         return termService.delete(session, term.getId());
     }
 

@@ -41,6 +41,8 @@ public class Constants {
 
     public static final String ZK_REGISTRY_JOB_PATH = "/opencron/job";
 
+    public static final String ZK_REGISTRY_TERM_PATH = "/opencron/term" ;
+
     public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
     public static final int HEADER_SIZE = 4;
