@@ -48,18 +48,17 @@ public class KryoSerializer implements Serializer {
 
     @Override
     public byte[] encode(Object msg) throws IOException {
-        Output output = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Output output = new Output(bos);
         try {
-            output = new Output(new ByteArrayOutputStream());
             Kryo kryo = THREAD_LOCAL.get();
             kryo.writeObject(output, msg);
+            bos.flush();
             output.flush();
             return output.toBytes();
         } finally {
-            if (output != null) {
-                output.clear();
-                output.close();
-            }
+            bos.close();
+            output.close();
         }
     }
 
