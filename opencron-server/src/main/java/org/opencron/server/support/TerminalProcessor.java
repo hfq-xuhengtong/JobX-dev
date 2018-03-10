@@ -23,6 +23,7 @@ package org.opencron.server.support;
 
 
 import com.alibaba.fastjson.JSON;
+import org.apache.zookeeper.data.Stat;
 import org.opencron.common.Constants;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.common.util.*;
@@ -43,6 +44,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
+import java.lang.annotation.*;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.*;
@@ -67,11 +69,9 @@ public class TerminalProcessor {
 
     private final ZookeeperClient zookeeperClient = registryService.getZKClient(registryURL);
 
-    private Map<String, String> methodMapping = new ConcurrentHashMap<String, String>(0);
+    private Map<String, Object[]> methodParams = new ConcurrentHashMap<String, Object[]>(0);
 
     private Map<String, Method> invokeMethods = new ConcurrentHashMap<String, Method>(0);
-
-    private Map<String, Object[]> params = new ConcurrentHashMap<String, Object[]>(0);
 
     @PostConstruct
     public void initialize() throws Exception {
@@ -79,7 +79,7 @@ public class TerminalProcessor {
         logger.info("[opencron] Terminal init zookeeper....");
         this.zookeeperClient.addChildListener(registryPath, new ChildListener() {
             @Override
-            public void childChanged(String path, List<String> children) {
+            public synchronized void childChanged(String path, List<String> children) {
                 if (CommonUtils.notEmpty(children)) {
                     for (String child : children) {
                         String array[] = child.split("_");
@@ -90,15 +90,14 @@ public class TerminalProcessor {
                         if (serverID.equalsIgnoreCase(OpencronTools.SERVER_ID)) {
                             logger.info("[opencron] Terminal serverId in this webServer");
                             //该实例
-                            Object[] param = params.remove(token.concat(methodName));
+                            Object[] param = methodParams.remove(token.concat(methodName));
                             if (CommonUtils.notEmpty(param)) {
                                 logger.info("[opencron] Terminal instance in this webServer");
                                 //unregister
                                 registryService.unregister(registryURL, registryPath + "/" + child);
                                 //反射获取目标方法执行.....
-                                Method method = invokeMethods.get(methodName);
                                 try {
-                                    method.invoke(param[0],token,param[1]);
+                                    invokeMethods.get(methodName).invoke(param[0],(Object[]) param[1]);//执行方法......
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -109,6 +108,15 @@ public class TerminalProcessor {
             }
         });
 
+        Method[] methods = this.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getDeclaredAnnotation(TerminalMethod.class) != null) {
+                method.setAccessible(true);
+                String methodName = DigestUtils.md5Hex(method.getName());
+                this.invokeMethods.put(methodName, method);
+            }
+        }
+
     }
 
 
@@ -116,33 +124,20 @@ public class TerminalProcessor {
      * 分配分布式任务
      *
      * @param methodName
-     * @param token
      * @param param
      */
-    public synchronized void doWork(String methodName, HttpServletResponse response, String token, Object... param) {
-
+    public synchronized void doWork(String methodName, Object... param) {
         String methodMD5 = DigestUtils.md5Hex(methodName);
-
-        this.params.put(token.concat(methodMD5),new Object[]{response,param});
-
-        if (!this.methodMapping.containsKey(methodMD5)) {
-            this.methodMapping.put(methodMD5, methodName);
-            Method[] methods = this.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equalsIgnoreCase(methodName)) {
-                    method.setAccessible(true);
-                    this.invokeMethods.put(methodMD5, method);
-                    break;
-                }
-            }
-        }
+        String token = (String) param[0];
+        this.methodParams.put(token.concat(methodMD5), new Object[]{this,param});
         //token_method_server
         logger.info("[opencron] Terminal registry to zookeeper");
         String data = token.concat("_").concat(methodMD5).concat("_").concat(OpencronTools.SERVER_ID);
         this.registryService.register(registryURL, registryPath + "/" + data, true);
     }
 
-    public void sendAll(HttpServletResponse response, String token, String cmd) throws Exception {
+    @TerminalMethod
+    public void sendAll(HttpServletResponse response,String token, String cmd) throws Exception {
         cmd = URLDecoder.decode(cmd, Constants.CHARSET_UTF8);
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
@@ -154,7 +149,8 @@ public class TerminalProcessor {
         WebUtils.writeJson(response, JSON.toJSONString(Status.TRUE));
     }
 
-    public void theme(HttpServletResponse response, String token, String theme) throws Exception {
+    @TerminalMethod
+    public void theme(HttpServletResponse response,String token,String theme) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
             termService.theme(terminalClient.getTerminal(), theme);
@@ -162,7 +158,8 @@ public class TerminalProcessor {
         WebUtils.writeJson(response, JSON.toJSONString(Status.TRUE));
     }
 
-    public void resize(HttpServletResponse response, String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
+    @TerminalMethod
+    public void resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
             terminalClient.resize(cols, rows, width, height);
@@ -170,8 +167,8 @@ public class TerminalProcessor {
         WebUtils.writeJson(response, JSON.toJSONString(Status.TRUE));
     }
 
-
-    public void upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile[] file, String path) {
+    @TerminalMethod
+    public void upload(HttpServletResponse response,String token,HttpSession httpSession, @RequestParam(value = "file", required = false) MultipartFile[] file, String path) {
         TerminalClient terminalClient = TerminalSession.get(token);
         boolean success = true;
         if (terminalClient != null) {
@@ -195,6 +192,13 @@ public class TerminalProcessor {
             }
         }
         WebUtils.writeJson(response, JSON.toJSONString(new Status(success)));
+    }
+
+
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD})
+    public @interface TerminalMethod {
     }
 
 }
