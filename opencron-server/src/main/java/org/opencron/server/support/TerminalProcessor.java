@@ -87,7 +87,7 @@ public class TerminalProcessor {
 
         Method[] methods = this.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (method.getDeclaredAnnotation(MethodMark.class) != null) {
+            if ( ReflectUtils.methodHasAnnotation(method,MethodMark.class) ) {
                 method.setAccessible(true);
                 String methodName = DigestUtils.md5Hex(method.getName());
                 methodMap.put(methodName, method);
