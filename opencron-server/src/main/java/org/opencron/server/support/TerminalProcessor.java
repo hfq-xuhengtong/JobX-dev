@@ -23,6 +23,7 @@ package org.opencron.server.support;
 
 
 import org.opencron.common.Constants;
+import org.opencron.common.ext.MethodMark;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.common.util.*;
 import org.opencron.registry.URL;
@@ -38,7 +39,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.lang.annotation.*;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.*;
@@ -80,12 +80,6 @@ public class TerminalProcessor {
     //key-->token  value--> serverId
     private Map<String, String> terminalMapping = new ConcurrentHashMap<String, String>();
 
-    @Documented
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.METHOD})
-    public @interface TerminalMethod {
-    }
-
     @PostConstruct
     public void initialize() throws Exception {
 
@@ -93,7 +87,7 @@ public class TerminalProcessor {
 
         Method[] methods = this.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (method.getDeclaredAnnotation(TerminalMethod.class) != null) {
+            if (method.getDeclaredAnnotation(MethodMark.class) != null) {
                 method.setAccessible(true);
                 String methodName = DigestUtils.md5Hex(method.getName());
                 methodMap.put(methodName, method);
@@ -186,7 +180,7 @@ public class TerminalProcessor {
         status.setStatus(result == null ? false : result.isStatus());
     }
 
-    @TerminalMethod
+    @MethodMark
     public void sendAll(String method, String token, String cmd) throws Exception {
         cmd = URLDecoder.decode(cmd, Constants.CHARSET_UTF8);
         TerminalClient terminalClient = TerminalSession.get(token);
@@ -201,7 +195,7 @@ public class TerminalProcessor {
         redisCacheManager.put(data, Status.TRUE);
     }
 
-    @TerminalMethod
+    @MethodMark
     public void theme(String method, String token, String theme) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
@@ -211,7 +205,7 @@ public class TerminalProcessor {
         redisCacheManager.put(data, Status.TRUE);
     }
 
-    @TerminalMethod
+    @MethodMark
     public void resize(String method, String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
@@ -221,7 +215,7 @@ public class TerminalProcessor {
         redisCacheManager.put(data, Status.TRUE);
     }
 
-    @TerminalMethod
+    @MethodMark
     public void upload(String method, String token, File file, String name, long size) {
         TerminalClient terminalClient = TerminalSession.get(token);
         boolean success = true;
