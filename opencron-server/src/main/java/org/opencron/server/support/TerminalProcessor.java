@@ -80,6 +80,12 @@ public class TerminalProcessor {
     //key-->token  value--> serverId
     private Map<String, String> terminalMapping = new ConcurrentHashMap<String, String>();
 
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD})
+    public @interface TerminalMethod {
+    }
+
     @PostConstruct
     public void initialize() throws Exception {
 
@@ -247,10 +253,6 @@ public class TerminalProcessor {
     }
 
 
-    @Documented
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.METHOD})
-    public @interface TerminalMethod {
-    }
+
 
 }
