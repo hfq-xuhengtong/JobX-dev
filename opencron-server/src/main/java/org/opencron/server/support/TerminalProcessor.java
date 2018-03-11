@@ -22,8 +22,6 @@
 package org.opencron.server.support;
 
 
-import com.alibaba.fastjson.JSON;
-import org.apache.zookeeper.data.Stat;
 import org.opencron.common.Constants;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.common.util.*;
@@ -39,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.lang.annotation.*;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
@@ -48,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 分布式web终端
+ * 分布式+反射+多线程.别问我怎么实现的,忘了....
  */
 @Component
 public class TerminalProcessor {
@@ -57,6 +56,15 @@ public class TerminalProcessor {
     @Autowired
     private TerminalService termService;
 
+    @Autowired
+    private RedisCacheManager redisCacheManager;
+
+    private final String ZK_TERM_INSTANCE_PREFIX = "term_";
+
+    private final String ZK_TERM_METHOD_PREFIX = "method_";
+
+    private final String ZK_TERM_METHOD_DONE_PREFIX = "done_";
+
     private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
 
     private final String registryPath = Constants.ZK_REGISTRY_TERM_PATH;
@@ -65,80 +73,84 @@ public class TerminalProcessor {
 
     private final ZookeeperClient zookeeperClient = registryService.getZKClient(registryURL);
 
-    private Map<String, Object[]> methodParams = new ConcurrentHashMap<String, Object[]>(0);
-
-    private Map<String, Method> invokeMethods = new ConcurrentHashMap<String, Method>(0);
+    private Map<String, Method> methodMap = new ConcurrentHashMap<String, Method>(0);
 
     private Map<String, String> methodLock = new ConcurrentHashMap<String, String>(0);
 
-    private final String ZK_TERM_INSTANCE_PREFIX = "term_";
-
-    private final String ZK_TERM_METHOD_PREFIX = "method_";
-
-    //key-->serverid  value-->token
-    private Map<String, String> terminals = new ConcurrentHashMap<String, String>();
+    //key-->token  value--> serverId
+    private Map<String, String> terminalMapping = new ConcurrentHashMap<String, String>();
 
     @PostConstruct
     public void initialize() throws Exception {
 
         logger.info("[opencron] Terminal init zookeeper....");
-        this.zookeeperClient.addChildListener(registryPath, new ChildListener() {
-            @Override
-            public synchronized void childChanged(String path, List<String> children) {
-
-                if (CommonUtils.notEmpty(children)) {
-
-                    for (String child : children) {
-
-                        String array[] = child.split("_");
-
-                        if (child.startsWith(ZK_TERM_INSTANCE_PREFIX)) {
-                            if (array[1].equalsIgnoreCase(OpencronTools.SERVER_ID)) {
-                                terminals.put(array[1], array[2]);
-                            }
-                        } else {
-                            String token = array[0];
-                            //该方法在该机器上
-                            if (terminals.containsValue(token)) {
-                                logger.info("[opencron] Terminal serverId in this webServer");
-                                //该实例
-                                String methodName = array[1];
-
-                                Object[] param = methodParams.remove(token.concat(methodName));
-                                if (CommonUtils.notEmpty(param)) {
-                                    logger.info("[opencron] Terminal instance in this webServer");
-                                    //unregister
-                                    registryService.unregister(registryURL, registryPath + "/" + child);
-                                    //反射获取目标方法执行.....
-                                    try {
-                                        invokeMethods.get(methodName).invoke(param[0], (Object[]) param[1]);//执行方法......
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    } finally {
-                                        //任务完成后移除任务锁
-                                        methodLock.remove(child);
-                                    }
-                                }
-
-                            }
-                        }
-
-                    }
-                }
-            }
-        });
 
         Method[] methods = this.getClass().getDeclaredMethods();
         for (Method method : methods) {
             if (method.getDeclaredAnnotation(TerminalMethod.class) != null) {
                 method.setAccessible(true);
                 String methodName = DigestUtils.md5Hex(method.getName());
-                this.invokeMethods.put(methodName, method);
+                methodMap.put(methodName, method);
             }
         }
 
-    }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
+                zookeeperClient.addChildListener(registryPath, new ChildListener() {
+                    @Override
+                    public synchronized void childChanged(String path, List<String> children) {
+
+                        if (CommonUtils.notEmpty(children)) {
+
+                            for (String child : children) {
+
+                                String array[] = child.split("_");
+
+                                if (child.startsWith(ZK_TERM_METHOD_DONE_PREFIX)) {
+
+                                    if (methodLock.get(child) != null) {
+                                        //唤醒doWork里的等待...
+                                        methodLock.remove(child);
+                                        registryService.unregister(registryURL, registryPath + "/" + child);
+                                    }
+                                } else if (child.startsWith(ZK_TERM_INSTANCE_PREFIX)) {
+                                    if (array[1].equalsIgnoreCase(OpencronTools.SERVER_ID)) {
+                                        terminalMapping.put(array[2], array[1]);
+                                    }
+                                } else {
+                                    String token = array[1];
+                                    String methodName = array[2];
+                                    //该方法在该机器上
+                                    if (terminalMapping.containsKey(token) && terminalMapping.containsValue(OpencronTools.SERVER_ID)) {
+                                        logger.info("[opencron] Terminal method :{} in this server", methodMap.get(methodName).getName());
+                                        //unregister
+                                        registryService.unregister(registryURL, registryPath + "/" + child);
+                                        //invoke...
+                                        Object[] param = redisCacheManager.get(token.concat(methodName), Object[].class);
+                                        param = CommonUtils.arrayInsertIndex(param, 0, methodName);
+                                        if (CommonUtils.notEmpty(param)) {
+                                            //反射获取目标方法执行.....
+                                            try {
+                                                methodMap.get(methodName).invoke(TerminalProcessor.this, param);//执行方法......
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            } finally {
+                                                String pathx = registryPath + "/" + ZK_TERM_METHOD_DONE_PREFIX + token.concat("_").concat(methodName);
+                                                registryService.register(registryURL, pathx, true);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
 
     /**
      * 分配分布式任务
@@ -146,27 +158,30 @@ public class TerminalProcessor {
      * @param methodName
      * @param param
      */
-    public synchronized void doWork(String methodName, Object... param) {
+    public synchronized void doWork(String methodName, final Object... param) throws Exception {
         String methodMD5 = DigestUtils.md5Hex(methodName);
-        String token = (String) param[0];
+        Status status = (Status) param[0];
+        String token = (String) param[1];
 
-        this.methodParams.put(token.concat(methodMD5), new Object[]{this, param});
+        redisCacheManager.put(token.concat(methodMD5), CommonUtils.arrayRemoveIndex(param, 0));
 
         logger.info("[opencron] Terminal registry to zookeeper");
 
         //method_token_method
-        String data = this.ZK_TERM_METHOD_PREFIX + token.concat("_").concat(methodMD5);
-        this.registryService.register(registryURL, registryPath + "/" + data, true);
+        String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(methodMD5);
+        registryService.register(registryURL, registryPath + "/" + data, true);
 
-        //添加任务锁,
-        this.methodLock.put(data, data);
-        while (this.methodLock.containsKey(data)) {
-            //
-        }
+        String lock = data.replace(ZK_TERM_METHOD_PREFIX, ZK_TERM_METHOD_DONE_PREFIX);
+        this.methodLock.put(lock, lock);
+        //等待处理结果...
+        while (this.methodLock.containsKey(lock));
+
+        Status result = redisCacheManager.remove(data, Status.class);
+        status.setStatus(result == null ? false : result.isStatus());
     }
 
     @TerminalMethod
-    public void sendAll(HttpServletResponse response, String token, String cmd) throws Exception {
+    public void sendAll(String method, String token, String cmd) throws Exception {
         cmd = URLDecoder.decode(cmd, Constants.CHARSET_UTF8);
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
@@ -175,35 +190,51 @@ public class TerminalProcessor {
                 client.write(cmd);
             }
         }
-        WebUtils.writeJson(response, JSON.toJSONString(Status.TRUE));
+
+        String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
+        redisCacheManager.put(data, Status.TRUE);
     }
 
     @TerminalMethod
-    public void theme(HttpServletResponse response, String token, String theme) throws Exception {
+    public void theme(String method, String token, String theme) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
             termService.theme(terminalClient.getTerminal(), theme);
         }
-        WebUtils.writeJson(response, JSON.toJSONString(Status.TRUE));
+        String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
+        redisCacheManager.put(data, Status.TRUE);
     }
 
     @TerminalMethod
-    public void resize(HttpServletResponse response, String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
+    public void resize(String method, String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
         TerminalClient terminalClient = TerminalSession.get(token);
         if (terminalClient != null) {
             terminalClient.resize(cols, rows, width, height);
         }
-        WebUtils.writeJson(response, JSON.toJSONString(Status.TRUE));
+        String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
+        redisCacheManager.put(data, Status.TRUE);
     }
 
     @TerminalMethod
-    public void upload(HttpServletResponse response, String token,String path, String name,long size) throws Exception {
+    public void upload(String method, String token, File file, String name, long size) {
         TerminalClient terminalClient = TerminalSession.get(token);
         boolean success = true;
-        if (terminalClient != null) {
-            terminalClient.upload(path, name, size);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
         }
-        WebUtils.writeJson(response, JSON.toJSONString(new Status(success)));
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            if (terminalClient != null) {
+                terminalClient.upload(file.getAbsolutePath(), name, size);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            success = false;
+        }
+        String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
+        redisCacheManager.put(data, Status.create(success));
     }
 
     //该实例绑定在该机器下 term@_server_termId

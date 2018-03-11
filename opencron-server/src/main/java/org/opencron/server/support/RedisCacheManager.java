@@ -101,6 +101,12 @@ public class RedisCacheManager implements Cache {
     }
 
 
+    public <T> T remove(Object key, final Class<T> type) {
+        T t = get(key,type);
+        evict(key);
+        return t;
+    }
+
     @Override
     public void put(final Object key, final Object value) {
         if (CommonUtils.isEmpty(key) || CommonUtils.isEmpty(value)) {
@@ -163,12 +169,6 @@ public class RedisCacheManager implements Cache {
     public void clear() {
     }
 
-    /**
-     * @param o
-     * @return
-     * @see get(Object key, final Class<T> type)
-     */
-
     @Override
     @Deprecated
     public ValueWrapper get(Object o) {
@@ -203,5 +203,7 @@ public class RedisCacheManager implements Cache {
     public List<String> keys(String pattern) {
         return (List<String>) redisTemplate.keys(pattern);
     }
+
+
 }
 

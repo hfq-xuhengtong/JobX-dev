@@ -21,6 +21,7 @@
 
 package org.opencron.server.controller;
 
+import org.apache.zookeeper.data.Stat;
 import org.opencron.common.Constants;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.collection.ParamsMap;
@@ -30,6 +31,7 @@ import org.opencron.server.domain.User;
 import org.opencron.server.support.*;
 import org.opencron.server.service.TerminalService;
 import org.opencron.server.tag.PageBean;
+import org.opencron.server.vo.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -171,22 +173,33 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping(value = "resize.do", method = RequestMethod.POST)
-    public void resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) {
-        terminalProcessor.doWork("resize",response,token,cols,rows,width,height);
+    @ResponseBody
+    public Status resize(HttpServletResponse response,String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
+        Status status = Status.TRUE;
+        terminalProcessor.doWork("resize",status,token,cols,rows,width,height);
+        return status;
     }
 
     @RequestMapping(value = "sendAll.do", method = RequestMethod.POST)
-    public void sendAll(HttpServletResponse response,String token, String cmd) {
-        terminalProcessor.doWork("sendAll",response,token,cmd);
+    @ResponseBody
+    public Status sendAll(HttpServletResponse response,String token, String cmd) throws Exception {
+        Status status = Status.TRUE;
+        terminalProcessor.doWork("sendAll",status,token,cmd);
+        return status;
     }
 
     @RequestMapping(value = "theme.do", method = RequestMethod.POST)
-    public void theme(HttpServletResponse response,String token, String theme) {
-        terminalProcessor.doWork("theme",response,token,theme);
+    @ResponseBody
+    public Status theme(HttpServletResponse response,String token, String theme) throws Exception {
+        Status status = Status.TRUE;
+        terminalProcessor.doWork("theme",status,token,theme);
+        return status;
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
-    public void upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile file, String path) {
+    @ResponseBody
+    public Status upload(HttpSession httpSession, HttpServletResponse response, String token, @RequestParam(value = "file", required = false) MultipartFile file, String path) {
+        Status status = Status.TRUE;
         String tmpPath = httpSession.getServletContext().getRealPath("/") + "upload" + File.separator;
         File tempFile = new File(tmpPath, file.getOriginalFilename());
         try {
@@ -198,10 +211,11 @@ public class TerminalController extends BaseController {
                     path = path.substring(0, path.lastIndexOf("/"));
                 }
             }
-            terminalProcessor.doWork("upload",response,token,tempFile.getAbsolutePath(), path + "/" + file.getOriginalFilename(), file.getSize());
+            terminalProcessor.doWork("upload",status,token,tempFile,path + "/" + file.getOriginalFilename(), file.getSize());
             tempFile.delete();
         } catch (Exception e) {
         }
+        return status;
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)

@@ -61,9 +61,6 @@ public class TerminalHandler extends TextWebSocketHandler {
         super.afterConnectionEstablished(session);
         sshSessionId = (String) session.getAttributes().get(Constants.PARAM_SSH_SESSION_ID_KEY);
 
-        //注册实例
-        terminalProcessor.registry(sshSessionId);
-
         if (sshSessionId != null) {
             final Terminal terminal = terminalContext.remove(sshSessionId);
             if (terminal != null) {

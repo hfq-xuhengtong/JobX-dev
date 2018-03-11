@@ -85,7 +85,7 @@ public class JobService {
                 "ON T.agentId = D.agentId " +
                 "WHERE IFNULL(T.flowNum,0)=0 " +
                 "AND cronType=? " +
-                "AND T.deleted=0";
+                "AND T.deleted=0 AND T.pause=0 ";
         List<JobInfo> jobs = queryDao.sqlQuery(JobInfo.class, sql, cronType.getType());
         queryJobMore(jobs);
         return jobs;
@@ -97,7 +97,7 @@ public class JobService {
                 "ON T.agentId = D.agentId " +
                 "WHERE IFNULL(T.flowNum,0)=0 " +
                 "AND cronType=? " +
-                "AND T.deleted=0 " +
+                "AND T.deleted=0 AND T.pause=0 " +
                 "AND D.agentId=? ";
 
         List<JobInfo> jobs = queryDao.sqlQuery(JobInfo.class, sql, cronType.getType(), agentId);
@@ -423,8 +423,8 @@ public class JobService {
         Integer[] cronTypes = new Integer[2];
         cronTypes[0] = CronType.CRONTAB.getType();
         cronTypes[1] = CronType.QUARTZ.getType();
-        Map params = ParamsMap.map().set("cronType", cronTypes).set("deleted", false);
-        String hql = "from Job where cronType in (:cronType) and deleted=:deleted";
+        Map params = ParamsMap.map().set("cronType", cronTypes).set("deleted", false).set("pause",false);
+        String hql = "from Job where cronType in (:cronType) and deleted=:deleted and pause=:pause";
         return queryDao.hqlQuery(hql, params);
     }
 }

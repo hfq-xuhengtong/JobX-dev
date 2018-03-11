@@ -465,6 +465,24 @@ public abstract class CommonUtils implements Serializable {
         return Arrays.copyOf(arrayList.toArray(array), arrayList.size());
     }
 
+
+    public static <T> T[] arrayInsertIndex(T[] array, int index, T t) {
+        AssertUtils.notNull(array);
+        List<T> arrayList = new ArrayList<T>(array.length+1);
+        if (index == 0) {
+            arrayList.add(t);
+            Collections.addAll(arrayList,array);
+
+        }else {
+            T[] before = Arrays.copyOfRange(array,0,index);
+            T[] after = Arrays.copyOfRange(array,index,array.length);
+            Collections.addAll(arrayList,before);
+            arrayList.add(t);
+            Collections.addAll(arrayList,after);
+        }
+        return arrayList.toArray(array);
+    }
+
     public static String uuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
@@ -481,6 +499,16 @@ public abstract class CommonUtils implements Serializable {
             sb.append(uuid());
         }
         return sb.toString().substring(0, len);
+    }
+
+
+    public static void main(String[] args) {
+        Integer[] arr = new Integer[]{1,2,3,4};
+        arr = arrayInsertIndex(arr,0,7);
+
+        for (Integer val:arr) {
+            System.out.println(val);
+        }
     }
 
 
