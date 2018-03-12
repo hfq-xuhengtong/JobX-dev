@@ -221,7 +221,7 @@ public class DashboardController extends BaseController {
 
             if (user.getHeaderpic() != null) {
                 String name = user.getUserId() + "_140" + user.getPicExtName();
-                String path = session.getServletContext().getRealPath("/").replaceFirst("/$", "") + "/upload/" + name;
+                String path = request.getServletContext().getRealPath("/").replaceFirst("/$", "") + "/upload/" + name;
                 IOUtils.writeFile(new File(path), user.getHeaderpic().getBinaryStream());
                 user.setHeaderPath(getWebUrlPath(request) + "/upload/" + name);
                 session.setAttribute(Constants.PARAM_LOGIN_USER_KEY, user);

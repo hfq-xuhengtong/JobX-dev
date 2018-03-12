@@ -117,11 +117,19 @@ public abstract class IOUtils implements Serializable {
         }
 
         BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(file));
-        int r;
-        while ((r = inputStream.read()) != -1) {
-            output.write((byte) r);
+        try {
+            int r;
+            while ((r = inputStream.read()) != -1) {
+                output.write((byte) r);
+            }
+
+        }finally {
+            if (output!=null) {
+                output.flush();
+                output.close();
+                output = null;
+            }
         }
-        output.close();
     }
 
     public static byte[] readFileToArray(File file) throws IOException {
@@ -220,6 +228,7 @@ public abstract class IOUtils implements Serializable {
                 total += read;
             }
         }
+        os.flush();
         return total;
     }
 
@@ -285,6 +294,7 @@ public abstract class IOUtils implements Serializable {
             writer.write(buf, 0, read);
             total += read;
         }
+        writer.flush();
         return total;
     }
 
