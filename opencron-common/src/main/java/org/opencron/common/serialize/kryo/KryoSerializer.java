@@ -49,21 +49,20 @@ public class KryoSerializer implements Serializer {
 
     @Override
     public byte[] encode(Object msg) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        Output output = new Output(byteArrayOutputStream);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Output output = new Output(bos);
         Kryo kryo = KryoHolder.get();
         kryo.writeObject(output, msg);
         return output.toBytes();
+
     }
 
     @Override
     public <T> T decode(byte[] buf, Class<T> type) throws IOException {
-        if (buf == null) {
-            return null;
-        }
-        Input input = new Input(new ByteArrayInputStream(buf));
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
+        Input input = new Input(byteArrayInputStream);
         Kryo kryo = KryoHolder.get();
-        return kryo.readObject(input,type);
+        return kryo.readObject(input, type);
     }
 
 }
