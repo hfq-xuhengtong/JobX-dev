@@ -50,15 +50,10 @@ public class KryoSerializer implements Serializer {
     @Override
     public byte[] encode(Object msg) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        Output output = new Output(1024 * 4, -1);
-        output.setOutputStream(byteArrayOutputStream);
-        try {
-            Kryo kryo = KryoHolder.get();
-            kryo.writeObject(output, msg);
-            return output.toBytes();
-        } finally {
-            output.close();
-        }
+        Output output = new Output(byteArrayOutputStream);
+        Kryo kryo = KryoHolder.get();
+        kryo.writeObject(output, msg);
+        return output.toBytes();
     }
 
     @Override
@@ -66,14 +61,9 @@ public class KryoSerializer implements Serializer {
         if (buf == null) {
             return null;
         }
-        Input input = null;
-        try {
-            input = new Input(new ByteArrayInputStream(buf));
-            Kryo kryo = KryoHolder.get();
-            return kryo.readObject(input,type);
-        } finally {
-            input.close();
-        }
+        Input input = new Input(new ByteArrayInputStream(buf));
+        Kryo kryo = KryoHolder.get();
+        return kryo.readObject(input,type);
     }
 
 }
