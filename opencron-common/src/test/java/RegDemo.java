@@ -20,6 +20,8 @@
  */
 
 
+import java.io.File;
+
 /**
  * Created by benjobs on 15/12/5.
  */
@@ -27,7 +29,10 @@ public class RegDemo {
 
     public static void main(String[] args) {
 
-        System.out.println() ;
+        File file = new File("/Users/benjobs/DOC/fds/陈丹丹的简历.docxff");
+
+        System.out.println(file.getParentFile());
+
 
 
     }
