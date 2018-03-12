@@ -18,35 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
-
-
-import org.opencron.common.serialize.ObjectInput;
-import org.opencron.common.serialize.ObjectOutput;
-import org.opencron.common.serialize.Serializer;
+package org.opencron.common.serialize.java;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 
-public class HessianSerializer implements Serializer {
-
-    public static final byte ID = 2;
-
-    public byte getContentTypeId() {
-        return ID;
+/**
+ * Compacted java object output stream.
+ */
+public class CompactedObjectOutputStream extends ObjectOutputStream {
+    public CompactedObjectOutputStream(OutputStream out) throws IOException {
+        super(out);
     }
 
-    public String getContentType() {
-        return "x-application/hessian";
+    @Override
+    protected void writeClassDescriptor(ObjectStreamClass desc) throws IOException {
+        Class<?> clazz = desc.forClass();
+        if (clazz.isPrimitive() || clazz.isArray()) {
+            write(0);
+            super.writeClassDescriptor(desc);
+        } else {
+            write(1);
+            writeUTF(desc.getName());
+        }
     }
-
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new HessianObjectOutput(out);
-    }
-
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new HessianObjectInput(is);
-    }
-
 }

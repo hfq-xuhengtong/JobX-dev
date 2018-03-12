@@ -18,35 +18,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
 
+package org.opencron.common.serialize.kryo.utils;
 
-import org.opencron.common.serialize.ObjectInput;
-import org.opencron.common.serialize.ObjectOutput;
-import org.opencron.common.serialize.Serializer;
+import com.esotericsoftware.kryo.Kryo;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+public class PrototypeKryoFactory extends AbstractKryoFactory {
 
-public class HessianSerializer implements Serializer {
-
-    public static final byte ID = 2;
-
-    public byte getContentTypeId() {
-        return ID;
+    @Override
+    public void returnKryo(Kryo kryo) {
+        // do nothing
     }
 
-    public String getContentType() {
-        return "x-application/hessian";
+    public Kryo getKryo() {
+        return create();
     }
-
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new HessianObjectOutput(out);
-    }
-
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new HessianObjectInput(is);
-    }
-
 }

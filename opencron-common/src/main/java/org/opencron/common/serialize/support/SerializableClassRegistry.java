@@ -18,30 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.msgpack;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.msgpack.jackson.dataformat.MessagePackFactory;
-import org.opencron.common.serialize.Serializer;
 
-import java.io.IOException;
+package org.opencron.common.serialize.support;
 
-/**
- * @author benjobs
- * msgpack-java: https://github.com/msgpack/msgpack-java
- */
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class MessagePackSerializer implements Serializer {
+public abstract class SerializableClassRegistry {
 
-    private final ObjectMapper objectMapper = new ObjectMapper(new MessagePackFactory());
+    private static final Set<Class> registrations = new LinkedHashSet<Class>();
 
-    @Override
-    public byte[] encode(Object msg) throws IOException {
-        return objectMapper.writeValueAsBytes(msg);
+    /**
+     * only supposed to be called at startup time
+     */
+    public static void registerClass(Class clazz) {
+        registrations.add(clazz);
     }
 
-    @Override
-    public <T> T decode(byte[] buf, Class<T> type) throws IOException {
-        return objectMapper.readValue(buf, type);
+    public static Set<Class> getRegisteredClasses() {
+        return registrations;
     }
 }

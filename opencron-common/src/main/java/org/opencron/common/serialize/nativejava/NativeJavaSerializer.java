@@ -18,8 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
 
+
+package org.opencron.common.serialize.nativejava;
 
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
@@ -29,24 +30,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class HessianSerializer implements Serializer {
+public class NativeJavaSerializer implements Serializer {
 
-    public static final byte ID = 2;
+    public static final String NAME = "nativejava";
 
     public byte getContentTypeId() {
-        return ID;
+        return 7;
     }
 
     public String getContentType() {
-        return "x-application/hessian";
+        return "x-application/nativejava";
     }
 
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new HessianObjectOutput(out);
+    public ObjectOutput serialize(OutputStream output) throws IOException {
+        return new NativeJavaObjectOutput(output);
     }
 
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new HessianObjectInput(is);
+    public ObjectInput deserialize(InputStream input) throws IOException {
+        return new NativeJavaObjectInput(input);
     }
-
 }

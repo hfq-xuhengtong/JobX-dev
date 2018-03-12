@@ -18,82 +18,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+
 package org.opencron.common.serialize.kryo;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import org.objenesis.strategy.StdInstantiatorStrategy;
+import org.opencron.common.serialize.ObjectInput;
+import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
 
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * @author benjobs
+ * TODO for now kryo serialization doesn't deny classes that don't implement the serializable interface
+ *
  */
-
 public class KryoSerializer implements Serializer {
 
-
-    private static final ThreadLocal<Kryo> KryoHolder = new ThreadLocal<Kryo>() {
-        @Override
-        protected Kryo initialValue() {
-            Kryo kryo = new Kryo();
-            kryo.setReferences(false);
-            kryo.setInstantiatorStrategy(new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
-            return kryo;
-        }
-    };
-
-    @Override
-    public byte[] encode(Object obj) throws IOException {
-        ByteArrayOutputStream byteOut = null;
-        Output output = null;
-        try {
-            byteOut = new ByteArrayOutputStream();
-            output = new Output(byteOut);
-            Kryo kryo = KryoHolder.get();
-            kryo.register(obj.getClass());
-            kryo.writeObject(output, obj);
-            return output.toBytes();
-        } finally {
-            if (null != byteOut) {
-                try {
-                    byteOut.close();
-                    byteOut = null;
-                } catch (IOException e) {
-                }
-            }
-            if (null != output) {
-                output.close();
-                output = null;
-            }
-        }
+    public byte getContentTypeId() {
+        return 8;
     }
 
-    @Override
-    public <T> T decode(byte[] bytes, Class<T> type) throws IOException {
-        ByteArrayInputStream inputStream = null;
-        Input input = null;
-        try {
-            inputStream =  new ByteArrayInputStream(bytes);
-            input = new Input(inputStream);
-            Kryo kryo = KryoHolder.get();
-            kryo.register(type);
-            return kryo.readObject(input,type);
-        } finally {
-            if (null != inputStream) {
-                inputStream.close();
-                inputStream = null;
-            }
-            if (null != input) {
-                input.close();
-                input = null;
-            }
-        }
+    public String getContentType() {
+        return "x-application/kryo";
     }
 
+    public ObjectOutput serialize(OutputStream out) throws IOException {
+        return new KryoObjectOutput(out);
+    }
+
+    public ObjectInput deserialize(InputStream is) throws IOException {
+        return new KryoObjectInput(is);
+    }
 }

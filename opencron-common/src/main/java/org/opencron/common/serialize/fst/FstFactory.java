@@ -18,35 +18,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
+package org.opencron.common.serialize.fst;
 
 
-import org.opencron.common.serialize.ObjectInput;
-import org.opencron.common.serialize.ObjectOutput;
-import org.opencron.common.serialize.Serializer;
+import org.nustaq.serialization.FSTConfiguration;
+import org.nustaq.serialization.FSTObjectInput;
+import org.nustaq.serialization.FSTObjectOutput;
+import org.opencron.common.serialize.support.SerializableClassRegistry;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class HessianSerializer implements Serializer {
+public class FstFactory {
 
-    public static final byte ID = 2;
+    private static final FstFactory factory = new FstFactory();
 
-    public byte getContentTypeId() {
-        return ID;
+    private final FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
+
+
+    public static FstFactory getDefaultFactory() {
+        return factory;
     }
 
-    public String getContentType() {
-        return "x-application/hessian";
+    public FstFactory() {
+        for (Class clazz : SerializableClassRegistry.getRegisteredClasses()) {
+            conf.registerClass(clazz);
+        }
     }
 
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new HessianObjectOutput(out);
+    public FSTObjectOutput getObjectOutput(OutputStream outputStream) {
+        return conf.getObjectOutput(outputStream);
     }
 
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new HessianObjectInput(is);
+    public FSTObjectInput getObjectInput(InputStream inputStream) {
+        return conf.getObjectInput(inputStream);
     }
-
 }

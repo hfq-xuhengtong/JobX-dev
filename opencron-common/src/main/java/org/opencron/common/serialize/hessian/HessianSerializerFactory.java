@@ -18,31 +18,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.jackson;
+package org.opencron.common.serialize.hessian;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opencron.common.serialize.Serializer;
+import com.caucho.hessian.io.SerializerFactory;
 
-import java.io.IOException;
+public class HessianSerializerFactory extends SerializerFactory {
 
-/**
- * @author benjobs
- */
+    public static final SerializerFactory SERIALIZER_FACTORY = new HessianSerializerFactory();
 
-public class JacksonSerializer implements Serializer {
-
-    private static final String CHARSET = "UTF-8";
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Override
-    public byte[] encode(Object msg) throws IOException {
-        String jsonString = objectMapper.writeValueAsString(msg);
-        return jsonString.getBytes(CHARSET);
+    private HessianSerializerFactory() {
     }
 
     @Override
-    public <T> T decode(byte[] buf, Class<T> type) throws IOException {
-        String jsonString = new String(buf, CHARSET);
-        return objectMapper.readValue(jsonString, type);
+    public ClassLoader getClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
     }
+
 }

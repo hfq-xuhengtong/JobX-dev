@@ -1,43 +1,48 @@
+/**
+ * Copyright (c) 2015 The Opencron Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.opencron.common.serialize.fst;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import org.nustaq.serialization.FSTConfiguration;
+import org.opencron.common.serialize.ObjectInput;
+import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
-/**
- * https://github.com/RuedigerMoeller/fast-serialization/wiki/Serialization
- */
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class FstSerializer implements Serializer {
 
-    private static final LoadingCache<Class<?>, FSTConfiguration> configurationLoadingCache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Class<?>, FSTConfiguration>() {
-                @Override
-                public FSTConfiguration load(Class<?> cls) throws Exception {
-                    return FSTConfiguration.createDefaultConfiguration();
-                }
-            });
-
-    @Override
-    public byte[] encode(Object msg) throws IOException {
-        return getFSTConfiguration(msg.getClass()).asByteArray(msg);
+    public byte getContentTypeId() {
+        return 9;
     }
 
-    @Override
-    public <T> T decode(byte[] buf, Class<T> type) throws IOException {
-        return (T) getFSTConfiguration(type).asObject(buf);
+    public String getContentType() {
+        return "x-application/fst";
     }
 
-    private static FSTConfiguration getFSTConfiguration(Class<?> clz) throws IOException {
-        try {
-            return configurationLoadingCache.get(clz);
-        } catch (ExecutionException e) {
-            throw new IOException("create FSTConfiguration error, class:" + clz);
-        }
+    public ObjectOutput serialize(OutputStream out) throws IOException {
+        return new FstObjectOutput(out);
+    }
+
+    public ObjectInput deserialize(InputStream is) throws IOException {
+        return new FstObjectInput(is);
     }
 }
