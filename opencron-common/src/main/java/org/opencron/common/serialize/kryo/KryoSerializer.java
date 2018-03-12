@@ -49,20 +49,47 @@ public class KryoSerializer implements Serializer {
 
     @Override
     public byte[] encode(Object msg) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Output output = new Output(bos);
-        Kryo kryo = KryoHolder.get();
-        kryo.writeObject(output, msg);
-        return output.toBytes();
-
+        ByteArrayOutputStream byteOut = null;
+        Output output = null;
+        try {
+            byteOut = new ByteArrayOutputStream();
+            output = new Output(byteOut, 1024);
+            Kryo kryo = KryoHolder.get();
+            kryo.writeObject(output, msg);
+            return output.toBytes();
+        } finally {
+            if (null != byteOut) {
+                try {
+                    byteOut.close();
+                    byteOut = null;
+                } catch (IOException e) {
+                }
+            }
+            if (null != output) {
+                output.close();
+                output = null;
+            }
+        }
     }
 
     @Override
-    public <T> T decode(byte[] buf, Class<T> type) throws IOException {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
-        Input input = new Input(byteArrayInputStream);
-        Kryo kryo = KryoHolder.get();
-        return kryo.readObject(input, type);
+    public <T> T decode(byte[] bytes, Class<T> type) throws IOException {
+        ByteArrayInputStream inputStream = null;
+        Input input = null;
+        try {
+            inputStream =  new ByteArrayInputStream(bytes);
+            input = new Input(inputStream);
+            return KryoHolder.get().readObject(input,type);
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
+                inputStream = null;
+            }
+            if (null != input) {
+                input.close();
+                input = null;
+            }
+        }
     }
 
 }
