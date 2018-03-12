@@ -158,12 +158,11 @@ public class TerminalProcessor {
      * @param methodName
      * @param param
      */
-    public synchronized void doWork(String methodName, final Object... param) throws Exception {
+    public synchronized void doWork(String methodName, Status status,Object... param) throws Exception {
         String methodMD5 = DigestUtils.md5Hex(methodName);
-        Status status = (Status) param[0];
-        String token = (String) param[1];
+        String token = (String) param[0];
 
-        redisCacheManager.put(token.concat(methodMD5), CommonUtils.arrayRemoveIndex(param, 0));
+        redisCacheManager.put(token.concat(methodMD5), param);
 
         logger.info("[opencron] Terminal registry to zookeeper");
 
