@@ -26,10 +26,14 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.opencron.common.Constants;
 import org.opencron.common.ext.ExtensionLoader;
+import org.opencron.common.serialize.ObjectInput;
+import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -40,6 +44,8 @@ public class NettyCodecAdapter<T> {
     private static Logger logger = LoggerFactory.getLogger(NettyCodecAdapter.class);
 
     private static Serializer serializer = ExtensionLoader.load(Serializer.class);
+
+    private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     public static NettyCodecAdapter getCodecAdapter() {
         return new NettyCodecAdapter();
@@ -65,7 +71,13 @@ public class NettyCodecAdapter<T> {
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
             try {
                 if (type.isInstance(msg)) {
-                    byte[] data = serializer.encode(msg);
+
+                    ObjectOutput objectOutput = serializer.serialize(outputStream);
+                    objectOutput.writeObject(msg);
+                    objectOutput.flushBuffer();
+                    byte[] data = outputStream.toByteArray();
+                    outputStream.reset();
+
                     out.writeInt(data.length);
                     out.writeBytes(data);
                 } else {
@@ -104,8 +116,10 @@ public class NettyCodecAdapter<T> {
                 }
                 byte[] data = new byte[dataLength];
                 in.readBytes(data);
-                Object object = serializer.decode(data, type);
-                out.add(object);
+
+                ObjectInput objectInput = serializer.deserialize(new ByteArrayInputStream(data));
+                out.add(objectInput.readObject(type));
+
             } catch (Exception e) {
                 if (logger.isErrorEnabled()) {
                     logger.error("[opencron] NettyCodecAdapter decode error:", stackTrace(e));

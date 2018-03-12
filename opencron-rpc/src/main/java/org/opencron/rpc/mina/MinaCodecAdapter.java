@@ -25,9 +25,14 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.*;
 import org.opencron.common.Constants;
 import org.opencron.common.ext.ExtensionLoader;
+import org.opencron.common.serialize.ObjectInput;
+import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 
 public class MinaCodecAdapter implements ProtocolCodecFactory {
@@ -78,7 +83,8 @@ public class MinaCodecAdapter implements ProtocolCodecFactory {
             }
             byte[] data = new byte[dataLength];
             in.get(data);
-            Object obj = serializer.decode(data, type);
+            ObjectInput objectInput = serializer.deserialize(new ByteArrayInputStream(data));
+            Object obj = objectInput.readObject(type);
             out.write(obj);
             return true;
         }
@@ -95,7 +101,14 @@ public class MinaCodecAdapter implements ProtocolCodecFactory {
         @Override
         public void encode(IoSession session, Object msg, ProtocolEncoderOutput out) throws Exception {
             if (type.isInstance(msg)) {
-                byte[] data = serializer.encode(msg);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                ObjectOutput objectOutput = serializer.serialize(outputStream);
+                objectOutput.writeObject(msg);
+                objectOutput.flushBuffer();
+
+                byte[] data = outputStream.toByteArray();
+
                 IoBuffer buffer = IoBuffer.allocate(100);
                 buffer.setAutoExpand(true);
                 buffer.setAutoShrink(true);

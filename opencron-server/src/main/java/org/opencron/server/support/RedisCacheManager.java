@@ -22,6 +22,8 @@
 package org.opencron.server.support;
 
 import org.opencron.common.ext.ExtensionLoader;
+import org.opencron.common.serialize.ObjectInput;
+import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
 import org.opencron.common.util.CommonUtils;
 import org.springframework.cache.Cache;
@@ -30,6 +32,8 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -85,8 +89,9 @@ public class RedisCacheManager implements Cache {
                         return null;
                     }
                     try {
-                        return serializer.decode(value, type);
-                    } catch (IOException e) {
+                        ObjectInput objectInput = serializer.deserialize(new ByteArrayInputStream(value));
+                        return objectInput.readObject(type);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     return null;
@@ -124,7 +129,12 @@ public class RedisCacheManager implements Cache {
                     @Override
                     public Boolean doInRedis(RedisConnection connection) {
                         try {
-                            connection.set(finalKey.getBytes(), serializer.encode(finalValue));
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            ObjectOutput objectOutput = serializer.serialize(outputStream);
+                            objectOutput.writeObject(finalValue);
+                            objectOutput.flushBuffer();
+                            byte[] data = outputStream.toByteArray();
+                            connection.set(finalKey.getBytes(),data);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
