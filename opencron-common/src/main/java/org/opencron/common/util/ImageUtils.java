@@ -43,7 +43,7 @@ public class ImageUtils {
     private static ImageUtils imageUtils;
 
     //获取实例
-    public static ImageUtils instance(File image) throws IOException {
+    public static ImageUtils getInstance(File image) throws IOException {
         if (image.exists()) {
             imageUtils = new ImageUtils();
             imageUtils.originImage = image;

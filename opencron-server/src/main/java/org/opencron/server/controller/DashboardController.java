@@ -288,7 +288,7 @@ public class DashboardController extends BaseController {
             }
 
             //旋转并且裁剪
-            ImageUtils.instance(picFile).rotate(cropper.getRotate()).clip(cropper.getX(), cropper.getY(), cropper.getWidth(), cropper.getHeight()).build();
+            ImageUtils.getInstance(picFile).rotate(cropper.getRotate()).clip(cropper.getX(), cropper.getY(), cropper.getWidth(), cropper.getHeight()).build();
 
             //保存入库.....
             userService.uploadimg(picFile, userId);
