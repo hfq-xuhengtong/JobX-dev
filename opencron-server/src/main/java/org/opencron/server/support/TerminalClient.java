@@ -26,13 +26,16 @@ import org.opencron.common.Constants;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.common.util.IOUtils;
+import org.opencron.common.util.StringUtils;
 import org.opencron.server.domain.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.*;
+import java.util.List;
 
 import static org.opencron.common.util.CommonUtils.notEmpty;
 
@@ -68,11 +71,20 @@ public class TerminalClient {
 
     private boolean closed = false;
 
-    public TerminalClient(WebSocketSession webSocketSession, Terminal terminal) {
+    public TerminalClient(WebSocketSession webSocketSession, Terminal terminal,String clientId) {
         this.webSocketSession = webSocketSession;
         this.terminal = terminal;
-        this.httpSessionId = (String) webSocketSession.getAttributes().get(Constants.PARAM_HTTP_SESSION_ID_KEY);
-        this.clientId = (String) webSocketSession.getAttributes().get(Constants.PARAM_SSH_SESSION_ID_KEY);
+        this.clientId = clientId;
+
+        //解决分布式环境下,不同的server为用户打开的终端实例会话不一致问题,导致根据会话Id查找不到另一个server打开的终端实例的问题
+        List<String> userAgents = webSocketSession.getHandshakeHeaders().get(HttpHeaders.USER_AGENT);
+        if (CommonUtils.notEmpty(userAgents)) {
+            String userAgent = StringUtils.joinString(userAgents);
+            userAgent = userAgent.replaceAll("\\s+","");
+            this.httpSessionId = DigestUtils.md5Hex(userAgent);
+        }else {
+            this.httpSessionId = (String) webSocketSession.getAttributes().get(Constants.PARAM_HTTP_SESSION_ID_KEY);
+        }
         this.sendTempCmdId = this.clientId + this.httpSessionId;
         this.jSch = new JSch();
     }

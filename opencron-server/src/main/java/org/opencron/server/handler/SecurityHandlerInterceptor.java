@@ -88,7 +88,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron]Bad request,redirect to login page");
             }
-            OpencronTools.invalidSession(session);
+            OpencronTools.invalidSession(request);
             return false;
         }
 
@@ -129,7 +129,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron]Bad request,redirect to login page");
                 }
-                OpencronTools.invalidSession(session);
+                OpencronTools.invalidSession(request);
                 return false;
             }
         }

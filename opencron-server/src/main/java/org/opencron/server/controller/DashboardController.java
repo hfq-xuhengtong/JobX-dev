@@ -234,8 +234,8 @@ public class DashboardController extends BaseController {
 
 
     @RequestMapping("logout.htm")
-    public String logout(HttpSession httpSession) throws Exception {
-        OpencronTools.invalidSession(httpSession);
+    public String logout(HttpServletRequest request) throws Exception {
+        OpencronTools.invalidSession(request);
         return "redirect:/";
     }
 

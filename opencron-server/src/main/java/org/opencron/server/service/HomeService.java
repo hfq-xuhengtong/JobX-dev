@@ -82,7 +82,7 @@ public class HomeService {
                     //拿到已经登录的session,将其踢下线
                     SingleLoginListener.removeUserSession(user.getUserId());
                     //已经登录的用户开启的终端全部关闭...
-                    TerminalSession.exit(session.getId());
+                    TerminalSession.exit(request);
                 }
                 SingleLoginListener.addUserSession(httpSession);
             }

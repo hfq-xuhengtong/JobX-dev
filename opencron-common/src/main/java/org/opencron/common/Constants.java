@@ -109,8 +109,6 @@ public class Constants {
 
     public static final String PARAM_PERMISSION_KEY = "permission";
 
-    public static final String PARAM_SSH_SESSION_ID_KEY = "ssh_session_id";
-
     public static final String PARAM_HTTP_SESSION_ID_KEY = "http_session_id";
 
     public static final String PARAM_TERMINAL_TOKEN_KEY = "opencron_term_token";

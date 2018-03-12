@@ -30,11 +30,9 @@ import org.opencron.server.domain.Terminal;
 import static org.opencron.common.util.CommonUtils.toInt;
 
 import org.opencron.server.service.TerminalService;
-import org.opencron.server.support.TerminalClient;
-import org.opencron.server.support.TerminalContext;
-import org.opencron.server.support.TerminalProcessor;
-import org.opencron.server.support.TerminalSession;
+import org.opencron.server.support.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -54,15 +52,14 @@ public class TerminalHandler extends TextWebSocketHandler {
     @Autowired
     private TerminalProcessor terminalProcessor;
 
-    private String sshSessionId;
+    private String terminalToken;
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public synchronized void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
-        sshSessionId = (String) session.getAttributes().get(Constants.PARAM_SSH_SESSION_ID_KEY);
-
-        if (sshSessionId != null) {
-            final Terminal terminal = terminalContext.remove(sshSessionId);
+        terminalToken = terminalContext.getToken();
+        if (terminalToken != null) {
+            final Terminal terminal = terminalContext.remove(terminalToken);
             if (terminal != null) {
                 try {
                     session.sendMessage(new TextMessage("Welcome to opencron Terminal! Connect Starting."));
@@ -125,7 +122,7 @@ public class TerminalHandler extends TextWebSocketHandler {
     private TerminalClient getClient(WebSocketSession session, Terminal terminal) {
         this.terminalClient = TerminalSession.get(session);
         if (this.terminalClient == null && terminal != null) {
-            this.terminalClient = new TerminalClient(session, terminal);
+            this.terminalClient = new TerminalClient(session, terminal,terminalToken);
             TerminalSession.put(session, this.terminalClient);
         }
         return this.terminalClient;
@@ -137,7 +134,7 @@ public class TerminalHandler extends TextWebSocketHandler {
             terminalClient.disconnect();
         }
         //注册实例
-        terminalProcessor.unregistry(sshSessionId);
+        terminalProcessor.unregistry(terminalToken);
     }
 
 }

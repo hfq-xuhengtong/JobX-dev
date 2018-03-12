@@ -35,7 +35,7 @@ import java.util.Map;
 public class TerminalHandShaker extends HttpSessionHandshakeInterceptor {
 
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+    public synchronized boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
             HttpSession session = servletRequest.getServletRequest().getSession();
@@ -43,7 +43,6 @@ public class TerminalHandShaker extends HttpSessionHandshakeInterceptor {
             attributes.put("rows", servletRequest.getServletRequest().getParameter("rows"));
             attributes.put("width", servletRequest.getServletRequest().getParameter("width"));
             attributes.put("height", servletRequest.getServletRequest().getParameter("height"));
-            attributes.put(Constants.PARAM_SSH_SESSION_ID_KEY, session.getAttribute(Constants.PARAM_SSH_SESSION_ID_KEY));
             attributes.put(Constants.PARAM_HTTP_SESSION_ID_KEY, session.getAttribute(Constants.PARAM_HTTP_SESSION_ID_KEY));
         }
         return super.beforeHandshake(request, response, wsHandler, attributes);

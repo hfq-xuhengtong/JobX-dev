@@ -69,21 +69,18 @@ public final class OpencronTools {
         return (Long) session.getAttribute(Constants.PARAM_LOGIN_USER_ID_KEY);
     }
 
-    public static void invalidSession(HttpSession session) throws Exception {
+    public static void invalidSession(HttpServletRequest request) throws Exception {
+        HttpSession session = request.getSession();
         session.removeAttribute(Constants.PARAM_LOGIN_USER_KEY);
         session.removeAttribute(Constants.PARAM_LOGIN_USER_ID_KEY);
         session.removeAttribute(Constants.PARAM_PERMISSION_KEY);
         session.removeAttribute(Constants.PARAM_HTTP_SESSION_ID_KEY);
-        session.removeAttribute(Constants.PARAM_SSH_SESSION_ID_KEY);
+        session.removeAttribute(Constants.PARAM_TERMINAL_TOKEN_KEY);
         session.removeAttribute(Constants.PARAM_CSRF_NAME_KEY);
-        TerminalSession.exit(session.getId());
+        TerminalSession.exit(request);
         session.removeAttribute(Constants.PARAM_LOGIN_MSG_KEY);
         session.removeAttribute(Constants.PARAM_CONTEXT_PATH_NAME_KEY);
         session.invalidate();
-    }
-
-    public static void setSshSessionId(HttpSession session, String sshSessionId) {
-        session.setAttribute(Constants.PARAM_SSH_SESSION_ID_KEY, sshSessionId);
     }
 
     public static String getResourceId() {

@@ -21,10 +21,17 @@
 
 package org.opencron.server.support;
 
+import org.opencron.common.Constants;
+import org.opencron.common.util.CommonUtils;
+import org.opencron.common.util.DigestUtils;
+import org.opencron.common.util.StringUtils;
 import org.opencron.server.domain.Terminal;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -95,11 +102,18 @@ public class TerminalSession implements Serializable {
         return null;
     }
 
-    public static void exit(String httpSessionId) throws IOException {
+    public static void exit(HttpServletRequest request) throws IOException {
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
+        if (userAgent != null) {
+            userAgent = userAgent.replaceAll("\\s+", "");
+            userAgent = DigestUtils.md5Hex(userAgent);
+        }
+
         if (notEmpty(terminalSession)) {
             for (Map.Entry<WebSocketSession, TerminalClient> entry : terminalSession.entrySet()) {
                 TerminalClient terminalClient = entry.getValue();
-                if (terminalClient.getHttpSessionId().equals(httpSessionId)) {
+                if (terminalClient.getHttpSessionId().equals(request.getSession().getId())
+                        || terminalClient.getHttpSessionId().equals(userAgent)) {
                     terminalClient.disconnect();
                     terminalClient.getWebSocketSession().sendMessage(new TextMessage("Sorry! Session was invalidated, so opencron Terminal changed to closed. "));
                     terminalClient.getWebSocketSession().close();

@@ -60,6 +60,6 @@ public class TerminalContext implements Serializable {
     }
 
     public String getToken() {
-        return redisCacheManager.get(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
+        return redisCacheManager.remove(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
     }
 }
