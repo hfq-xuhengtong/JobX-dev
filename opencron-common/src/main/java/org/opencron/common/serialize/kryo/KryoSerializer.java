@@ -42,20 +42,22 @@ public class KryoSerializer implements Serializer {
         @Override
         protected Kryo initialValue() {
             Kryo kryo = new Kryo();
+            kryo.setReferences(false);
             kryo.setInstantiatorStrategy(new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
             return kryo;
         }
     };
 
     @Override
-    public byte[] encode(Object msg) throws IOException {
+    public byte[] encode(Object obj) throws IOException {
         ByteArrayOutputStream byteOut = null;
         Output output = null;
         try {
             byteOut = new ByteArrayOutputStream();
-            output = new Output(byteOut, 1024);
+            output = new Output(byteOut);
             Kryo kryo = KryoHolder.get();
-            kryo.writeObject(output, msg);
+            kryo.register(obj.getClass());
+            kryo.writeObject(output, obj);
             return output.toBytes();
         } finally {
             if (null != byteOut) {
@@ -79,7 +81,9 @@ public class KryoSerializer implements Serializer {
         try {
             inputStream =  new ByteArrayInputStream(bytes);
             input = new Input(inputStream);
-            return KryoHolder.get().readObject(input,type);
+            Kryo kryo = KryoHolder.get();
+            kryo.register(type);
+            return kryo.readObject(input,type);
         } finally {
             if (null != inputStream) {
                 inputStream.close();
