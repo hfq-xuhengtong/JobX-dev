@@ -18,7 +18,6 @@
     <sitemesh:write property='head' />
 
     <script type="text/javascript">
-
         $(document).ready(function() {
 
             <c:if test="${fn:contains(uri,'/notice/')}">
@@ -169,6 +168,21 @@
                 }
             });
         });
+        
+        function userImg(img) {
+            $.ajax({
+                type: "POST",
+                url: "${contextPath}/user/header.do",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status) {
+                        $(img).attr("src","${opencron_user.headerPath}?"+new Date().getTime());
+                    }else {
+                        $(img).attr("src","${contextPath}/static/img/profile-pic.jpg");
+                    }
+                }
+            });
+        }
     </script>
 
 </head>

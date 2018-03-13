@@ -21,6 +21,10 @@
 
 package org.opencron.server.controller;
 
+import org.opencron.common.Constants;
+import org.opencron.common.util.DigestUtils;
+import org.opencron.common.util.IOUtils;
+import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.support.OpencronTools;
 import org.opencron.server.service.AgentService;
 import org.opencron.server.service.UserService;
@@ -37,12 +41,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
 import static org.opencron.common.util.CommonUtils.notEmpty;
+import static org.opencron.common.util.WebUtils.getWebUrlPath;
 
 /**
  * Created by ChenHui on 2016/2/18.
@@ -73,6 +81,21 @@ public class UserController extends BaseController {
         return "/user/detail";
     }
 
+
+    @RequestMapping("header.do")
+    @ResponseBody
+    public Status header(HttpServletRequest request) throws Exception {
+        User user = OpencronTools.getUser(request.getSession());
+        if (user.getHeaderpic() != null) {
+            String name = user.getUserId() + "_140" + user.getPicExtName();
+            String path = request.getServletContext().getRealPath("/").replaceFirst("/$", "") + "/upload/" + name;
+            IOUtils.writeFile(new File(path), user.getHeaderpic().getBinaryStream());
+            user.setHeaderPath(getWebUrlPath(request) + "/upload/" + name);
+            return Status.TRUE;
+        }
+        return Status.FALSE;
+    }
+
     @RequestMapping("add.htm")
     public String add(Model model) {
         List<Role> role = userService.getRoleGroup();
@@ -86,6 +109,7 @@ public class UserController extends BaseController {
         userService.addUser(user);
         return "redirect:/user/view.htm";
     }
+
 
     @RequestMapping("edit/{id}.htm")
     public String editPage(HttpSession session, Model model, @PathVariable("id") Long id) {
