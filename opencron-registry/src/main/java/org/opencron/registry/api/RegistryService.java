@@ -27,24 +27,23 @@ import org.opencron.registry.zookeeper.ZookeeperClient;
 import org.opencron.registry.zookeeper.ZookeeperTransporter;
 
 /**
- *
  * @author benjobs
  */
 public class RegistryService implements Registry {
 
     private ZookeeperTransporter transporter = ExtensionLoader.load(ZookeeperTransporter.class);
 
-    public ZookeeperClient getZKClient(URL url){
-       return transporter.connect(url);
+    public ZookeeperClient getZKClient(URL url) {
+        return transporter.connect(url);
     }
 
     @Override
-    public void register(URL url,String path,boolean ephemeral) {
-        transporter.connect(url).create(path,ephemeral);
+    public void register(URL url, String path, boolean ephemeral) {
+        transporter.connect(url).create(path, ephemeral);
     }
 
     @Override
-    public void unregister(URL url,String path) {
+    public void unregister(URL url, String path) {
         transporter.connect(url).delete(path);
     }
 

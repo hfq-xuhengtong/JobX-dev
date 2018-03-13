@@ -67,15 +67,15 @@ public class Monitor implements Serializable {
     }
 
     public Map<String, String> toMap() {
-        Map<String,String> map = new HashMap<String, String>(0);
-        if (this.cpu!=null) {
+        Map<String, String> map = new HashMap<String, String>(0);
+        if (this.cpu != null) {
             map.put("cpu", this.cpu.toString());
         }
-        if (this.mem!=null) {
-            map.put("mem",this.mem.toString());
+        if (this.mem != null) {
+            map.put("mem", this.mem.toString());
         }
-        if (this.load!=null) {
-            map.put("load",this.load.toString());
+        if (this.load != null) {
+            map.put("load", this.load.toString());
         }
         return map;
     }
@@ -283,7 +283,7 @@ public class Monitor implements Serializable {
 
     public static class Mem implements Serializable {
         private long total = 0L;
-        private  long ram = 0L;
+        private long ram = 0L;
         private long used = 0L;
         private long free = 0L;
 
@@ -296,18 +296,18 @@ public class Monitor implements Serializable {
         private double usedPercent = 0.0D;
         private double freePercent = 0.0D;
 
-        public Mem(org.hyperic.sigar.Mem mem, Swap swap){
-            this.total = mem.getTotal()/1024;
+        public Mem(org.hyperic.sigar.Mem mem, Swap swap) {
+            this.total = mem.getTotal() / 1024;
             this.ram = mem.getRam();
-            this.used = mem.getUsed()/1024;
-            this.free = mem.getFree()/1024;
-            this.actualUsed = mem.getActualUsed()/1024;
-            this.actualFree = mem.getActualFree()/1024;
-            this.usedPercent = mem.getUsedPercent()/1024;
-            this.freePercent = mem.getFreePercent()/1024;
-            this.swapTotal = swap.getTotal()/1024;
-            this.swapFree = swap.getFree()/1024;
-            this.swapUsed = swap.getUsed()/1024;
+            this.used = mem.getUsed() / 1024;
+            this.free = mem.getFree() / 1024;
+            this.actualUsed = mem.getActualUsed() / 1024;
+            this.actualFree = mem.getActualFree() / 1024;
+            this.usedPercent = mem.getUsedPercent() / 1024;
+            this.freePercent = mem.getFreePercent() / 1024;
+            this.swapTotal = swap.getTotal() / 1024;
+            this.swapFree = swap.getFree() / 1024;
+            this.swapUsed = swap.getUsed() / 1024;
         }
 
         public long getTotal() {
@@ -422,7 +422,7 @@ public class Monitor implements Serializable {
         private double five;//5分钟的平均负载
         private double fifteen;//15分钟的评价负载
 
-        public Load(double[] loads){
+        public Load(double[] loads) {
             this.one = loads[0];
             this.five = loads[1];
             this.fifteen = loads[2];

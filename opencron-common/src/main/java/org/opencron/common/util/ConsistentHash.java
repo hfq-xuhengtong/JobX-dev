@@ -26,7 +26,7 @@ import java.util.*;
 public class ConsistentHash<T> {
 
     private final MurmurHash murmurHash;
-    private int numberOfReplicas =  2 << 3;
+    private int numberOfReplicas = 2 << 3;
     private final SortedMap<Long, T> circle = new TreeMap<Long, T>();
 
     public ConsistentHash(Collection<T> nodes) {

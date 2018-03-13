@@ -11,14 +11,14 @@
     <bean id="webSocketHandShaker" class="org.opencron.server.websocket.TerminalHandShaker"/>
 
     <websocket:handlers>
-        <websocket:mapping path="/terminal.ws" handler="terminalHandler" />
+        <websocket:mapping path="/terminal.ws" handler="terminalHandler"/>
         <websocket:handshake-interceptors>
             <ref bean="webSocketHandShaker"/>
         </websocket:handshake-interceptors>
     </websocket:handlers>
 
     <websocket:handlers>
-        <websocket:mapping path="/terminal.js" handler="terminalHandler" />
+        <websocket:mapping path="/terminal.js" handler="terminalHandler"/>
         <websocket:handshake-interceptors>
             <ref bean="webSocketHandShaker"/>
         </websocket:handshake-interceptors>

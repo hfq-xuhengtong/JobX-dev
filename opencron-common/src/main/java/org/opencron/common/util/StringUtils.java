@@ -929,11 +929,11 @@ public abstract class StringUtils {
         if (CommonUtils.isEmpty(agentIds)) {
             return new Long[0];
         }
-        String array[] = stringToArray(agentIds,",");
+        String array[] = stringToArray(agentIds, ",");
         if (CommonUtils.isEmpty(array)) return new Long[0];
 
         Long longArray[] = new Long[array.length];
-        for (int i=0;i<array.length;i++){
+        for (int i = 0; i < array.length; i++) {
             longArray[i] = Long.parseLong(array[i]);
         }
         return longArray;
@@ -943,11 +943,11 @@ public abstract class StringUtils {
         if (CommonUtils.isEmpty(agentIds)) {
             return new Integer[0];
         }
-        String array[] = stringToArray(agentIds,",");
+        String array[] = stringToArray(agentIds, ",");
         if (CommonUtils.isEmpty(array)) return new Integer[0];
 
         Integer intArray[] = new Integer[array.length];
-        for (int i=0;i<array.length;i++){
+        for (int i = 0; i < array.length; i++) {
             intArray[i] = Integer.parseInt(array[i]);
         }
         return intArray;

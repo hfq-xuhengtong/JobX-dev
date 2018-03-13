@@ -53,6 +53,7 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
                     stateChanged(StateListener.CONNECTED);
                 }
             }
+
             public void handleNewSession() throws Exception {
                 stateChanged(StateListener.RECONNECTED);
             }

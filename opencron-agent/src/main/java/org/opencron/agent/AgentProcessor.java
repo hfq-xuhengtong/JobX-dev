@@ -306,7 +306,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         if (isEmpty(newPassword)) {
             return response.setSuccess(false).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setMessage("密码不能为空").end();
         }
-        SystemPropertyUtils.setProperty(Constants.PARAM_OPENCRON_PASSWORD_KEY,newPassword);
+        SystemPropertyUtils.setProperty(Constants.PARAM_OPENCRON_PASSWORD_KEY, newPassword);
         IOUtils.writeText(Constants.OPENCRON_PASSWORD_FILE, newPassword, "UTF-8");
         return response.setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
     }

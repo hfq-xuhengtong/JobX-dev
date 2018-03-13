@@ -87,7 +87,7 @@ public class TerminalProcessor {
 
         Method[] methods = this.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if ( ReflectUtils.methodHasAnnotation(method,MethodMark.class) ) {
+            if (ReflectUtils.methodHasAnnotation(method, MethodMark.class)) {
                 method.setAccessible(true);
                 String methodName = DigestUtils.md5Hex(method.getName());
                 methodMap.put(methodName, method);
@@ -158,7 +158,7 @@ public class TerminalProcessor {
      * @param methodName
      * @param param
      */
-    public synchronized void doWork(String methodName, Status status,Object... param) throws Exception {
+    public synchronized void doWork(String methodName, Status status, Object... param) throws Exception {
         String methodMD5 = DigestUtils.md5Hex(methodName);
         String token = (String) param[0];
 
@@ -173,7 +173,7 @@ public class TerminalProcessor {
         String lock = data.replace(ZK_TERM_METHOD_PREFIX, ZK_TERM_METHOD_DONE_PREFIX);
         this.methodLock.put(lock, lock);
         //等待处理结果...
-        while (this.methodLock.containsKey(lock));
+        while (this.methodLock.containsKey(lock)) ;
 
         Status result = redisCacheManager.remove(data, Status.class);
         status.setStatus(result == null ? false : result.isStatus());
@@ -244,8 +244,6 @@ public class TerminalProcessor {
     public void unregistry(String termId) {
         this.registryService.unregister(registryURL, registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId);
     }
-
-
 
 
 }

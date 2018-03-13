@@ -47,8 +47,8 @@ public final class MurmurHash {
     }
 
     /**
-     *  * Generates 32 bit hash from byte array of the given length and  * seed.
-     *  *  * @param data byte array to hash  * @param length length of the array
+     * * Generates 32 bit hash from byte array of the given length and  * seed.
+     * *  * @param data byte array to hash  * @param length length of the array
      * to hash  * @param seed initial seed value  * @return 32 bit hash of the
      * given array
      */
@@ -88,7 +88,7 @@ public final class MurmurHash {
     }
 
     /**
-     *  * Generates 32 bit hash from byte array with default seed value.  *  * @param
+     * * Generates 32 bit hash from byte array with default seed value.  *  * @param
      * data byte array to hash  * @param length length of the array to hash  * @return
      * 32 bit hash of the given array
      */
@@ -102,8 +102,8 @@ public final class MurmurHash {
     }
 
     /**
-     *  * Generates 64 bit hash from byte array of the given length and seed.  *
-     *  * @param data byte array to hash  * @param length length of the array to
+     * * Generates 64 bit hash from byte array of the given length and seed.  *
+     * * @param data byte array to hash  * @param length length of the array to
      * hash  * @param seed initial seed value  * @return 64 bit hash of the
      * given array
      */
@@ -153,7 +153,7 @@ public final class MurmurHash {
     }
 
     /**
-     *  * Generates 64 bit hash from byte array with default seed value.  *  * @param
+     * * Generates 64 bit hash from byte array with default seed value.  *  * @param
      * data byte array to hash  * @param length length of the array to hash  * @return
      * 64 bit hash of the given string
      */

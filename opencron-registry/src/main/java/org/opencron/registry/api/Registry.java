@@ -21,7 +21,6 @@
 package org.opencron.registry.api;
 
 /**
- *
  * @author benjobs
  */
 
@@ -36,11 +35,11 @@ public interface Registry {
     /**
      * 注册数据
      */
-    void register(URL url,String path,boolean ephemeral);
+    void register(URL url, String path, boolean ephemeral);
 
     /**
      * 取消注册.
      */
-    void unregister(URL url,String path);
+    void unregister(URL url, String path);
 
 }

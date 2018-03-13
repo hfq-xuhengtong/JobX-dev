@@ -169,7 +169,7 @@ public class TerminalController extends BaseController {
     @ResponseBody
     public Status resize(String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
         Status status = Status.TRUE;
-        terminalProcessor.doWork("resize",status,token,cols,rows,width,height);
+        terminalProcessor.doWork("resize", status, token, cols, rows, width, height);
         return status;
     }
 
@@ -177,7 +177,7 @@ public class TerminalController extends BaseController {
     @ResponseBody
     public Status sendAll(String token, String cmd) throws Exception {
         Status status = Status.TRUE;
-        terminalProcessor.doWork("sendAll",status,token,cmd);
+        terminalProcessor.doWork("sendAll", status, token, cmd);
         return status;
     }
 
@@ -185,13 +185,13 @@ public class TerminalController extends BaseController {
     @ResponseBody
     public Status theme(String token, String theme) throws Exception {
         Status status = Status.TRUE;
-        terminalProcessor.doWork("theme",status,token,theme);
+        terminalProcessor.doWork("theme", status, token, theme);
         return status;
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status upload(HttpSession httpSession,String token, @RequestParam(value = "file", required = false) MultipartFile file, String path) {
+    public Status upload(HttpSession httpSession, String token, @RequestParam(value = "file", required = false) MultipartFile file, String path) {
         Status status = Status.TRUE;
         String tmpPath = httpSession.getServletContext().getRealPath("/") + "upload" + File.separator;
         File tempFile = new File(tmpPath, file.getOriginalFilename());
@@ -204,7 +204,7 @@ public class TerminalController extends BaseController {
                     path = path.substring(0, path.lastIndexOf("/"));
                 }
             }
-            terminalProcessor.doWork("upload",status,token,tempFile,path + "/" + file.getOriginalFilename(), file.getSize());
+            terminalProcessor.doWork("upload", status, token, tempFile, path + "/" + file.getOriginalFilename(), file.getSize());
             tempFile.delete();
         } catch (Exception e) {
         }

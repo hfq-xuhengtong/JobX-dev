@@ -41,7 +41,7 @@ public class Constants {
 
     public static final String ZK_REGISTRY_JOB_PATH = "/opencron/job";
 
-    public static final String ZK_REGISTRY_TERM_PATH = "/opencron/term" ;
+    public static final String ZK_REGISTRY_TERM_PATH = "/opencron/term";
 
     public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
@@ -168,7 +168,6 @@ public class Constants {
      * kill file
      */
     public static final File OPENCRON_KILL_SHELL = new File(OPENCRON_HOME + "/bin/kill.sh");
-
 
 
     public enum StatusCode implements Serializable {
@@ -601,7 +600,7 @@ public class Constants {
 
         private Integer type;
 
-        SshType(Integer type){
+        SshType(Integer type) {
             this.type = type;
         }
 

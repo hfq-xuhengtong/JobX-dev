@@ -55,6 +55,7 @@ public class MacUtils {
 
     /**
      * 获取本机所有的网卡(过滤虚拟网卡)
+     *
      * @return
      */
     public static Set<String> getAllMac() {
@@ -63,7 +64,7 @@ public class MacUtils {
             Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
             while (enumeration.hasMoreElements()) {
                 NetworkInterface network = enumeration.nextElement();
-                if (network == null || network.getHardwareAddress() == null || network.isLoopback() || network.isVirtual() || !network.isUp() ) {
+                if (network == null || network.getHardwareAddress() == null || network.isLoopback() || network.isVirtual() || !network.isUp()) {
                     continue;
                 }
                 byte[] address = network.getHardwareAddress();

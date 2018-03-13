@@ -71,7 +71,7 @@ public class TerminalClient {
 
     private boolean closed = false;
 
-    public TerminalClient(WebSocketSession webSocketSession, Terminal terminal,String clientId) {
+    public TerminalClient(WebSocketSession webSocketSession, Terminal terminal, String clientId) {
         this.webSocketSession = webSocketSession;
         this.terminal = terminal;
         this.clientId = clientId;
@@ -80,9 +80,9 @@ public class TerminalClient {
         List<String> userAgents = webSocketSession.getHandshakeHeaders().get(HttpHeaders.USER_AGENT);
         if (CommonUtils.notEmpty(userAgents)) {
             String userAgent = StringUtils.joinString(userAgents);
-            userAgent = userAgent.replaceAll("\\s+","");
+            userAgent = userAgent.replaceAll("\\s+", "");
             this.httpSessionId = DigestUtils.md5Hex(userAgent);
-        }else {
+        } else {
             this.httpSessionId = (String) webSocketSession.getAttributes().get(Constants.PARAM_HTTP_SESSION_ID_KEY);
         }
         this.sendTempCmdId = this.clientId + this.httpSessionId;

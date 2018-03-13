@@ -423,7 +423,7 @@ public class JobService {
         Integer[] cronTypes = new Integer[2];
         cronTypes[0] = CronType.CRONTAB.getType();
         cronTypes[1] = CronType.QUARTZ.getType();
-        Map params = ParamsMap.map().set("cronType", cronTypes).set("deleted", false).set("pause",false);
+        Map params = ParamsMap.map().set("cronType", cronTypes).set("deleted", false).set("pause", false);
         String hql = "from Job where cronType in (:cronType) and deleted=:deleted and pause=:pause";
         return queryDao.hqlQuery(hql, params);
     }

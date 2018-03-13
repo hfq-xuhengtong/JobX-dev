@@ -51,13 +51,13 @@ public class AgentMonitor {
         CpuPerc cpuList[] = sigar.getCpuPercList();
         List<Monitor.CPU> cpus = new ArrayList<Monitor.CPU>();
         for (int i = 0; i < infos.length; i++) {
-            cpus.add(new Monitor.CPU(i,infos[i],cpuList[i]));
+            cpus.add(new Monitor.CPU(i, infos[i], cpuList[i]));
         }
         return cpus;
     }
 
-    public  Monitor.Mem getMem() throws SigarException {
-        return new Monitor.Mem(sigar.getMem(),sigar.getSwap());
+    public Monitor.Mem getMem() throws SigarException {
+        return new Monitor.Mem(sigar.getMem(), sigar.getSwap());
     }
 
     public Monitor.Load getLoad() throws SigarException {

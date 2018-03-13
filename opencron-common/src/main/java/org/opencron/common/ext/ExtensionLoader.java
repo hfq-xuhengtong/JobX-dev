@@ -184,7 +184,7 @@ public class ExtensionLoader<T> {
     }
 
     private String getSpiKey(String spiName) {
-        if (spiName!=null) {
+        if (spiName != null) {
             return spiName.concat("_").concat(this.type.getName());
         }
         return this.type.getName();

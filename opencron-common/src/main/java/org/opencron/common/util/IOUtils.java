@@ -123,8 +123,8 @@ public abstract class IOUtils implements Serializable {
                 output.write((byte) r);
             }
 
-        }finally {
-            if (output!=null) {
+        } finally {
+            if (output != null) {
                 output.flush();
                 output.close();
                 output = null;

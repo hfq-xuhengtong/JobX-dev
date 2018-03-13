@@ -24,7 +24,7 @@ package org.opencron.server.vo;
 
 import java.io.Serializable;
 
-public class Status implements Serializable{
+public class Status implements Serializable {
 
     private boolean status;
 

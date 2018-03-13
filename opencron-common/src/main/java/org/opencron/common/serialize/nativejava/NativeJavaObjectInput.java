@@ -20,7 +20,6 @@
  */
 
 
-
 package org.opencron.common.serialize.nativejava;
 
 

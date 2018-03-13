@@ -30,6 +30,6 @@
 
     <context:annotation-config/>
 
-    <aop:aspectj-autoproxy />
+    <aop:aspectj-autoproxy/>
 
 </beans>

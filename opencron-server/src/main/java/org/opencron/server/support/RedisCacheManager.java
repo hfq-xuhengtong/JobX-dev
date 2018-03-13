@@ -107,7 +107,7 @@ public class RedisCacheManager implements Cache {
 
 
     public <T> T remove(Object key, final Class<T> type) {
-        T t = get(key,type);
+        T t = get(key, type);
         evict(key);
         return t;
     }
@@ -134,7 +134,7 @@ public class RedisCacheManager implements Cache {
                             objectOutput.writeObject(finalValue);
                             objectOutput.flushBuffer();
                             byte[] data = outputStream.toByteArray();
-                            connection.set(finalKey.getBytes(),data);
+                            connection.set(finalKey.getBytes(), data);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

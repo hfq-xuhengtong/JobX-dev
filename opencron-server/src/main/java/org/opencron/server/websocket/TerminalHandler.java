@@ -122,7 +122,7 @@ public class TerminalHandler extends TextWebSocketHandler {
     private TerminalClient getClient(WebSocketSession session, Terminal terminal) {
         this.terminalClient = TerminalSession.get(session);
         if (this.terminalClient == null && terminal != null) {
-            this.terminalClient = new TerminalClient(session, terminal,terminalToken);
+            this.terminalClient = new TerminalClient(session, terminal, terminalToken);
             TerminalSession.put(session, this.terminalClient);
         }
         return this.terminalClient;

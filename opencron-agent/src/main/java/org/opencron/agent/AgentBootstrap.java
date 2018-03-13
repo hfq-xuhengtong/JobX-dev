@@ -188,7 +188,7 @@ public class AgentBootstrap implements Serializable {
         if (!libPath.contains(path)) {
             libPath += ";" + path;
         }
-        SystemPropertyUtils.setProperty(Constants.PARAM_JAVA_LIBRARY_PATH_KEY,libPath);
+        SystemPropertyUtils.setProperty(Constants.PARAM_JAVA_LIBRARY_PATH_KEY, libPath);
     }
 
     private void start() {
@@ -219,13 +219,13 @@ public class AgentBootstrap implements Serializable {
              * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
              */
             //mac_password
-            this.registryPath = String.format("%s/%s_%s",Constants.ZK_REGISTRY_AGENT_PATH,machineId,this.password);
+            this.registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId, this.password);
 
             if (CommonUtils.isEmpty(this.host)) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("[opencron] agent host not input,auto register can not be run，you can add this agent by yourself");
                 }
-            }else {
+            } else {
                 //mac_password_host_port
                 this.registryPath = String.format("%s/%s_%s_%s_%s",
                         Constants.ZK_REGISTRY_AGENT_PATH,

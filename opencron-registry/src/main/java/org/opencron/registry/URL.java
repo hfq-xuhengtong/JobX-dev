@@ -61,6 +61,7 @@ public final class URL {
         this.path = null;
         this.parameters = null;
     }
+
     public URL(String protocol, String host, int port) {
         this(protocol, null, null, host, port, null, (Map<String, String>) null);
     }

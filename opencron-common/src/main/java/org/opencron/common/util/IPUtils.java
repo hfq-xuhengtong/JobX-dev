@@ -142,17 +142,17 @@ public abstract class IPUtils {
         try {
             url = new URL(chinaz);
             urlConnection = (HttpURLConnection) url.openConnection();
-            in = new BufferedReader( new InputStreamReader(urlConnection.getInputStream(),"UTF-8"));
-            while((read=in.readLine())!=null){
-                inputLine.append(read+"\r\n");
+            in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+            while ((read = in.readLine()) != null) {
+                inputLine.append(read + "\r\n");
             }
             //System.out.println(inputLine.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }finally{
-            if(in!=null){
+        } finally {
+            if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
@@ -164,7 +164,7 @@ public abstract class IPUtils {
 
         Pattern p = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
         Matcher m = p.matcher(inputLine.toString());
-        if(m.find()){
+        if (m.find()) {
             String ipstr = m.group(1);
             ip = ipstr;
             //System.out.println(ipstr);
