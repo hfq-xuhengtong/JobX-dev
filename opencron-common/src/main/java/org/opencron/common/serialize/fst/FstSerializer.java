@@ -23,12 +23,11 @@ package org.opencron.common.serialize.fst;
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
+import org.opencron.common.serialize.support.AbstractSerializer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-public class FstSerializer implements Serializer {
+public class FstSerializer extends AbstractSerializer implements Serializer {
 
     public byte getContentTypeId() {
         return 9;
@@ -38,11 +37,16 @@ public class FstSerializer implements Serializer {
         return "x-application/fst";
     }
 
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new FstObjectOutput(out);
+    @Override
+    public byte[] serialize(Object object) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutput objectOutput = new FstObjectOutput(outputStream);
+        return super.serialize(outputStream,objectOutput,object);
     }
 
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new FstObjectInput(is);
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        ObjectInput objectInput =  new FstObjectInput(new ByteArrayInputStream(bytes));
+        return super.deserialize(objectInput,clazz);
     }
 }

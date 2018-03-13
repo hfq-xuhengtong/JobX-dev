@@ -24,12 +24,11 @@ package org.opencron.common.serialize.hessian;
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
+import org.opencron.common.serialize.support.AbstractSerializer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-public class HessianSerializer implements Serializer {
+public class HessianSerializer extends AbstractSerializer implements Serializer {
 
     public static final byte ID = 2;
 
@@ -41,12 +40,17 @@ public class HessianSerializer implements Serializer {
         return "x-application/hessian";
     }
 
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new HessianObjectOutput(out);
+    @Override
+    public byte[] serialize(Object object) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutput objectOutput = new HessianObjectOutput(outputStream);
+        return super.serialize(outputStream,objectOutput,object);
     }
 
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new HessianObjectInput(is);
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        ObjectInput objectInput =  new HessianObjectInput(new ByteArrayInputStream(bytes));
+        return super.deserialize(objectInput,clazz);
     }
 
 }

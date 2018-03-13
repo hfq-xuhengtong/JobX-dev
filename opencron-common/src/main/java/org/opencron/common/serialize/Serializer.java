@@ -24,9 +24,6 @@ package org.opencron.common.serialize;
 import org.opencron.common.ext.SPI;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 /**
  * Serialization. (SPI, Singleton, ThreadSafe)
  */
@@ -50,19 +47,18 @@ public interface Serializer {
     /**
      * create serializer
      *
-     * @param output
      * @return serializer
      * @throws IOException
      */
-    ObjectOutput serialize(OutputStream output) throws IOException;
+    byte[] serialize(Object object) throws IOException;
 
     /**
      * create deserializer
      *
-     * @param input
+     * @param bytes
      * @return deserializer
      * @throws IOException
      */
-    ObjectInput deserialize(InputStream input) throws IOException;
+    <T>T deserialize(byte[] bytes,Class<T> clazz) throws IOException;
 
 }

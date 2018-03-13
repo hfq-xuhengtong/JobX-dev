@@ -22,8 +22,6 @@
 package org.opencron.server.support;
 
 import org.opencron.common.ext.ExtensionLoader;
-import org.opencron.common.serialize.ObjectInput;
-import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
 import org.opencron.common.util.CommonUtils;
 import org.springframework.cache.Cache;
@@ -32,8 +30,6 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -89,8 +85,7 @@ public class RedisCacheManager implements Cache {
                         return null;
                     }
                     try {
-                        ObjectInput objectInput = serializer.deserialize(new ByteArrayInputStream(value));
-                        return objectInput.readObject(type);
+                        return serializer.deserialize(value,finalType);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -129,11 +124,7 @@ public class RedisCacheManager implements Cache {
                     @Override
                     public Boolean doInRedis(RedisConnection connection) {
                         try {
-                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                            ObjectOutput objectOutput = serializer.serialize(outputStream);
-                            objectOutput.writeObject(finalValue);
-                            objectOutput.flushBuffer();
-                            byte[] data = outputStream.toByteArray();
+                            byte[] data =  serializer.serialize(finalValue);
                             connection.set(finalKey.getBytes(), data);
                         } catch (IOException e) {
                             e.printStackTrace();

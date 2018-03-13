@@ -25,15 +25,14 @@ package org.opencron.common.serialize.kryo;
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
+import org.opencron.common.serialize.support.AbstractSerializer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * TODO for now kryo serialization doesn't deny classes that don't implement the serializable interface
  */
-public class KryoSerializer implements Serializer {
+public class KryoSerializer extends AbstractSerializer implements Serializer {
 
     public byte getContentTypeId() {
         return 8;
@@ -43,11 +42,17 @@ public class KryoSerializer implements Serializer {
         return "x-application/kryo";
     }
 
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new KryoObjectOutput(out);
+    @Override
+    public byte[] serialize(Object object) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutput objectOutput = new KryoObjectOutput(outputStream);
+        return super.serialize(outputStream,objectOutput,object);
     }
 
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new KryoObjectInput(is);
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        ObjectInput objectInput =  new KryoObjectInput(new ByteArrayInputStream(bytes));
+        return super.deserialize(objectInput,clazz);
     }
+
 }

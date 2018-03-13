@@ -25,12 +25,11 @@ package org.opencron.common.serialize.nativejava;
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
+import org.opencron.common.serialize.support.AbstractSerializer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-public class NativeJavaSerializer implements Serializer {
+public class NativeJavaSerializer extends AbstractSerializer implements Serializer {
 
     public static final String NAME = "nativejava";
 
@@ -42,11 +41,17 @@ public class NativeJavaSerializer implements Serializer {
         return "x-application/nativejava";
     }
 
-    public ObjectOutput serialize(OutputStream output) throws IOException {
-        return new NativeJavaObjectOutput(output);
+    @Override
+    public byte[] serialize(Object object) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutput objectOutput = new NativeJavaObjectOutput(outputStream);
+        return super.serialize(outputStream,objectOutput,object);
     }
 
-    public ObjectInput deserialize(InputStream input) throws IOException {
-        return new NativeJavaObjectInput(input);
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        ObjectInput objectInput =  new NativeJavaObjectInput(new ByteArrayInputStream(bytes));
+        return super.deserialize(objectInput,clazz);
     }
+
 }

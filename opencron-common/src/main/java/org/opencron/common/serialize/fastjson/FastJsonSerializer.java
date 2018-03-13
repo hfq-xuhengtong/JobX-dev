@@ -23,15 +23,14 @@ package org.opencron.common.serialize.fastjson;
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
+import org.opencron.common.serialize.support.AbstractSerializer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * FastJsonSerialization
  */
-public class FastJsonSerializer implements Serializer {
+public class FastJsonSerializer extends AbstractSerializer implements Serializer {
 
     public byte getContentTypeId() {
         return 6;
@@ -41,12 +40,17 @@ public class FastJsonSerializer implements Serializer {
         return "text/json";
     }
 
-    public ObjectOutput serialize(OutputStream output) throws IOException {
-        return new FastJsonObjectOutput(output);
+    @Override
+    public byte[] serialize(Object object) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutput objectOutput = new FastJsonObjectOutput(outputStream);
+        return super.serialize(outputStream,objectOutput,object);
     }
 
-    public ObjectInput deserialize(InputStream input) throws IOException {
-        return new FastJsonObjectInput(input);
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        ObjectInput objectInput =  new FastJsonObjectInput(new ByteArrayInputStream(bytes));
+        return super.deserialize(objectInput,clazz);
     }
 
 }

@@ -24,12 +24,11 @@ package org.opencron.common.serialize.java;
 import org.opencron.common.serialize.ObjectInput;
 import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
+import org.opencron.common.serialize.support.AbstractSerializer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-public class JavaSerializer implements Serializer {
+public class JavaSerializer extends AbstractSerializer implements Serializer {
 
     public byte getContentTypeId() {
         return 3;
@@ -39,12 +38,17 @@ public class JavaSerializer implements Serializer {
         return "x-application/java";
     }
 
-    public ObjectOutput serialize(OutputStream out) throws IOException {
-        return new JavaObjectOutput(out);
+    @Override
+    public byte[] serialize(Object object) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutput objectOutput = new JavaObjectOutput(outputStream);
+        return super.serialize(outputStream,objectOutput,object);
     }
 
-    public ObjectInput deserialize(InputStream is) throws IOException {
-        return new JavaObjectInput(is);
+    @Override
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        ObjectInput objectInput =  new JavaObjectInput(new ByteArrayInputStream(bytes));
+        return super.deserialize(objectInput,clazz);
     }
 
 }
