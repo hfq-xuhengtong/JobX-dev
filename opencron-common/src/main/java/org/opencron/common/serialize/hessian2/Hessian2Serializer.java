@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
+package org.opencron.common.serialize.hessian2;
 
 
 import org.opencron.common.serialize.ObjectInput;
@@ -28,7 +28,7 @@ import org.opencron.common.serialize.support.AbstractSerializer;
 
 import java.io.*;
 
-public class HessianSerializer extends AbstractSerializer implements Serializer {
+public class Hessian2Serializer extends AbstractSerializer implements Serializer {
 
     public static final byte ID = 2;
 
@@ -43,13 +43,13 @@ public class HessianSerializer extends AbstractSerializer implements Serializer 
     @Override
     public byte[] serialize(Object object) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ObjectOutput objectOutput = new HessianObjectOutput(outputStream);
+        ObjectOutput objectOutput = new Hessian2ObjectOutput(outputStream);
         return super.serialize(outputStream,objectOutput,object);
     }
 
     @Override
     public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
-        ObjectInput objectInput =  new HessianObjectInput(new ByteArrayInputStream(bytes));
+        ObjectInput objectInput =  new Hessian2ObjectInput(new ByteArrayInputStream(bytes));
         return super.deserialize(objectInput,clazz);
     }
 

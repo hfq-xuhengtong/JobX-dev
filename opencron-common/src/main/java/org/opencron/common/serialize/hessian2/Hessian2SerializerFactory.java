@@ -18,15 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
+package org.opencron.common.serialize.hessian2;
 
 import com.caucho.hessian.io.SerializerFactory;
 
-public class HessianSerializerFactory extends SerializerFactory {
+public class Hessian2SerializerFactory extends SerializerFactory {
 
-    public static final SerializerFactory SERIALIZER_FACTORY = new HessianSerializerFactory();
+    public static final SerializerFactory SERIALIZER_FACTORY = new Hessian2SerializerFactory();
 
-    private HessianSerializerFactory() {
+    private Hessian2SerializerFactory() {
     }
 
     @Override

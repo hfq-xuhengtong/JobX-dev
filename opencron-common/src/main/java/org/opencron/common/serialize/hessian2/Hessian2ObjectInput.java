@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
+package org.opencron.common.serialize.hessian2;
 
 import com.caucho.hessian.io.Hessian2Input;
 import org.opencron.common.serialize.ObjectInput;
@@ -30,59 +30,59 @@ import java.lang.reflect.Type;
 /**
  * Hessian2 Object input.
  */
-public class HessianObjectInput implements ObjectInput {
+public class Hessian2ObjectInput implements ObjectInput {
 
-    private final Hessian2Input mH2i;
+    private final Hessian2Input hessian2Input;
 
-    public HessianObjectInput(InputStream is) {
-        mH2i = new Hessian2Input(is);
-        mH2i.setSerializerFactory(HessianSerializerFactory.SERIALIZER_FACTORY);
+    public Hessian2ObjectInput(InputStream is) {
+        hessian2Input = new Hessian2Input(is);
+        hessian2Input.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);
     }
 
     public boolean readBool() throws IOException {
-        return mH2i.readBoolean();
+        return hessian2Input.readBoolean();
     }
 
     public byte readByte() throws IOException {
-        return (byte) mH2i.readInt();
+        return (byte) hessian2Input.readInt();
     }
 
     public short readShort() throws IOException {
-        return (short) mH2i.readInt();
+        return (short) hessian2Input.readInt();
     }
 
     public int readInt() throws IOException {
-        return mH2i.readInt();
+        return hessian2Input.readInt();
     }
 
     public long readLong() throws IOException {
-        return mH2i.readLong();
+        return hessian2Input.readLong();
     }
 
     public float readFloat() throws IOException {
-        return (float) mH2i.readDouble();
+        return (float) hessian2Input.readDouble();
     }
 
     public double readDouble() throws IOException {
-        return mH2i.readDouble();
+        return hessian2Input.readDouble();
     }
 
     public byte[] readBytes() throws IOException {
-        return mH2i.readBytes();
+        return hessian2Input.readBytes();
     }
 
     public String readUTF() throws IOException {
-        return mH2i.readString();
+        return hessian2Input.readString();
     }
 
     public Object readObject() throws IOException {
-        return mH2i.readObject();
+        return hessian2Input.readObject();
     }
 
     @SuppressWarnings("unchecked")
     public <T> T readObject(Class<T> cls) throws IOException,
             ClassNotFoundException {
-        return (T) mH2i.readObject(cls);
+        return (T) hessian2Input.readObject(cls);
     }
 
     public <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException {

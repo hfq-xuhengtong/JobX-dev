@@ -1,6 +1,6 @@
 fastjson=org.opencron.common.serialize.fastjson.FastJsonSerializer
 fst=org.opencron.common.serialize.fst.FstSerializer
-hessian=org.opencron.common.serialize.hessian.HessianSerializer
+hessian2=org.opencron.common.serialize.hessian2.Hessian2Serializer
 kryo=org.opencron.common.serialize.kryo.KryoSerializer
 java=org.opencron.common.serialize.java.JavaSerializer
 nativejava=org.opencron.common.serialize.nativejava.NativeJavaSerializer

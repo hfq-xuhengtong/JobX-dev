@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.common.serialize.hessian;
+package org.opencron.common.serialize.hessian2;
 
 
 import com.caucho.hessian.io.Hessian2Output;
@@ -30,60 +30,60 @@ import java.io.OutputStream;
 /**
  * Hessian2 Object output.
  */
-public class HessianObjectOutput implements ObjectOutput {
+public class Hessian2ObjectOutput implements ObjectOutput {
 
-    private final Hessian2Output mH2o;
+    private final Hessian2Output hessian2Output;
 
-    public HessianObjectOutput(OutputStream os) {
-        mH2o = new Hessian2Output(os);
-        mH2o.setSerializerFactory(HessianSerializerFactory.SERIALIZER_FACTORY);
+    public Hessian2ObjectOutput(OutputStream os) {
+        hessian2Output = new Hessian2Output(os);
+        hessian2Output.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);
     }
 
     public void writeBool(boolean v) throws IOException {
-        mH2o.writeBoolean(v);
+        hessian2Output.writeBoolean(v);
     }
 
     public void writeByte(byte v) throws IOException {
-        mH2o.writeInt(v);
+        hessian2Output.writeInt(v);
     }
 
     public void writeShort(short v) throws IOException {
-        mH2o.writeInt(v);
+        hessian2Output.writeInt(v);
     }
 
     public void writeInt(int v) throws IOException {
-        mH2o.writeInt(v);
+        hessian2Output.writeInt(v);
     }
 
     public void writeLong(long v) throws IOException {
-        mH2o.writeLong(v);
+        hessian2Output.writeLong(v);
     }
 
     public void writeFloat(float v) throws IOException {
-        mH2o.writeDouble(v);
+        hessian2Output.writeDouble(v);
     }
 
     public void writeDouble(double v) throws IOException {
-        mH2o.writeDouble(v);
+        hessian2Output.writeDouble(v);
     }
 
     public void writeBytes(byte[] b) throws IOException {
-        mH2o.writeBytes(b);
+        hessian2Output.writeBytes(b);
     }
 
     public void writeBytes(byte[] b, int off, int len) throws IOException {
-        mH2o.writeBytes(b, off, len);
+        hessian2Output.writeBytes(b, off, len);
     }
 
     public void writeUTF(String v) throws IOException {
-        mH2o.writeString(v);
+        hessian2Output.writeString(v);
     }
 
     public void writeObject(Object obj) throws IOException {
-        mH2o.writeObject(obj);
+        hessian2Output.writeObject(obj);
     }
 
     public void flushBuffer() throws IOException {
-        mH2o.flushBuffer();
+        hessian2Output.flushBuffer();
     }
 }
