@@ -21,17 +21,13 @@
 
 package org.opencron.server.support;
 
-import org.opencron.common.Constants;
-import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.DigestUtils;
-import org.opencron.common.util.StringUtils;
 import org.opencron.server.domain.Terminal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;

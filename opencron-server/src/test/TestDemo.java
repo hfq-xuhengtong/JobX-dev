@@ -1,11 +1,6 @@
 import org.junit.Test;
 import org.opencron.common.ext.ExtensionLoader;
-import org.opencron.common.serialize.ObjectInput;
-import org.opencron.common.serialize.ObjectOutput;
 import org.opencron.common.serialize.Serializer;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 
 public class TestDemo {
@@ -17,17 +12,9 @@ public class TestDemo {
 
         Serializer serializer = ExtensionLoader.load(Serializer.class);
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] data = serializer.serialize(msg);
 
-        ObjectOutput objectOutput = serializer.serialize(outputStream);
-        objectOutput.writeObject(msg);
-        objectOutput.flushBuffer();
-        byte[] data = outputStream.toByteArray();
-        outputStream.reset();
-
-
-        ObjectInput objectInput = serializer.deserialize(new ByteArrayInputStream(data));
-        String result = objectInput.readUTF();
+        String result = serializer.deserialize(data,String.class);
         System.out.println(result);
 
     }

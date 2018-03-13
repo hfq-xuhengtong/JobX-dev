@@ -35,8 +35,6 @@ public class RegistryTest {
     @Test
     public void lister() throws IOException {
 
-
-
         zookeeperClient.addChildListener("/opencron/agent",new ChildListener(){
             @Override
             public void childChanged(String path, List<String> children) {
@@ -71,8 +69,8 @@ public class RegistryTest {
 
     @Test
     public void backup(){
-        URL url = URL.valueOf("zookeeper://127.0.0.1:2181?backup=127.0.0.1:2182,127.0.0.1:2183,127.0.0.1:2184");
-        System.out.println(url.getBackupUrls());
+        URL url = URL.valueOf("zookeeper://127.0.0.1:2181");
+        System.out.println(url.getBackupAddress());
     }
 
 }

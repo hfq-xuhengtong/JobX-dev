@@ -24,7 +24,6 @@ package org.opencron.server.websocket;
 
 import java.io.IOException;
 
-import org.opencron.common.Constants;
 import org.opencron.server.domain.Terminal;
 
 import static org.opencron.common.util.CommonUtils.toInt;
@@ -32,7 +31,6 @@ import static org.opencron.common.util.CommonUtils.toInt;
 import org.opencron.server.service.TerminalService;
 import org.opencron.server.support.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
