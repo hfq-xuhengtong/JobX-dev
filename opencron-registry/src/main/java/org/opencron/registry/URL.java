@@ -213,6 +213,36 @@ public final class URL {
         }
     }
 
+
+    public String getBackupAddress() {
+        return getBackupAddress(0);
+    }
+
+    public String getBackupAddress(int defaultPort) {
+        StringBuilder address = new StringBuilder(appendDefaultPort(getAddress(), defaultPort));
+        String[] backups = getParameter(Constants.PARAM_BACKUP_KEY, new String[0]);
+        if (backups != null && backups.length > 0) {
+            for (String backup : backups) {
+                address.append(",");
+                address.append(appendDefaultPort(backup, defaultPort));
+            }
+        }
+        return address.toString();
+    }
+
+    public List<URL> getBackupUrls() {
+        List<URL> urls = new ArrayList<URL>();
+        urls.add(this);
+        String[] backups = getParameter(Constants.PARAM_BACKUP_KEY, new String[0]);
+        if (backups != null && backups.length > 0) {
+            for (String backup : backups) {
+                urls.add(this.setAddress(backup));
+            }
+        }
+        return urls;
+    }
+
+
     public String getProtocol() {
         return protocol;
     }

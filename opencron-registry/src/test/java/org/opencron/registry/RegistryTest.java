@@ -15,7 +15,7 @@ public class RegistryTest {
 
     String url = "zookeeper://127.0.0.1:2181";
 
-    @Before
+ //   @Before
     public void init() {
         zookeeperClient = new ZkclientZookeeperClient(URL.valueOf(url));
     }
@@ -67,6 +67,12 @@ public class RegistryTest {
 
         for (String path:paths)
             System.out.println(path);
+    }
+
+    @Test
+    public void backup(){
+        URL url = URL.valueOf("zookeeper://127.0.0.1:2181?backup=127.0.0.1:2182,127.0.0.1:2183,127.0.0.1:2184");
+        System.out.println(url.getBackupUrls());
     }
 
 }
