@@ -965,7 +965,7 @@ public abstract class StringUtils {
     }
 
     public static String tab(int count) {
-        String str = null;
+        String str = "";
         int index = 0;
         while (true) {
             if (index == count)break;
@@ -976,7 +976,7 @@ public abstract class StringUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(line(3));
+        System.out.println(line(1));
     }
 
 }
