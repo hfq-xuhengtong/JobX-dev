@@ -23,6 +23,7 @@ package org.opencron.server.handler;
 
 import static org.opencron.common.util.CommonUtils.*;
 
+import org.opencron.common.Constants;
 import org.opencron.common.util.StringUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -41,12 +42,10 @@ import java.util.Map;
 
 public class OpencronServlet extends DispatcherServlet {
 
-    private final String DEF_ENCODING = "UTF-8";
-
     @Override
     protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        request.setCharacterEncoding(DEF_ENCODING);
-        response.setCharacterEncoding(DEF_ENCODING);
+        request.setCharacterEncoding(Constants.CHARSET_UTF8);
+        response.setCharacterEncoding(Constants.CHARSET_UTF8);
         super.doDispatch(new OpencronServletRequest(request), response);
     }
 
@@ -169,7 +168,7 @@ public class OpencronServlet extends DispatcherServlet {
         private String cleanXSS(String value) {
             if (value == null) return null;
             try {
-                value = URLDecoder.decode(value, DEF_ENCODING);
+                value = URLDecoder.decode(value, Constants.CHARSET_UTF8);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

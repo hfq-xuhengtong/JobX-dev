@@ -87,21 +87,25 @@ public class NoticeService {
 
     public void notice(JobInfo job, String msg) {
         if (!job.getWarning()) return;
-        Agent agent = job.getAgent();
-        String message = "执行任务:" + job.getCommand() + "(" + job.getCronExp() + ")失败,%s!";
-        if (msg == null) {
-            message = String.format(message, "");
-        } else {
-            message = String.format(message, "[" + msg + "]");
-        }
-        String content = getMessage(agent, message);
-        if (logger.isInfoEnabled()) {
-            logger.info(content);
-        }
-        try {
-            sendMessage(Arrays.asList(job.getUser()), agent.getAgentId(), job.getEmailAddress(), job.getMobiles(), content);
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        //当前的单一任务只运行一次未设置重跑.
+        if (job.getRedo() == 0 || job.getRunCount() == 0) {
+            Agent agent = job.getAgent();
+            String message = "执行任务:" + job.getCommand() + "(" + job.getCronExp() + ")失败,%s!";
+            if (msg == null) {
+                message = String.format(message, "");
+            } else {
+                message = String.format(message, "[" + msg + "]");
+            }
+            String content = getMessage(agent, message);
+            if (logger.isInfoEnabled()) {
+                logger.info(content);
+            }
+            try {
+                sendMessage(Arrays.asList(job.getUser()), agent.getAgentId(), job.getEmailAddress(), job.getMobiles(), content);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

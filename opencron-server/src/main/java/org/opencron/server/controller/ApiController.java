@@ -76,7 +76,7 @@ public class ApiController extends BaseController {
             @Override
             public void run() {
                 try {
-                    executeService.executeJob(job, Constants.ExecType.API);
+                    executeService.execute(job, Constants.ExecType.API);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -55,7 +55,7 @@ public class OpencronCollector implements TaskCollector {
             this.getTasks().add(new SchedulingPattern(job.getCronExp()), new Task() {
                 @Override
                 public void execute(TaskExecutionContext context) throws RuntimeException {
-                    executeService.executeJob(job, Constants.ExecType.AUTO);
+                    executeService.execute(job, Constants.ExecType.AUTO);
                 }
             });
         }

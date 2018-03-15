@@ -190,9 +190,8 @@ public class RecordService {
     }
 
     public Record merge(Record record) {
-        record = (Record) queryDao.merge(record);
-        String sql = "UPDATE T_RECORD SET startTime=NOW() WHERE recordId=?";
-        queryDao.createSQLQuery(sql, record.getRecordId()).executeUpdate();
+        Record cord = (Record) queryDao.merge(record);
+        record.setRecordId(cord.getRecordId());
         return record;
     }
 

@@ -359,7 +359,8 @@ public class Constants {
         FAILED(0x0, "失败"),
         SUCCESSFUL(0x1, "成功"),
         KILLED(0x2, "被杀"),
-        TIMEOUT(0x3, "超时");
+        TIMEOUT(0x3, "超时"),
+        LOST(0x4, "方法调用失联");
 
         private Integer status;
         private String description;

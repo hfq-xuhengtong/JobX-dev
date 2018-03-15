@@ -98,7 +98,6 @@ public class TerminalController extends BaseController {
             //重新输入密码进行认证...
             return "redirect:/terminal/open.htm?id=" + terminal.getId();
         }
-
     }
 
     @RequestMapping(value = "detail.do", method = RequestMethod.POST)

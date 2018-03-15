@@ -320,13 +320,13 @@ public class JobController extends BaseController {
             @Override
             public void run() {
                 try {
-                    executeService.executeJob(job, Constants.ExecType.OPERATOR);
+                    executeService.execute(job, Constants.ExecType.OPERATOR);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }).start();
-        return Status.create(true);
+        return Status.TRUE;
     }
 
     @RequestMapping(value = "scan.do", method = RequestMethod.POST)
