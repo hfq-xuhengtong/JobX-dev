@@ -952,5 +952,32 @@ public abstract class StringUtils {
         }
         return intArray;
     }
+
+    public static String line(int count) {
+        String str = "";
+        int index = 0;
+        while (true) {
+            if (index == count)break;
+            str+="\n";
+            ++index;
+        }
+        return str;
+    }
+
+    public static String tab(int count) {
+        String str = null;
+        int index = 0;
+        while (true) {
+            if (index == count)break;
+            str+="\t";
+            ++index;
+        }
+        return str;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(line(3));
+    }
+
 }
 

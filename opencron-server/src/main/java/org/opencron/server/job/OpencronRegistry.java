@@ -43,7 +43,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.opencron.common.util.CommonUtils.toLong;
-import static org.opencron.common.util.CommonUtils.uuid;
+import static org.opencron.common.util.StringUtils.*;
+import static org.opencron.common.util.StringUtils.line;
 
 /**
  * @author benjobs.
@@ -197,16 +198,13 @@ public class OpencronRegistry {
                     List<Job> jobList = jobService.getScheduleJob();
 
                     for (Job job : jobList) {
-
                         Long jobId = job.getJobId();
-
                         //该任务落在当前的机器上
                         if (!jobs.containsKey(jobId) && OpencronTools.SERVER_ID.equals(hash.get(jobId))) {
                             jobDispatch(jobId);
                         } else {
                             jobRemove(jobId);
                         }
-
                     }
 
                     dispatchedInfo(children.size());
@@ -286,7 +284,11 @@ public class OpencronRegistry {
         this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
     }
 
-    public void jobDispatch(Long jobId) {
+    /**
+     * 作业的分发一定要经过一致性哈希算法,计算是否落在该server上....
+     * @param jobId
+     */
+    private void jobDispatch(Long jobId) {
         try {
             this.lock.lock();
             this.jobs.put(jobId, jobId);
@@ -323,16 +325,25 @@ public class OpencronRegistry {
     }
 
     private void dispatchedInfo(Integer serverSize) {
-        logger.info("\n\t▃▃▃▅▅▅▆▆▆▇▇▇███ [opencron] serverChanged,print dispatched info ███▇▇▇▆▆▆▅▅▅▃▃▃" +
-                        "\n\t\t\tdatetime: \"{}\"" +
-                        "\n\t\t\tprevious serverSize:{}" +
-                        "\n\t\t\tcurrent serverSize:{}" +
-                        "\n\t\t\tjobs:[ {} ]\n\n",
+
+        String headerformat = line(1)+tab(1);
+        String bodyformat = line(1)+tab(3);
+        String endformat = line(2);
+
+        String infoformat =  headerformat+"███████████████ [opencron] serverChanged,print dispatched info ███████████████" +
+                bodyformat+"datetime: \"{}\"" +
+                bodyformat+"previous serverSize:{}" +
+                bodyformat+"current serverSize:{}" +
+                bodyformat+"jobs:[ {} ]"+endformat;
+
+        logger.info(
+                infoformat,
                 DateUtils.formatFullDate(new Date()),
                 this.serverSize,
                 serverSize,
                 StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
+
         this.serverSize = serverSize;
     }
 

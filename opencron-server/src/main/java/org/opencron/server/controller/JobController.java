@@ -144,6 +144,7 @@ public class JobController extends BaseController {
         jobParam.setDeleted(false);
         if (jobParam.getJobId() != null) {
             Job job = jobService.getJob(jobParam.getJobId());
+
             if (!jobService.checkJobOwner(session, job.getUserId()))
                 return "redirect:/job/view.htm";
             /**

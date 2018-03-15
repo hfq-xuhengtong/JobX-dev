@@ -132,21 +132,13 @@ public final class SchedulerService {
     }
 
     public void syncTigger(JobInfo job) throws Exception {
-        //job已经被删除..
-        if (job.getDeleted()) {
-            //将该作业从zookeeper中移除掉....
-            opencronRegistry.jobUnRegister(job.getJobId());
-            return;
-        }
-        //新增或修改的job往zookeeper中同步一次...
-        opencronRegistry.jobRegister(job.getJobId());
+        //将该作业从zookeeper中移除掉....
+        opencronRegistry.jobUnRegister(job.getJobId());
 
-        /**
-         * 如果该job在zookeeper中已经存在则zookeeper就不会有回调事件触发
-         * 不能保证修改后的job也同步到crontab或quartz的任务队列里.
-         * 因此需要手动调用一次
-         */
-        opencronRegistry.jobDispatch(job.getJobId());
+        if (!job.getDeleted()) {
+            //新增或修改的job往zookeeper中同步一次...
+            opencronRegistry.jobRegister(job.getJobId());
+        }
     }
 
     public void syncTigger(Long jobId) throws Exception {
