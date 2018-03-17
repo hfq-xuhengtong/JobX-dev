@@ -20,9 +20,7 @@
  */
 package org.opencron.rpc.netty;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
 import org.opencron.common.job.RpcType;
@@ -30,7 +28,6 @@ import org.opencron.common.logging.LoggerFactory;
 import org.opencron.rpc.ServerHandler;
 import org.slf4j.Logger;
 
-@ChannelHandler.Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
 
     private Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
@@ -50,13 +47,20 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext handlerContext, Request request) throws Exception {
+    protected void channelRead0(ChannelHandlerContext handlerContext,final Request request) throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[opencron]Receive request {}" + request.getId());
+        }
         Response response = handler.handle(request);
         if (request.getRpcType() != RpcType.ONE_WAY) {    //非单向调用
-            handlerContext.writeAndFlush(response);
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("[opencron] agent process done,action:{}", request.getAction());
+            handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("[opencron] Send response for request id:{},action:{}", request.getId(), request.getAction());
+                    }
+                }
+            });
         }
     }
 

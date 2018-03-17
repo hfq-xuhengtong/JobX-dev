@@ -20,23 +20,21 @@
  */
 package org.opencron.rpc.netty;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.opencron.common.job.Response;
 import org.opencron.common.logging.LoggerFactory;
-import org.opencron.rpc.Promise;
+import org.opencron.rpc.RpcFuture;
 import org.slf4j.Logger;
 
 
-@ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     private Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
 
-    private Promise.Getter promiseGetter;
+    private RpcFuture.Getter promiseGetter;
 
-    public NettyClientHandler(Promise.Getter promiseGetter) {
+    public NettyClientHandler(RpcFuture.Getter promiseGetter) {
         this.promiseGetter = promiseGetter;
     }
 
@@ -45,13 +43,13 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
         }
-        Promise promise = promiseGetter.getPromise(response.getId());
-        promise.setResult(response);
-        if (promise.isAsync()) {   //异步调用
+        RpcFuture rpcFuture = promiseGetter.getPromise(response.getId());
+        rpcFuture.setResult(response);
+        if (rpcFuture.isAsync()) {   //异步调用
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron] nettyRPC client async callback invoke");
             }
-            promise.execCallback();
+            rpcFuture.execCallback();
         }
     }
 

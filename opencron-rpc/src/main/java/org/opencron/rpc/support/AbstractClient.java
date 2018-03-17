@@ -32,7 +32,7 @@ import org.opencron.common.job.Request;
 import org.opencron.common.util.HttpUtils;
 import org.opencron.common.util.IdGenerator;
 import org.opencron.rpc.InvokeCallback;
-import org.opencron.rpc.Promise;
+import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.mina.ConnectWrapper;
 import org.opencron.rpc.netty.ChannelWrapper;
 import org.slf4j.Logger;
@@ -50,34 +50,34 @@ public abstract class AbstractClient {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     //for mina
-    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
+    protected final ConcurrentHashMap<String, ConnectWrapper> connectMap = new ConcurrentHashMap<String, ConnectWrapper>();
 
     protected NioSocketConnector connector;
 
     //for netty
-    protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
+    protected final ConcurrentHashMap<String, ChannelWrapper> channelMap = new ConcurrentHashMap<String, ChannelWrapper>();
 
-    protected final ConcurrentHashMap<Integer, Promise> promiseTable = new ConcurrentHashMap<Integer, Promise>(256);
+    protected final ConcurrentHashMap<Integer, RpcFuture> futureMap = new ConcurrentHashMap<Integer, RpcFuture>(256);
 
-    protected ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+    protected ScheduledThreadPoolExecutor executor;
 
-    public void connect() {
+    public AbstractClient() {
 
-        doConnect();
+        connect();
 
-        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(5, new ThreadFactory() {
+        this.executor = new ScheduledThreadPoolExecutor(5, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 return new Thread(r, "RPC_" + IdGenerator.getId());
             }
         });
-        this.scheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
+        this.executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Iterator<Map.Entry<Integer, Promise>> it = promiseTable.entrySet().iterator();
+                Iterator<Map.Entry<Integer, RpcFuture>> it = futureMap.entrySet().iterator();
                 while (it.hasNext()) {
-                    Map.Entry<Integer, Promise> next = it.next();
-                    Promise rep = next.getValue();
+                    Map.Entry<Integer, RpcFuture> next = it.next();
+                    RpcFuture rep = next.getValue();
 
                     if ((rep.getBeginTime() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {  //超时
                         it.remove();
@@ -89,7 +89,7 @@ public abstract class AbstractClient {
 
     public ConnectFuture getConnect(Request request) {
 
-        ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
+        ConnectWrapper connectWrapper = this.connectMap.get(request.getAddress());
 
         if (connectWrapper != null) {
             if (connectWrapper.isActive()) {
@@ -102,7 +102,7 @@ public abstract class AbstractClient {
             // 发起异步连接操作
             ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             connectWrapper = new ConnectWrapper(connectFuture);
-            this.connectTable.put(request.getAddress(), connectWrapper);
+            this.connectMap.put(request.getAddress(), connectWrapper);
         }
 
         if (connectWrapper != null) {
@@ -130,7 +130,7 @@ public abstract class AbstractClient {
 
     public Channel getChannel(Bootstrap bootstrap, Request request) {
 
-        ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
+        ChannelWrapper channelWrapper = this.channelMap.get(request.getAddress());
 
         if (channelWrapper != null && channelWrapper.isActive()) {
             return channelWrapper.getChannel();
@@ -140,7 +140,7 @@ public abstract class AbstractClient {
             // 发起异步连接操作
             ChannelFuture channelFuture = bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             channelWrapper = new ChannelWrapper(channelFuture);
-            this.channelTable.put(request.getAddress(), channelWrapper);
+            this.channelMap.put(request.getAddress(), channelWrapper);
         }
         if (channelWrapper != null) {
             ChannelFuture channelFuture = channelWrapper.getChannelFuture();
@@ -166,16 +166,16 @@ public abstract class AbstractClient {
     }
 
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
-        private Promise promise;
+        private RpcFuture rpcFuture;
         private Request request;
         private InvokeCallback callback;
 
-        public FutureListener(Request request, Promise promise, InvokeCallback callback) {
+        public FutureListener(Request request, RpcFuture rpcFuture, InvokeCallback callback) {
             this.request = request;
             this.callback = callback;
-            this.promise = promise;
+            this.rpcFuture = rpcFuture;
             if (request != null) {
-                promiseTable.put(request.getId(), promise);
+                futureMap.put(request.getId(), rpcFuture);
             }
         }
 
@@ -185,18 +185,18 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
                 }
-                if (promise != null) {
-                    promise.setSendDone(true);
+                if (rpcFuture != null) {
+                    rpcFuture.setSendDone(true);
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] NettyRPC sent failure, request id:{}", request.getId());
                 }
-                if (this.promise != null) {
-                    promiseTable.remove(request.getId());
-                    promise.setSendDone(false);
-                    promise.setFailure(future.cause());
+                if (this.rpcFuture != null) {
+                    futureMap.remove(request.getId());
+                    rpcFuture.setSendDone(false);
+                    rpcFuture.setFailure(future.cause());
                 }
                 //回调
                 if (callback != null) {
@@ -211,18 +211,18 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] MinaRPC sent success, request id:{}", request.getId());
                 }
-                if (promise != null) {
-                    promise.setSendDone(true);
+                if (rpcFuture != null) {
+                    rpcFuture.setSendDone(true);
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] MinaRPC sent failure, request id:{}", request.getId());
                 }
-                if (promise != null) {
-                    promiseTable.remove(request.getId());
-                    promise.setSendDone(false);
-                    promise.setFailure(getConnect(request).getException());
+                if (rpcFuture != null) {
+                    futureMap.remove(request.getId());
+                    rpcFuture.setSendDone(false);
+                    rpcFuture.setFailure(getConnect(request).getException());
                 }
 
                 //回调
@@ -234,6 +234,6 @@ public abstract class AbstractClient {
 
     }
 
-    protected abstract void doConnect();
+    protected abstract void connect();
 
 }

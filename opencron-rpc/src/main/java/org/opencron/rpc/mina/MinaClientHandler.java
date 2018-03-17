@@ -24,16 +24,16 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.opencron.common.job.Response;
 import org.opencron.common.logging.LoggerFactory;
-import org.opencron.rpc.Promise;
+import org.opencron.rpc.RpcFuture;
 import org.slf4j.Logger;
 
 public class MinaClientHandler extends IoHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(MinaClientHandler.class);
 
-    private Promise.Getter promiseGetter;
+    private RpcFuture.Getter promiseGetter;
 
-    public MinaClientHandler(Promise.Getter promiseGetter) {
+    public MinaClientHandler(RpcFuture.Getter promiseGetter) {
         this.promiseGetter = promiseGetter;
     }
 
@@ -43,13 +43,13 @@ public class MinaClientHandler extends IoHandlerAdapter {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] minaRPC client receive response id:{}", response.getId());
         }
-        Promise promise = promiseGetter.getPromise(response.getId());
-        promise.setResult(response);
-        if (promise.isAsync()) {   //异步调用
+        RpcFuture rpcFuture = promiseGetter.getPromise(response.getId());
+        rpcFuture.setResult(response);
+        if (rpcFuture.isAsync()) {   //异步调用
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron] minaRPC client async callback invoke");
             }
-            promise.execCallback();
+            rpcFuture.execCallback();
         }
     }
 

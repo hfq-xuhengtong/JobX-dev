@@ -74,8 +74,8 @@ public class NettyServer implements Server {
                         );
                     }
                 });
-        try {
 
+        try {
             this.bootstrap.bind(port).sync().addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) {

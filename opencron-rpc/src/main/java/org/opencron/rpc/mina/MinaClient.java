@@ -29,7 +29,7 @@ import org.opencron.common.job.Response;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.rpc.Client;
 import org.opencron.rpc.InvokeCallback;
-import org.opencron.rpc.Promise;
+import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.support.AbstractClient;
 import org.slf4j.Logger;
 
@@ -42,13 +42,13 @@ public class MinaClient extends AbstractClient implements Client {
     }
 
     @Override
-    public void doConnect() {
+    public void connect() {
         connector = new NioSocketConnector();
         connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Request.class, Response.class)));
-        connector.setHandler(new MinaClientHandler(new Promise.Getter() {
+        connector.setHandler(new MinaClientHandler(new RpcFuture.Getter() {
             @Override
-            public Promise getPromise(Integer id) {
-                return promiseTable.get(id);
+            public RpcFuture getPromise(Integer id) {
+                return futureMap.get(id);
             }
         }));
         connector.setConnectTimeoutMillis(5000);
@@ -70,11 +70,11 @@ public class MinaClient extends AbstractClient implements Client {
     public Response sentSync(final Request request) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            Promise promise = new Promise(request.getTimeOut());
+            RpcFuture rpcFuture = new RpcFuture(request.getTimeOut());
             //写数据
-            connect.addListener(new AbstractClient.FutureListener(request, promise, null));
+            connect.addListener(new AbstractClient.FutureListener(request, rpcFuture, null));
             connect.getSession().write(request);
-            return promise.get();
+            return rpcFuture.get();
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC channel not active. request id:" + request.getId());
         }
@@ -95,8 +95,8 @@ public class MinaClient extends AbstractClient implements Client {
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            Promise promise = new Promise(request.getTimeOut(), callback);
-            connect.addListener(new AbstractClient.FutureListener(request, promise, callback));
+            RpcFuture rpcFuture = new RpcFuture(request.getTimeOut(), callback);
+            connect.addListener(new AbstractClient.FutureListener(request, rpcFuture, callback));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC sentAsync channel not active. request id:" + request.getId());

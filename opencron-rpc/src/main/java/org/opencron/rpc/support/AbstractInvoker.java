@@ -38,10 +38,12 @@ import org.opencron.rpc.Invoker;
 
 public abstract class AbstractInvoker implements Invoker {
 
+    private Client client = ExtensionLoader.load(Client.class);
+
     //同步调用
     public Response sentSync(Request request) {
         try {
-            return ExtensionLoader.load(Client.class).sentSync(request.setRpcType(RpcType.SYNC));
+            return client.sentSync(request.setRpcType(RpcType.SYNC));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,7 +53,7 @@ public abstract class AbstractInvoker implements Invoker {
     //单向调用
     public void sentOneway(Request request) {
         try {
-            ExtensionLoader.load(Client.class).sentOneway(request.setRpcType(RpcType.ONE_WAY));
+            client.sentOneway(request.setRpcType(RpcType.ONE_WAY));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,7 +62,7 @@ public abstract class AbstractInvoker implements Invoker {
     //异步调用...
     public void sentAsync(Request request, InvokeCallback callback) {
         try {
-            ExtensionLoader.load(Client.class).sentAsync(request.setRpcType(RpcType.ASYNC), callback);
+            client.sentAsync(request.setRpcType(RpcType.ASYNC), callback);
         } catch (Exception e) {
             e.printStackTrace();
         }
