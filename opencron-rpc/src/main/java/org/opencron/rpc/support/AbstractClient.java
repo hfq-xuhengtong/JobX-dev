@@ -50,14 +50,14 @@ public abstract class AbstractClient {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     //for mina
-    protected final ConcurrentHashMap<String, ConnectWrapper> connectMap = new ConcurrentHashMap<String, ConnectWrapper>();
+    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
 
     protected NioSocketConnector connector;
 
     //for netty
-    protected final ConcurrentHashMap<String, ChannelWrapper> channelMap = new ConcurrentHashMap<String, ChannelWrapper>();
+    protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
-    protected final ConcurrentHashMap<Integer, RpcFuture> futureMap = new ConcurrentHashMap<Integer, RpcFuture>(256);
+    public final ConcurrentHashMap<Integer, RpcFuture> futureTable = new ConcurrentHashMap<Integer, RpcFuture>(256);
 
     protected ScheduledThreadPoolExecutor executor;
 
@@ -74,12 +74,12 @@ public abstract class AbstractClient {
         this.executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Iterator<Map.Entry<Integer, RpcFuture>> it = futureMap.entrySet().iterator();
+                Iterator<Map.Entry<Integer, RpcFuture>> it = futureTable.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry<Integer, RpcFuture> next = it.next();
                     RpcFuture rep = next.getValue();
-
-                    if ((rep.getBeginTime() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {  //超时
+                    //超时
+                    if ((rep.getBeginTime() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
                         it.remove();
                     }
                 }
@@ -89,7 +89,7 @@ public abstract class AbstractClient {
 
     public ConnectFuture getConnect(Request request) {
 
-        ConnectWrapper connectWrapper = this.connectMap.get(request.getAddress());
+        ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
 
         if (connectWrapper != null) {
             if (connectWrapper.isActive()) {
@@ -102,7 +102,7 @@ public abstract class AbstractClient {
             // 发起异步连接操作
             ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             connectWrapper = new ConnectWrapper(connectFuture);
-            this.connectMap.put(request.getAddress(), connectWrapper);
+            this.connectTable.put(request.getAddress(), connectWrapper);
         }
 
         if (connectWrapper != null) {
@@ -130,7 +130,7 @@ public abstract class AbstractClient {
 
     public Channel getChannel(Bootstrap bootstrap, Request request) {
 
-        ChannelWrapper channelWrapper = this.channelMap.get(request.getAddress());
+        ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
 
         if (channelWrapper != null && channelWrapper.isActive()) {
             return channelWrapper.getChannel();
@@ -140,7 +140,7 @@ public abstract class AbstractClient {
             // 发起异步连接操作
             ChannelFuture channelFuture = bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             channelWrapper = new ChannelWrapper(channelFuture);
-            this.channelMap.put(request.getAddress(), channelWrapper);
+            this.channelTable.put(request.getAddress(), channelWrapper);
         }
         if (channelWrapper != null) {
             ChannelFuture channelFuture = channelWrapper.getChannelFuture();
@@ -168,25 +168,24 @@ public abstract class AbstractClient {
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
         private RpcFuture rpcFuture;
         private Request request;
-        private InvokeCallback callback;
 
-        public FutureListener(Request request, RpcFuture rpcFuture, InvokeCallback callback) {
+        public FutureListener(Request request, RpcFuture rpcFuture) {
             this.request = request;
-            this.callback = callback;
             this.rpcFuture = rpcFuture;
             if (request != null) {
-                futureMap.put(request.getId(), rpcFuture);
+                futureTable.put(request.getId(), rpcFuture);
             }
         }
 
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
+
             if (future.isSuccess()) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
-                }
                 if (rpcFuture != null) {
                     rpcFuture.setSendDone(true);
+                }
+                if (logger.isInfoEnabled()) {
+                    logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
                 }
                 return;
             } else {
@@ -194,13 +193,10 @@ public abstract class AbstractClient {
                     logger.info("[opencron] NettyRPC sent failure, request id:{}", request.getId());
                 }
                 if (this.rpcFuture != null) {
-                    futureMap.remove(request.getId());
+                    futureTable.remove(request.getId());
                     rpcFuture.setSendDone(false);
                     rpcFuture.setFailure(future.cause());
-                }
-                //回调
-                if (callback != null) {
-                    callback.failure(future.cause());
+                    rpcFuture.getCallback().failure(future.cause());
                 }
             }
         }
@@ -220,14 +216,10 @@ public abstract class AbstractClient {
                     logger.info("[opencron] MinaRPC sent failure, request id:{}", request.getId());
                 }
                 if (rpcFuture != null) {
-                    futureMap.remove(request.getId());
+                    futureTable.remove(request.getId());
                     rpcFuture.setSendDone(false);
                     rpcFuture.setFailure(getConnect(request).getException());
-                }
-
-                //回调
-                if (callback != null) {
-                    callback.failure(getConnect(request).getException());
+                    rpcFuture.getCallback().failure(getConnect(request).getException());
                 }
             }
         }

@@ -33,7 +33,7 @@ public class RpcFuture {
     private static final CancellationException CANCELLED = new CancellationException();
     private volatile boolean sendDone = true;
     private volatile boolean haveResult;
-    private volatile Response result;
+    private volatile Response response;
     private volatile Throwable cause;
     private CountDownLatch latch;
 
@@ -62,12 +62,12 @@ public class RpcFuture {
         this.callback = callback;
     }
 
-    public void execCallback() {
+    public void invokeCallback() {
         if (isDone()) {
             if (this.cause != null) {
                 this.callback.failure(this.cause);
             } else {
-                this.callback.success(this.result);
+                this.callback.success(this.response);
             }
         }
     }
@@ -87,7 +87,7 @@ public class RpcFuture {
     public void setResult(Response response) {
         synchronized (this) {
             if (!this.haveResult) {
-                this.result = response;
+                this.response = response;
                 this.haveResult = true;
                 if (this.latch != null) {
                     this.latch.countDown();
@@ -149,7 +149,7 @@ public class RpcFuture {
                 throw new ExecutionException(this.cause);
             }
         } else {
-            return this.result;
+            return this.response;
         }
     }
 
@@ -164,6 +164,10 @@ public class RpcFuture {
                 return true;
             }
         }
+    }
+
+    public InvokeCallback getCallback() {
+        return callback;
     }
 
     public boolean isSendDone() {
@@ -182,7 +186,4 @@ public class RpcFuture {
         return unit.toMillis(timeout);
     }
 
-    public interface Getter {
-        RpcFuture getPromise(Integer id);
-    }
 }

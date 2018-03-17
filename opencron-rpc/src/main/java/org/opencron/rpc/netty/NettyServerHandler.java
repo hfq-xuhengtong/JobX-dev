@@ -52,7 +52,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
             logger.debug("[opencron]Receive request {}" + request.getId());
         }
         Response response = handler.handle(request);
-        if (request.getRpcType() != RpcType.ONE_WAY) {    //非单向调用
+        if (request.getRpcType() != RpcType.ONE_WAY) {
             handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {

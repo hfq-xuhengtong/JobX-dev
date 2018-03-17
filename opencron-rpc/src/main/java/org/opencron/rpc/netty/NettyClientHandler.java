@@ -32,10 +32,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     private Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
 
-    private RpcFuture.Getter promiseGetter;
+    private NettyClient nettyClient;
 
-    public NettyClientHandler(RpcFuture.Getter promiseGetter) {
-        this.promiseGetter = promiseGetter;
+    public NettyClientHandler(NettyClient nettyClient) {
+        this.nettyClient = nettyClient;
     }
 
     @Override
@@ -43,13 +43,13 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
         }
-        RpcFuture rpcFuture = promiseGetter.getPromise(response.getId());
+        RpcFuture rpcFuture = nettyClient.futureTable.get(response.getId());
         rpcFuture.setResult(response);
-        if (rpcFuture.isAsync()) {   //异步调用
+        if (rpcFuture.isAsync()) {
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron] nettyRPC client async callback invoke");
             }
-            rpcFuture.execCallback();
+            rpcFuture.invokeCallback();
         }
     }
 

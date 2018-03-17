@@ -31,10 +31,10 @@ public class MinaClientHandler extends IoHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(MinaClientHandler.class);
 
-    private RpcFuture.Getter promiseGetter;
+    private MinaClient minaClient;
 
-    public MinaClientHandler(RpcFuture.Getter promiseGetter) {
-        this.promiseGetter = promiseGetter;
+    public MinaClientHandler(MinaClient minaClient) {
+        this.minaClient = minaClient;
     }
 
     @Override
@@ -43,13 +43,13 @@ public class MinaClientHandler extends IoHandlerAdapter {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] minaRPC client receive response id:{}", response.getId());
         }
-        RpcFuture rpcFuture = promiseGetter.getPromise(response.getId());
+        RpcFuture rpcFuture = this.minaClient.futureTable.get(response.getId());
         rpcFuture.setResult(response);
-        if (rpcFuture.isAsync()) {   //异步调用
+        if (rpcFuture.isAsync()) {
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron] minaRPC client async callback invoke");
             }
-            rpcFuture.execCallback();
+            rpcFuture.invokeCallback();
         }
     }
 
