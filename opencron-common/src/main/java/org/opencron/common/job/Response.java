@@ -44,7 +44,7 @@ public class Response implements Serializable {
     /**
      * @see Action
      */
-    private int id;
+    private String id;
     private Action action; // required
     private Map<String, String> result; // required
     private int exitCode; // required
@@ -122,12 +122,12 @@ public class Response implements Serializable {
     }
 
     public Response start() {
-        this.startTime = new Date().getTime();
+        this.startTime = System.currentTimeMillis();
         return this;
     }
 
     public Response end() {
-        this.endTime = new Date().getTime();
+        this.endTime = System.currentTimeMillis();
         return this;
     }
 
@@ -139,11 +139,11 @@ public class Response implements Serializable {
         this.throwable = throwable;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public Response setId(int id) {
+    public Response setId(String id) {
         this.id = id;
         return this;
     }

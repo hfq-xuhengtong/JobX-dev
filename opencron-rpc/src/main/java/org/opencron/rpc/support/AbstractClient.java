@@ -45,19 +45,29 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author benjobs
+ */
 public abstract class AbstractClient {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    //for mina
-    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
-
     protected NioSocketConnector connector;
 
-    //for netty
+    protected Bootstrap bootstrap;
+
+    /**
+     * for mina
+     */
+    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
+
+    /**
+     * for netty
+     */
     protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
-    public final ConcurrentHashMap<Integer, RpcFuture> futureTable = new ConcurrentHashMap<Integer, RpcFuture>(256);
+
+    public final ConcurrentHashMap<String, RpcFuture> futureTable = new ConcurrentHashMap<String, RpcFuture>(256);
 
     protected ScheduledThreadPoolExecutor executor;
 
@@ -74,9 +84,9 @@ public abstract class AbstractClient {
         this.executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Iterator<Map.Entry<Integer, RpcFuture>> it = futureTable.entrySet().iterator();
+                Iterator<Map.Entry<String, RpcFuture>> it = futureTable.entrySet().iterator();
                 while (it.hasNext()) {
-                    Map.Entry<Integer, RpcFuture> next = it.next();
+                    Map.Entry<String, RpcFuture> next = it.next();
                     RpcFuture rep = next.getValue();
                     //超时
                     if ((rep.getBeginTime() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
@@ -226,6 +236,9 @@ public abstract class AbstractClient {
 
     }
 
+    /**
+     * call subclass connect
+     */
     protected abstract void connect();
 
 }

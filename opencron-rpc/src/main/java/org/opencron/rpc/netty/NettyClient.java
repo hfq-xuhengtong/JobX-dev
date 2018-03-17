@@ -48,8 +48,6 @@ public class NettyClient extends AbstractClient implements Client {
 
     private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyClientWorker", true));
 
-    private Bootstrap bootstrap = null;
-
     @Override
     public void connect() {
         bootstrap = new Bootstrap();

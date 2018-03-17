@@ -21,6 +21,7 @@
 
 package org.opencron.common.util;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class IdGenerator {
@@ -28,5 +29,10 @@ public class IdGenerator {
 
     public static Integer getId() {
         return generator.incrementAndGet();
+    }
+
+    public static void main(String[] args) throws IOException {
+        System.out.println(getId());
+        System.in.read();
     }
 }

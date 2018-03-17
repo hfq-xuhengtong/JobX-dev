@@ -37,10 +37,6 @@ public class MinaClient extends AbstractClient implements Client {
 
     private static Logger logger = LoggerFactory.getLogger(MinaClient.class);
 
-    public MinaClient() {
-        this.connect();
-    }
-
     @Override
     public void connect() {
         connector = new NioSocketConnector();
