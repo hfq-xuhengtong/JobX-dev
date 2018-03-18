@@ -51,7 +51,7 @@ public class NettyClient extends AbstractClient implements Client {
     @Override
     public void connect() {
         int timeout = 3000;
-        if (this.bootstrap!=null) {
+        if (this.bootstrap == null) {
             bootstrap = new Bootstrap();
             bootstrap.group(NIO_EVENT_LOOP_GROUP)
                     .option(ChannelOption.SO_KEEPALIVE, true)
