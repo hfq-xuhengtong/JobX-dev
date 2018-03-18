@@ -44,6 +44,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityHandlerInterceptor.class);
 
+    @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         request.setAttribute("uri", request.getRequestURI());
