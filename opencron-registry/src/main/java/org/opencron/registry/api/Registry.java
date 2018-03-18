@@ -27,7 +27,6 @@ package org.opencron.registry.api;
 import org.opencron.registry.URL;
 
 /**
- *
  * @author benjobs
  */
 public interface Registry {

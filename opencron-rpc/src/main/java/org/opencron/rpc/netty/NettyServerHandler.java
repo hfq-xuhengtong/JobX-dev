@@ -52,7 +52,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext handlerContext,final Request request) throws Exception {
+    protected void channelRead0(ChannelHandlerContext handlerContext, final Request request) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("[opencron]Receive request {}" + request.getId());
         }
