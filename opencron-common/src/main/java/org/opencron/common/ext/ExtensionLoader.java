@@ -48,7 +48,7 @@ public class ExtensionLoader<T> {
 
     private SPI spi;
 
-    private static final Map<String, Class<?>> EXTENSION_SPIS = new HashMap<String, Class<?>>();
+    private final Map<String, Class<?>> EXTENSION_SPI = new HashMap<String, Class<?>>();
 
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
 
@@ -91,13 +91,13 @@ public class ExtensionLoader<T> {
             Class<?> instanceClass;
             //spi注解上是否指定了实现类的key
             if (CommonUtils.isEmpty(spi.value())) {
-                instanceClass = EXTENSION_SPIS.get(spiName);
+                instanceClass = EXTENSION_SPI.get(spiName);
             } else {
                 //当前的获取方法是否指定了spi实现类的Key
                 if (CommonUtils.notEmpty(spiName)) {
-                    instanceClass = EXTENSION_SPIS.get(getSpiKey(spi.value()));
+                    instanceClass = EXTENSION_SPI.get(getSpiKey(spi.value()));
                 } else {
-                    instanceClass = EXTENSION_SPIS.get(spi.value());
+                    instanceClass = EXTENSION_SPI.get(spi.value());
                 }
             }
             if (instanceClass != null) {
@@ -163,7 +163,7 @@ public class ExtensionLoader<T> {
                                                     this.type + ", class line: " + clazz.getName() + "), class "
                                                     + clazz.getName() + "is not subtype of interface.");
                                         }
-                                        this.EXTENSION_SPIS.put(getSpiKey(spiName), clazz);
+                                        this.EXTENSION_SPI.put(getSpiKey(spiName), clazz);
                                     }
                                 } catch (Throwable t) {
                                     throw new IllegalStateException("Failed to load extension class(interface: " + type + ", class line: " + line + ") in " + url + ", cause: " + t.getMessage(), t);

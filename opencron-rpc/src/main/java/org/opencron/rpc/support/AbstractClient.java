@@ -31,7 +31,6 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.opencron.common.job.Request;
 import org.opencron.common.util.HttpUtils;
 import org.opencron.common.util.IdGenerator;
-import org.opencron.rpc.InvokeCallback;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.mina.ConnectWrapper;
 import org.opencron.rpc.netty.ChannelWrapper;
@@ -67,7 +66,7 @@ public abstract class AbstractClient {
     protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
 
-    public final ConcurrentHashMap<String, RpcFuture> futureTable = new ConcurrentHashMap<String, RpcFuture>(256);
+    public final ConcurrentHashMap<Integer, RpcFuture> futureTable = new ConcurrentHashMap<Integer, RpcFuture>(256);
 
     protected ScheduledThreadPoolExecutor executor;
 
@@ -84,9 +83,9 @@ public abstract class AbstractClient {
         this.executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Iterator<Map.Entry<String, RpcFuture>> it = futureTable.entrySet().iterator();
+                Iterator<Map.Entry<Integer, RpcFuture>> it = futureTable.entrySet().iterator();
                 while (it.hasNext()) {
-                    Map.Entry<String, RpcFuture> next = it.next();
+                    Map.Entry<Integer, RpcFuture> next = it.next();
                     RpcFuture rep = next.getValue();
                     //超时
                     if ((rep.getBeginTime() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
@@ -138,7 +137,7 @@ public abstract class AbstractClient {
         return null;
     }
 
-    public Channel getChannel(Bootstrap bootstrap, Request request) {
+    public Channel getChannel(Request request) {
 
         ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
 
@@ -148,7 +147,7 @@ public abstract class AbstractClient {
 
         synchronized (this) {
             // 发起异步连接操作
-            ChannelFuture channelFuture = bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
+            ChannelFuture channelFuture = this.bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             channelWrapper = new ChannelWrapper(channelFuture);
             this.channelTable.put(request.getAddress(), channelWrapper);
         }
@@ -175,6 +174,7 @@ public abstract class AbstractClient {
         return null;
     }
 
+
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
         private RpcFuture rpcFuture;
         private Request request;
@@ -189,13 +189,12 @@ public abstract class AbstractClient {
 
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
-
             if (future.isSuccess()) {
-                if (rpcFuture != null) {
-                    rpcFuture.setSendDone(true);
-                }
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
+                }
+                if (rpcFuture != null) {
+                    rpcFuture.setSendDone(true);
                 }
                 return;
             } else {
@@ -240,5 +239,19 @@ public abstract class AbstractClient {
      * call subclass connect
      */
     protected abstract void connect();
+
+    public RpcFuture getRpcFuture(Integer id) {
+        return this.futureTable.get(id);
+    }
+
+    public void disconnect() throws Throwable {
+        if (this.connector != null) {
+            this.connector.dispose();
+            this.connector = null;
+        }
+        this.futureTable.clear();
+        this.channelTable.clear();
+        this.executor.shutdown();
+    }
 
 }

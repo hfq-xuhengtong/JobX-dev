@@ -46,47 +46,35 @@ import org.opencron.rpc.support.AbstractClient;
 
 public class NettyClient extends AbstractClient implements Client {
 
-    private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyClientWorker", true));
+    private static final NioEventLoopGroup NIO_EVENT_LOOP_GROUP = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyClientWorker", true));
 
     @Override
     public void connect() {
-        bootstrap = new Bootstrap();
-        bootstrap.group(nioEventLoopGroup)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .channel(NioSocketChannel.class);
-
-        int timeont = 3000;
-        if (timeont < 3000) {
-            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
-        } else {
-            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeont);
+        int timeout = 3000;
+        if (this.bootstrap!=null) {
+            bootstrap = new Bootstrap();
+            bootstrap.group(NIO_EVENT_LOOP_GROUP)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout < 3000 ? 3000 : timeout)
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel channel) throws Exception {
+                            channel.pipeline().addLast(
+                                    NettyCodecAdapter.getCodecAdapter().getDecoder(Response.class),
+                                    NettyCodecAdapter.getCodecAdapter().getEncoder(Request.class),
+                                    new NettyClientHandler(NettyClient.this)
+                            );
+                        }
+                    });
         }
-
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            public void initChannel(SocketChannel channel) throws Exception {
-                channel.pipeline().addLast(
-                        NettyCodecAdapter.getCodecAdapter().getDecoder(Response.class),
-                        NettyCodecAdapter.getCodecAdapter().getEncoder(Request.class),
-                        new NettyClientHandler(NettyClient.this)
-                );
-            }
-        });
-
-    }
-
-    @Override
-    public void disconnect() {
-        this.futureTable.clear();
-        this.channelTable.clear();
-        this.executor.shutdown();
     }
 
     @Override
     public Response sentSync(final Request request) throws Exception {
-        Channel channel = super.getChannel(this.bootstrap, request);
+        Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
             final RpcFuture rpcFuture = new RpcFuture(request.getTimeOut());
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(request, rpcFuture));
@@ -98,7 +86,7 @@ public class NettyClient extends AbstractClient implements Client {
 
     @Override
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
-        Channel channel = super.getChannel(this.bootstrap, request);
+        Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
             final RpcFuture rpcFuture = new RpcFuture(request.getTimeOut(), callback);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(request, rpcFuture));
@@ -108,8 +96,8 @@ public class NettyClient extends AbstractClient implements Client {
     }
 
     @Override
-    public void sentOneway(final Request request) throws Exception {
-        Channel channel = super.getChannel(this.bootstrap, request);
+    public void sentOneWay(final Request request) throws Exception {
+        Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(null, null));
         } else {

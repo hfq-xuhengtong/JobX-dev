@@ -35,6 +35,10 @@ import java.util.List;
 
 import static org.opencron.common.util.ExceptionUtils.stackTrace;
 
+
+/**
+ * @author benjobs
+ */
 public class NettyCodecAdapter<T> {
 
     private static Logger logger = LoggerFactory.getLogger(NettyCodecAdapter.class);

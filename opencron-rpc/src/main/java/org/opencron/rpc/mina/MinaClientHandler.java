@@ -27,6 +27,9 @@ import org.opencron.common.logging.LoggerFactory;
 import org.opencron.rpc.RpcFuture;
 import org.slf4j.Logger;
 
+/**
+ * @author benjobs
+ */
 public class MinaClientHandler extends IoHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(MinaClientHandler.class);
@@ -43,7 +46,7 @@ public class MinaClientHandler extends IoHandlerAdapter {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] minaRPC client receive response id:{}", response.getId());
         }
-        RpcFuture rpcFuture = this.minaClient.futureTable.get(response.getId());
+        RpcFuture rpcFuture = this.minaClient.getRpcFuture(response.getId());
         rpcFuture.setResult(response);
         if (rpcFuture.isAsync()) {
             if (logger.isInfoEnabled()) {

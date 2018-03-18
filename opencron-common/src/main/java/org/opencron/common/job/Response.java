@@ -37,21 +37,24 @@ package org.opencron.common.job;
 
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class Response implements Serializable {
+
+    private Integer id;
     /**
      * @see Action
      */
-    private String id;
-    private Action action; // required
-    private Map<String, String> result; // required
-    private int exitCode; // required
-    private boolean success; // required
-    private long startTime; // required
-    private long endTime; // required
-    private String message; // required
+    private Action action;
+    private Map<String, String> result;
+    private int exitCode;
+    private boolean success;
+    private long startTime;
+    private long endTime;
+    private String message;
     private Throwable throwable;
 
     public static Response response(Request request) {
@@ -139,11 +142,11 @@ public class Response implements Serializable {
         this.throwable = throwable;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public Response setId(String id) {
+    public Response setId(Integer id) {
         this.id = id;
         return this;
     }

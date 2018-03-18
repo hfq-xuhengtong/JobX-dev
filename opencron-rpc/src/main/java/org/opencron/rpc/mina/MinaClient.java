@@ -49,13 +49,6 @@ public class MinaClient extends AbstractClient implements Client {
         sessionConfiguration.setWriteTimeout(5);
     }
 
-    @Override
-    public void disconnect() throws Throwable {
-        if (this.connector != null) {
-            this.connector.dispose();
-            this.connector = null;
-        }
-    }
 
     @Override
     public Response sentSync(final Request request) throws Exception {
@@ -72,7 +65,7 @@ public class MinaClient extends AbstractClient implements Client {
     }
 
     @Override
-    public void sentOneway(final Request request) throws Exception {
+    public void sentOneWay(final Request request) throws Exception {
         ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             connect.addListener(new AbstractClient.FutureListener(request, null));

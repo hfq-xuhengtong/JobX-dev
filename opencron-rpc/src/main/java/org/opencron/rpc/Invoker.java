@@ -24,13 +24,32 @@ package org.opencron.rpc;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
 
-
+/**
+ * @author benjobs
+ */
 public interface Invoker {
 
+    /**
+     * 同步阻塞调用
+     * @param request
+     * @return
+     * @throws Exception
+     */
     Response sentSync(Request request) throws Exception;
 
-    void sentOneway(Request request) throws Exception;
+    /**
+     * 单向调用
+     * @param request
+     * @throws Exception
+     */
+    void sentOneWay(Request request) throws Exception;
 
+    /**
+     * 异步非阻塞,通知回调方式调用
+     * @param request
+     * @param callback
+     * @throws Exception
+     */
     void sentAsync(Request request, InvokeCallback callback) throws Exception;
 
 }

@@ -20,6 +20,7 @@
  */
 package org.opencron.rpc.netty;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.opencron.common.job.Response;
@@ -27,7 +28,10 @@ import org.opencron.common.logging.LoggerFactory;
 import org.opencron.rpc.RpcFuture;
 import org.slf4j.Logger;
 
-
+/**
+ * @author benjobs
+ */
+@ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     private Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
@@ -43,7 +47,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
         }
-        RpcFuture rpcFuture = nettyClient.futureTable.get(response.getId());
+        RpcFuture rpcFuture = nettyClient.getRpcFuture(response.getId());
         rpcFuture.setResult(response);
         if (rpcFuture.isAsync()) {
             if (logger.isInfoEnabled()) {

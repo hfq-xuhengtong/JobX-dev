@@ -40,6 +40,9 @@ import org.slf4j.Logger;
 
 import static org.opencron.common.util.ExceptionUtils.stackTrace;
 
+/**
+ * @author benjobs
+ */
 public class NettyServer implements Server {
 
     private static Logger logger = LoggerFactory.getLogger(NettyServer.class);
@@ -61,10 +64,11 @@ public class NettyServer implements Server {
 
         this.bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)//压榨性能
+                .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)
                 .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
                     protected void initChannel(SocketChannel channel) throws Exception {
                         channel.pipeline().addLast(
                                 new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 0),

@@ -40,7 +40,7 @@ public abstract class AbstractInvoker implements Invoker {
 
     private Client client = ExtensionLoader.load(Client.class);
 
-    //同步调用
+    @Override
     public Response sentSync(Request request) {
         try {
             return client.sentSync(request.setRpcType(RpcType.SYNC));
@@ -50,16 +50,16 @@ public abstract class AbstractInvoker implements Invoker {
         return null;
     }
 
-    //单向调用
-    public void sentOneway(Request request) {
+    @Override
+    public void sentOneWay(Request request) {
         try {
-            client.sentOneway(request.setRpcType(RpcType.ONE_WAY));
+            client.sentOneWay(request.setRpcType(RpcType.ONE_WAY));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    //异步调用...
+    @Override
     public void sentAsync(Request request, InvokeCallback callback) {
         try {
             client.sentAsync(request.setRpcType(RpcType.ASYNC), callback);

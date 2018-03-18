@@ -27,19 +27,16 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.opencron.common.util.CommonUtils.uuid;
-
 public class Request implements Serializable {
 
-    private RpcType rpcType = RpcType.ASYNC;//默认异步调用
+    private RpcType rpcType = RpcType.ASYNC;
     private String host;
-    private String id;
+    private Integer id;
     private Integer port;
     private String address;
     private Integer timeOut;
     private Action action;
     private String password;
-    //是否为代理Agent的请求
     private Long proxyAgent;
     private Map<String, String> params;
 
@@ -55,7 +52,7 @@ public class Request implements Serializable {
                 .setPassword(password)
                 .setTimeOut(timeOut)
                 .setProxyAgent(proxyAgent)
-                .setId(uuid());
+                .setId(IdGenerator.getId());
     }
 
     public Request putParam(String key, String value) {
@@ -140,11 +137,11 @@ public class Request implements Serializable {
         this.address = address;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public Request setId(String id) {
+    public Request setId(Integer id) {
         this.id = id;
         return this;
     }

@@ -50,7 +50,7 @@ public class OpencronCaller extends AbstractInvoker {
     @Autowired
     private AgentService agentService;
 
-    //同步调用
+    @Override
     public Response sentSync(Request request) {
         checkProxyAgent(request);
         try {
@@ -61,17 +61,17 @@ public class OpencronCaller extends AbstractInvoker {
         return null;
     }
 
-    //单向调用
-    public void sentOneway(Request request) {
+    @Override
+    public void sentOneWay(Request request) {
         checkProxyAgent(request);
         try {
-            super.sentOneway(request);
+            super.sentOneWay(request);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    //异步调用...
+    @Override
     public void sentAsync(Request request, InvokeCallback callback) {
         checkProxyAgent(request);
         try {

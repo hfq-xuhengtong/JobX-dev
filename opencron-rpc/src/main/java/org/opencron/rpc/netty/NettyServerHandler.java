@@ -28,6 +28,12 @@ import org.opencron.common.logging.LoggerFactory;
 import org.opencron.rpc.ServerHandler;
 import org.slf4j.Logger;
 
+
+/**
+ * @author benjobs
+ */
+
+@ChannelHandler.Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
 
     private Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
