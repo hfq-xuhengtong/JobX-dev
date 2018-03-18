@@ -47,7 +47,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
             logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
         }
         RpcFuture rpcFuture = nettyClient.getRpcFuture(response.getId());
-        rpcFuture.setResult(response);
+        rpcFuture.done(response);
         if (rpcFuture.isAsync()) {
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron] nettyRPC client async callback invoke");

@@ -193,9 +193,6 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
                 }
-                if (rpcFuture != null) {
-                    rpcFuture.setSendDone(true);
-                }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
@@ -203,9 +200,7 @@ public abstract class AbstractClient {
                 }
                 if (this.rpcFuture != null) {
                     futureTable.remove(request.getId());
-                    rpcFuture.setSendDone(false);
-                    rpcFuture.setFailure(future.cause());
-                    rpcFuture.getCallback().failure(future.cause());
+                    rpcFuture.failure(future.cause());
                 }
             }
         }
@@ -216,9 +211,6 @@ public abstract class AbstractClient {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] MinaRPC sent success, request id:{}", request.getId());
                 }
-                if (rpcFuture != null) {
-                    rpcFuture.setSendDone(true);
-                }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
@@ -226,9 +218,7 @@ public abstract class AbstractClient {
                 }
                 if (rpcFuture != null) {
                     futureTable.remove(request.getId());
-                    rpcFuture.setSendDone(false);
-                    rpcFuture.setFailure(getConnect(request).getException());
-                    rpcFuture.getCallback().failure(getConnect(request).getException());
+                    rpcFuture.failure(getConnect(request).getException());
                 }
             }
         }

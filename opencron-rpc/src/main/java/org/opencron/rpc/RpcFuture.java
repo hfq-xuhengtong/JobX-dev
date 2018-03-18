@@ -31,7 +31,6 @@ import java.util.concurrent.*;
 public class RpcFuture {
 
     private static final CancellationException CANCELLED = new CancellationException();
-    private volatile boolean sendDone = true;
     private volatile boolean haveResult;
     private volatile Response response;
     private volatile Throwable cause;
@@ -88,7 +87,7 @@ public class RpcFuture {
         return this.haveResult;
     }
 
-    public void setResult(Response response) {
+    public void done(Response response) {
         synchronized (this) {
             if (!this.haveResult) {
                 this.response = response;
@@ -100,11 +99,10 @@ public class RpcFuture {
         }
     }
 
-    public void setFailure(Throwable throwable) {
+    public void failure(Throwable throwable) {
         if (!(throwable instanceof IOException) && !(throwable instanceof SecurityException)) {
             throwable = new IOException(throwable);
         }
-
         synchronized (this) {
             if (!this.haveResult) {
                 this.cause = throwable;
@@ -112,15 +110,8 @@ public class RpcFuture {
                 if (this.latch != null) {
                     this.latch.countDown();
                 }
+                this.getCallback().failure(throwable);
             }
-        }
-    }
-
-    public void setResult(Response result, Throwable cause) {
-        if (cause == null) {
-            this.setResult(result);
-        } else {
-            this.setFailure(cause);
         }
     }
 
@@ -171,14 +162,6 @@ public class RpcFuture {
 
     public InvokeCallback getCallback() {
         return callback;
-    }
-
-    public boolean isSendDone() {
-        return sendDone;
-    }
-
-    public void setSendDone(boolean sendDone) {
-        this.sendDone = sendDone;
     }
 
     public long getBeginTime() {
