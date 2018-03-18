@@ -122,7 +122,6 @@ public class RpcFuture {
         } else {
             this.setFailure(cause);
         }
-
     }
 
     public Response get() throws InterruptedException, ExecutionException {

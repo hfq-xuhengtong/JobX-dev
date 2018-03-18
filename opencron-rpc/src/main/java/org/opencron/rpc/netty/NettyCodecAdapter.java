@@ -108,7 +108,7 @@ public class NettyCodecAdapter<T> {
                 }
                 byte[] data = new byte[dataLength];
                 in.readBytes(data);
-                out.add(serializer.deserialize(data, type));
+                out.add(serializer.deserialize(data,type));
             } catch (Exception e) {
                 if (logger.isErrorEnabled()) {
                     logger.error("[opencron] NettyCodecAdapter decode error:", stackTrace(e));

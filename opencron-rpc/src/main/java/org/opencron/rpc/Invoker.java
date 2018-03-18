@@ -31,7 +31,6 @@ public interface Invoker {
 
     /**
      * 同步阻塞调用
-     *
      * @param request
      * @return
      * @throws Exception
@@ -40,7 +39,6 @@ public interface Invoker {
 
     /**
      * 单向调用
-     *
      * @param request
      * @throws Exception
      */
@@ -48,7 +46,6 @@ public interface Invoker {
 
     /**
      * 异步非阻塞,通知回调方式调用
-     *
      * @param request
      * @param callback
      * @throws Exception

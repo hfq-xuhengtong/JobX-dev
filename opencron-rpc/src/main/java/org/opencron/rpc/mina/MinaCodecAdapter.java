@@ -78,7 +78,7 @@ public class MinaCodecAdapter implements ProtocolCodecFactory {
             }
             byte[] data = new byte[dataLength];
             in.get(data);
-            Object obj = serializer.deserialize(data, type);
+            Object obj =  serializer.deserialize(data,type);
             out.write(obj);
             return true;
         }
@@ -95,7 +95,7 @@ public class MinaCodecAdapter implements ProtocolCodecFactory {
         @Override
         public void encode(IoSession session, Object msg, ProtocolEncoderOutput out) throws Exception {
             if (type.isInstance(msg)) {
-                byte[] data = serializer.serialize(msg);
+                byte[] data =  serializer.serialize(msg);
                 IoBuffer buffer = IoBuffer.allocate(100);
                 buffer.setAutoExpand(true);
                 buffer.setAutoShrink(true);
