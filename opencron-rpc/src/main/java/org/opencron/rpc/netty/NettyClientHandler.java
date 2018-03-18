@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 /**
  * @author benjobs
  */
-@ChannelHandler.Sharable
 public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     private Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
@@ -61,7 +60,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         if (logger.isErrorEnabled()) {
-            logger.error("捕获异常", cause);
+            logger.error("[opencron nettyRPC error,cause{}]", cause);
         }
     }
 }

@@ -39,14 +39,16 @@ public class MinaClient extends AbstractClient implements Client {
 
     @Override
     public void connect() {
-        connector = new NioSocketConnector();
-        connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Request.class, Response.class)));
-        connector.setHandler(new MinaClientHandler(this));
-        connector.setConnectTimeoutMillis(5000);
-        DefaultSocketSessionConfig sessionConfiguration = (DefaultSocketSessionConfig) connector.getSessionConfig();
-        sessionConfiguration.setTcpNoDelay(true);
-        sessionConfiguration.setKeepAlive(true);
-        sessionConfiguration.setWriteTimeout(5);
+        if (connector == null) {
+            connector = new NioSocketConnector();
+            connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Request.class, Response.class)));
+            connector.setHandler(new MinaClientHandler(this));
+            connector.setConnectTimeoutMillis(5000);
+            DefaultSocketSessionConfig sessionConfiguration = (DefaultSocketSessionConfig) connector.getSessionConfig();
+            sessionConfiguration.setTcpNoDelay(true);
+            sessionConfiguration.setKeepAlive(true);
+            sessionConfiguration.setWriteTimeout(5);
+        }
     }
 
 
