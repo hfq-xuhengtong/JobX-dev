@@ -102,31 +102,33 @@ Browser IE10+
 
 ```
 1)下载源码: 
-  git clone https://github.com/wolfboys/opencron-dev.git
+  > git clone https://github.com/wolfboys/opencron-dev.git
 
 2):修改server端的配置信息
    1:创建数据,数据库名字可以是opencron或者其他
    2:进入opencron-server/src/main/resources 修改config.properties里的jdbc连接信息
    
+   #jdbc
    jdbc.driver=com.mysql.jdbc.Driver
    jdbc.url=jdbc:mysql://${mysql_host}:3306/opencron?useUnicode=true&characterEncoding=UTF-8
    jdbc.username=${user}
    jdbc.password=${password}
    
+   #redis
    redis.host=${redis.host}
    redis.password=${redis.password}
    redis.port=${redis.port}
    
-   opencron.registry=zookeeper://${zookeeper_host}:2181
+   #zookeeper
+   opencron.registry=zookeeper://${zookeeper_host}:2181?bakup=${zookeeper_host1}:2181,${zookeeper_host2}:2181
 3):进入源码目录并执行编译:
    cd opencron
    sh build.sh
 编译完成的文件在build/dist下
-```
+
 
 ## opencron-agent 部署安装步骤
 
-```
 1) 执行运行agent.sh即可 或者手动部署agent
   
     手动部署agent步骤
@@ -325,6 +327,7 @@ server {
     }
 
 }
+
 
 ```
 
