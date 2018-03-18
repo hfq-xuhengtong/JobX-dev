@@ -37,7 +37,9 @@ public class RpcFuture {
     private volatile Throwable cause;
     private CountDownLatch latch;
 
-    //处理开始时间
+    /**
+     * 处理开始时间
+     */
     private final long beginTime = System.currentTimeMillis();
 
     /**
@@ -46,7 +48,9 @@ public class RpcFuture {
     private Integer timeout;
     private TimeUnit unit;
 
-    //异步回调
+    /**
+     * 异步回调
+     */
     private InvokeCallback callback;
 
     public RpcFuture() {
@@ -112,11 +116,11 @@ public class RpcFuture {
         }
     }
 
-    public void setResult(Response result, Throwable exc) {
-        if (exc == null) {
+    public void setResult(Response result, Throwable cause) {
+        if (cause == null) {
             this.setResult(result);
         } else {
-            this.setFailure(exc);
+            this.setFailure(cause);
         }
 
     }
