@@ -136,12 +136,10 @@ public abstract class AbstractClient {
 
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
         private RpcFuture rpcFuture;
-        private Request request;
 
-        public FutureListener(Request request, RpcFuture rpcFuture) {
-            this.request = request;
-            this.rpcFuture = rpcFuture;
-            if (request != null) {
+        public FutureListener(RpcFuture rpcFuture) {
+            if (rpcFuture != null) {
+                this.rpcFuture = rpcFuture;
                 futureTable.put(rpcFuture.getFutureId(), rpcFuture);
             }
         }
@@ -150,12 +148,12 @@ public abstract class AbstractClient {
         public void operationComplete(ChannelFuture future) throws Exception {
             if (future.isSuccess()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] NettyRPC sent success, request id:{}", request.getId());
+                    logger.info("[opencron] NettyRPC sent success, request id:{}", rpcFuture.getRequest().getId());
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] NettyRPC sent failure, request id:{}", request.getId());
+                    logger.info("[opencron] NettyRPC sent failure, request id:{}",  rpcFuture.getRequest().getId());
                 }
                 if (this.rpcFuture != null) {
                     rpcFuture.failure(future.cause());
@@ -168,18 +166,18 @@ public abstract class AbstractClient {
         public void operationComplete(IoFuture future) {
             if (future.isDone()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] MinaRPC sent success, request id:{}", request.getId());
+                    logger.info("[opencron] MinaRPC sent success, request id:{}",  rpcFuture.getRequest().getId());
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] MinaRPC sent failure, request id:{}", request.getId());
+                    logger.info("[opencron] MinaRPC sent failure, request id:{}",  rpcFuture.getRequest().getId());
                 }
                 if (rpcFuture != null) {
-                    rpcFuture.failure(getConnect(request).getException());
+                    rpcFuture.failure(getConnect(rpcFuture.getRequest()).getException());
                 }
             }
-            futureTable.remove(request.getId());
+            futureTable.remove(rpcFuture.getRequest().getId());
         }
 
     }

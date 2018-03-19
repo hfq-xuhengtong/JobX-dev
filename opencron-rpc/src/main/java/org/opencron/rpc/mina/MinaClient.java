@@ -58,7 +58,7 @@ public class MinaClient extends AbstractClient implements Client {
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request);
             //写数据
-            connect.addListener(new AbstractClient.FutureListener(request, rpcFuture));
+            connect.addListener(new AbstractClient.FutureListener(rpcFuture));
             connect.getSession().write(request);
             return rpcFuture.get();
         } else {
@@ -70,7 +70,8 @@ public class MinaClient extends AbstractClient implements Client {
     public void sentOneWay(final Request request) throws Exception {
         ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            connect.addListener(new AbstractClient.FutureListener(request, null));
+            RpcFuture rpcFuture = new RpcFuture(request);
+            connect.addListener(new AbstractClient.FutureListener(rpcFuture));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC channel not active. request id:" + request.getId());
@@ -82,7 +83,7 @@ public class MinaClient extends AbstractClient implements Client {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request, callback);
-            connect.addListener(new AbstractClient.FutureListener(request, rpcFuture));
+            connect.addListener(new AbstractClient.FutureListener(rpcFuture));
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[opencron] MinaRPC sentAsync channel not active. request id:" + request.getId());
