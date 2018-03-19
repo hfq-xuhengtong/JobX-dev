@@ -56,7 +56,7 @@ public class MinaClient extends AbstractClient implements Client {
     public Response sentSync(final Request request) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            RpcFuture rpcFuture = new RpcFuture(request.getTimeOut());
+            RpcFuture rpcFuture = new RpcFuture(request);
             //写数据
             connect.addListener(new AbstractClient.FutureListener(request, rpcFuture));
             connect.getSession().write(request);
@@ -81,7 +81,7 @@ public class MinaClient extends AbstractClient implements Client {
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            RpcFuture rpcFuture = new RpcFuture(request.getTimeOut(), callback);
+            RpcFuture rpcFuture = new RpcFuture(request, callback);
             connect.addListener(new AbstractClient.FutureListener(request, rpcFuture));
             connect.getSession().write(request);
         } else {

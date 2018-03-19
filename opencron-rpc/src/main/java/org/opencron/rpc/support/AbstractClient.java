@@ -30,19 +30,13 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.opencron.common.job.Request;
 import org.opencron.common.util.HttpUtils;
-import org.opencron.common.util.IdGenerator;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.mina.ConnectWrapper;
 import org.opencron.rpc.netty.ChannelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author benjobs
@@ -55,46 +49,11 @@ public abstract class AbstractClient {
 
     protected Bootstrap bootstrap;
 
-    /**
-     * for mina
-     */
     protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
 
-    /**
-     * for netty
-     */
     protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
-
     public final ConcurrentHashMap<Integer, RpcFuture> futureTable = new ConcurrentHashMap<Integer, RpcFuture>(256);
-
-    protected ScheduledThreadPoolExecutor executor;
-
-    public AbstractClient() {
-
-        connect();
-
-        this.executor = new ScheduledThreadPoolExecutor(5, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "RPC_" + IdGenerator.getId());
-            }
-        });
-        this.executor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                Iterator<Map.Entry<Integer, RpcFuture>> it = futureTable.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, RpcFuture> next = it.next();
-                    RpcFuture rep = next.getValue();
-                    //超时
-                    if ((rep.getBeginTime() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
-                        it.remove();
-                    }
-                }
-            }
-        }, 500, 500, TimeUnit.MILLISECONDS);
-    }
 
     public ConnectFuture getConnect(Request request) {
 
@@ -183,7 +142,7 @@ public abstract class AbstractClient {
             this.request = request;
             this.rpcFuture = rpcFuture;
             if (request != null) {
-                futureTable.put(request.getId(), rpcFuture);
+                futureTable.put(rpcFuture.getFutureId(), rpcFuture);
             }
         }
 
@@ -199,10 +158,10 @@ public abstract class AbstractClient {
                     logger.info("[opencron] NettyRPC sent failure, request id:{}", request.getId());
                 }
                 if (this.rpcFuture != null) {
-                    futureTable.remove(request.getId());
                     rpcFuture.failure(future.cause());
                 }
             }
+            futureTable.remove(rpcFuture.getFutureId());
         }
 
         @Override
@@ -217,18 +176,14 @@ public abstract class AbstractClient {
                     logger.info("[opencron] MinaRPC sent failure, request id:{}", request.getId());
                 }
                 if (rpcFuture != null) {
-                    futureTable.remove(request.getId());
                     rpcFuture.failure(getConnect(request).getException());
                 }
             }
+            futureTable.remove(request.getId());
         }
 
     }
 
-    /**
-     * call subclass connect
-     */
-    protected abstract void connect();
 
     public RpcFuture getRpcFuture(Integer id) {
         return this.futureTable.get(id);
@@ -241,7 +196,6 @@ public abstract class AbstractClient {
         }
         this.futureTable.clear();
         this.channelTable.clear();
-        this.executor.shutdown();
     }
 
 }

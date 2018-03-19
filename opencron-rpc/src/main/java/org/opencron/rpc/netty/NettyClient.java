@@ -75,7 +75,7 @@ public class NettyClient extends AbstractClient implements Client {
     public Response sentSync(final Request request) throws Exception {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request.getTimeOut());
+            final RpcFuture rpcFuture = new RpcFuture(request);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(request, rpcFuture));
             return rpcFuture.get();
         } else {
@@ -87,7 +87,7 @@ public class NettyClient extends AbstractClient implements Client {
     public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request.getTimeOut(), callback);
+            final RpcFuture rpcFuture = new RpcFuture(request, callback);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(request, rpcFuture));
         } else {
             throw new IllegalArgumentException("[opencron] NettyRPC sentAsync channel not active. request id:" + request.getId());

@@ -7,35 +7,86 @@
 <html lang="en">
 <meta name="author" content="author:benjobs,wechat:wolfboys,Created by 2016" />
 <head>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            var iframe = document.getElementById("druid");
-            iframe.onload = function () {
-                var valId = window.setInterval(function(){
-                    var brand = $("#druid").contents().find(".brand");
-                    if ( brand.text() ){
-                        brand.attr("href","javascript:void(0)");
-                        brand.removeAttr("target");
-                        brand.text("Opencron Druid");
-                        window.clearInterval(valId);
-                    }
-                }, 1);
-                var footer = $("#druid").contents().find(".footer");
-                footer.find(".container").remove();
-            }
-        });
-        function reinitIframe() {
-            try{
-                var iframe = document.getElementById("druid");
-                var bHeight = iframe.contentWindow.document.body.scrollHeight;
-                var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
-                var height = Math.max(bHeight, dHeight);
-                iframe.height = height;
-                window.frames["druid"].document.getElementById("iframe中控件的ID");
-            }catch (ex){}
+
+    <style type="text/css">
+        .nav-tabs > li > a {
+            padding: 13px 16px 13px;
         }
-        window.setInterval("reinitIframe()", 200);
+
+        .tab-content {
+            padding: 29px 0px;
+        }
+        .td-title {
+            background: rgba(0,0,0,0.2);
+            width: 135px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        var format = {
+            "Version":"版本",
+            "Drivers":"驱动",
+            "ResetEnable":"是否允许重置",
+            "ResetCount":"重置次数",
+            "JavaVMName":"JAVA版本",
+            "JavaVersion":"JVM名称",
+            "JavaClassPath":"<br>classpath路径",
+            "StartTime":"启动时间"
+        };
+
+        var page = {
+            toHome : function () {
+                ajax({
+                    type: "get",
+                    url: "${contextPath}/druid/basic.json"
+                },function (data) {
+                    var html = "";
+                    data = data["Content"];
+                    for(var key in data) {
+                        var value = data[key];
+                        if (key != "StartTime")
+                            value = value.toString().replace(/,|:/g, "<br>&nbsp;&nbsp;");
+                        html += $("#basic-each").html()
+                            .replace(/#key#/,format[key])
+                            .replace(/#value#/,value);
+                    }
+                    html = $("#basic-template").html().replace(/#basic#/,html);
+                    $("#basic").html(html);
+                });
+            },
+            toDS:function () {
+                ajax({
+                    type: "get",
+                    url: "${contextPath}/druid/datasource.json"
+                },function (data) {
+                    var html = "";
+                    data = data["Content"][0];
+                    for(var key in data) {
+                        var value = data[key];
+                        html += $("#basic-each").html()
+                            .replace(/#key#/,key)
+                            .replace(/#value#/,value?value:"");
+                    }
+                    html = $("#basic-template").html().replace(/#basic#/,html);
+                    $("#datasource").html(html);
+                });
+            }
+        }
+
     </script>
+
+    <script type="text/html" id="basic-each">
+        <tr><td class="td-title">#key#</td><td>&nbsp;&nbsp;#value#</td></tr>
+    </script>
+
+    <script type="text/html" id="basic-template">
+        <table class="table tile">
+            <tbody>
+            #basic#
+            </tbody>
+        </table>
+    </script>
+
 </head>
 
 <body>
@@ -56,9 +107,18 @@
     <h4 class="page-title"><i class="fa fa-bar-chart" aria-hidden="true" style="font-style: 30px;"></i>&nbsp;Druid监控</h4>
 
     <div class="block-area">
-        <iframe src="${contextPath}/druid/index.html" frameborder="0" scrolling="no" id="druid" name="druid" width="100%" onload="this.height=100"></iframe>
+        <div class="tab-container">
+            <ul class="nav tab nav-tabs">
+                <li class=""><a href="javascript:void(0)">opencron Druid</a></li>
+                <li class=""><a href="#basic" onclick="page.toHome()">首页</a></li>
+                <li class=""><a href="#datasource" onclick="page.toDS()" >数据源</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane" id="basic"></div>
+                <div class="tab-pane" id="datasource"></div>
+            </div>
+        </div>
     </div>
-
 </section>
 
 </body>

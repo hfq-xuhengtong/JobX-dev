@@ -20,6 +20,7 @@
  */
 package org.opencron.rpc;
 
+import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
 
 import java.io.IOException;
@@ -32,36 +33,26 @@ public class RpcFuture {
 
     private static final CancellationException CANCELLED = new CancellationException();
     private volatile boolean haveResult;
+    private volatile Integer futureId;
+    private volatile Request request;
     private volatile Response response;
     private volatile Throwable cause;
     private CountDownLatch latch;
-
-    /**
-     * 处理开始时间
-     */
     private final long beginTime = System.currentTimeMillis();
-
-    /**
-     * 超时时间
-     **/
-    private Integer timeout;
     private TimeUnit unit;
-
-    /**
-     * 异步回调
-     */
     private InvokeCallback callback;
 
     public RpcFuture() {
     }
 
-    public RpcFuture(Integer timeout) {
-        this.timeout = timeout == null ? Integer.MAX_VALUE : timeout;
+    public RpcFuture(Request request) {
+        this.request = request;
+        this.futureId = request.getId();
+        this.unit = TimeUnit.SECONDS;
     }
 
-    public RpcFuture(Integer timeout, InvokeCallback callback) {
-        this.timeout = timeout == null ? Integer.MAX_VALUE : timeout;
-        this.unit = TimeUnit.SECONDS;
+    public RpcFuture(Request request, InvokeCallback callback) {
+        this(request);
         this.callback = callback;
     }
 
@@ -169,7 +160,22 @@ public class RpcFuture {
     }
 
     public long getTimeoutMillis() {
-        return unit.toMillis(timeout);
+        return unit.toMillis(this.request.getTimeOut());
     }
 
+    public Integer getFutureId() {
+        return futureId;
+    }
+
+    public void setFutureId(Integer futureId) {
+        this.futureId = futureId;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public void setRequest(Request request) {
+        this.request = request;
+    }
 }

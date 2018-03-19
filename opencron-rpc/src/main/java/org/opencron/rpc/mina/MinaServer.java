@@ -47,7 +47,6 @@ public class MinaServer implements Server {
 
     @Override
     public void start(final int port, ServerHandler handler) {
-
         final MinaServerHandler serverHandler = new MinaServerHandler(handler);
         this.socketAddress = new InetSocketAddress(port);
 
