@@ -30,6 +30,7 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.opencron.common.job.Request;
 import org.opencron.common.util.HttpUtils;
+import org.opencron.rpc.Client;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.mina.ConnectWrapper;
 import org.opencron.rpc.netty.ChannelWrapper;
@@ -41,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author benjobs
  */
-public abstract class AbstractClient {
+public abstract class AbstractClient implements Client {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -54,6 +55,10 @@ public abstract class AbstractClient {
     protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
     public final ConcurrentHashMap<Integer, RpcFuture> futureTable = new ConcurrentHashMap<Integer, RpcFuture>(256);
+
+    public AbstractClient() {
+        this.connect();
+    }
 
     public ConnectFuture getConnect(Request request) {
 
@@ -153,7 +158,7 @@ public abstract class AbstractClient {
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] NettyRPC sent failure, request id:{}",  rpcFuture.getRequest().getId());
+                    logger.info("[opencron] NettyRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
                 }
                 if (this.rpcFuture != null) {
                     rpcFuture.failure(future.cause());
@@ -166,12 +171,12 @@ public abstract class AbstractClient {
         public void operationComplete(IoFuture future) {
             if (future.isDone()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] MinaRPC sent success, request id:{}",  rpcFuture.getRequest().getId());
+                    logger.info("[opencron] MinaRPC sent success, request id:{}", rpcFuture.getRequest().getId());
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] MinaRPC sent failure, request id:{}",  rpcFuture.getRequest().getId());
+                    logger.info("[opencron] MinaRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
                 }
                 if (rpcFuture != null) {
                     rpcFuture.failure(getConnect(rpcFuture.getRequest()).getException());
@@ -182,11 +187,10 @@ public abstract class AbstractClient {
 
     }
 
+    @Override
+    public abstract void connect();
 
-    public RpcFuture getRpcFuture(Integer id) {
-        return this.futureTable.get(id);
-    }
-
+    @Override
     public void disconnect() throws Throwable {
         if (this.connector != null) {
             this.connector.dispose();
@@ -195,5 +199,10 @@ public abstract class AbstractClient {
         this.futureTable.clear();
         this.channelTable.clear();
     }
+
+    public RpcFuture getRpcFuture(Integer id) {
+        return this.futureTable.get(id);
+    }
+
 
 }

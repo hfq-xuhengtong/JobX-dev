@@ -27,13 +27,12 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
 import org.opencron.common.logging.LoggerFactory;
-import org.opencron.rpc.Client;
 import org.opencron.rpc.InvokeCallback;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.support.AbstractClient;
 import org.slf4j.Logger;
 
-public class MinaClient extends AbstractClient implements Client {
+public class MinaClient extends AbstractClient {
 
     private static Logger logger = LoggerFactory.getLogger(MinaClient.class);
 

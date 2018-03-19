@@ -31,7 +31,6 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import org.opencron.common.Constants;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
-import org.opencron.rpc.Client;
 import org.opencron.rpc.InvokeCallback;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.support.AbstractClient;
@@ -44,7 +43,7 @@ import org.opencron.rpc.support.AbstractClient;
  * @date 2016-03-27
  */
 
-public class NettyClient extends AbstractClient implements Client {
+public class NettyClient extends AbstractClient {
 
     private static final NioEventLoopGroup NIO_EVENT_LOOP_GROUP = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyClientWorker", true));
 
