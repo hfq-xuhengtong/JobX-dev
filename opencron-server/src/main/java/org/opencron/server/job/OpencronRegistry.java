@@ -70,14 +70,15 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
+    private Boolean cluster = PropertyPlaceholder.getBoolean(Constants.PARAM_OPENCRON_CLUSTER_KEY);
 
-    private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
+    private URL registryURL = null;
 
-    private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
+    private String registryPath = null;
 
-    private final RegistryService registryService = new RegistryService();
+    private RegistryService registryService = null;
 
-    private final ZookeeperClient zookeeperClient = registryService.getZKClient(registryURL);
+    private ZookeeperClient zookeeperClient = null;
 
     private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
@@ -92,6 +93,15 @@ public class OpencronRegistry {
 
     private Lock lock = new ReentrantLock();
 
+    public OpencronRegistry(){
+        if (this.cluster) {
+            registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
+            registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
+            registryService = new RegistryService();
+            zookeeperClient = registryService.getZKClient(registryURL);
+        }
+    }
+
     public void initialize() {
         //server第一次启动检查所有的agent是否可用
         List<Agent> agentList = this.agentService.getAll();
@@ -104,6 +114,8 @@ public class OpencronRegistry {
                 }
             }
         }
+
+        if (!this.cluster) return;
 
         //扫描agent自动注册到server
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
@@ -124,6 +136,8 @@ public class OpencronRegistry {
             logger.info("[opencron] run destroy now...");
         }
 
+        if (!this.cluster) return;
+
         //job unregister
         if (CommonUtils.notEmpty(jobs)) {
             for (Long job : jobs.keySet()) {
@@ -136,6 +150,8 @@ public class OpencronRegistry {
     }
 
     public void registryAgent() {
+
+        if (!this.cluster) return;
 
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_AGENT_PATH, new ChildListener() {
             @Override
@@ -178,6 +194,8 @@ public class OpencronRegistry {
     }
 
     public void registryServer() {
+
+        if (!this.cluster) return;
 
         //server监控增加和删除
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_SERVER_PATH, new ChildListener() {
@@ -234,6 +252,9 @@ public class OpencronRegistry {
 
 
     public void registryJob() {
+
+        if (!this.cluster) return;
+
         //job的监控
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
             @Override
@@ -276,12 +297,20 @@ public class OpencronRegistry {
 
     //job新增的时候手动触发.....
     public void jobRegister(Long jobId) {
-        this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+        if (this.cluster) {
+            this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+        }else {
+            this.jobDispatch(jobId);
+        }
     }
 
     //job删除的时候手动触发.....
     public void jobUnRegister(Long jobId) {
-        this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
+        if (this.cluster) {
+            this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
+        }else {
+            this.jobRemove(jobId);
+        }
     }
 
     /**
@@ -290,10 +319,15 @@ public class OpencronRegistry {
      */
     private void jobDispatch(Long jobId) {
         try {
+
             this.lock.lock();
-            this.jobs.put(jobId, jobId);
-            this.jobUnRegister(jobId);
-            this.jobRegister(jobId);
+            if (this.cluster) {
+                this.jobs.put(jobId, jobId);
+                this.jobUnRegister(jobId);
+                this.jobRegister(jobId);
+            }else {
+                this.jobRemove(jobId);
+            }
             JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
             Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
             switch (cronType) {
@@ -314,7 +348,9 @@ public class OpencronRegistry {
     private void jobRemove(Long jobId) {
         try {
             this.lock.lock();
-            this.jobs.remove(jobId);
+            if (this.cluster) {
+                this.jobs.remove(jobId);
+            }
             this.opencronCollector.remove(jobId);
             this.schedulerService.remove(jobId);
         } catch (Exception e) {
@@ -325,7 +361,6 @@ public class OpencronRegistry {
     }
 
     private void dispatchedInfo(Integer serverSize) {
-
         String headerformat = line(1)+tab(1);
         String bodyformat = line(1)+tab(3);
         String endformat = line(2);

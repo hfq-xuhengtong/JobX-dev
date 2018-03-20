@@ -129,13 +129,70 @@ public class ExecuteService implements Job {
                 record.setStartTime(new Date());
                 record.setJobType(JobType.SINGLETON.getCode());//单一任务
 
+                InvokeCallback callback = new InvokeCallback() {
+
+                    @Override
+                    public void success(Response response) {
+
+                        logger.info("[opencron]:execute response:{}", response.toString());
+
+                        setRecordDone(record, response);
+
+                        try {
+                            //api方式调度,回调结果数据给调用方
+                            if (execType.getStatus().equals(ExecType.API.getStatus()) && CommonUtils.notEmpty(job.getCallbackURL())) {
+                                try {
+                                    ParamsMap params = ParamsMap.map().put(
+                                            "jobId", job.getJobId(),
+                                            "startTime", response.getStartTime(),
+                                            "endTime", response.getEndTime(),
+                                            "success", response.isSuccess(),
+                                            "message", response.getMessage()
+                                    );
+                                    HttpClientUtils.httpPostRequest(job.getCallbackURL(), params);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            //防止返回的信息太大,往数据库存，有保存失败的情况发送
+                            recordService.merge(record);
+
+                            if (!response.isSuccess()) {
+                                noticeService.notice(job, null);
+                                printLog("execute failed:jobName:{} at host:{},port:{},info:{}", job, record.getMessage());
+                            } else {
+                                printLog("execute successful:jobName:{} at host:{},port:{}", job, null);
+                            }
+
+                        } catch (Exception e) {
+                            if (e instanceof PacketTooBigException) {
+                                //信息丢失,继续保存记录
+                                printLostJobInfo(job, record.getMessage());
+                                record.setMessage(null);
+                                recordService.merge(record);
+                                //发送警告信息
+                                noticeService.notice(job, PACKETTOOBIG_ERROR);
+                                loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void failure(Throwable err) {
+                        //方法失联
+                        setRecordLost(record);
+                        noticeService.notice(job, "调用失败,获取不到返回结果集");
+                    }
+
+                };
+
                 try {
                     //执行前先保存
                     Record record1 = recordService.merge(record);
                     record.setRecordId(record1.getRecordId());
                     //执行前先检测一次通信是否正常
                     checkPing(job, record);
-
                     Request request = Request.request(
                             job.getHost(),
                             job.getPort(),
@@ -148,70 +205,12 @@ public class ExecuteService implements Job {
                             .putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout().toString())
                             .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
 
-                    InvokeCallback callback = new InvokeCallback() {
+                    Response response = caller.sentSync(request);
 
-                        @Override
-                        public void success(Response response) {
-
-                            logger.info("[opencron]:execute response:{}", response.toString());
-
-                            setRecordDone(record, response);
-
-                            try {
-                                //api方式调度,回调结果数据给调用方
-                                if (execType.getStatus().equals(ExecType.API.getStatus()) && CommonUtils.notEmpty(job.getCallbackURL())) {
-                                    try {
-                                        ParamsMap params = ParamsMap.map().put(
-                                                "jobId", job.getJobId(),
-                                                "startTime", response.getStartTime(),
-                                                "endTime", response.getEndTime(),
-                                                "success", response.isSuccess(),
-                                                "message", response.getMessage()
-                                        );
-                                        HttpClientUtils.httpPostRequest(job.getCallbackURL(), params);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-
-                                //防止返回的信息太大,往数据库存，有保存失败的情况发送
-                                recordService.merge(record);
-
-                                if (!response.isSuccess()) {
-                                    noticeService.notice(job, null);
-                                    printLog("execute failed:jobName:{} at host:{},port:{},info:{}", job, record.getMessage());
-                                } else {
-                                    printLog("execute successful:jobName:{} at host:{},port:{}", job, null);
-                                }
-
-                            } catch (Exception e) {
-                                if (e instanceof PacketTooBigException) {
-                                    //信息丢失,继续保存记录
-                                    printLostJobInfo(job, record.getMessage());
-                                    record.setMessage(null);
-                                    recordService.merge(record);
-                                    //发送警告信息
-                                    noticeService.notice(job, PACKETTOOBIG_ERROR);
-                                    loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void failure(Throwable err) {
-                            //方法失联
-                            setRecordLost(record);
-                            noticeService.notice(job, "调用失败,获取不到返回结果集");
-                        }
-
-                    };
-
-                    //发送异步请求
-                    caller.sentAsync(request, callback);
+                    callback.success(response);
 
                 } catch (Exception e) {
-                    loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e);
-                    noticeService.notice(job, null);
+                    callback.failure(e);
                 }
             }
 

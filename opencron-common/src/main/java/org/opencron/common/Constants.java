@@ -77,6 +77,8 @@ public class Constants {
 
     public static final String PARAM_SUCCESSEXIT_KEY = "successExit";
 
+    public static final String PARAM_OPENCRON_CLUSTER_KEY = "opencron.cluster";
+
     public static final String PARAM_OPENCRON_KEYPATH_KEY = "opencron.keypath";
 
     public static final String PARAM_OPENCRON_SINGLELOGIN_KEY = "opencron.singlelogin";
