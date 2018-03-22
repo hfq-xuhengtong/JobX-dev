@@ -1,0 +1,4 @@
+jedis=org.opencron.server.session.store.JedisSessionStore
+memcached=org.opencron.server.session.store.MemcachedSessionStore
+
+org.opencron.server.session.store.JedisSessionStore

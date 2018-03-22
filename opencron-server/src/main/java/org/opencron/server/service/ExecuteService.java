@@ -205,9 +205,7 @@ public class ExecuteService implements Job {
                             .putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout().toString())
                             .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
 
-                    Response response = caller.sentSync(request);
-
-                    callback.success(response);
+                    caller.sentAsync(request,callback);
 
                 } catch (Exception e) {
                     callback.failure(e);

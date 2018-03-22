@@ -70,8 +70,6 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
-    private Boolean cluster = PropertyPlaceholder.getBoolean(Constants.PARAM_OPENCRON_CLUSTER_KEY);
-
     private URL registryURL = null;
 
     private String registryPath = null;
@@ -94,7 +92,7 @@ public class OpencronRegistry {
     private Lock lock = new ReentrantLock();
 
     public OpencronRegistry(){
-        if (this.cluster) {
+        if (Constants.OPENCRON_CLUSTER) {
             registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
             registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
             registryService = new RegistryService();
@@ -115,7 +113,7 @@ public class OpencronRegistry {
             }
         }
 
-        if (!this.cluster) return;
+        if (!Constants.OPENCRON_CLUSTER) return;
 
         //扫描agent自动注册到server
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
@@ -136,7 +134,7 @@ public class OpencronRegistry {
             logger.info("[opencron] run destroy now...");
         }
 
-        if (!this.cluster) return;
+        if (!Constants.OPENCRON_CLUSTER) return;
 
         //job unregister
         if (CommonUtils.notEmpty(jobs)) {
@@ -151,7 +149,7 @@ public class OpencronRegistry {
 
     public void registryAgent() {
 
-        if (!this.cluster) return;
+        if (!Constants.OPENCRON_CLUSTER) return;
 
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_AGENT_PATH, new ChildListener() {
             @Override
@@ -195,7 +193,7 @@ public class OpencronRegistry {
 
     public void registryServer() {
 
-        if (!this.cluster) return;
+        if (!Constants.OPENCRON_CLUSTER) return;
 
         //server监控增加和删除
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_SERVER_PATH, new ChildListener() {
@@ -253,7 +251,7 @@ public class OpencronRegistry {
 
     public void registryJob() {
 
-        if (!this.cluster) return;
+        if (!Constants.OPENCRON_CLUSTER) return;
 
         //job的监控
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
@@ -297,7 +295,7 @@ public class OpencronRegistry {
 
     //job新增的时候手动触发.....
     public void jobRegister(Long jobId) {
-        if (this.cluster) {
+        if (Constants.OPENCRON_CLUSTER) {
             this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
         }else {
             this.jobDispatch(jobId);
@@ -306,7 +304,7 @@ public class OpencronRegistry {
 
     //job删除的时候手动触发.....
     public void jobUnRegister(Long jobId) {
-        if (this.cluster) {
+        if (Constants.OPENCRON_CLUSTER) {
             this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
         }else {
             this.jobRemove(jobId);
@@ -321,7 +319,7 @@ public class OpencronRegistry {
         try {
 
             this.lock.lock();
-            if (this.cluster) {
+            if (Constants.OPENCRON_CLUSTER) {
                 this.jobs.put(jobId, jobId);
                 this.jobUnRegister(jobId);
                 this.jobRegister(jobId);
@@ -348,7 +346,7 @@ public class OpencronRegistry {
     private void jobRemove(Long jobId) {
         try {
             this.lock.lock();
-            if (this.cluster) {
+            if (Constants.OPENCRON_CLUSTER) {
                 this.jobs.remove(jobId);
             }
             this.opencronCollector.remove(jobId);

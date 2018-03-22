@@ -24,6 +24,7 @@ package org.opencron.server.websocket;
 
 import java.io.IOException;
 
+import org.opencron.common.Constants;
 import org.opencron.server.domain.Terminal;
 
 import static org.opencron.common.util.CommonUtils.toInt;
@@ -48,7 +49,7 @@ public class TerminalHandler extends TextWebSocketHandler {
     private TerminalContext terminalContext;
 
     @Autowired
-    private TerminalProcessor terminalProcessor;
+    private TerminalClusterProcessor terminalClusterProcessor;
 
     private String terminalToken;
 
@@ -131,8 +132,8 @@ public class TerminalHandler extends TextWebSocketHandler {
         if (terminalClient != null) {
             terminalClient.disconnect();
         }
-        //注册实例
-        terminalProcessor.unregistry(terminalToken);
+        //解除实例
+        terminalClusterProcessor.unregistry(terminalToken);
     }
 
 }

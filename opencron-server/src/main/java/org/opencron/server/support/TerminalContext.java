@@ -23,36 +23,58 @@ package org.opencron.server.support;
 
 import org.opencron.common.Constants;
 import org.opencron.server.domain.Terminal;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
 public class TerminalContext implements Serializable {
 
-    @Autowired
-    private RedisCacheManager redisCacheManager;
+    //key-->token value--->Terminal
+    public static Map<String, Terminal> terminalContext = new ConcurrentHashMap<String, Terminal>(0);
+
+    private String token;
 
     public Terminal get(String key) {
-        return redisCacheManager.get(key(key), Terminal.class);
+        if (Constants.OPENCRON_CLUSTER) {
+            return OpencronTools.getRedisManager().get(key(key), Terminal.class);
+        }else {
+            return terminalContext.get(key(key));
+        }
     }
 
     public void put(String key, Terminal terminal) {
-        redisCacheManager.put(Constants.PARAM_TERMINAL_TOKEN_KEY, key);
-        redisCacheManager.put(key(key), terminal);
-        /**
-         * 为复制会话
-         */
-        String reKey = terminal.getId() + "_" + key;
-        redisCacheManager.put(key(reKey), terminal);
+        if (Constants.OPENCRON_CLUSTER) {
+            OpencronTools.getRedisManager().put(Constants.PARAM_TERMINAL_TOKEN_KEY, key);
+            OpencronTools.getRedisManager().put(key(key), terminal);
+            /**
+             * 为复制会话
+             */
+            String reKey = terminal.getId() + "_" + key;
+            OpencronTools.getRedisManager().put(key(reKey), terminal);
+        }else {
+            this.token = key;
+            //该终端实例只能被的打开一次,之后就失效
+            terminalContext.put(key(key), terminal);
+            /**
+             * 为复制会话
+             */
+            String reKey = terminal.getId() + "_" + key;
+            terminalContext.put(key(reKey), terminal);
+        }
     }
 
     public Terminal remove(String key) {
-        Terminal terminal = get(key);
-        redisCacheManager.evict(key(key));
-        return terminal;
+        if (Constants.OPENCRON_CLUSTER) {
+            Terminal terminal = get(key);
+            OpencronTools.getRedisManager().evict(key(key));
+            return terminal;
+        }else {
+            return terminalContext.remove(key(key));
+        }
     }
 
     private String key(String key) {
@@ -60,6 +82,11 @@ public class TerminalContext implements Serializable {
     }
 
     public String getToken() {
-        return redisCacheManager.remove(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
+        if (Constants.OPENCRON_CLUSTER) {
+            return OpencronTools.getRedisManager().remove(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
+        }else {
+            return this.token;
+        }
     }
+
 }

@@ -21,6 +21,7 @@
 
 package org.opencron.server.controller;
 
+import org.opencron.common.Constants;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.domain.Terminal;
@@ -59,7 +60,10 @@ public class TerminalController extends BaseController {
     private TerminalContext terminalContext;
 
     @Autowired
-    private TerminalProcessor terminalProcessor;
+    private TerminalClusterProcessor terminalClusterProcessor;
+
+    @Autowired
+    private TerminalOneProcessor terminalOneProcessor;
 
     @RequestMapping(value = "ssh.do", method = RequestMethod.POST)
     @ResponseBody
@@ -120,7 +124,7 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping("open.htm")
-    public String open(Model model, String token, Long id) {
+    public String open(HttpSession session,Model model, String token, Long id) {
         //登陆失败
         if (token == null && id != null) {
             Terminal terminal = terminalService.getById(id);
@@ -136,7 +140,7 @@ public class TerminalController extends BaseController {
             List<Terminal> terminas = terminalService.getListByUser(terminal.getUser());
             model.addAttribute("terms", terminas);
             //注册实例
-            terminalProcessor.registry(token);
+            terminalClusterProcessor.registry(token);
             return "/terminal/console";
         }
         return "/terminal/error";
@@ -151,7 +155,7 @@ public class TerminalController extends BaseController {
      * @throws Exception
      */
     @RequestMapping("reopen.htm")
-    public String reopen(Long id, String token) {
+    public String reopen(HttpSession session,Long id, String token) {
         String reKey = id + "_" + token;
         Terminal terminal = terminalContext.remove(reKey);//reKey
         if (terminal != null) {
@@ -165,24 +169,33 @@ public class TerminalController extends BaseController {
     @RequestMapping(value = "resize.do", method = RequestMethod.POST)
     @ResponseBody
     public Status resize(String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
+        if (!Constants.OPENCRON_CLUSTER) {
+           return terminalOneProcessor.resize(token,cols,rows,width,height);
+        }
         Status status = Status.TRUE;
-        terminalProcessor.doWork("resize", status, token, cols, rows, width, height);
+        terminalClusterProcessor.doWork("resize", status, token, cols, rows, width, height);
         return status;
     }
 
     @RequestMapping(value = "sendAll.do", method = RequestMethod.POST)
     @ResponseBody
     public Status sendAll(String token, String cmd) throws Exception {
+        if (!Constants.OPENCRON_CLUSTER) {
+            return terminalOneProcessor.sendAll(token,cmd);
+        }
         Status status = Status.TRUE;
-        terminalProcessor.doWork("sendAll", status, token, cmd);
+        terminalClusterProcessor.doWork("sendAll", status, token, cmd);
         return status;
     }
 
     @RequestMapping(value = "theme.do", method = RequestMethod.POST)
     @ResponseBody
     public Status theme(String token, String theme) throws Exception {
+        if (!Constants.OPENCRON_CLUSTER) {
+            return terminalOneProcessor.theme(token,theme);
+        }
         Status status = Status.TRUE;
-        terminalProcessor.doWork("theme", status, token, theme);
+        terminalClusterProcessor.doWork("theme", status, token, theme);
         return status;
     }
 
@@ -201,7 +214,11 @@ public class TerminalController extends BaseController {
                     path = path.substring(0, path.lastIndexOf("/"));
                 }
             }
-            terminalProcessor.doWork("upload", status, token, tempFile, path + "/" + file.getOriginalFilename(), file.getSize());
+
+            if (!Constants.OPENCRON_CLUSTER) {
+                return terminalOneProcessor.upload(token,tempFile,path + "/" + file.getOriginalFilename(), file.getSize());
+            }
+            terminalClusterProcessor.doWork("upload", status, token, tempFile, path + "/" + file.getOriginalFilename(), file.getSize());
             tempFile.delete();
         } catch (Exception e) {
         }

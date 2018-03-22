@@ -123,9 +123,10 @@ public class ConfigService {
             user.setQq("benjobs@qq.com");
             user.setContact("13800138000");
             userService.addUser(user);
-
         }
 
     }
+
+
 
 }

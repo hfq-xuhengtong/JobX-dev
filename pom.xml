@@ -258,6 +258,12 @@
                 <version>2.9.0</version>
             </dependency>
 
+            <dependency>
+                <groupId>net.spy</groupId>
+                <artifactId>spymemcached</artifactId>
+                <version>2.12.3</version>
+            </dependency>
+
             <!--Hibernate orm begin -->
             <dependency>
                 <groupId>org.hibernate</groupId>

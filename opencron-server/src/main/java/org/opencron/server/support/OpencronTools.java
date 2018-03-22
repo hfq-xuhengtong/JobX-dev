@@ -22,11 +22,14 @@
 package org.opencron.server.support;
 
 
+import net.spy.memcached.MemcachedClient;
 import org.opencron.common.Constants;
 import org.opencron.common.util.*;
 import org.opencron.server.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +47,25 @@ public final class OpencronTools {
     public static final String SERVER_ID = uuid();
 
     private static Logger logger = LoggerFactory.getLogger(OpencronTools.class);
+
+    private static ApplicationContext cachedContext;
+
+    static {
+        if (Constants.OPENCRON_CLUSTER) {
+            cachedContext = new ClassPathXmlApplicationContext(
+                    "classpath*:app-session-"
+                    + Constants.OPENCRON_CACHED +
+                    ".xml");
+        }
+    }
+
+    public static RedisCacheManager getRedisManager(){
+         return cachedContext.getBean(RedisCacheManager.class);
+    }
+
+    public static MemcachedClient getMamcachedClient(){
+        return cachedContext.getBean(MemcachedClient.class);
+    }
 
     public static boolean isPermission(HttpSession session) {
         Object obj = session.getAttribute(Constants.PARAM_PERMISSION_KEY);

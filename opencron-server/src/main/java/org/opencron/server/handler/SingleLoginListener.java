@@ -45,12 +45,14 @@ public class SingleLoginListener implements HttpSessionListener {
     /**
      * HttpSessionListener中的方法，在创建session
      */
+    @Override
     public void sessionCreated(HttpSessionEvent event) {
     }
 
     /**
      * HttpSessionListener中的方法，回收session时,删除sessionMap中对应的session
      */
+    @Override
     public void sessionDestroyed(HttpSessionEvent event) {
         getSingleLoginSessionMap().remove(event.getSession().getId());
     }

@@ -21,6 +21,7 @@
 package org.opencron.common;
 
 import org.opencron.common.util.CommonUtils;
+import org.opencron.common.util.PropertyPlaceholder;
 import org.opencron.common.util.SystemPropertyUtils;
 
 import java.io.File;
@@ -32,6 +33,8 @@ public class Constants {
     public static final int ZK_CONNECTION_TIMEOUT = 2000;
 
     public static final int RPC_TIMEOUT = 5000;
+
+    public static final int CACHED_TIMEOUT = 5;
 
     public static final String META_INF_DIR = "META-INF/opencron/";
 
@@ -63,7 +66,7 @@ public class Constants {
 
     public static final String PARAM_PROXYPARAMS_KEY = "proxyParams";
 
-    public static final String PARAM_MONITORPORT_KEY = "opencorn.monitorPort";
+    public static final String PARAM_MONITORPORT_KEY = "opencron.monitorPort";
 
     public static final String PARAM_NEWPASSWORD_KEY = "newPassword";
 
@@ -76,6 +79,10 @@ public class Constants {
     public static final String PARAM_BACKUP_KEY = "backup";
 
     public static final String PARAM_SUCCESSEXIT_KEY = "successExit";
+
+    public static final String PARAM_CACHED_NAME_KEY = "opencron.cached";
+
+    public static final String PARAM_COOKIE_NAME_KEY = "OPENCRON_UID";
 
     public static final String PARAM_OPENCRON_CLUSTER_KEY = "opencron.cluster";
 
@@ -137,6 +144,10 @@ public class Constants {
     /**
      * Name of the system property containing
      */
+    public static final Boolean OPENCRON_CLUSTER = PropertyPlaceholder.getBoolean(Constants.PARAM_OPENCRON_CLUSTER_KEY);
+
+    public static final String OPENCRON_CACHED = PropertyPlaceholder.get(Constants.PARAM_CACHED_NAME_KEY);
+
     public static final String OPENCRON_HOME = SystemPropertyUtils.get(PARAM_OPENCRON_HOME_KEY);
 
     /**
