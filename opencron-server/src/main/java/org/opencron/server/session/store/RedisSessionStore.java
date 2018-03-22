@@ -28,9 +28,9 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JedisSessionStore implements HttpSessionStore {
+public class RedisSessionStore implements HttpSessionStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(JedisSessionStore.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisSessionStore.class);
 
     @Override
     public void deleteSession(String sessionId) {
