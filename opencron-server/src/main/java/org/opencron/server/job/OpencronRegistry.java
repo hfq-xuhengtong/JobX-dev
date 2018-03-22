@@ -91,7 +91,7 @@ public class OpencronRegistry {
 
     private Lock lock = new ReentrantLock();
 
-    public OpencronRegistry(){
+    public OpencronRegistry() {
         if (Constants.OPENCRON_CLUSTER) {
             registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
             registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
@@ -297,7 +297,7 @@ public class OpencronRegistry {
     public void jobRegister(Long jobId) {
         if (Constants.OPENCRON_CLUSTER) {
             this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
-        }else {
+        } else {
             this.jobDispatch(jobId);
         }
     }
@@ -306,13 +306,14 @@ public class OpencronRegistry {
     public void jobUnRegister(Long jobId) {
         if (Constants.OPENCRON_CLUSTER) {
             this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
-        }else {
+        } else {
             this.jobRemove(jobId);
         }
     }
 
     /**
      * 作业的分发一定要经过一致性哈希算法,计算是否落在该server上....
+     *
      * @param jobId
      */
     private void jobDispatch(Long jobId) {
@@ -323,7 +324,7 @@ public class OpencronRegistry {
                 this.jobs.put(jobId, jobId);
                 this.jobUnRegister(jobId);
                 this.jobRegister(jobId);
-            }else {
+            } else {
                 this.jobRemove(jobId);
             }
             JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
@@ -359,15 +360,15 @@ public class OpencronRegistry {
     }
 
     private void dispatchedInfo(Integer serverSize) {
-        String headerformat = line(1)+tab(1);
-        String bodyformat = line(1)+tab(3);
+        String headerformat = line(1) + tab(1);
+        String bodyformat = line(1) + tab(3);
         String endformat = line(2);
 
-        String infoformat =  headerformat+"███████████████ [opencron] serverChanged,print dispatched info ███████████████" +
-                bodyformat+"datetime: \"{}\"" +
-                bodyformat+"previous serverSize:{}" +
-                bodyformat+"current serverSize:{}" +
-                bodyformat+"jobs:[ {} ]"+endformat;
+        String infoformat = headerformat + "███████████████ [opencron] serverChanged,print dispatched info ███████████████" +
+                bodyformat + "datetime: \"{}\"" +
+                bodyformat + "previous serverSize:{}" +
+                bodyformat + "current serverSize:{}" +
+                bodyformat + "jobs:[ {} ]" + endformat;
 
         logger.info(
                 infoformat,

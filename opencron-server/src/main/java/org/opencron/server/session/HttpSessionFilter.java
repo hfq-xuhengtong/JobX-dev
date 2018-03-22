@@ -47,94 +47,94 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @SuppressWarnings("unchecked")
 public class HttpSessionFilter extends OncePerRequestFilter implements Filter {
-	
-	private static final Logger logger = LoggerFactory.getLogger(HttpSessionFilter.class);
 
-	private HttpSessionStore sessionStore;
+    private static final Logger logger = LoggerFactory.getLogger(HttpSessionFilter.class);
 
-	@Override
-	protected void initFilterBean() throws ServletException {
-		super.initFilterBean();
-	}
+    private HttpSessionStore sessionStore;
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response, FilterChain chain)throws ServletException, IOException {
+    @Override
+    protected void initFilterBean() throws ServletException {
+        super.initFilterBean();
+    }
 
-		if (Constants.OPENCRON_CLUSTER) {
-			if (sessionStore == null) {
-				sessionStore = ExtensionLoader.load(HttpSessionStore.class, Constants.OPENCRON_CACHED);
-			}
-		}else {
-			chain.doFilter(request,response);
-		}
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
-		String requestURI = request.getContextPath() + request.getServletPath();
+        if (Constants.OPENCRON_CLUSTER) {
+            if (sessionStore == null) {
+                sessionStore = ExtensionLoader.load(HttpSessionStore.class, Constants.OPENCRON_CACHED);
+            }
+        } else {
+            chain.doFilter(request, response);
+        }
 
-		//过滤静态资源
-		if (requestURI.startsWith("/static/")||requestURI.startsWith("/favicon.ico")) {
-			chain.doFilter(request, response);
-			return;
-		}
+        String requestURI = request.getContextPath() + request.getServletPath();
 
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("text/html;charset=utf-8");
-		Cookie sessionIdCookie = getOrGenerateSessionId(request, response);
-		String sessionId = sessionIdCookie.getValue();
+        //过滤静态资源
+        if (requestURI.startsWith("/static/") || requestURI.startsWith("/favicon.ico")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
-		HttpSession rawSession = request.getSession();
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=utf-8");
+        Cookie sessionIdCookie = getOrGenerateSessionId(request, response);
+        String sessionId = sessionIdCookie.getValue();
 
-		Map sessionData = loadSessionData(sessionId);
-		try {
-			HttpSession sessionWrapper = new HttpSessionStoreWrapper(sessionStore,rawSession,sessionId,sessionData);
-			chain.doFilter(new HttpServletRequestSessionWrapper(request,sessionWrapper), response);
-		}finally {
-			try {
-				String token = (String) sessionData.get("token");
-				if ( token!=null) {
-					//登陆token
-					sessionId = token;
-					logger.info("login token="+token);
-					sessionData.remove("token");
-				}
-				sessionStore.setSession(sessionId, sessionData);
-			}catch(Exception e) {
-				logger.warn("save session data error,cause:"+e,e);
-			}
-		}
-	}
+        HttpSession rawSession = request.getSession();
 
-	private Map loadSessionData(String sessionId) {
-		Map sessionData = null;
-		try {
-			sessionData = sessionStore.getSession(sessionId);
-		}catch(Exception e) {
-			sessionData = new HashMap();
-			logger.warn("load session data error,cause:"+e,e);
-		}
-		return sessionData;
-	}
+        Map sessionData = loadSessionData(sessionId);
+        try {
+            HttpSession sessionWrapper = new HttpSessionStoreWrapper(sessionStore, rawSession, sessionId, sessionData);
+            chain.doFilter(new HttpServletRequestSessionWrapper(request, sessionWrapper), response);
+        } finally {
+            try {
+                String token = (String) sessionData.get("token");
+                if (token != null) {
+                    //登陆token
+                    sessionId = token;
+                    logger.info("login token=" + token);
+                    sessionData.remove("token");
+                }
+                sessionStore.setSession(sessionId, sessionData);
+            } catch (Exception e) {
+                logger.warn("save session data error,cause:" + e, e);
+            }
+        }
+    }
 
-	private Cookie getOrGenerateSessionId(HttpServletRequest request, HttpServletResponse response) {
-		Map<String,Cookie> cookieMap = CookieUtils.cookieToMap(request.getCookies());
-		Cookie sessionIdCookie = cookieMap.get(Constants.PARAM_COOKIE_NAME_KEY );
-		if(sessionIdCookie == null || StringUtils.isEmpty(sessionIdCookie.getValue())) {
-			sessionIdCookie = generateCookie(request,response);
-		}else {
-			sessionIdCookie.setMaxAge(request.getSession().getMaxInactiveInterval() * 60 * 60 * 1000);
-		}
-		return sessionIdCookie;
-	}
+    private Map loadSessionData(String sessionId) {
+        Map sessionData = null;
+        try {
+            sessionData = sessionStore.getSession(sessionId);
+        } catch (Exception e) {
+            sessionData = new HashMap();
+            logger.warn("load session data error,cause:" + e, e);
+        }
+        return sessionData;
+    }
 
-	private Cookie generateCookie(HttpServletRequest request,HttpServletResponse response) {
-		Cookie sessionIdCookie = new Cookie(Constants.PARAM_COOKIE_NAME_KEY,CommonUtils.uuid());
-		String domain = request.getServerName();
-		if(domain != null) {
-			sessionIdCookie.setDomain(domain);
-		}
-		sessionIdCookie.setPath("/");
-		sessionIdCookie.setMaxAge(request.getSession().getMaxInactiveInterval());
-		response.addCookie(sessionIdCookie);
-		return sessionIdCookie;
-	}
+    private Cookie getOrGenerateSessionId(HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Cookie> cookieMap = CookieUtils.cookieToMap(request.getCookies());
+        Cookie sessionIdCookie = cookieMap.get(Constants.PARAM_COOKIE_NAME_KEY);
+        if (sessionIdCookie == null || StringUtils.isEmpty(sessionIdCookie.getValue())) {
+            sessionIdCookie = generateCookie(request, response);
+        } else {
+            sessionIdCookie.setMaxAge(request.getSession().getMaxInactiveInterval() * 60 * 60 * 1000);
+        }
+        return sessionIdCookie;
+    }
+
+    private Cookie generateCookie(HttpServletRequest request, HttpServletResponse response) {
+        Cookie sessionIdCookie = new Cookie(Constants.PARAM_COOKIE_NAME_KEY, CommonUtils.uuid());
+        String domain = request.getServerName();
+        if (domain != null) {
+            sessionIdCookie.setDomain(domain);
+        }
+        sessionIdCookie.setPath("/");
+        sessionIdCookie.setMaxAge(request.getSession().getMaxInactiveInterval());
+        response.addCookie(sessionIdCookie);
+        return sessionIdCookie;
+    }
 
 }

@@ -28,10 +28,10 @@ import java.util.Map;
 @SPI("jedis")
 public interface HttpSessionStore {
 
-	void setSession(String sessionId,Map sessionData);
+    void setSession(String sessionId, Map sessionData);
 
-	void deleteSession(String sessionId);
+    void deleteSession(String sessionId);
 
-	Map<String,?> getSession(String sessionId);
+    Map<String, ?> getSession(String sessionId);
 
 }

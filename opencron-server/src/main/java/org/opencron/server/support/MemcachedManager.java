@@ -121,31 +121,39 @@ public class MemcachedManager {
         }
         return map;
     }
+
     // ---- increment & decrement Start ----//
     public long increment(String key, int by, long defaultValue, int expire) {
         return memcachedClient.incr(key, by, defaultValue, expire);
     }
+
     public long increment(String key, int by) {
         return memcachedClient.incr(key, by);
     }
+
     public long decrement(String key, int by, long defaultValue, int expire) {
         return memcachedClient.decr(key, by, defaultValue, expire);
     }
+
     public long decrement(String key, int by) {
         return memcachedClient.decr(key, by);
     }
+
     public long asyncIncrement(String key, int by) {
         Future<Long> f = memcachedClient.asyncIncr(key, by);
         return getLongValue(f);
     }
+
     public long asyncDecrement(String key, int by) {
         Future<Long> f = memcachedClient.asyncDecr(key, by);
         return getLongValue(f);
     }
+
     // ---- increment & decrement End ----//
     public void printStats() throws IOException {
         printStats(null);
     }
+
     public void printStats(OutputStream stream) throws IOException {
         Map<SocketAddress, Map<String, String>> statMap = memcachedClient.getStats();
         if (stream == null) {
@@ -170,9 +178,11 @@ public class MemcachedManager {
         stream.write(buf.toString().getBytes());
         stream.flush();
     }
+
     public Transcoder getTranscoder() {
         return memcachedClient.getTranscoder();
     }
+
     private long getLongValue(Future<Long> f) {
         try {
             Long l = f.get(DEFAULT_TIMEOUT, DEFAULT_TIMEUNIT);
@@ -182,6 +192,7 @@ public class MemcachedManager {
         }
         return -1;
     }
+
     private boolean getBooleanValue(Future<Boolean> f) {
         try {
             Boolean bool = f.get(DEFAULT_TIMEOUT, DEFAULT_TIMEUNIT);
@@ -191,9 +202,11 @@ public class MemcachedManager {
             return false;
         }
     }
+
     public MemcachedClient getMemcachedClient() {
         return memcachedClient;
     }
+
     public void setMemcachedClient(MemcachedClient memcachedClient) {
         this.memcachedClient = memcachedClient;
     }

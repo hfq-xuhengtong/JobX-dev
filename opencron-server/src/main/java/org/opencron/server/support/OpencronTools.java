@@ -54,16 +54,16 @@ public final class OpencronTools {
         if (Constants.OPENCRON_CLUSTER) {
             cachedContext = new ClassPathXmlApplicationContext(
                     "classpath*:app-session-"
-                    + Constants.OPENCRON_CACHED +
-                    ".xml");
+                            + Constants.OPENCRON_CACHED +
+                            ".xml");
         }
     }
 
-    public static RedisCacheManager getRedisManager(){
-         return cachedContext.getBean(RedisCacheManager.class);
+    public static RedisCacheManager getRedisManager() {
+        return cachedContext.getBean(RedisCacheManager.class);
     }
 
-    public static MemcachedClient getMamcachedClient(){
+    public static MemcachedClient getMamcachedClient() {
         return cachedContext.getBean(MemcachedClient.class);
     }
 

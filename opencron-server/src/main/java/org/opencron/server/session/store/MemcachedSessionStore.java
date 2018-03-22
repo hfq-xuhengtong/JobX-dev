@@ -22,6 +22,7 @@ package org.opencron.server.session.store;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import net.spy.memcached.transcoders.SerializingTranscoder;
 
 import org.opencron.server.session.HttpSessionStore;
@@ -31,32 +32,32 @@ import org.slf4j.LoggerFactory;
 
 
 public class MemcachedSessionStore implements HttpSessionStore {
-	
-	private static final Logger logger = LoggerFactory.getLogger(MemcachedSessionStore.class);
-	
-	private SerializingTranscoder serializingTranscoder = new SerializingTranscoder();
-	
-	@Override
-	public void deleteSession(String sessionId) {
-		OpencronTools.getMamcachedClient().delete(sessionId);
-	}
 
-	@Override
-	public Map getSession(String sessionId) {
-		Map result = (Map)get(sessionId);
-		if(result == null){
-			result = new HashMap();
-		}
-		return result;
-	}
+    private static final Logger logger = LoggerFactory.getLogger(MemcachedSessionStore.class);
 
-	private Object get(String sessionId) {
-		return OpencronTools.getMamcachedClient().get(sessionId, serializingTranscoder);
-	}
+    private SerializingTranscoder serializingTranscoder = new SerializingTranscoder();
 
-	@Override
-	public void setSession(String sessionId,Map sessionData) {
-		OpencronTools.getMamcachedClient().set(sessionId, Integer.MAX_VALUE,sessionData,serializingTranscoder);
-	}
+    @Override
+    public void deleteSession(String sessionId) {
+        OpencronTools.getMamcachedClient().delete(sessionId);
+    }
+
+    @Override
+    public Map getSession(String sessionId) {
+        Map result = (Map) get(sessionId);
+        if (result == null) {
+            result = new HashMap();
+        }
+        return result;
+    }
+
+    private Object get(String sessionId) {
+        return OpencronTools.getMamcachedClient().get(sessionId, serializingTranscoder);
+    }
+
+    @Override
+    public void setSession(String sessionId, Map sessionData) {
+        OpencronTools.getMamcachedClient().set(sessionId, Integer.MAX_VALUE, sessionData, serializingTranscoder);
+    }
 
 }

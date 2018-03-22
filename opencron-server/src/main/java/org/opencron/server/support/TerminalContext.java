@@ -41,7 +41,7 @@ public class TerminalContext implements Serializable {
     public Terminal get(String key) {
         if (Constants.OPENCRON_CLUSTER) {
             return OpencronTools.getRedisManager().get(key(key), Terminal.class);
-        }else {
+        } else {
             return terminalContext.get(key(key));
         }
     }
@@ -55,7 +55,7 @@ public class TerminalContext implements Serializable {
              */
             String reKey = terminal.getId() + "_" + key;
             OpencronTools.getRedisManager().put(key(reKey), terminal);
-        }else {
+        } else {
             this.token = key;
             //该终端实例只能被的打开一次,之后就失效
             terminalContext.put(key(key), terminal);
@@ -72,7 +72,7 @@ public class TerminalContext implements Serializable {
             Terminal terminal = get(key);
             OpencronTools.getRedisManager().evict(key(key));
             return terminal;
-        }else {
+        } else {
             return terminalContext.remove(key(key));
         }
     }
@@ -84,7 +84,7 @@ public class TerminalContext implements Serializable {
     public String getToken() {
         if (Constants.OPENCRON_CLUSTER) {
             return OpencronTools.getRedisManager().remove(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
-        }else {
+        } else {
             return this.token;
         }
     }

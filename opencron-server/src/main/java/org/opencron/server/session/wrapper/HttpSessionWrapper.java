@@ -30,97 +30,97 @@ import javax.servlet.http.HttpSessionContext;
 
 @SuppressWarnings("deprecation")
 public class HttpSessionWrapper implements HttpSession {
-	private HttpSession delegate;
+    private HttpSession delegate;
 
-	public HttpSessionWrapper(HttpSession session) {
-		super();
-		this.delegate = session;
-	}
+    public HttpSessionWrapper(HttpSession session) {
+        super();
+        this.delegate = session;
+    }
 
-	@Override
-	public Object getAttribute(String key) {
-		return delegate.getAttribute(key);
-	}
+    @Override
+    public Object getAttribute(String key) {
+        return delegate.getAttribute(key);
+    }
 
-	@Override
-	public Enumeration<String> getAttributeNames() {
-		return delegate.getAttributeNames();
-	}
+    @Override
+    public Enumeration<String> getAttributeNames() {
+        return delegate.getAttributeNames();
+    }
 
-	@Override
-	public long getCreationTime() {
-		return delegate.getCreationTime();
-	}
+    @Override
+    public long getCreationTime() {
+        return delegate.getCreationTime();
+    }
 
-	@Override
-	public String getId() {
-		return delegate.getId();
-	}
+    @Override
+    public String getId() {
+        return delegate.getId();
+    }
 
-	@Override
-	public long getLastAccessedTime() {
-		return delegate.getLastAccessedTime();
-	}
+    @Override
+    public long getLastAccessedTime() {
+        return delegate.getLastAccessedTime();
+    }
 
-	@Override
-	public int getMaxInactiveInterval() {
-		return delegate.getMaxInactiveInterval();
-	}
+    @Override
+    public int getMaxInactiveInterval() {
+        return delegate.getMaxInactiveInterval();
+    }
 
-	@Override
-	public ServletContext getServletContext() {
-		return delegate.getServletContext();
-	}
+    @Override
+    public ServletContext getServletContext() {
+        return delegate.getServletContext();
+    }
 
-	@Override
-	@Deprecated
-	public HttpSessionContext getSessionContext() {
-		return delegate.getSessionContext();
-	}
+    @Override
+    @Deprecated
+    public HttpSessionContext getSessionContext() {
+        return delegate.getSessionContext();
+    }
 
-	@Override
-	public Object getValue(String key) {
-		return getAttribute(key);
-	}
+    @Override
+    public Object getValue(String key) {
+        return getAttribute(key);
+    }
 
-	@Override
-	public String[] getValueNames() {
-		return (String[])Collections.list(getAttributeNames()).toArray(new String[]{});
-	}
+    @Override
+    public String[] getValueNames() {
+        return (String[]) Collections.list(getAttributeNames()).toArray(new String[]{});
+    }
 
-	@Override
-	public void invalidate() {
-		delegate.invalidate();
-	}
+    @Override
+    public void invalidate() {
+        delegate.invalidate();
+    }
 
-	@Override
-	public boolean isNew() {
-		return delegate.isNew();
-	}
+    @Override
+    public boolean isNew() {
+        return delegate.isNew();
+    }
 
-	@Override
-	public void putValue(String key, Object value) {
-		setAttribute(key, value);
-	}
+    @Override
+    public void putValue(String key, Object value) {
+        setAttribute(key, value);
+    }
 
-	@Override
-	public void removeAttribute(String key) {
-		delegate.removeAttribute(key);
-	}
+    @Override
+    public void removeAttribute(String key) {
+        delegate.removeAttribute(key);
+    }
 
-	@Override
-	public void removeValue(String key) {
-		removeAttribute(key);
-	}
+    @Override
+    public void removeValue(String key) {
+        removeAttribute(key);
+    }
 
-	@Override
-	public void setAttribute(String key, Object value) {
-		delegate.setAttribute(key, value);
-	}
+    @Override
+    public void setAttribute(String key, Object value) {
+        delegate.setAttribute(key, value);
+    }
 
-	@Override
-	public void setMaxInactiveInterval(int interval) {
-		delegate.setMaxInactiveInterval(interval);
-	}
+    @Override
+    public void setMaxInactiveInterval(int interval) {
+        delegate.setMaxInactiveInterval(interval);
+    }
 
 }

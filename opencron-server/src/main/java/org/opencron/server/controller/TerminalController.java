@@ -124,7 +124,7 @@ public class TerminalController extends BaseController {
     }
 
     @RequestMapping("open.htm")
-    public String open(HttpSession session,Model model, String token, Long id) {
+    public String open(HttpSession session, Model model, String token, Long id) {
         //登陆失败
         if (token == null && id != null) {
             Terminal terminal = terminalService.getById(id);
@@ -155,7 +155,7 @@ public class TerminalController extends BaseController {
      * @throws Exception
      */
     @RequestMapping("reopen.htm")
-    public String reopen(HttpSession session,Long id, String token) {
+    public String reopen(HttpSession session, Long id, String token) {
         String reKey = id + "_" + token;
         Terminal terminal = terminalContext.remove(reKey);//reKey
         if (terminal != null) {
@@ -170,7 +170,7 @@ public class TerminalController extends BaseController {
     @ResponseBody
     public Status resize(String token, Integer cols, Integer rows, Integer width, Integer height) throws Exception {
         if (!Constants.OPENCRON_CLUSTER) {
-           return terminalOneProcessor.resize(token,cols,rows,width,height);
+            return terminalOneProcessor.resize(token, cols, rows, width, height);
         }
         Status status = Status.TRUE;
         terminalClusterProcessor.doWork("resize", status, token, cols, rows, width, height);
@@ -181,7 +181,7 @@ public class TerminalController extends BaseController {
     @ResponseBody
     public Status sendAll(String token, String cmd) throws Exception {
         if (!Constants.OPENCRON_CLUSTER) {
-            return terminalOneProcessor.sendAll(token,cmd);
+            return terminalOneProcessor.sendAll(token, cmd);
         }
         Status status = Status.TRUE;
         terminalClusterProcessor.doWork("sendAll", status, token, cmd);
@@ -192,7 +192,7 @@ public class TerminalController extends BaseController {
     @ResponseBody
     public Status theme(String token, String theme) throws Exception {
         if (!Constants.OPENCRON_CLUSTER) {
-            return terminalOneProcessor.theme(token,theme);
+            return terminalOneProcessor.theme(token, theme);
         }
         Status status = Status.TRUE;
         terminalClusterProcessor.doWork("theme", status, token, theme);
@@ -216,7 +216,7 @@ public class TerminalController extends BaseController {
             }
 
             if (!Constants.OPENCRON_CLUSTER) {
-                return terminalOneProcessor.upload(token,tempFile,path + "/" + file.getOriginalFilename(), file.getSize());
+                return terminalOneProcessor.upload(token, tempFile, path + "/" + file.getOriginalFilename(), file.getSize());
             }
             terminalClusterProcessor.doWork("upload", status, token, tempFile, path + "/" + file.getOriginalFilename(), file.getSize());
             tempFile.delete();

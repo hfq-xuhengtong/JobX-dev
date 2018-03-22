@@ -29,30 +29,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JedisSessionStore implements HttpSessionStore {
-	
-	private static final Logger logger = LoggerFactory.getLogger(JedisSessionStore.class);
-	
-	@Override
-	public void deleteSession(String sessionId) {
-		OpencronTools.getRedisManager().evict(sessionId);
-	}
 
-	@Override
-	public Map getSession(String sessionId) {
-		Map result = (Map)get(sessionId);
-		if(result == null){
-			result = new HashMap();
-		}
-		return result;
-	}
+    private static final Logger logger = LoggerFactory.getLogger(JedisSessionStore.class);
 
-	private Object get(String sessionId) {
-		return OpencronTools.getRedisManager().get(sessionId,Map.class);
-	}
+    @Override
+    public void deleteSession(String sessionId) {
+        OpencronTools.getRedisManager().evict(sessionId);
+    }
 
-	@Override
-	public void setSession(String sessionId,Map sessionData) {
-		OpencronTools.getRedisManager().put(sessionId,sessionData);
-	}
+    @Override
+    public Map getSession(String sessionId) {
+        Map result = (Map) get(sessionId);
+        if (result == null) {
+            result = new HashMap();
+        }
+        return result;
+    }
+
+    private Object get(String sessionId) {
+        return OpencronTools.getRedisManager().get(sessionId, Map.class);
+    }
+
+    @Override
+    public void setSession(String sessionId, Map sessionData) {
+        OpencronTools.getRedisManager().put(sessionId, sessionData);
+    }
 
 }

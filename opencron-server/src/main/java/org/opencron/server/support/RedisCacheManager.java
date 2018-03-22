@@ -85,7 +85,7 @@ public class RedisCacheManager implements Cache {
                         return null;
                     }
                     try {
-                        return serializer.deserialize(value,finalType);
+                        return serializer.deserialize(value, finalType);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -124,7 +124,7 @@ public class RedisCacheManager implements Cache {
                     @Override
                     public Boolean doInRedis(RedisConnection connection) {
                         try {
-                            byte[] data =  serializer.serialize(finalValue);
+                            byte[] data = serializer.serialize(finalValue);
                             connection.set(finalKey.getBytes(), data);
                         } catch (IOException e) {
                             e.printStackTrace();

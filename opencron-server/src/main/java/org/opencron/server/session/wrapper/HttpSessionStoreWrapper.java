@@ -30,52 +30,52 @@ import org.opencron.server.session.HttpSessionStore;
 
 
 @SuppressWarnings("unchecked")
-public class HttpSessionStoreWrapper extends HttpSessionWrapper{
+public class HttpSessionStoreWrapper extends HttpSessionWrapper {
 
-	private HttpSessionStore store;
+    private HttpSessionStore store;
 
-	private String sessionId;
+    private String sessionId;
 
-	private Map sessionData;
+    private Map sessionData;
 
-	public HttpSessionStoreWrapper(HttpSessionStore store,HttpSession session,String sessionId,Map sessionData) {
-		super(session);
-		this.sessionId = sessionId;
-		this.sessionData = sessionData;
-		this.store = store;
-	}
+    public HttpSessionStoreWrapper(HttpSessionStore store, HttpSession session, String sessionId, Map sessionData) {
+        super(session);
+        this.sessionId = sessionId;
+        this.sessionData = sessionData;
+        this.store = store;
+    }
 
-	@Override
-	public void invalidate() {
-		sessionData.clear();
-		store.deleteSession(getId());
-	}
+    @Override
+    public void invalidate() {
+        sessionData.clear();
+        store.deleteSession(getId());
+    }
 
-	@Override
-	public String getId() {
-		return sessionId;
-	}
+    @Override
+    public String getId() {
+        return sessionId;
+    }
 
-	@Override
-	public Object getAttribute(String key) {
-		return this.sessionData.get(key);
-	}
+    @Override
+    public Object getAttribute(String key) {
+        return this.sessionData.get(key);
+    }
 
-	@Override
-	public Enumeration getAttributeNames() {
-		return Collections.enumeration(sessionData.keySet());
-	}
+    @Override
+    public Enumeration getAttributeNames() {
+        return Collections.enumeration(sessionData.keySet());
+    }
 
-	@Override
-	public void removeAttribute(String key) {
-		sessionData.remove(key);
-		store.setSession(sessionId,sessionData);
-	}
+    @Override
+    public void removeAttribute(String key) {
+        sessionData.remove(key);
+        store.setSession(sessionId, sessionData);
+    }
 
-	@Override
-	public void setAttribute(String key, Object value) {
-		sessionData.put(key, value);
-		store.setSession(sessionId,sessionData);
-	}
+    @Override
+    public void setAttribute(String key, Object value) {
+        sessionData.put(key, value);
+        store.setSession(sessionId, sessionData);
+    }
 
 }
