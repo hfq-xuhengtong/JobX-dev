@@ -25,7 +25,7 @@ import org.opencron.common.ext.SPI;
 import java.util.Map;
 
 
-@SPI("jedis")
+@SPI
 public interface HttpSessionStore {
 
     void setSession(String sessionId, Map sessionData);
