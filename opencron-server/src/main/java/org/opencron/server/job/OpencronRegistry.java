@@ -70,13 +70,13 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
-    private URL registryURL = null;
+    private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));;
 
-    private String registryPath = null;
+    private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
 
-    private RegistryService registryService = null;
+    private final RegistryService registryService = new RegistryService();
 
-    private ZookeeperClient zookeeperClient = null;
+    private final ZookeeperClient zookeeperClient = registryService.getZKClient(registryURL);;
 
     private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
@@ -90,15 +90,6 @@ public class OpencronRegistry {
     private volatile boolean destroy = false;
 
     private Lock lock = new ReentrantLock();
-
-    public OpencronRegistry() {
-        if (Constants.OPENCRON_CLUSTER) {
-            registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
-            registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
-            registryService = new RegistryService();
-            zookeeperClient = registryService.getZKClient(registryURL);
-        }
-    }
 
     public void initialize() {
         //server第一次启动检查所有的agent是否可用
@@ -148,8 +139,6 @@ public class OpencronRegistry {
     }
 
     public void registryAgent() {
-
-        if (!Constants.OPENCRON_CLUSTER) return;
 
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_AGENT_PATH, new ChildListener() {
             @Override

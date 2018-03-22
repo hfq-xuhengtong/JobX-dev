@@ -209,10 +209,6 @@ public class AgentBootstrap implements Serializable {
                 logger.info("[opencron]agent started @ port:{},pid:{}", port, getPid());
             }
 
-
-            String cluster = AgentProperties.getProperty(Constants.PARAM_OPENCRON_CLUSTER_KEY);
-            if (cluster == null || "false".equalsIgnoreCase(cluster.trim())) return;
-
             String machineId = MacUtils.getMachineId();
             if (machineId == null) {
                 throw new IllegalArgumentException("[opencron] getUniqueId error.");
