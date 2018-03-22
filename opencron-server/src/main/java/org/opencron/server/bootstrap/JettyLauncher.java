@@ -44,6 +44,7 @@ public class JettyLauncher implements Launcher {
 
     private Logger logger = LoggerFactory.getLogger(JettyLauncher.class);
 
+    @Override
     public void start(boolean devMode, int port) throws Exception {
 
         Server server = new Server(new QueuedThreadPool(Constants.WEB_THREADPOOL_SIZE));
