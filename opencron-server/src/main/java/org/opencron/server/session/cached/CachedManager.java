@@ -18,9 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.server.session;
+package org.opencron.server.session.cached;
 
-
+/**
+ * @author benjobs
+ */
 public interface CachedManager {
 
     void delete(String key);

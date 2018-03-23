@@ -25,7 +25,7 @@ package org.opencron.server.support;
 import org.opencron.common.Constants;
 import org.opencron.common.util.*;
 import org.opencron.server.domain.User;
-import org.opencron.server.session.CachedManager;
+import org.opencron.server.session.cached.CachedManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -57,7 +57,7 @@ public final class OpencronTools {
         if (Constants.OPENCRON_CLUSTER) {
             Constants.CachedProvider provider = Constants.CachedProvider.getByName(Constants.OPENCRON_CACHED);
             if (provider == null) {
-                throw new ExceptionInInitializerError("[opencron] pleash check opencron.cached value,must be 'redis' or 'memcached'");
+                throw new ExceptionInInitializerError("[opencron] please check parameter 'opencron.cached' value,must be 'redis' or 'memcached'");
             }
             String conf = String.format(Constants.SESSION_CONF_FORMAT,provider.getName());
             try {

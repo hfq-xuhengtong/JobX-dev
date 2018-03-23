@@ -47,7 +47,8 @@
     </bean>
 
     <bean class="org.opencron.server.session.cached.MemcachedManager">
-        <constructor-arg name="memcachedClient" ref="memcachedClient"/>
-    </bean>
+        <property name="memcachedClient" ref="memcachedClient"/>
+        <property name="expire" value="${memcached.expire}"/>
+     </bean>
 
 </beans>

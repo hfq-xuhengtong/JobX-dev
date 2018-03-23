@@ -20,6 +20,7 @@
  */
 package org.opencron.server.session;
 
+import org.opencron.server.session.cached.CachedManager;
 import org.opencron.server.support.OpencronTools;
 
 import java.util.HashMap;

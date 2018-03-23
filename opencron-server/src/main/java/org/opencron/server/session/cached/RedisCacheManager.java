@@ -24,7 +24,6 @@ package org.opencron.server.session.cached;
 import org.opencron.common.ext.ExtensionLoader;
 import org.opencron.common.serialize.Serializer;
 import org.opencron.common.util.CommonUtils;
-import org.opencron.server.session.CachedManager;
 import org.springframework.cache.Cache;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -35,7 +34,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-
+/**
+ * @author benjobs
+ */
 public class RedisCacheManager implements Cache,CachedManager {
 
     private Serializer serializer = ExtensionLoader.load(Serializer.class);
@@ -54,7 +55,7 @@ public class RedisCacheManager implements Cache,CachedManager {
     /**
      * 超时时间
      */
-    private long timeout;
+    private long expire;
 
     @Override
     public String getName() {
@@ -79,6 +80,7 @@ public class RedisCacheManager implements Cache,CachedManager {
                 finalKey = key.toString();
             }
             final Object object = redisTemplate.execute(new RedisCallback<Object>() {
+                @Override
                 public Object doInRedis(RedisConnection connection) throws DataAccessException {
                     byte[] key = finalKey.getBytes();
                     byte[] value = connection.get(key);
@@ -131,7 +133,7 @@ public class RedisCacheManager implements Cache,CachedManager {
                             e.printStackTrace();
                         }
                         // 设置超时间
-                        connection.expire(finalKey.getBytes(), timeout);
+                        connection.expire(finalKey.getBytes(), getExpire());
                         return true;
                     }
                 });
@@ -158,6 +160,7 @@ public class RedisCacheManager implements Cache,CachedManager {
             }
             if (CommonUtils.notEmpty(finalKey)) {
                 redisTemplate.execute(new RedisCallback<Long>() {
+                    @Override
                     public Long doInRedis(RedisConnection connection) throws DataAccessException {
                         return connection.del(finalKey.getBytes());
                     }
@@ -194,12 +197,12 @@ public class RedisCacheManager implements Cache,CachedManager {
         this.name = name;
     }
 
-    public long getTimeout() {
-        return timeout;
+    public long getExpire() {
+        return expire;
     }
 
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
+    public void setExpire(long expire) {
+        this.expire = expire;
     }
 
     public List<String> keys(String pattern) {

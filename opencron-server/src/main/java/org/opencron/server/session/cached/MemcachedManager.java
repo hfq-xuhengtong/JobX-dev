@@ -34,9 +34,10 @@ import java.util.concurrent.TimeUnit;
 import net.spy.memcached.ConnectionObserver;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.transcoders.Transcoder;
-import org.opencron.server.session.CachedManager;
 
-
+/**
+ * @author benjobs
+ */
 public class MemcachedManager implements CachedManager {
 
     public static final int DEFAULT_TIMEOUT = 5;
@@ -45,9 +46,7 @@ public class MemcachedManager implements CachedManager {
 
     private MemcachedClient memcachedClient;
 
-    public MemcachedManager(MemcachedClient memcachedClient){
-        this.memcachedClient = memcachedClient;
-    }
+    private int expire;
 
     public void addObserver(ConnectionObserver obs) {
         memcachedClient.addObserver(obs);
@@ -55,11 +54,6 @@ public class MemcachedManager implements CachedManager {
 
     public void removeObserver(ConnectionObserver obs) {
         memcachedClient.removeObserver(obs);
-    }
-
-    public boolean set(String key, Object value, int expire) {
-        Future<Boolean> f = memcachedClient.set(key, expire, value);
-        return getBooleanValue(f);
     }
 
     @Override
@@ -74,7 +68,7 @@ public class MemcachedManager implements CachedManager {
 
     @Override
     public void set(String key, Object object) {
-        memcachedClient.set(key, Integer.MAX_VALUE, object);
+        memcachedClient.set(key, this.expire, object);
     }
 
     @Override
@@ -95,17 +89,11 @@ public class MemcachedManager implements CachedManager {
         return obj;
     }
 
-    public boolean add(String key, Object value, int expire) {
-        Future<Boolean> f = memcachedClient.add(key, expire, value);
-        return getBooleanValue(f);
-    }
 
-    public boolean replace(String key, Object value, int expire) {
+    public boolean replace(String key, Object value) {
         Future<Boolean> f = memcachedClient.replace(key, expire, value);
         return getBooleanValue(f);
     }
-
-
 
     public boolean flush() {
         Future<Boolean> f = memcachedClient.flush();
@@ -229,5 +217,13 @@ public class MemcachedManager implements CachedManager {
 
     public void setMemcachedClient(MemcachedClient memcachedClient) {
         this.memcachedClient = memcachedClient;
+    }
+
+    public int getExpire() {
+        return expire;
+    }
+
+    public void setExpire(int expire) {
+        this.expire = expire;
     }
 }
