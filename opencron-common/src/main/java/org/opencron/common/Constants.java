@@ -95,8 +95,6 @@ public class Constants {
 
     public static final String PARAM_OPENCRON_KEYPATH_KEY = "opencron.keypath";
 
-    public static final String PARAM_OPENCRON_SINGLELOGIN_KEY = "opencron.singlelogin";
-
     public static final String PARAM_OPENCRON_PASSWORD_KEY = "opencron.password";
 
     public static final String PARAM_OPENCRON_HOST_KEY = "opencron.host";
@@ -715,4 +713,6 @@ public class Constants {
     }
 
 
+    public class PARAM_ONLINE_USER_KEY {
+    }
 }

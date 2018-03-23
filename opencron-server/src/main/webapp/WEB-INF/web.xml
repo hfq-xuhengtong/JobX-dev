@@ -27,10 +27,6 @@
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
-    <listener>
-        <listener-class>org.opencron.server.handler.SingleLoginListener</listener-class>
-    </listener>
-
     <filter>
         <filter-name>httpSessionFilter</filter-name>
         <filter-class>org.opencron.server.session.HttpSessionFilter</filter-class>

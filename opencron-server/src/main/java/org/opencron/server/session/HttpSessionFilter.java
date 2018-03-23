@@ -34,7 +34,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.opencron.common.Constants;
-import org.opencron.common.ext.ExtensionLoader;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.CookieUtils;
 import org.opencron.server.session.wrapper.HttpServletRequestSessionWrapper;

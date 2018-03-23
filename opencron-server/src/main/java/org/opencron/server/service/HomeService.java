@@ -23,13 +23,10 @@ package org.opencron.server.service;
 
 import org.opencron.common.Constants;
 import org.opencron.common.util.DigestUtils;
-import org.opencron.common.util.PropertyPlaceholder;
 import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.Log;
 import org.opencron.server.domain.User;
-import org.opencron.server.handler.SingleLoginListener;
 import org.opencron.server.support.OpencronTools;
-import org.opencron.server.support.TerminalSession;
 import org.opencron.server.tag.PageBean;
 import org.opencron.server.vo.LogInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,22 +66,6 @@ public class HomeService {
                 httpSession.setAttribute(Constants.PARAM_PERMISSION_KEY, true);
             } else {
                 httpSession.setAttribute(Constants.PARAM_PERMISSION_KEY, false);
-            }
-
-            String singlelogin = PropertyPlaceholder.get(Constants.PARAM_OPENCRON_SINGLELOGIN_KEY);
-            if (singlelogin != null && singlelogin.trim().equalsIgnoreCase("true")) {
-                Boolean logined = SingleLoginListener.logined(user);
-                if (logined) {
-                    HttpSession session = SingleLoginListener.getLoginedSession(user.getUserId());
-                    if (session != null) {
-                        session.setAttribute("loginMsg", "你的账号在其他地方登录,请重新登录");
-                    }
-                    //拿到已经登录的session,将其踢下线
-                    SingleLoginListener.removeUserSession(user.getUserId());
-                    //已经登录的用户开启的终端全部关闭...
-                    TerminalSession.exit(request);
-                }
-                SingleLoginListener.addUserSession(httpSession);
             }
             OpencronTools.logined(request, user);
             return 200;
