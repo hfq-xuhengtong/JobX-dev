@@ -11,7 +11,7 @@ V1.2.0 by 2018-xx-xx
     
     4)基于zookeeper实现server集群,动态增减server,job自动分配,实现高可用
     
-    5）server端支持单机和集群两种部署方式,对用户来说一个参数决定哪种部署方式
+    5)server端支持单机和集群两种部署方式,对用户来说一个参数决定哪种部署方式
 
     6)server在集群情况下处理分布式session的缓存实现redis和memcached可选
     
