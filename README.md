@@ -10,20 +10,26 @@ V1.2.0 by 2018-xx-xx
     3)基于zookeeper,agent实现自动注册
     
     4)基于zookeeper实现server集群,动态增减server,job自动分配,实现高可用
+    
+    5)server端支持单机和集群两种部署方式,对用户来说一个参数决定哪种部署方式
 
-    5)简化安装部署流程,提供三个脚本一键安装启动项目(build.sh,agent.sh,server.sh)
+    6)server在集群情况下处理分布式session的缓存实现redis和memcached可选
     
-    6)server内置tomcat和jetty组件,支持开发者模式,大大减轻运维部署的难度
+    7)特别增加对JAVA定时任务的支持,切入到方法级别的调度
     
-    7)改进首页实时监控,大幅度提升agent端性能
+    8)简化安装部署流程,提供三个脚本一键安装启动项目(build.sh,agent.sh,server.sh)
     
-    8)webssh新增基于privateKey方式的登录
+    9)server内置tomcat和jetty组件,支持开发者模式,大大减轻运维部署的难度
     
-    9)支持对外提供api的方式,控制任务调度
+    10)改进首页实时监控,大幅度提升agent端性能
     
-    10)新增一系列的examples调度使用实例
+    11)webssh新增基于privateKey方式的登录
     
-    11)修复一系列已知bug,增强稳定性和可用性
+    12)支持对外提供api的方式,允许通过接口调度任务
+    
+    13)新增一系列的examples调度使用实例
+    
+    14)修复一系列已知bug,增强稳定性和可用性
     
     此版本是里程碑版本,从底层架构到项目实现都进行重新规划,大大提高了可用性和稳定性,建议所有人升级
 
