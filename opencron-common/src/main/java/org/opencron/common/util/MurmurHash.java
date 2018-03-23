@@ -110,7 +110,7 @@ public final class MurmurHash {
     public long hash64(final byte[] data, int length, int seed) {
         final long m = 0xc6a4a7935bd1e995L;
         final int r = 47;
-        long h = (seed & 0xffffffffl) ^ (length * m);
+        long h = (seed & 0xffffffffL) ^ (length * m);
         int length8 = length / 8;
         for (int i = 0; i < length8; i++) {
             final int i8 = i * 8;

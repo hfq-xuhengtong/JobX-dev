@@ -25,11 +25,11 @@ package org.opencron.server.session.cached;
  */
 public interface CachedManager {
 
-    void delete(String key);
+    void delete(Object key);
 
-    <T>T get(String key, Class<T> clazz);
+    <T>T get(Object key, Class<T> clazz);
 
-    void set(String key, Object object);
+    void set(Object key, Object object);
 
     /***
      * remove and return value
@@ -38,6 +38,6 @@ public interface CachedManager {
      * @param <T>
      * @return
      */
-    <T>T remove(String key, Class<T> clazz);
+    <T>T remove(Object key, Class<T> clazz);
 
 }

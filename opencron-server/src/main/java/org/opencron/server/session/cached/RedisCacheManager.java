@@ -104,7 +104,17 @@ public class RedisCacheManager implements Cache,CachedManager {
     }
 
     @Override
-    public <T> T remove(String key, final Class<T> type) {
+    public void delete(Object key) {
+        this.evict(key);
+    }
+
+    @Override
+    public void set(Object key, Object object) {
+        this.put(key,object);
+    }
+
+    @Override
+    public <T> T remove(Object key, final Class<T> type) {
         T t = get(key, type);
         evict(key);
         return t;
@@ -210,20 +220,7 @@ public class RedisCacheManager implements Cache,CachedManager {
     }
 
 
-    @Override
-    public void delete(String key) {
-        this.evict(key);
-    }
 
-    @Override
-    public <T> T get(String key, Class<T> clazz) {
-        return this.get(key,clazz);
-    }
-
-    @Override
-    public void set(String key, Object object) {
-        this.put(key,object);
-    }
 
 }
 

@@ -57,23 +57,23 @@ public class MemcachedManager implements CachedManager {
     }
 
     @Override
-    public <T> T get(String key, Class<T> clazz) {
-        return (T) memcachedClient.get(key);
+    public <T> T get(Object key, Class<T> clazz) {
+        return (T) memcachedClient.get(key.toString());
     }
 
     @Override
-    public void delete(String key) {
-        memcachedClient.delete(key);
+    public void delete(Object key) {
+        memcachedClient.delete(key.toString());
     }
 
     @Override
-    public void set(String key, Object object) {
-        memcachedClient.set(key, this.expire, object);
+    public void set(Object key, Object object) {
+        memcachedClient.set(key.toString(), this.expire, object);
     }
 
     @Override
-    public <T> T remove(String key, Class<T> clazz) {
-        T t = (T) memcachedClient.get(key);
+    public <T> T remove(Object key, Class<T> clazz) {
+        T t = (T) memcachedClient.get(key.toString());
         this.delete(key);
         return t;
     }

@@ -235,6 +235,7 @@ public class OpencronRegistry {
 
         //register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
             public void run() {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] run shutdown hook now...");

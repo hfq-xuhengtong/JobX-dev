@@ -506,7 +506,9 @@ public class Constants {
         }
 
         public static JobType getJobType(Integer type) {
-            if (type == null) return null;
+            if (type == null) {
+                return null;
+            }
             for (JobType jobType : JobType.values()) {
                 if (jobType.getCode().equals(type)) {
                     return jobType;
