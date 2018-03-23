@@ -104,7 +104,9 @@ public class OpencronRegistry {
             }
         }
 
-        if (!Constants.OPENCRON_CLUSTER) return;
+        if (!Constants.OPENCRON_CLUSTER) {
+            return;
+        }
 
         //扫描agent自动注册到server
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
@@ -146,7 +148,9 @@ public class OpencronRegistry {
 
                 lock.lock();
 
-                if (destroy) return;
+                if (destroy) {
+                    return;
+                }
 
                 if (agents.isEmpty()) {
                     for (String agent : children) {
@@ -182,7 +186,9 @@ public class OpencronRegistry {
 
     public void registryServer() {
 
-        if (!Constants.OPENCRON_CLUSTER) return;
+        if (!Constants.OPENCRON_CLUSTER) {
+            return;
+        }
 
         //server监控增加和删除
         this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_SERVER_PATH, new ChildListener() {
@@ -193,7 +199,9 @@ public class OpencronRegistry {
 
                     lock.lock();
 
-                    if (destroy) return;
+                    if (destroy) {
+                        return;
+                    }
 
                     servers = children;
 
@@ -240,45 +248,52 @@ public class OpencronRegistry {
 
     public void registryJob() {
 
-        if (!Constants.OPENCRON_CLUSTER) return;
+        if (Constants.OPENCRON_CLUSTER) {
+            //job的监控
+            this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
+                @Override
+                public void childChanged(String path, List<String> children) {
+                    try {
 
-        //job的监控
-        this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
-            @Override
-            public void childChanged(String path, List<String> children) {
-                try {
+                        lock.lock();
 
-                    lock.lock();
-
-                    if (destroy) return;
-
-                    Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
-
-                    ConsistentHash<String> hash = new ConsistentHash<String>(servers);
-
-                    for (String job : children) {
-
-                        Long jobId = toLong(job);
-                        unJobs.remove(jobId);
-                        if (!jobs.containsKey(jobId) && hash.get(jobId).equals(OpencronTools.SERVER_ID)) {
-                            jobDispatch(jobId);
+                        if (destroy) {
+                            return;
                         }
 
+                        Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
+
+                        ConsistentHash<String> hash = new ConsistentHash<String>(servers);
+
+                        for (String job : children) {
+
+                            Long jobId = toLong(job);
+                            unJobs.remove(jobId);
+                            if (!jobs.containsKey(jobId) && hash.get(jobId).equals(OpencronTools.SERVER_ID)) {
+                                jobDispatch(jobId);
+                            }
+
+                        }
+
+                        for (Long job : unJobs.keySet()) {
+                            jobRemove(job);
+                        }
+
+                        dispatchedInfo(serverSize);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        lock.unlock();
                     }
-
-                    for (Long job : unJobs.keySet()) {
-                        jobRemove(job);
-                    }
-
-                    dispatchedInfo(serverSize);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    lock.unlock();
                 }
+            });
+        } else {
+            List<Job> jobList = jobService.getScheduleJob();
+            for (Job job : jobList) {
+                jobDispatch(job.getJobId());
             }
-        });
+        }
 
     }
 

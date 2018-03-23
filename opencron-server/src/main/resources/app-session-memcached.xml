@@ -46,4 +46,8 @@
         <property name="useNagleAlgorithm" value="${memcached.useNagleAlgorithm}" />
     </bean>
 
+    <bean class="org.opencron.server.session.cached.MemcachedManager">
+        <constructor-arg name="memcachedClient" ref="memcachedClient"/>
+    </bean>
+
 </beans>

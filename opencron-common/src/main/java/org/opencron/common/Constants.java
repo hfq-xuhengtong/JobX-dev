@@ -34,8 +34,6 @@ public class Constants {
 
     public static final int RPC_TIMEOUT = 5000;
 
-    public static final int CACHED_TIMEOUT = 5;
-
     public static final String META_INF_DIR = "META-INF/opencron/";
 
     public static final String ZK_REGISTRY_AGENT_PATH = "/opencron/agent";
@@ -48,6 +46,8 @@ public class Constants {
 
     public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
+    public static final String SESSION_CONF_FORMAT = "app-session-%s.xml";
+
     public static final int HEADER_SIZE = 4;
 
     public static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
@@ -55,6 +55,15 @@ public class Constants {
     public static final String DEFAULT_KEY_PREFIX = "default.";
 
     //============================== param ==============================//
+
+
+    public static final String PARAM_JAVA_LIBRARY_PATH_KEY = "java.library.path";
+
+    public static final String PARAM_COOKIE_NAME_KEY = "OPENCRON_UID";
+
+    public static final String PARAM_DEF_USER_KEY = "opencron";
+
+    public static final String PARAM_DEF_PASSWORD_KEY = "opencron";
 
     public static final String PARAM_PROXYHOST_KEY = "proxyHost";
 
@@ -82,8 +91,6 @@ public class Constants {
 
     public static final String PARAM_CACHED_NAME_KEY = "opencron.cached";
 
-    public static final String PARAM_COOKIE_NAME_KEY = "OPENCRON_UID";
-
     public static final String PARAM_OPENCRON_CLUSTER_KEY = "opencron.cluster";
 
     public static final String PARAM_OPENCRON_KEYPATH_KEY = "opencron.keypath";
@@ -92,17 +99,11 @@ public class Constants {
 
     public static final String PARAM_OPENCRON_PASSWORD_KEY = "opencron.password";
 
-    public static final String PARAM_JAVA_LIBRARY_PATH_KEY = "java.library.path";
-
     public static final String PARAM_OPENCRON_HOST_KEY = "opencron.host";
 
     public static final String PARAM_OPENCRON_SHUTDOWN_KEY = "opencron.shutdown";
 
     public static final String PARAM_OPENCRON_REGISTRY_KEY = "opencron.registry";
-
-    public static final String PARAM_DEF_USER_KEY = "opencron";
-
-    public static final String PARAM_DEF_PASSWORD_KEY = "opencron";
 
     public static final String PARAM_OPENCRON_HOME_KEY = "opencron.home";
 
@@ -184,6 +185,37 @@ public class Constants {
      */
     public static final File OPENCRON_KILL_SHELL = new File(OPENCRON_HOME + "/bin/kill.sh");
 
+
+    public enum CachedProvider implements Serializable {
+
+        REDIS("redis"),
+        MEMCACHED("memcached");
+        private String name;
+
+        CachedProvider(String name) {
+            this.name = name;
+        }
+
+        public static CachedProvider getByName(String name) {
+            if (CommonUtils.isEmpty(name)) {
+                return null;
+            }
+            for (CachedProvider provider : CachedProvider.values()) {
+                if (provider.getName().equalsIgnoreCase(name)) {
+                    return provider;
+                }
+            }
+            return null;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
     public enum StatusCode implements Serializable {
         SUCCESS_EXIT(0x0, "正常退出"),

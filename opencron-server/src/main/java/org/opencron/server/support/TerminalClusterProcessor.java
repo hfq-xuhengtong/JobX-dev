@@ -137,7 +137,7 @@ public class TerminalClusterProcessor {
                                             //unregister
                                             registryService.unregister(registryURL, registryPath + "/" + child);
                                             //invoke...
-                                            Object[] param = OpencronTools.getRedisManager().get(token.concat(methodName), Object[].class);
+                                            Object[] param = OpencronTools.getCachedManager().get(token.concat(methodName), Object[].class);
                                             param = CommonUtils.arrayInsertIndex(param, 0, methodName);
                                             if (CommonUtils.notEmpty(param)) {
                                                 //反射获取目标方法执行.....
@@ -165,7 +165,7 @@ public class TerminalClusterProcessor {
         String methodMD5 = DigestUtils.md5Hex(methodName);
         String token = (String) param[0];
 
-        OpencronTools.getRedisManager().put(token.concat(methodMD5), param);
+        OpencronTools.getCachedManager().set(token.concat(methodMD5), param);
 
         logger.info("[opencron] Terminal registry to zookeeper");
 
@@ -178,7 +178,7 @@ public class TerminalClusterProcessor {
         //等待处理结果...
         while (this.methodLock.containsKey(lock)) ;
 
-        Status result = OpencronTools.getRedisManager().remove(data, Status.class);
+        Status result = OpencronTools.getCachedManager().remove(data, Status.class);
         status.setStatus(result == null ? false : result.isStatus());
     }
 
@@ -194,7 +194,7 @@ public class TerminalClusterProcessor {
         }
 
         String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
-        OpencronTools.getRedisManager().put(data, Status.TRUE);
+        OpencronTools.getCachedManager().set(data, Status.TRUE);
     }
 
     @MethodMark
@@ -204,7 +204,7 @@ public class TerminalClusterProcessor {
             termService.theme(terminalClient.getTerminal(), theme);
         }
         String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
-        OpencronTools.getRedisManager().put(data, Status.TRUE);
+        OpencronTools.getCachedManager().set(data, Status.TRUE);
     }
 
     @MethodMark
@@ -214,7 +214,7 @@ public class TerminalClusterProcessor {
             terminalClient.resize(cols, rows, width, height);
         }
         String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
-        OpencronTools.getRedisManager().put(data, Status.TRUE);
+        OpencronTools.getCachedManager().set(data, Status.TRUE);
     }
 
     @MethodMark
@@ -236,7 +236,7 @@ public class TerminalClusterProcessor {
             success = false;
         }
         String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(method);
-        OpencronTools.getRedisManager().put(data, Status.create(success));
+        OpencronTools.getCachedManager().set(data, Status.create(success));
         return Status.create(success);
     }
 

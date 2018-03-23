@@ -45,7 +45,7 @@
     </bean>
 
     <!-- 配置RedisCacheManager -->
-    <bean id="redisCacheManager" class="org.opencron.server.support.RedisCacheManager">
+    <bean id="redisCacheManager" class="org.opencron.server.session.cached.RedisCacheManager">
         <property name="redisTemplate" ref="redisTemplate"/>
         <property name="timeout" value="${redis.expiration}"/>
         <property name="name" value="opencron"/>

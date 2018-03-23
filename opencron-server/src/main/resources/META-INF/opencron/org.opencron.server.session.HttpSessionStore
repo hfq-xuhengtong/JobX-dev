@@ -1,4 +1,0 @@
-redis=org.opencron.server.session.store.RedisSessionStore
-memcached=org.opencron.server.session.store.MemcachedSessionStore
-
-org.opencron.server.session.store.RedisSessionStore

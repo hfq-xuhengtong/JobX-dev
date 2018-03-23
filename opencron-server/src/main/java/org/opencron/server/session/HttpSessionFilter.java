@@ -36,7 +36,6 @@ import org.apache.commons.lang.StringUtils;
 import org.opencron.common.Constants;
 import org.opencron.common.ext.ExtensionLoader;
 import org.opencron.common.util.CommonUtils;
-import org.opencron.common.util.Constant;
 import org.opencron.common.util.CookieUtils;
 import org.opencron.server.session.wrapper.HttpServletRequestSessionWrapper;
 import org.opencron.server.session.wrapper.HttpSessionStoreWrapper;
@@ -62,7 +61,7 @@ public class HttpSessionFilter extends OncePerRequestFilter implements Filter {
 
         if (Constants.OPENCRON_CLUSTER) {
             if (sessionStore == null) {
-                sessionStore = ExtensionLoader.load(HttpSessionStore.class, Constants.OPENCRON_CACHED);
+                sessionStore = new HttpSessionStore();
             }
         } else {
             chain.doFilter(request, response);
@@ -88,18 +87,7 @@ public class HttpSessionFilter extends OncePerRequestFilter implements Filter {
             HttpSession sessionWrapper = new HttpSessionStoreWrapper(sessionStore, rawSession, sessionId, sessionData);
             chain.doFilter(new HttpServletRequestSessionWrapper(request, sessionWrapper), response);
         } finally {
-            try {
-                String token = (String) sessionData.get("token");
-                if (token != null) {
-                    //登陆token
-                    sessionId = token;
-                    logger.info("login token=" + token);
-                    sessionData.remove("token");
-                }
-                sessionStore.setSession(sessionId, sessionData);
-            } catch (Exception e) {
-                logger.warn("save session data error,cause:" + e, e);
-            }
+            sessionStore.setSession(sessionId, sessionData);
         }
     }
 

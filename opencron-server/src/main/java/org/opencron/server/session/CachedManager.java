@@ -20,39 +20,22 @@
  */
 package org.opencron.server.session;
 
-import org.opencron.server.support.OpencronTools;
 
-import java.util.HashMap;
-import java.util.Map;
+public interface CachedManager {
 
+    void delete(String key);
 
-public class HttpSessionStore {
+    <T>T get(String key, Class<T> clazz);
 
-    private CachedManager cachedManager;
+    void set(String key, Object object);
 
-    public HttpSessionStore(){
-        this.cachedManager = OpencronTools.getCachedManager();
-    }
-
-    public void deleteSession(String sessionId) {
-        cachedManager.delete(sessionId);
-    }
-
-    public Map getSession(String sessionId) {
-        Map result = (Map) get(sessionId);
-        if (result == null) {
-            result = new HashMap();
-        }
-        return result;
-    }
-
-    private Object get(String sessionId) {
-        return cachedManager.get(sessionId, Map.class);
-    }
-
-    public void setSession(String sessionId, Map sessionData) {
-        cachedManager.set(sessionId, sessionData);
-    }
-
+    /***
+     * remove and return value
+     * @param key
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    <T>T remove(String key, Class<T> clazz);
 
 }

@@ -40,7 +40,7 @@ public class TerminalContext implements Serializable {
 
     public Terminal get(String key) {
         if (Constants.OPENCRON_CLUSTER) {
-            return OpencronTools.getRedisManager().get(key(key), Terminal.class);
+            return OpencronTools.getCachedManager().get(key(key), Terminal.class);
         } else {
             return terminalContext.get(key(key));
         }
@@ -48,13 +48,13 @@ public class TerminalContext implements Serializable {
 
     public void put(String key, Terminal terminal) {
         if (Constants.OPENCRON_CLUSTER) {
-            OpencronTools.getRedisManager().put(Constants.PARAM_TERMINAL_TOKEN_KEY, key);
-            OpencronTools.getRedisManager().put(key(key), terminal);
+            OpencronTools.getCachedManager().set(Constants.PARAM_TERMINAL_TOKEN_KEY, key);
+            OpencronTools.getCachedManager().set(key(key), terminal);
             /**
              * 为复制会话
              */
             String reKey = terminal.getId() + "_" + key;
-            OpencronTools.getRedisManager().put(key(reKey), terminal);
+            OpencronTools.getCachedManager().set(key(reKey), terminal);
         } else {
             this.token = key;
             //该终端实例只能被的打开一次,之后就失效
@@ -70,7 +70,7 @@ public class TerminalContext implements Serializable {
     public Terminal remove(String key) {
         if (Constants.OPENCRON_CLUSTER) {
             Terminal terminal = get(key);
-            OpencronTools.getRedisManager().evict(key(key));
+            OpencronTools.getCachedManager().delete(key(key));
             return terminal;
         } else {
             return terminalContext.remove(key(key));
@@ -83,7 +83,7 @@ public class TerminalContext implements Serializable {
 
     public String getToken() {
         if (Constants.OPENCRON_CLUSTER) {
-            return OpencronTools.getRedisManager().remove(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
+            return OpencronTools.getCachedManager().remove(Constants.PARAM_TERMINAL_TOKEN_KEY, String.class);
         } else {
             return this.token;
         }

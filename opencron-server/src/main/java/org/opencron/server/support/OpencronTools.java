@@ -22,10 +22,10 @@
 package org.opencron.server.support;
 
 
-import net.spy.memcached.MemcachedClient;
 import org.opencron.common.Constants;
 import org.opencron.common.util.*;
 import org.opencron.server.domain.User;
+import org.opencron.server.session.CachedManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -35,6 +35,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,19 +55,25 @@ public final class OpencronTools {
 
     static {
         if (Constants.OPENCRON_CLUSTER) {
-            cachedContext = new ClassPathXmlApplicationContext(
-                    "classpath*:app-session-"
-                            + Constants.OPENCRON_CACHED +
-                            ".xml");
+            Constants.CachedProvider provider = Constants.CachedProvider.getByName(Constants.OPENCRON_CACHED);
+            if (provider == null) {
+                throw new ExceptionInInitializerError("[opencron] pleash check opencron.cached value,must be 'redis' or 'memcached'");
+            }
+            String conf = String.format(Constants.SESSION_CONF_FORMAT,provider.getName());
+            try {
+                Enumeration<URL> urls = OpencronTools.class.getClassLoader().getResources(conf);
+                if (urls == null || !urls.hasMoreElements()) {
+                    throw new ExceptionInInitializerError("[opencron] cache conf file ["+conf+"] not found!");
+                }
+                cachedContext = new ClassPathXmlApplicationContext("classpath*:".concat(conf));
+            } catch (IOException e) {
+                throw new ExceptionInInitializerError("[opencron] init cache conf error:"+ e );
+            }
         }
     }
 
-    public static RedisCacheManager getRedisManager() {
-        return cachedContext.getBean(RedisCacheManager.class);
-    }
-
-    public static MemcachedClient getMamcachedClient() {
-        return cachedContext.getBean(MemcachedClient.class);
+    public static CachedManager getCachedManager() {
+        return cachedContext.getBean(CachedManager.class);
     }
 
     public static boolean isPermission(HttpSession session) {
