@@ -23,11 +23,12 @@ package org.opencron.server.job;
 import org.opencron.server.service.ConfigService;
 import org.opencron.server.service.SchedulerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-
+@Component
 public class OpencronInitializer {
 
     @Autowired
