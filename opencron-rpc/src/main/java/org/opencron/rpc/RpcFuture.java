@@ -56,7 +56,9 @@ public class RpcFuture {
     public RpcFuture(Request request) {
         this.scanAndCleanTimeOut();
         this.request = request;
-        this.timeout = this.request.getMillisTimeOut();
+        //rpc连接的超时时间+业务真正运行需要的时间
+        this.timeout =  Constants.RPC_TIMEOUT + this.request.getMillisTimeOut();
+        this.startTime = System.currentTimeMillis();
         this.futureId = request.getId();
         FUTURES.put(this.futureId, this);
     }
@@ -64,10 +66,6 @@ public class RpcFuture {
     public RpcFuture(Request request, InvokeCallback invokeCallback) {
         this(request);
         this.invokeCallback = invokeCallback;
-    }
-
-    public void start(){
-        this.startTime = System.currentTimeMillis();
     }
 
     public boolean isDone() {
