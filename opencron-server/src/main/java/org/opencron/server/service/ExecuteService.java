@@ -45,13 +45,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 
 import static org.opencron.common.Constants.*;
 
+/**
+ * 这段调度核心代码得彻底重构,太臭了...实在有失水准...
+ */
 @Service
 public class ExecuteService implements Job {
 
@@ -78,6 +78,8 @@ public class ExecuteService implements Job {
     private Map<Long, Integer> reExecuteThreadMap = new HashMap<Long, Integer>(0);
 
     private static final String PACKETTOOBIG_ERROR = "在向MySQL数据库插入数据量过多,需要设定max_allowed_packet";
+
+    private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(16, 16, 600L, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(65536));
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -120,11 +122,9 @@ public class ExecuteService implements Job {
             return;
         }
 
-        new Thread(new Runnable() {
-
+        threadPoolExecutor.submit(new Runnable() {
             @Override
             public void run() {
-
                 final Record record = new Record(job, execType);
                 record.setStartTime(new Date());
                 record.setJobType(JobType.SINGLETON.getCode());//单一任务
@@ -184,7 +184,6 @@ public class ExecuteService implements Job {
                         setRecordLost(record);
                         noticeService.notice(job, "调用失败,获取不到返回结果集");
                     }
-
                 };
 
                 try {
@@ -205,17 +204,15 @@ public class ExecuteService implements Job {
                             .putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout().toString())
                             .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
 
-                    Response response = caller.sentSync(request);
-                    callback.done(response);
+                    caller.sentAsync(request,callback);
+
                 } catch (Exception e) {
                     callback.caught(e);
                 }
             }
-
-        }).start();
+        });
 
     }
-
 
     /**
      * 流程任务 按流程任务处理方式区分
@@ -384,8 +381,7 @@ public class ExecuteService implements Job {
             Agent agent = agentService.getAgent(Long.parseLong(agentId));
             final JobInfo jobInfo = new JobInfo(userId, command, agent);
             jobInfo.setSuccessExit("0");
-
-            Runnable task = new Runnable() {
+            exec.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -396,8 +392,7 @@ public class ExecuteService implements Job {
                         e.printStackTrace();
                     }
                 }
-            };
-            exec.submit(task);
+            });
         }
         exec.shutdown();
         while (true) {
@@ -505,11 +500,10 @@ public class ExecuteService implements Job {
         ExecutorService exec = Executors.newCachedThreadPool();
 
         for (final Record cord : recordQueue) {
-            Runnable task = new Runnable() {
+            exec.submit(new Runnable() {
                 @Override
                 public void run() {
                     final JobInfo job = jobService.getJobInfoById(cord.getJobId());
-                    ;
                     try {
                         semaphore.acquire();
                         //临时的改成停止中...
@@ -561,8 +555,7 @@ public class ExecuteService implements Job {
                     }
                     semaphore.release();
                 }
-            };
-            exec.submit(task);
+            });
         }
         exec.shutdown();
         while (true) {
