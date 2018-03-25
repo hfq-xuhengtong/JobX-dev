@@ -91,11 +91,11 @@ public class Request implements Serializable {
     }
 
     public Long getTimeOut() {
-        return timeOut == null ? 0 : timeOut;
+        return timeOut == null ? -1 : timeOut;
     }
 
     public Long getMillisTimeOut(){
-       return getTimeOut() == 0 ? 0 : getTimeOut() * 60 * 1000;
+       return getTimeOut() * 60 * 1000;
     }
 
     public Request setTimeOut(Long timeOut) {

@@ -54,7 +54,7 @@ public class RpcFuture {
 
     public RpcFuture(Request request) {
         this.request = request;
-        this.timeout = this.request.getTimeOut() < 0? Constants.JOB_TIMEOUT:this.request.getMillisTimeOut() ;
+        this.timeout = this.request.getMillisTimeOut() < 0? Constants.JOB_TIMEOUT:this.request.getMillisTimeOut() ;
         this.futureId = request.getId();
         FUTURES.put(this.futureId, this);
         if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {
@@ -103,12 +103,11 @@ public class RpcFuture {
 
     public Response get(long timeout, TimeUnit unit) throws TimeoutException {
         if (!isDone()) {
-            long start = System.currentTimeMillis();
             lock.lock();
             try {
                 while (!isDone()) {
                     done.await(timeout,unit);
-                    if (isDone() || System.currentTimeMillis() - start > timeout) {
+                    if (isDone() || System.currentTimeMillis() - startTime > timeout) {
                         break;
                     }
                 }
