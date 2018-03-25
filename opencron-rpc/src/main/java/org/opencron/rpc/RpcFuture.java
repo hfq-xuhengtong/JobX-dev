@@ -84,7 +84,7 @@ public class RpcFuture {
             try {
                 while (!isDone()) {
                     done.await(timeout,unit);
-                    if (isDone() || System.currentTimeMillis() - startTime > timeout) {
+                    if (isDone() || System.currentTimeMillis() - this.startTime > timeout) {
                         break;
                     }
                 }
