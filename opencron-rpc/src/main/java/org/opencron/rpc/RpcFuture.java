@@ -54,35 +54,11 @@ public class RpcFuture {
     private final String scanKey = "scanRpc";
 
     public RpcFuture(Request request) {
+        this.scanAndCleanTimeOut();
         this.request = request;
         this.timeout = this.request.getMillisTimeOut();
         this.futureId = request.getId();
         FUTURES.put(this.futureId, this);
-        if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {
-            SystemPropertyUtils.setProperty(this.scanKey,Boolean.TRUE.toString());
-            Thread th = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        try {
-                            for (RpcFuture future : FUTURES.values()) {
-                                if (future == null || future.isDone()) {
-                                    continue;
-                                }
-                                if (System.currentTimeMillis() - future.getStartTime() > future.getTimeout()) {
-                                    RpcFuture.this.caught(getTimeoutException());
-                                }
-                            }
-                            Thread.sleep(30);
-                        } catch (Throwable e) {
-                            logger.error("Exception when scan the timeout invocation of remoting.", e);
-                        }
-                    }
-                }
-            }, "OpencronResponseTimeoutScanTimer");
-            th.setDaemon(true);
-            th.start();
-        }
     }
 
     public RpcFuture(Request request, InvokeCallback invokeCallback) {
@@ -190,6 +166,34 @@ public class RpcFuture {
 
     public TimeoutException getTimeoutException() {
         return new TimeoutException("[opencron] RPC timeout! host:"+request.getAddress()+",action:"+request.getAction());
+    }
+
+    private void scanAndCleanTimeOut() {
+        if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {
+            SystemPropertyUtils.setProperty(this.scanKey,Boolean.TRUE.toString());
+            Thread th = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            for (RpcFuture future : FUTURES.values()) {
+                                if (future == null || future.isDone()) {
+                                    continue;
+                                }
+                                if (System.currentTimeMillis() - future.getStartTime() > future.getTimeout()) {
+                                    RpcFuture.this.caught(getTimeoutException());
+                                }
+                            }
+                            Thread.sleep(30);
+                        } catch (Throwable e) {
+                            logger.error("Exception when scan the timeout invocation of remoting.", e);
+                        }
+                    }
+                }
+            }, "OpencronRpcTimeoutScanTimer");
+            th.setDaemon(true);
+            th.start();
+        }
     }
 
     public Long getFutureId() {
