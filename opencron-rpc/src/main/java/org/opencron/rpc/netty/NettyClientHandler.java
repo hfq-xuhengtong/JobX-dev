@@ -20,7 +20,6 @@
  */
 package org.opencron.rpc.netty;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.opencron.common.job.Response;
@@ -48,12 +47,6 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
         }
         RpcFuture rpcFuture = nettyClient.getRpcFuture(response.getId());
         rpcFuture.done(response);
-        if (rpcFuture.isAsync()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("[opencron] nettyRPC client async callback invoke");
-            }
-            rpcFuture.invokeCallback();
-        }
     }
 
     @Override

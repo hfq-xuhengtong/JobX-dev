@@ -31,10 +31,10 @@ public class Request implements Serializable {
 
     private RpcType rpcType = RpcType.ASYNC;
     private String host;
-    private Integer id;
+    private Long id;
     private Integer port;
     private String address;
-    private Integer timeOut;
+    private Long timeOut;
     private Action action;
     private String password;
     private Long proxyAgent;
@@ -44,7 +44,7 @@ public class Request implements Serializable {
 
     }
 
-    public static Request request(String host, Integer port, Action action, String password, Integer timeOut, Long proxyAgent) {
+    public static Request request(String host, Integer port, Action action, String password, Long timeOut, Long proxyAgent) {
         return new Request()
                 .setHost(host)
                 .setPort(port)
@@ -90,11 +90,15 @@ public class Request implements Serializable {
         return this;
     }
 
-    public Integer getTimeOut() {
+    public Long getTimeOut() {
         return timeOut == null ? 0 : timeOut;
     }
 
-    public Request setTimeOut(Integer timeOut) {
+    public Long getMillisTimeOut(){
+       return getTimeOut() == 0 ? 0 : getTimeOut() * 60 * 1000;
+    }
+
+    public Request setTimeOut(Long timeOut) {
         this.timeOut = timeOut;
         return this;
     }
@@ -137,11 +141,11 @@ public class Request implements Serializable {
         this.address = address;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public Request setId(Integer id) {
+    public Request setId(Long id) {
         this.id = id;
         return this;
     }

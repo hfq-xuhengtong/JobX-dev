@@ -23,11 +23,12 @@ package org.opencron.common.util;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class IdGenerator {
-    private static final AtomicInteger generator = new AtomicInteger(0);
+    private static final AtomicLong generator = new AtomicLong(0);
 
-    public static Integer getId() {
+    public static Long getId() {
         return generator.incrementAndGet();
     }
 

@@ -48,12 +48,6 @@ public class MinaClientHandler extends IoHandlerAdapter {
         }
         RpcFuture rpcFuture = this.minaClient.getRpcFuture(response.getId());
         rpcFuture.done(response);
-        if (rpcFuture.isAsync()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("[opencron] minaRPC client async callback invoke");
-            }
-            rpcFuture.invokeCallback();
-        }
     }
 
     @Override

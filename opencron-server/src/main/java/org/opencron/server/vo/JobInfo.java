@@ -82,8 +82,8 @@ public class JobInfo implements Serializable {
 
     private String emailAddress;
 
-    //运行超时的截止时间
-    private Integer timeout;
+    //运行时长(分钟)
+    private Long timeout;
 
     private Boolean deleted;
 
@@ -333,11 +333,11 @@ public class JobInfo implements Serializable {
         this.emailAddress = emailAddress;
     }
 
-    public Integer getTimeout() {
+    public Long getTimeout() {
         return timeout == null ? 0 : timeout;
     }
 
-    public void setTimeout(Integer timeout) {
+    public void setTimeout(Long timeout) {
         this.timeout = timeout;
     }
 

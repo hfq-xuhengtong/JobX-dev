@@ -28,6 +28,7 @@ import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
+import org.opencron.common.Constants;
 import org.opencron.common.job.Request;
 import org.opencron.common.util.HttpUtils;
 import org.opencron.rpc.Client;
@@ -54,7 +55,7 @@ public abstract class AbstractClient implements Client {
 
     protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
-    public final ConcurrentHashMap<Integer, RpcFuture> futureTable = new ConcurrentHashMap<Integer, RpcFuture>(256);
+    public final ConcurrentHashMap<Long, RpcFuture> futureTable = new ConcurrentHashMap<Long, RpcFuture>(256);
 
     public AbstractClient() {
         this.connect();
@@ -64,29 +65,20 @@ public abstract class AbstractClient implements Client {
 
         ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
 
-        if (connectWrapper != null) {
-            if (connectWrapper.isActive()) {
-                return connectWrapper.getConnectFuture();
-            }
-            connectWrapper.close();
+        if (connectWrapper != null && connectWrapper.isActive()) {
+            return connectWrapper.getConnectFuture();
         }
 
         synchronized (this) {
-            // 发起异步连接操作
             ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             connectWrapper = new ConnectWrapper(connectFuture);
-            this.connectTable.put(request.getAddress(), connectWrapper);
-        }
-
-        if (connectWrapper != null) {
-            ConnectFuture connectFuture = connectWrapper.getConnectFuture();
-            long timeout = 5000;
-            if (connectFuture.awaitUninterruptibly(timeout)) {
+            if (connectFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
                 if (connectWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
                         logger.info("[opencron] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
                     }
-                    return connectWrapper.getConnectFuture();
+                    this.connectTable.put(request.getAddress(), connectWrapper);
+                    return connectFuture;
                 } else {
                     if (logger.isWarnEnabled()) {
                         logger.warn("[opencron] MinaRPC getConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
@@ -94,7 +86,7 @@ public abstract class AbstractClient implements Client {
                 }
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[opencron] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, connectFuture);
+                    logger.warn("[opencron] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, connectFuture);
                 }
             }
         }
@@ -104,25 +96,19 @@ public abstract class AbstractClient implements Client {
     public Channel getChannel(Request request) {
 
         ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
-
         if (channelWrapper != null && channelWrapper.isActive()) {
             return channelWrapper.getChannel();
         }
-
         synchronized (this) {
             // 发起异步连接操作
             ChannelFuture channelFuture = this.bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
             channelWrapper = new ChannelWrapper(channelFuture);
-            this.channelTable.put(request.getAddress(), channelWrapper);
-        }
-        if (channelWrapper != null) {
-            ChannelFuture channelFuture = channelWrapper.getChannelFuture();
-            long timeout = 5000;
-            if (channelFuture.awaitUninterruptibly(timeout)) {
+            if (channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
                 if (channelWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
                         logger.info("[opencron] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
                     }
+                    this.channelTable.put(request.getAddress(), channelWrapper);
                     return channelWrapper.getChannel();
                 } else {
                     if (logger.isWarnEnabled()) {
@@ -131,15 +117,15 @@ public abstract class AbstractClient implements Client {
                 }
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[opencron] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), timeout, channelFuture);
+                    logger.warn("[opencron] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, channelFuture);
                 }
             }
         }
         return null;
     }
 
-
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
+
         private RpcFuture rpcFuture;
 
         public FutureListener(RpcFuture rpcFuture) {
@@ -200,9 +186,8 @@ public abstract class AbstractClient implements Client {
         this.channelTable.clear();
     }
 
-    public RpcFuture getRpcFuture(Integer id) {
+    public synchronized RpcFuture getRpcFuture(Long id) {
         return this.futureTable.get(id);
     }
-
 
 }

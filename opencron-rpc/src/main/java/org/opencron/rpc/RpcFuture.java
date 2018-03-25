@@ -18,157 +18,182 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.opencron.rpc;
 
+import org.opencron.common.Constants;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.Response;
+import org.opencron.common.util.SystemPropertyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * @author benjobs
- */
+
 public class RpcFuture {
+    private static final Logger logger = LoggerFactory.getLogger(RpcFuture.class);
 
-    private static final CancellationException CANCELLED = new CancellationException();
-    private volatile boolean haveResult;
-    private volatile Integer futureId;
+    private static final Map<Long, RpcFuture> FUTURES = new ConcurrentHashMap<Long, RpcFuture>();
+
+    private  final Lock lock = new ReentrantLock();
+    private final Condition done = lock.newCondition();
+    private final Long futureId;
     private volatile Request request;
     private volatile Response response;
-    private volatile Throwable cause;
-    private CountDownLatch latch;
-    private final long beginTime = System.currentTimeMillis();
-    private TimeUnit unit;
-    private InvokeCallback callback;
+    private volatile Long startTime;
+    private volatile Long timeout;
+    private volatile InvokeCallback invokeCallback;
 
-    public RpcFuture() {
-    }
+    private final String scanKey = "scanRpc";
 
     public RpcFuture(Request request) {
         this.request = request;
+        this.timeout = this.request.getTimeOut() < 0? Constants.JOB_TIMEOUT:this.request.getMillisTimeOut() ;
         this.futureId = request.getId();
-        this.unit = TimeUnit.SECONDS;
-    }
-
-    public RpcFuture(Request request, InvokeCallback callback) {
-        this(request);
-        this.callback = callback;
-    }
-
-    public void invokeCallback() {
-        if (isDone()) {
-            if (this.cause != null) {
-                this.callback.failure(this.cause);
-            } else {
-                this.callback.success(this.response);
-            }
+        FUTURES.put(this.futureId, this);
+        if (!SystemPropertyUtils.getBoolean(this.scanKey,false)) {
+            SystemPropertyUtils.getBoolean(this.scanKey,true);
+            Thread th = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            for (RpcFuture future : FUTURES.values()) {
+                                if (future == null || future.isDone()) {
+                                    continue;
+                                }
+                                if (System.currentTimeMillis() - future.getStartTime() > future.getTimeout()) {
+                                    RpcFuture.this.failure(getTimeoutException());
+                                }
+                            }
+                            Thread.sleep(30);
+                        } catch (Throwable e) {
+                            logger.error("Exception when scan the timeout invocation of remoting.", e);
+                        }
+                    }
+                }
+            }, "OpencronResponseTimeoutScanTimer");
+            th.setDaemon(true);
+            th.start();
         }
     }
 
-    public boolean isAsync() {
-        return this.callback != null;
+    public RpcFuture(Request request, InvokeCallback invokeCallback) {
+        this(request);
+        this.invokeCallback = invokeCallback;
     }
 
-    public boolean isCancelled() {
-        return this.cause == CANCELLED;
+    public void start(){
+        this.startTime = System.currentTimeMillis();
     }
 
     public boolean isDone() {
-        return this.haveResult;
+        return response != null;
     }
 
-    public void done(Response response) {
-        synchronized (this) {
-            if (!this.haveResult) {
-                this.response = response;
-                this.haveResult = true;
-                if (this.latch != null) {
-                    this.latch.countDown();
+    public Response get() throws TimeoutException {
+        return get(this.timeout,TimeUnit.MILLISECONDS);
+    }
+
+    public Response get(long timeout, TimeUnit unit) throws TimeoutException {
+        if (!isDone()) {
+            long start = System.currentTimeMillis();
+            lock.lock();
+            try {
+                while (!isDone()) {
+                    done.await(timeout,unit);
+                    if (isDone() || System.currentTimeMillis() - start > timeout) {
+                        break;
+                    }
                 }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                lock.unlock();
             }
+
+            if (!isDone()) {
+                throw getTimeoutException();
+            }
+        }
+        return null;
+    }
+
+    public void done(Response reponse) {
+        lock.lock();
+        try {
+            this.response = reponse;
+            long useTime = System.currentTimeMillis() - startTime;
+            if (useTime > this.timeout) {
+                logger.warn("[opencron]Service response time is too slow. Request id:{}. Response Time:{}",this.futureId,useTime);
+            }
+            if (done != null) {
+                done.signal();
+            }
+            if (this.invokeCallback != null ) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("[opencron] minaRPC client async callback invoke");
+                }
+                this.invokeCallback();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
     public void failure(Throwable throwable) {
-        if (!(throwable instanceof IOException) && !(throwable instanceof SecurityException)) {
-            throwable = new IOException(throwable);
+        lock.lock();
+        try {
+            if (!(throwable instanceof IOException) && !(throwable instanceof SecurityException)) {
+                throwable = new IOException(throwable);
+            }
+            this.response = Response.response(request);
+            this.response.setThrowable(throwable);
+            this.response.setStartTime(this.startTime);
+            this.response.setSuccess(false);
+            this.response.setExitCode(Constants.StatusCode.ERROR_EXEC.getValue());
+            if (this.invokeCallback != null ) {
+                invokeCallback();
+            }
+        }finally {
+            lock.unlock();
         }
-        synchronized (this) {
-            if (!this.haveResult) {
-                this.cause = throwable;
-                this.haveResult = true;
-                if (this.latch != null) {
-                    this.latch.countDown();
-                }
-                this.getCallback().failure(throwable);
+    }
+
+    private void invokeCallback() {
+        if (invokeCallback == null) {
+            throw new NullPointerException("[opencron]callback cannot be null.");
+        }
+        if (this.response == null) {
+            throw new IllegalStateException("[opencron]response cannot be null. host:"+this.request.getAddress() + ",action: "+ this.request.getAction());
+        }
+        if ( this.response.getThrowable() == null ) {
+            try {
+                invokeCallback.done(this.response);
+            } catch (Exception e) {
+                logger.error("[opencron]callback done invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
+            }
+        }  else {
+            try {
+                invokeCallback.caught(response.getThrowable());
+            } catch (Exception e) {
+                logger.error("[opencron]callback caught invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
             }
         }
     }
 
-    public Response get() throws InterruptedException, ExecutionException {
-        if (!this.haveResult) {
-            boolean wait = this.prepareForWait();
-            if (wait) {
-                this.latch.await();
-            }
-        }
-        return returnResult();
+    public TimeoutException getTimeoutException() {
+        return new TimeoutException("[opencron] RPC timeout! host:"+request.getAddress()+",action:"+request.getAction());
     }
 
-    public Response get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        if (!this.haveResult) {
-            boolean wait = this.prepareForWait();
-            if (wait && !this.latch.await(timeout, unit)) {
-                throw new TimeoutException();
-            }
-        }
-        return returnResult();
-    }
-
-    private Response returnResult() throws ExecutionException {
-        if (this.cause != null) {
-            if (this.cause == CANCELLED) {
-                throw new CancellationException();
-            } else {
-                throw new ExecutionException(this.cause);
-            }
-        } else {
-            return this.response;
-        }
-    }
-
-    private boolean prepareForWait() {
-        synchronized (this) {
-            if (this.haveResult) {
-                return false;
-            } else {
-                if (this.latch == null) {
-                    this.latch = new CountDownLatch(1);
-                }
-                return true;
-            }
-        }
-    }
-
-    public InvokeCallback getCallback() {
-        return callback;
-    }
-
-    public long getBeginTime() {
-        return beginTime;
-    }
-
-    public long getTimeoutMillis() {
-        return unit.toMillis(this.request.getTimeOut());
-    }
-
-    public Integer getFutureId() {
+    public Long getFutureId() {
         return futureId;
-    }
-
-    public void setFutureId(Integer futureId) {
-        this.futureId = futureId;
     }
 
     public Request getRequest() {
@@ -177,5 +202,29 @@ public class RpcFuture {
 
     public void setRequest(Request request) {
         this.request = request;
+    }
+
+    public Response getResponse() {
+        return response;
+    }
+
+    public void setResponse(Response response) {
+        this.response = response;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
     }
 }

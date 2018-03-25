@@ -44,7 +44,7 @@ import java.util.Map;
  */
 public class Response implements Serializable {
 
-    private Integer id;
+    private Long id;
     /**
      * @see Action
      */
@@ -142,11 +142,11 @@ public class Response implements Serializable {
         this.throwable = throwable;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public Response setId(Integer id) {
+    public Response setId(Long id) {
         this.id = id;
         return this;
     }

@@ -32,7 +32,9 @@ public class Constants {
 
     public static final int ZK_CONNECTION_TIMEOUT = 2000;
 
-    public static final int RPC_TIMEOUT = 5000;
+    public static final long RPC_TIMEOUT = 5000;
+
+    public static final long JOB_TIMEOUT = 1 * 60 * 1000 ;//默认一分钟,单位毫秒
 
     public static final String META_INF_DIR = "META-INF/opencron/";
 

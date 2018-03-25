@@ -18,17 +18,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.opencron.rpc;
 
-import org.opencron.common.job.Response;
+package org.opencron.common.exception;
 
-/**
- * @author benjobs
- */
-public interface InvokeCallback {
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
-    void done(Response response);
+public class TimeoutException extends BasicException {
+    public TimeoutException() {
+        super();
+    }
 
-    void caught(Throwable err);
+    public TimeoutException(String msg) {
+        super(msg);
+    }
 
+    public TimeoutException(Throwable nestedThrowable) {
+        super(nestedThrowable);
+    }
+
+    public TimeoutException(String msg, Throwable nestedThrowable) {
+        super(msg, nestedThrowable);
+    }
+
+    @Override
+    public void printStackTrace() {
+        super.printStackTrace();
+    }
+
+    @Override
+    public void printStackTrace(PrintStream ps) {
+        super.printStackTrace(ps);
+    }
+
+    @Override
+    public void printStackTrace(PrintWriter pw) {
+        super.printStackTrace(pw);
+    }
 }

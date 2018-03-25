@@ -132,7 +132,7 @@ public class ExecuteService implements Job {
                 InvokeCallback callback = new InvokeCallback() {
 
                     @Override
-                    public void success(Response response) {
+                    public void done(Response response) {
 
                         logger.info("[opencron]:execute response:{}", response.toString());
 
@@ -179,7 +179,7 @@ public class ExecuteService implements Job {
                     }
 
                     @Override
-                    public void failure(Throwable err) {
+                    public void caught(Throwable err) {
                         //方法失联
                         setRecordLost(record);
                         noticeService.notice(job, "调用失败,获取不到返回结果集");
@@ -198,7 +198,7 @@ public class ExecuteService implements Job {
                             job.getPort(),
                             Action.EXECUTE,
                             job.getPassword(),
-                            job.getTimeout() * 6000,
+                            job.getTimeout(),
                             job.getAgent().getProxyAgent())
                             .putParam(Constants.PARAM_COMMAND_KEY, job.getCommand())
                             .putParam(Constants.PARAM_PID_KEY, record.getPid())
@@ -206,9 +206,9 @@ public class ExecuteService implements Job {
                             .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
 
                     Response response = caller.sentSync(request);
-                    callback.success(response);
+                    callback.done(response);
                 } catch (Exception e) {
-                    callback.failure(e);
+                    callback.caught(e);
                 }
             }
 
@@ -532,7 +532,7 @@ public class ExecuteService implements Job {
                                         cord.getPid())
                                 , new InvokeCallback() {
                                     @Override
-                                    public void success(Response response) {
+                                    public void done(Response response) {
                                         cord.setStatus(RunStatus.STOPED.getStatus());
                                         cord.setEndTime(new Date());
                                         recordService.merge(cord);
@@ -540,7 +540,7 @@ public class ExecuteService implements Job {
                                     }
 
                                     @Override
-                                    public void failure(Throwable err) {
+                                    public void caught(Throwable err) {
                                         cord.setStatus(RunStatus.STOPED.getStatus());
                                         cord.setEndTime(new Date());
                                         recordService.merge(cord);
@@ -582,7 +582,7 @@ public class ExecuteService implements Job {
                 job.getPort(),
                 Action.EXECUTE,
                 job.getPassword(),
-                job.getTimeout() * 6000,
+                job.getTimeout(),
                 job.getAgent().getProxyAgent())
                 .putParam(Constants.PARAM_COMMAND_KEY, job.getCommand())
                 .putParam(Constants.PARAM_PID_KEY, record.getPid())
