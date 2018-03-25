@@ -1,5 +1,6 @@
 import org.junit.Test;
 import org.opencron.common.ext.ExtensionLoader;
+import org.opencron.common.util.SystemPropertyUtils;
 import org.opencron.rpc.Client;
 import org.opencron.rpc.Server;
 
@@ -9,11 +10,15 @@ public class SPITest {
 
     @Test
     public void testSpi() throws IOException {
-        Server server = ExtensionLoader.load(Server.class);
-        System.out.println(server.getClass());
+        boolean xx =  SystemPropertyUtils.getBoolean("aaa",false);
 
-        Client client = ExtensionLoader.load(Client.class);
-        System.out.println(client.getClass());
+        System.out.println(xx);
+        //SystemPropertyUtils.setProperty("aaa","true");
+
+
+        xx =  SystemPropertyUtils.getBoolean("aaa",false);
+
+        System.out.println(xx);
     }
 
 }

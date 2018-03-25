@@ -147,7 +147,7 @@ public abstract class AbstractClient implements Client {
                     logger.info("[opencron] NettyRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
                 }
                 if (this.rpcFuture != null) {
-                    rpcFuture.failure(future.cause());
+                    rpcFuture.caught(future.cause());
                 }
             }
             futureTable.remove(rpcFuture.getFutureId());
@@ -165,7 +165,7 @@ public abstract class AbstractClient implements Client {
                     logger.info("[opencron] MinaRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
                 }
                 if (rpcFuture != null) {
-                    rpcFuture.failure(getConnect(rpcFuture.getRequest()).getException());
+                    rpcFuture.caught(getConnect(rpcFuture.getRequest()).getException());
                 }
             }
             futureTable.remove(rpcFuture.getRequest().getId());

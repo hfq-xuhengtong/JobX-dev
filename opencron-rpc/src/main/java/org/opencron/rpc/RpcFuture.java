@@ -57,8 +57,8 @@ public class RpcFuture {
         this.timeout = this.request.getTimeOut() < 0? Constants.JOB_TIMEOUT:this.request.getMillisTimeOut() ;
         this.futureId = request.getId();
         FUTURES.put(this.futureId, this);
-        if (!SystemPropertyUtils.getBoolean(this.scanKey,false)) {
-            SystemPropertyUtils.getBoolean(this.scanKey,true);
+        if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {
+            SystemPropertyUtils.setProperty(this.scanKey,Boolean.TRUE.toString());
             Thread th = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -69,7 +69,7 @@ public class RpcFuture {
                                     continue;
                                 }
                                 if (System.currentTimeMillis() - future.getStartTime() > future.getTimeout()) {
-                                    RpcFuture.this.failure(getTimeoutException());
+                                    RpcFuture.this.caught(getTimeoutException());
                                 }
                             }
                             Thread.sleep(30);
@@ -147,7 +147,7 @@ public class RpcFuture {
         }
     }
 
-    public void failure(Throwable throwable) {
+    public void caught(Throwable throwable) {
         lock.lock();
         try {
             if (!(throwable instanceof IOException) && !(throwable instanceof SecurityException)) {
