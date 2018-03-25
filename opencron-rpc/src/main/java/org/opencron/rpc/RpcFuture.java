@@ -37,6 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class RpcFuture {
+    
     private static final Logger logger = LoggerFactory.getLogger(RpcFuture.class);
 
     private static final Map<Long, RpcFuture> FUTURES = new ConcurrentHashMap<Long, RpcFuture>();
@@ -54,7 +55,7 @@ public class RpcFuture {
 
     public RpcFuture(Request request) {
         this.request = request;
-        this.timeout = this.request.getMillisTimeOut() < 0? Constants.JOB_TIMEOUT:this.request.getMillisTimeOut() ;
+        this.timeout = this.request.getMillisTimeOut();
         this.futureId = request.getId();
         FUTURES.put(this.futureId, this);
         if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {

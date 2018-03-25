@@ -34,7 +34,7 @@ public class Request implements Serializable {
     private Long id;
     private Integer port;
     private String address;
-    private Long timeOut;
+    private Long timeOut;//调用超时时间限制(分钟)
     private Action action;
     private String password;
     private Long proxyAgent;
@@ -91,10 +91,14 @@ public class Request implements Serializable {
     }
 
     public Long getTimeOut() {
-        return timeOut == null ? -1 : timeOut;
+        if ( timeOut == null || timeOut<0 ) {
+            //如果timeOut为设置,则返回24小时(1440分钟)
+            return 60 * 24L;
+        }
+        return timeOut;
     }
 
-    public Long getMillisTimeOut(){
+    public Long getMillisTimeOut() {
        return getTimeOut() * 60 * 1000;
     }
 

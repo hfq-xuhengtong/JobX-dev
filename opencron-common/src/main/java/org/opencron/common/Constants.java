@@ -34,8 +34,6 @@ public class Constants {
 
     public static final long RPC_TIMEOUT = 5000;
 
-    public static final long JOB_TIMEOUT = 1 * 60 * 1000 ;//默认一分钟,单位毫秒
-
     public static final String META_INF_DIR = "META-INF/opencron/";
 
     public static final String ZK_REGISTRY_AGENT_PATH = "/opencron/agent";
