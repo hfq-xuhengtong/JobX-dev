@@ -657,7 +657,7 @@ public class ExecuteService implements Job {
                     agent.getPort(),
                     Action.PING,
                     agent.getPassword(),
-                    null,
+                    Constants.RPC_TIMEOUT,
                     agent.getProxyAgent()
             ));
             return response != null && response.isSuccess();
@@ -674,7 +674,7 @@ public class ExecuteService implements Job {
                     agent.getPort(),
                     Action.GUID,
                     agent.getPassword(),
-                    null,
+                    Constants.RPC_TIMEOUT,
                     agent.getProxyAgent())
             );
             return response.getMessage();

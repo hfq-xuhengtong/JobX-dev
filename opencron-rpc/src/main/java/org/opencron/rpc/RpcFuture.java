@@ -56,8 +56,7 @@ public class RpcFuture {
     public RpcFuture(Request request) {
         this.scanAndCleanTimeOut();
         this.request = request;
-        //rpc连接的超时时间+业务真正运行需要的时间
-        this.timeout =  Constants.RPC_TIMEOUT + this.request.getMillisTimeOut();
+        this.timeout = this.request.getMillisTimeOut();
         this.startTime = System.currentTimeMillis();
         this.futureId = request.getId();
         FUTURES.put(this.futureId, this);
@@ -112,7 +111,7 @@ public class RpcFuture {
             }
             if (this.invokeCallback != null ) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[opencron] minaRPC client async callback invoke");
+                    logger.info("[opencron] async callback invoke");
                 }
                 this.invokeCallback();
             }
