@@ -58,35 +58,34 @@ public class HttpSessionFilter extends OncePerRequestFilter implements Filter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
-        if (Constants.OPENCRON_CLUSTER) {
+        if (!Constants.OPENCRON_CLUSTER) {
+            chain.doFilter(request, response);
+        } else {
             if (sessionStore == null) {
                 sessionStore = new HttpSessionStore();
             }
-        } else {
-            chain.doFilter(request, response);
-        }
+            String requestURI = request.getContextPath() + request.getServletPath();
 
-        String requestURI = request.getContextPath() + request.getServletPath();
+            //过滤静态资源
+            if (requestURI.startsWith("/static/") || requestURI.startsWith("/favicon.ico")) {
+                chain.doFilter(request, response);
+                return;
+            }
 
-        //过滤静态资源
-        if (requestURI.startsWith("/static/") || requestURI.startsWith("/favicon.ico")) {
-            chain.doFilter(request, response);
-            return;
-        }
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/html;charset=utf-8");
+            Cookie sessionIdCookie = getOrGenerateSessionId(request, response);
+            String sessionId = sessionIdCookie.getValue();
 
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=utf-8");
-        Cookie sessionIdCookie = getOrGenerateSessionId(request, response);
-        String sessionId = sessionIdCookie.getValue();
+            HttpSession rawSession = request.getSession();
 
-        HttpSession rawSession = request.getSession();
-
-        Map sessionData = loadSessionData(sessionId);
-        try {
-            HttpSession sessionWrapper = new HttpSessionStoreWrapper(sessionStore, rawSession, sessionId, sessionData);
-            chain.doFilter(new HttpServletRequestSessionWrapper(request, sessionWrapper), response);
-        } finally {
-            sessionStore.setSession(sessionId, sessionData);
+            Map sessionData = loadSessionData(sessionId);
+            try {
+                HttpSession sessionWrapper = new HttpSessionStoreWrapper(sessionStore, rawSession, sessionId, sessionData);
+                chain.doFilter(new HttpServletRequestSessionWrapper(request, sessionWrapper), response);
+            } finally {
+                sessionStore.setSession(sessionId, sessionData);
+            }
         }
     }
 
