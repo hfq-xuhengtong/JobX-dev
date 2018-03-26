@@ -34,9 +34,10 @@
                 }
 
                 //同步到session中...
-                ajax({
+                $.ajax({
                     type: "post",
                     url: "${contextPath}/config/skin.do",
+                    dataType: "JSON",
                     data:{
                         "skin":skin
                     }
