@@ -140,9 +140,6 @@ public class RpcFuture {
     }
 
     private void invokeCallback() {
-        if (invokeCallback == null) {
-            throw new NullPointerException("[opencron]callback cannot be null.");
-        }
         if (this.response == null) {
             throw new IllegalStateException("[opencron]response cannot be null. host:"+this.request.getAddress() + ",action: "+ this.request.getAction());
         }
