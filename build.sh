@@ -28,17 +28,15 @@ GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
 RES="\E[0m";
 
-printf "${GREEN_COLOR}\n"
-cat<<EOT
-                                                      __ _ _
-  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \
- (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \
-  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )
-       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /
-           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/
+printf "${GREEN_COLOR}                                                                  \n"
+printf "${GREEN_COLOR}                                                      __ _ _      \n"
+printf "${GREEN_COLOR}  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \     \n"
+printf "${GREEN_COLOR} (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \    \n"
+printf "${GREEN_COLOR}  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )   \n"
+printf "${GREEN_COLOR}       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /    \n"
+printf "${GREEN_COLOR}           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/     \n"
+printf "${GREEN_COLOR}                                                                  \n"
 
-EOT
-printf "${RES}\n"
 
 echo_r () {
     # Color red: Error, Failed
@@ -88,15 +86,14 @@ while [ -h "$PRG" ]; do
 done
 
 # Get standard environment variables
-##############################################
-PRGDIR=`dirname "$PRG"`                     ##
-                                            ##
-WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;     ##
-                                            ##
-OPENCRON_VERSION="1.2.0-RELEASE";           ##
-                                            ##
-DIST_HOME="${WORKDIR}/dist"                 ##
-##############################################
+############################################################################################
+PRGDIR=`dirname "$PRG"`                                                                   ##
+WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;                                                   ##
+OPENCRON_VERSION="1.2.0-RELEASE";                                                         ##
+OPENCRON_AGENT=${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz ##
+OPENCRON_SERVER=${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war ##
+DIST_HOME="${WORKDIR}/dist"                                                               ##
+############################################################################################
 
 # Make sure prerequisite environment variables are set
 if [ -z "$JAVA_HOME" -a -z "$JRE_HOME" ]; then
@@ -189,14 +186,19 @@ fi
 
 echo_w "build opencron Starting...";
 
+if [ ! -f "${WORKDIR}/.mvnw" ];then
+    echo_r "ERROR: ${WORKDIR}/.mvnw is not exists,This file is needed to run this program!"
+    exit 1;
+fi
+
 ${WORKDIR}/.mvnw clean install -Dmaven.test.skip=true;
 
 retval=$?
 
 if [ ${retval} -eq 0 ] ; then
     [ ! -d "${DIST_HOME}" ] && mkdir ${DIST_HOME} || rm -rf  ${DIST_HOME}/* ;
-    cp ${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz ${DIST_HOME}
-    cp ${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war ${DIST_HOME}
+    cp ${OPENCRON_AGENT} ${DIST_HOME}
+    cp ${OPENCRON_SERVER} ${DIST_HOME}
     printf "[${BLUE_COLOR}opencron${RES}] ${WHITE_COLOR}build opencron @Version ${OPENCRON_VERSION} successfully! please goto${RES} ${GREEN_COLOR}${DIST_HOME}${RES}\n"
     exit 0
 else

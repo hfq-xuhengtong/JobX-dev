@@ -8,17 +8,15 @@ GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
 RES="\E[0m";
 
-printf "${GREEN_COLOR}\n"
-cat<<EOT
-                                                      __ _ _
-  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \
- (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \
-  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )
-       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /
-           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/
+printf "${GREEN_COLOR}                                                                  \n"
+printf "${GREEN_COLOR}                                                      __ _ _      \n"
+printf "${GREEN_COLOR}  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \     \n"
+printf "${GREEN_COLOR} (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \    \n"
+printf "${GREEN_COLOR}  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )   \n"
+printf "${GREEN_COLOR}       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /    \n"
+printf "${GREEN_COLOR}           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/     \n"
+printf "${GREEN_COLOR}                                                                  \n"
 
-EOT
-printf "${RES}\n"
 
 echo_r () {
     # Color red: Error, Failed

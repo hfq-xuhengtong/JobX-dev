@@ -27,6 +27,12 @@
 
 @rem In debug mode we need a real JDK (JAVA_HOME)
 
+echo  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \
+echo (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \
+echo  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )
+echo       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /
+echo           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/
+
 if ""%1"" == ""debug"" goto needJavaHome
 rem Otherwise either JRE or JDK are fine
 if not "%JRE_HOME%" == "" goto gotJreHome
@@ -107,12 +113,12 @@ echo This environment variable is needed to run this program
 goto end
 :okHome
 
-@REM ------------------------------------------------------------------------------------
-set version=1.2.0-RELEASE
-set distpath==%OPENCRON_HOME%\dist
-set agent=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%version%.tar.gz
-set server=%OPENCRON_HOME%\opencron-server\target\opencron-server-%version%.war
-@REM ------------------------------------------------------------------------------------
+@REM #################################################################################################-
+set OPENCRON_VERSION=1.2.0-RELEASE
+set DIST_HOME=%OPENCRON_HOME%\dist
+set OPENCRON_AGENT=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%OPENCRON_VERSION%.tar.gz
+set OPENCRON_SERVER=%OPENCRON_HOME%\opencron-server\target\opencron-server-%OPENCRON_VERSION%.war
+@REM #################################################################################################
 
 set "EXECUTABLE=%OPENCRON_HOME%\.mvnw.cmd"
 
@@ -120,25 +126,19 @@ rem Check that target executable exists
 if exist "%EXECUTABLE%" goto okExec
 echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
-goto end
+goto exit
+
 :okExec
-
-set retVal=0
-
 call "%EXECUTABLE%" "clean" "install" "-Dmaven.test.skip=true"
-
-set retVal=%errorlevel%
-
-if %retVal%==0 goto toDist
-goto end
+if %errorlevel%==0 goto toDist
+goto exit
 
 :toDist
-if exist "%distpath%" mkdir %distpath%
-copy %agent% %distpath%
-copy %server% %distpath%
-echo "[opencron] build opencron @Version %version% successfully! please goto %distpath%\n"
-goto end
-
+if exist "%DIST_HOME%" rd /s /q %DIST_HOME%
+if not exist "%DIST_HOME%" mkdir %DIST_HOME%
+copy %OPENCRON_AGENT% %DIST_HOME%
+copy %OPENCRON_SERVER% %DIST_HOME%
+echo [opencron] build opencron @Version %OPENCRON_VERSION% successfully! please goto %DIST_HOME%
 
 :exit
 exit /b 1
