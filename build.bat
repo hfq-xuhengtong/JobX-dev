@@ -18,250 +18,131 @@
 @REM specific language governing permissions and limitations
 @REM under the License.
 @REM
+@rem ---------------------------------------------------------------------------
+@rem Set JAVA_HOME or JRE_HOME if not already set, ensure any provided settings
+@rem are valid and consistent with the selected start-up options and set up the
+@rem endorsed directory.
+@rem ---------------------------------------------------------------------------
+@rem Make sure prerequisite environment variables are set
+
+@rem In debug mode we need a real JDK (JAVA_HOME)
+
+if ""%1"" == ""debug"" goto needJavaHome
+rem Otherwise either JRE or JDK are fine
+if not "%JRE_HOME%" == "" goto gotJreHome
+if not "%JAVA_HOME%" == "" goto gotJavaHome
+echo Neither the JAVA_HOME nor the JRE_HOME environment variable is defined
+echo At least one of these environment variable is needed to run this program
+goto exit
+
+:needJavaHome
+rem Check if we have a usable JDK
+if "%JAVA_HOME%" == "" goto noJavaHome
+if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
+if not exist "%JAVA_HOME%\bin\javaw.exe" goto noJavaHome
+if not exist "%JAVA_HOME%\bin\jdb.exe" goto noJavaHome
+if not exist "%JAVA_HOME%\bin\javac.exe" goto noJavaHome
+set "JRE_HOME=%JAVA_HOME%"
+goto okJava
+
+:noJavaHome
+echo The JAVA_HOME environment variable is not defined correctly.
+echo It is needed to run this program in debug mode.
+echo NB: JAVA_HOME should point to a JDK not a JRE.
+goto exit
+
+:gotJavaHome
+rem No JRE given, use JAVA_HOME as JRE_HOME
+set "JRE_HOME=%JAVA_HOME%"
+
+:gotJreHome
+rem Check if we have a usable JRE
+if not exist "%JRE_HOME%\bin\java.exe" goto noJreHome
+if not exist "%JRE_HOME%\bin\javaw.exe" goto noJreHome
+goto okJava
+
+:noJreHome
+rem Needed at least a JRE
+echo The JRE_HOME environment variable is not defined correctly
+echo This environment variable is needed to run this program
+goto exit
+
+:okJava
+rem Don't override the endorsed dir if the user has set it previously
+if not "%JAVA_ENDORSED_DIRS%" == "" goto gotEndorseddir
+rem Java 9 no longer supports the java.endorsed.dirs
+rem system property. Only try to use it if
+rem OPENCRON_HOME/endorsed exists.
+if not exist "%OPENCRON_HOME%\endorsed" goto gotEndorseddir
+set "JAVA_ENDORSED_DIRS=%OPENCRON_HOME%\endorsed"
+:gotEndorseddir
+
+rem Don't override _RUNJAVA if the user has set it previously
+if not "%_RUNJAVA%" == "" goto gotRunJava
+rem Set standard command for invoking Java.
+rem Also note the quoting as JRE_HOME may contain spaces.
+set _RUNJAVA="%JRE_HOME%\bin\java.exe"
+:gotRunJava
+
+rem Don't override _RUNJDB if the user has set it previously
+rem Also note the quoting as JAVA_HOME may contain spaces.
+if not "%_RUNJDB%" == "" goto gotRunJdb
+set _RUNJDB="%JAVA_HOME%\bin\jdb.exe"
+:gotRunJdb
 
 setlocal
-
-rem Suppress Terminate batch job on CTRL+C
-if not ""%1"" == ""run"" goto mainEntry
-if "%TEMP%" == "" goto mainEntry
-if exist "%TEMP%\%~nx0.run" goto mainEntry
-echo Y>"%TEMP%\%~nx0.run"
-if not exist "%TEMP%\%~nx0.run" goto mainEntry
-echo Y>"%TEMP%\%~nx0.Y"
-call "%~f0" %* <"%TEMP%\%~nx0.Y"
-rem Use provided errorlevel
-set RETVAL=%ERRORLEVEL%
-del /Q "%TEMP%\%~nx0.Y" >NUL 2>&1
-exit /B %RETVAL%
-:mainEntry
-del /Q "%TEMP%\%~nx0.run" >NUL 2>&1
 
 rem Guess OPENCRON_HOME if not defined
 set "CURRENT_DIR=%cd%"
 if not "%OPENCRON_HOME%" == "" goto gotHome
 set "OPENCRON_HOME=%CURRENT_DIR%"
-if exist "%OPENCRON_HOME%\bin\OPENCRON.bat" goto okHome
+if exist "%OPENCRON_HOME%\.mvnw.cmd" goto okHome
 cd ..
 set "OPENCRON_HOME=%cd%"
 cd "%CURRENT_DIR%"
 :gotHome
-
-if exist "%OPENCRON_HOME%\bin\OPENCRON.bat" goto okHome
+if exist "%OPENCRON_HOME%\.mvnw.cmd" goto okHome
 echo The OPENCRON_HOME environment variable is not defined correctly
 echo This environment variable is needed to run this program
 goto end
 :okHome
 
-rem Copy OPENCRON_BASE from OPENCRON_HOME if not defined
-if not "%OPENCRON_BASE%" == "" goto gotBase
-set "OPENCRON_BASE=%OPENCRON_HOME%"
-:gotBase
+@REM ------------------------------------------------------------------------------------
+set version=1.2.0-RELEASE
+set distpath==%OPENCRON_HOME%\dist
+set agent=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%version%.tar.gz
+set server=%OPENCRON_HOME%\opencron-server\target\opencron-server-%version%.war
+@REM ------------------------------------------------------------------------------------
 
-rem Ensure that neither OPENCRON_HOME nor OPENCRON_BASE contains a semi-colon
-rem as this is used as the separator in the classpath and Java provides no
-rem mechanism for escaping if the same character appears in the path. Check this
-rem by replacing all occurrences of ';' with '' and checking that neither
-rem OPENCRON_HOME nor OPENCRON_BASE have changed
-if "%OPENCRON_HOME%" == "%OPENCRON_HOME:;=%" goto homeNoSemicolon
-echo Using OPENCRON_HOME:   "%OPENCRON_HOME%"
-echo Unable to start as OPENCRON_HOME contains a semicolon (;) character
-goto end
-:homeNoSemicolon
+set "EXECUTABLE=%OPENCRON_HOME%\.mvnw.cmd"
 
-if "%OPENCRON_BASE%" == "%OPENCRON_BASE:;=%" goto baseNoSemicolon
-echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
-echo Unable to start as OPENCRON_BASE contains a semicolon (;) character
-goto end
-:baseNoSemicolon
-
-rem Ensure that any user defined CLASSPATH variables are not used on startup,
-rem but allow them to be specified in setenv.bat, in rare case when it is needed.
-set CLASSPATH=
-
-rem Get standard environment variables
-if not exist "%OPENCRON_BASE%\bin\setenv.bat" goto checkSetenvHome
-call "%OPENCRON_BASE%\bin\setenv.bat"
-goto setenvDone
-:checkSetenvHome
-if exist "%OPENCRON_HOME%\bin\setenv.bat" call "%OPENCRON_HOME%\bin\setenv.bat"
-:setenvDone
-
-rem Get standard Java environment variables
-if exist "%OPENCRON_HOME%\bin\setclasspath.bat" goto okSetclasspath
-echo Cannot find "%OPENCRON_HOME%\bin\setclasspath.bat"
+rem Check that target executable exists
+if exist "%EXECUTABLE%" goto okExec
+echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
 goto end
-:okSetclasspath
-call "%OPENCRON_HOME%\bin\setclasspath.bat" %1
-if errorlevel 1 goto end
+:okExec
 
-rem Add on extra jar file to CLASSPATH
-rem Note that there are no quotes as we do not want to introduce random
-rem quotes into the CLASSPATH
-if "%CLASSPATH%" == "" goto emptyClasspath
-set "CLASSPATH=%CLASSPATH%;"
-:emptyClasspath
-set "CLASSPATH=%CLASSPATH%%OPENCRON_HOME%\bin\bootstrap.jar"
+set retVal=0
 
-if not "%OPENCRON_TMPDIR%" == "" goto gotTmpdir
-set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
-:gotTmpdir
+call "%EXECUTABLE%" "clean" "install" "-Dmaven.test.skip=true"
 
-rem Add tomcat-juli.jar to classpath
-rem tomcat-juli.jar can be over-ridden per instance
-if not exist "%OPENCRON_BASE%\bin\tomcat-juli.jar" goto juliClasspathHome
-set "CLASSPATH=%CLASSPATH%;%OPENCRON_BASE%\bin\tomcat-juli.jar"
-goto juliClasspathDone
-:juliClasspathHome
-set "CLASSPATH=%CLASSPATH%;%OPENCRON_HOME%\bin\tomcat-juli.jar"
-:juliClasspathDone
+set retVal=%errorlevel%
 
-if not "%JSSE_OPTS%" == "" goto gotJsseOpts
-set JSSE_OPTS="-Djdk.tls.ephemeralDHKeySize=2048"
-:gotJsseOpts
-set "JAVA_OPTS=%JAVA_OPTS% %JSSE_OPTS%"
-
-rem Register custom URL handlers
-rem Do this here so custom URL handles (specifically 'war:...') can be used in the security policy
-set "JAVA_OPTS=%JAVA_OPTS% -Djava.protocol.handler.pkgs=org.apache.OPENCRON.webresources"
-
-if not "%LOGGING_CONFIG%" == "" goto noJuliConfig
-set LOGGING_CONFIG=-Dnop
-if not exist "%OPENCRON_BASE%\conf\logging.properties" goto noJuliConfig
-set LOGGING_CONFIG=-Djava.util.logging.config.file="%OPENCRON_BASE%\conf\logging.properties"
-:noJuliConfig
-
-if not "%LOGGING_MANAGER%" == "" goto noJuliManager
-set LOGGING_MANAGER=-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
-:noJuliManager
-
-rem ----- Execute The Requested Command ---------------------------------------
-
-echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
-echo Using OPENCRON_HOME:   "%OPENCRON_HOME%"
-echo Using OPENCRON_TMPDIR: "%OPENCRON_TMPDIR%"
-if ""%1"" == ""debug"" goto use_jdk
-echo Using JRE_HOME:        "%JRE_HOME%"
-goto java_dir_displayed
-:use_jdk
-echo Using JAVA_HOME:       "%JAVA_HOME%"
-:java_dir_displayed
-echo Using CLASSPATH:       "%CLASSPATH%"
-
-set _EXECJAVA=%_RUNJAVA%
-set MAINCLASS=org.apache.OPENCRON.startup.Bootstrap
-set ACTION=start
-set SECURITY_POLICY_FILE=
-set DEBUG_OPTS=
-set JPDA=
-
-if not ""%1"" == ""jpda"" goto noJpda
-set JPDA=jpda
-if not "%JPDA_TRANSPORT%" == "" goto gotJpdaTransport
-set JPDA_TRANSPORT=dt_socket
-:gotJpdaTransport
-if not "%JPDA_ADDRESS%" == "" goto gotJpdaAddress
-set JPDA_ADDRESS=localhost:8000
-:gotJpdaAddress
-if not "%JPDA_SUSPEND%" == "" goto gotJpdaSuspend
-set JPDA_SUSPEND=n
-:gotJpdaSuspend
-if not "%JPDA_OPTS%" == "" goto gotJpdaOpts
-set JPDA_OPTS=-agentlib:jdwp=transport=%JPDA_TRANSPORT%,address=%JPDA_ADDRESS%,server=y,suspend=%JPDA_SUSPEND%
-:gotJpdaOpts
-shift
-:noJpda
-
-if ""%1"" == ""debug"" goto doDebug
-if ""%1"" == ""run"" goto doRun
-if ""%1"" == ""start"" goto doStart
-if ""%1"" == ""stop"" goto doStop
-if ""%1"" == ""configtest"" goto doConfigTest
-if ""%1"" == ""version"" goto doVersion
-
-echo Usage:  OPENCRON ( commands ... )
-echo commands:
-echo   debug             Start OPENCRON in a debugger
-echo   debug -security   Debug OPENCRON with a security manager
-echo   jpda start        Start OPENCRON under JPDA debugger
-echo   run               Start OPENCRON in the current window
-echo   run -security     Start in the current window with security manager
-echo   start             Start OPENCRON in a separate window
-echo   start -security   Start in a separate window with security manager
-echo   stop              Stop OPENCRON
-echo   configtest        Run a basic syntax check on server.xml
-echo   version           What version of tomcat are you running?
+if %retVal%==0 goto toDist
 goto end
 
-:doDebug
-shift
-set _EXECJAVA=%_RUNJDB%
-set DEBUG_OPTS=-sourcepath "%OPENCRON_HOME%\..\..\java"
-if not ""%1"" == ""-security"" goto execCmd
-shift
-echo Using Security Manager
-set "SECURITY_POLICY_FILE=%OPENCRON_BASE%\conf\OPENCRON.policy"
-goto execCmd
-
-:doRun
-shift
-if not ""%1"" == ""-security"" goto execCmd
-shift
-echo Using Security Manager
-set "SECURITY_POLICY_FILE=%OPENCRON_BASE%\conf\OPENCRON.policy"
-goto execCmd
-
-:doStart
-shift
-if "%TITLE%" == "" set TITLE=Tomcat
-set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
-if not ""%1"" == ""-security"" goto execCmd
-shift
-echo Using Security Manager
-set "SECURITY_POLICY_FILE=%OPENCRON_BASE%\conf\OPENCRON.policy"
-goto execCmd
-
-:doStop
-shift
-set ACTION=stop
-set OPENCRON_OPTS=
-goto execCmd
-
-:doConfigTest
-shift
-set ACTION=configtest
-set OPENCRON_OPTS=
-goto execCmd
-
-:doVersion
-%_EXECJAVA% -classpath "%OPENCRON_HOME%\lib\OPENCRON.jar" org.apache.OPENCRON.util.ServerInfo
+:toDist
+if exist "%distpath%" mkdir %distpath%
+copy %agent% %distpath%
+copy %server% %distpath%
+echo "[opencron] build opencron @Version %version% successfully! please goto %distpath%\n"
 goto end
 
 
-:execCmd
-rem Get remaining unshifted command line arguments and save them in the
-set CMD_LINE_ARGS=
-:setArgs
-if ""%1""=="""" goto doneSetArgs
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setArgs
-:doneSetArgs
-
-rem Execute Java with the applicable properties
-if not "%JPDA%" == "" goto doJpda
-if not "%SECURITY_POLICY_FILE%" == "" goto doSecurity
-%_EXECJAVA% %LOGGING_CONFIG% %LOGGING_MANAGER% %JAVA_OPTS% %OPENCRON_OPTS% %DEBUG_OPTS% -classpath "%CLASSPATH%" -DOPENCRON.base="%OPENCRON_BASE%" -DOPENCRON.home="%OPENCRON_HOME%" -Djava.io.tmpdir="%OPENCRON_TMPDIR%" %MAINCLASS% %CMD_LINE_ARGS% %ACTION%
-goto end
-:doSecurity
-%_EXECJAVA% %LOGGING_CONFIG% %LOGGING_MANAGER% %JAVA_OPTS% %OPENCRON_OPTS% %DEBUG_OPTS% -classpath "%CLASSPATH%" -Djava.security.manager -Djava.security.policy=="%SECURITY_POLICY_FILE%" -DOPENCRON.base="%OPENCRON_BASE%" -DOPENCRON.home="%OPENCRON_HOME%" -Djava.io.tmpdir="%OPENCRON_TMPDIR%" %MAINCLASS% %CMD_LINE_ARGS% %ACTION%
-goto end
-:doJpda
-if not "%SECURITY_POLICY_FILE%" == "" goto doSecurityJpda
-%_EXECJAVA% %LOGGING_CONFIG% %LOGGING_MANAGER% %JAVA_OPTS% %JPDA_OPTS% %OPENCRON_OPTS% %DEBUG_OPTS% -classpath "%CLASSPATH%" -DOPENCRON.base="%OPENCRON_BASE%" -DOPENCRON.home="%OPENCRON_HOME%" -Djava.io.tmpdir="%OPENCRON_TMPDIR%" %MAINCLASS% %CMD_LINE_ARGS% %ACTION%
-goto end
-:doSecurityJpda
-%_EXECJAVA% %LOGGING_CONFIG% %LOGGING_MANAGER% %JAVA_OPTS% %JPDA_OPTS% %OPENCRON_OPTS% %DEBUG_OPTS% -classpath "%CLASSPATH%" -Djava.security.manager -Djava.security.policy=="%SECURITY_POLICY_FILE%" -DOPENCRON.base="%OPENCRON_BASE%" -DOPENCRON.home="%OPENCRON_HOME%" -Djava.io.tmpdir="%OPENCRON_TMPDIR%" %MAINCLASS% %CMD_LINE_ARGS% %ACTION%
-goto end
+:exit
+exit /b 1
 
 :end
+exit /b 0
+
