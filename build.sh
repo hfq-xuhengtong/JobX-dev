@@ -183,7 +183,7 @@ fi
 
 #check openjdk
 if [ "`$JAVACMD -version 2>&1 | head -1|grep "openjdk"|wc -l`"x == "1"x ]; then
-  echo_r "ERROR: please uninstall OpenJDK and install jdk first"
+  echo_r "ERROR: please uninstall OpenJDK and install JDK 1.7+ first"
   exit 1;
 fi
 
