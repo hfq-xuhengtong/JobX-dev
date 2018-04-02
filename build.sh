@@ -89,13 +89,13 @@ done
 
 # Get standard environment variables
 ##############################################
-PRGDIR=`dirname "$PRG"`
-
-WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
-
-OPENCRON_VERSION="1.2.0-RELEASE";
-
-DIST_HOME="${WORKDIR}/dist"
+PRGDIR=`dirname "$PRG"`                     ##
+                                            ##
+WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;     ##
+                                            ##
+OPENCRON_VERSION="1.2.0-RELEASE";           ##
+                                            ##
+DIST_HOME="${WORKDIR}/dist"                 ##
 ##############################################
 
 # Make sure prerequisite environment variables are set
@@ -187,97 +187,16 @@ if [ "`$JAVACMD -version 2>&1 | head -1|grep "openjdk"|wc -l`"x == "1"x ]; then
   exit 1;
 fi
 
-if [ -z "$M2_HOME" ] ; then
-
-  saveddir=`pwd`
-
-  M2_HOME=`dirname "$PRG"`/..
-
-  # make it fully qualified
-  M2_HOME=`cd "$M2_HOME" && pwd`
-
-  cd "$saveddir"
-  # echo Using m2 at $M2_HOME
-fi
-
-# For Cygwin, ensure paths are in UNIX format before anything is touched
-if $cygwin ; then
-  [ -n "$M2_HOME" ] &&
-    M2_HOME=`cygpath --unix "$M2_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$CLASSPATH" ] &&
-    CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
-fi
-
-# For Migwn, ensure paths are in UNIX format before anything is touched
-if $mingw ; then
-  [ -n "$M2_HOME" ] &&
-    M2_HOME="`(cd "$M2_HOME"; pwd)`"
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-  # TODO classpath?
-fi
-
-
-CLASSWORLDS_LAUNCHER=org.codehaus.plexus.classworlds.launcher.Launcher
-
-# For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
-  [ -n "$M2_HOME" ] &&
-    M2_HOME=`cygpath --path --windows "$M2_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
-  [ -n "$CLASSPATH" ] &&
-    CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
-fi
-
-# traverses directory structure from process work directory to filesystem root
-# first directory with .mvn subdirectory is considered project base directory
-find_maven_basedir() {
-  local basedir=$(pwd)
-  local wdir=$(pwd)
-  while [ "$wdir" != '/' ] ; do
-    if [ -d "$wdir"/.mvn ] ; then
-      basedir=$wdir
-      break
-    fi
-    wdir=$(cd "$wdir/.."; pwd)
-  done
-  echo "${basedir}"
-}
-
-# concatenates all lines of a file
-concat_lines() {
-  if [ -f "$1" ]; then
-    echo "$(tr -s '\n' ' ' < "$1")"
-  fi
-}
-
-export MAVEN_PROJECTBASEDIR=${MAVEN_BASEDIR:-$(find_maven_basedir)}
-MAVEN_OPTS="$(concat_lines "$MAVEN_PROJECTBASEDIR/.mvn/jvm.config") $MAVEN_OPTS"
-
-# Provide a "standardized" way to retrieve the CLI args that will
-# work with both Windows and non-Windows executions.
-MAVEN_CMD_LINE_ARGS="$MAVEN_CONFIG $@"
-export MAVEN_CMD_LINE_ARGS
-
-WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
-
 echo_w "build opencron Starting...";
 
-exec "$JAVACMD" \
-  $MAVEN_OPTS \
-  -classpath "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar" \
-  "-Dmaven.home=${M2_HOME}" "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
-  ${WRAPPER_LAUNCHER} "$@"
+${WORKDIR}/.mvnw clean install -Dmaven.test.skip=true;
 
 retval=$?
 
 if [ ${retval} -eq 0 ] ; then
     [ ! -d "${DIST_HOME}" ] && mkdir ${DIST_HOME} || rm -rf  ${DIST_HOME}/* ;
     cp ${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz ${DIST_HOME}
-    cp ${WORKDIR}/opencron-server/target/opencron-server.war ${DIST_HOME}
+    cp ${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war ${DIST_HOME}
     printf "[${BLUE_COLOR}opencron${RES}] ${WHITE_COLOR}build opencron @Version ${OPENCRON_VERSION} successfully! please goto${RES} ${GREEN_COLOR}${DIST_HOME}${RES}\n"
     exit 0
 else

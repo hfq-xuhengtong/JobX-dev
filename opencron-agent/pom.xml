@@ -9,6 +9,7 @@
     <artifactId>opencron-agent</artifactId>
     <packaging>jar</packaging>
     <name>opencron-agent</name>
+
     <dependencies>
         <dependency>
             <groupId>org.opencron</groupId>
@@ -97,7 +98,7 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>../lib</classpathPrefix>
+                            <classpathPrefix>${project.build.directory}/lib</classpathPrefix>
                             <mainClass>org.opencron.agent.AgentBootstrap</mainClass>
                         </manifest>
                     </archive>
