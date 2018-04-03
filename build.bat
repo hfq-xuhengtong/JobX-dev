@@ -113,7 +113,7 @@ echo This environment variable is needed to run this program
 goto end
 :okHome
 
-@REM #################################################################################################-
+@REM #################################################################################################
 set OPENCRON_VERSION=1.2.0-RELEASE
 set DIST_HOME=%OPENCRON_HOME%\dist
 set OPENCRON_AGENT=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%OPENCRON_VERSION%.tar.gz
