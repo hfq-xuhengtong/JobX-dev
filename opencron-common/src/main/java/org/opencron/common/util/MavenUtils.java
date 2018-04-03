@@ -98,15 +98,10 @@ public class MavenUtils {
         return getArtifactId().concat("-").concat(getArtifactVersion());
     }
 
-    public String getName() {
-        Model model = getCurrentModel();
-        return model.getName();
-    }
-
 
     public static void main(String[] args) {
         MavenUtils mavenUtils = MavenUtils.get(Thread.currentThread().getContextClassLoader());
-        System.out.println(mavenUtils.getArtifact() + "---> " + mavenUtils.getName());
+        System.out.println(mavenUtils.getArtifactId() + "---> " + mavenUtils.getArtifact());
     }
 
 

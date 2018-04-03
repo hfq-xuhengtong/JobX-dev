@@ -11,8 +11,8 @@ public class AbstractSerializer {
         objectOutput.writeObject(object);
         objectOutput.flushBuffer();
         byte[] data = outputStream.toByteArray();
-        outputStream.reset();
         outputStream.flush();
+        outputStream.close();
         return data;
     }
 

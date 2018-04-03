@@ -186,12 +186,12 @@ fi
 
 echo_w "build opencron Starting...";
 
-if [ ! -f "${WORKDIR}/.mvnw" ];then
-    echo_r "ERROR: ${WORKDIR}/.mvnw is not exists,This file is needed to run this program!"
+if [ ! -f "${WORKDIR}/.mvn/mvnw" ];then
+    echo_r "ERROR: ${WORKDIR}/.mvn/mvnw is not exists,This file is needed to run this program!"
     exit 1;
 fi
 
-${WORKDIR}/.mvnw clean install -Dmaven.test.skip=true;
+${WORKDIR}/.mvn/mvnw clean install -Dmaven.test.skip=true;
 
 retval=$?
 

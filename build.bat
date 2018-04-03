@@ -102,12 +102,12 @@ rem Guess OPENCRON_HOME if not defined
 set "CURRENT_DIR=%cd%"
 if not "%OPENCRON_HOME%" == "" goto gotHome
 set "OPENCRON_HOME=%CURRENT_DIR%"
-if exist "%OPENCRON_HOME%\.mvnw.cmd" goto okHome
+if exist "%OPENCRON_HOME%\.mvn\mvnw.cmd" goto okHome
 cd ..
 set "OPENCRON_HOME=%cd%"
 cd "%CURRENT_DIR%"
 :gotHome
-if exist "%OPENCRON_HOME%\.mvnw.cmd" goto okHome
+if exist "%OPENCRON_HOME%\.mvn\mvnw.cmd" goto okHome
 echo The OPENCRON_HOME environment variable is not defined correctly
 echo This environment variable is needed to run this program
 goto end
@@ -120,7 +120,7 @@ set OPENCRON_AGENT=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%OPENCRO
 set OPENCRON_SERVER=%OPENCRON_HOME%\opencron-server\target\opencron-server-%OPENCRON_VERSION%.war
 @REM #################################################################################################
 
-set "EXECUTABLE=%OPENCRON_HOME%\.mvnw.cmd"
+set "EXECUTABLE=%OPENCRON_HOME%\.mvn\mvnw.cmd"
 
 rem Check that target executable exists
 if exist "%EXECUTABLE%" goto okExec
