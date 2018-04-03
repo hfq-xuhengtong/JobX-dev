@@ -59,15 +59,14 @@ PRGDIR=`dirname "$PRG"`
 
 WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
 
+# Get standard environment variables
+###############################################################################################
 APP_ARTIFACT=opencron-agent
-
 APP_VERSION="1.2.0-RELEASE";
-
 APP_TAR_NAME=${APP_ARTIFACT}-${APP_VERSION}.tar.gz
-
 MAVEN_TARGET_TAR="${WORKDIR}"/${APP_ARTIFACT}/target/${APP_TAR_NAME}
-
 DIST_PATH=${WORKDIR}/dist/
+###############################################################################################
 
 [ ! -d "${DIST_PATH}" ] && mkdir -p "${DIST_PATH}"
 
@@ -86,8 +85,24 @@ fi
 
 [ -d "${DEPLOY_PATH}" ] && rm -rf ${DEPLOY_PATH}/* || mkdir -p ${DEPLOY_PATH}
 
-tar -xzvf ${DIST_PATH}/${APP_TAR_NAME} -C ${DEPLOY_PATH}/../ >/dev/null 2>&1
+tar -xzvf ${DIST_PATH}/${APP_TAR_NAME} -C ${DEPLOY_PATH}/../ >/dev/null 2>&1 && chmod +x ${DEPLOY_PATH}/bin/* >/dev/null 2>&1
 
-#startup
-/bin/bash +x "${DEPLOY_PATH}/bin/startup.sh" "$@"
+EXECUTABLE=${DEPLOY_PATH}/bin/startup.sh
 
+# Check that target executable exists
+if $os400; then
+  # -x will Only work on the os400 if the files are:
+  # 1. owned by the user
+  # 2. owned by the PRIMARY group of the user
+  # this will not work if the user belongs in secondary groups
+  eval
+else
+  if [ ! -x "$EXECUTABLE" ]; then
+    echo "Cannot find $EXECUTABLE"
+    echo "The file is absent or does not have execute permission"
+    echo "This file is needed to run this program"
+    exit 1
+  fi
+fi
+
+exec "$EXECUTABLE" "$@"

@@ -105,15 +105,14 @@ PRGDIR=`dirname "$PRG"`
 
 WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
 
+# Get standard environment variables
+###############################################################################################
 APP_ARTIFACT=opencron-server
-
 APP_VERSION="1.2.0-RELEASE";
-
-APP_WAR_NAME=${APP_ARTIFACT}.war
-
+APP_WAR_NAME=${APP_ARTIFACT}-${APP_VERSION}.war
 MAVEN_TARGET_WAR="${WORKDIR}"/${APP_ARTIFACT}/target/${APP_WAR_NAME}
-
 DIST_PATH=${WORKDIR}/dist/
+###############################################################################################
 
 [ ! -d "${DIST_PATH}" ] && mkdir -p "${DIST_PATH}"
 
@@ -141,8 +140,25 @@ cp ${DIST_PATH}/${APP_WAR_NAME} ${DEPLOY_PATH} && cd ${DEPLOY_PATH} && jar xvf $
 cp -r ${WORKDIR}/${APP_ARTIFACT}/work ${DEPLOY_PATH}
 
 #copy startup.sh
-cp  ${STARTUP_SHELL} ${DEPLOY_PATH}
+cp  ${STARTUP_SHELL} ${DEPLOY_PATH} && chmod +x ${DEPLOY_PATH}/startup.sh >/dev/null 2>&1
 
 #startup
-/bin/bash +x "${DEPLOY_PATH}/startup.sh" "$@"
+EXECUTABLE=${DEPLOY_PATH}/startup.sh
 
+# Check that target executable exists
+if $os400; then
+  # -x will Only work on the os400 if the files are:
+  # 1. owned by the user
+  # 2. owned by the PRIMARY group of the user
+  # this will not work if the user belongs in secondary groups
+  eval
+else
+  if [ ! -x "$EXECUTABLE" ]; then
+    echo "Cannot find $EXECUTABLE"
+    echo "The file is absent or does not have execute permission"
+    echo "This file is needed to run this program"
+    exit 1
+  fi
+fi
+
+exec "$EXECUTABLE" "$@"
