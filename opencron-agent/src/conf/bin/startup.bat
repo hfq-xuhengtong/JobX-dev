@@ -49,15 +49,13 @@ echo This file is needed to run this program
 goto end
 :okExec
 
-@REM Get @REMaining unshifted command line arguments and save them in the
-set CMD_LINE_ARGS=
-:setArgs
-if ""%1""=="""" goto doneSetArgs
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setArgs
-:doneSetArgs
+set /p port=please input port(default 1577,if use default please pass Enter)
+set /p pass=please input password(default "opencron",if use default please pass Enter)
+set /p host=please input host(if use default please pass Enter)
 
-call "%EXECUTABLE%" start %CMD_LINE_ARGS%
+if "%port%" == "" set "port=1577"
+if "%pass%" == "" set "pass=opencron"
+
+call "%EXECUTABLE%" start %port% %pass% %host%
 
 :end

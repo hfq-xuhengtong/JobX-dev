@@ -124,70 +124,64 @@ set "CLASSPATH=%CLASSPATH%;"
 set "CLASSPATH=%CLASSPATH%%OPENCRON_HOME%\lib\opencron-agent-%OPENCRON_VERSION%.jar"
 
 if not "%OPENCRON_TMPDIR%" == "" goto gotTmpdir
-set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
+
 :gotTmpdir
-
-if not "%OPENCRON_PORT%" == "" goto defPort
-set "OPENCRON_PORT=1577"
-:defPort
-
-if not exist  "%OPENCRON_BASE%\.password" goto defPassword
-set "OPENCRON_PASSWORD="opencron"
-echo opencron password not input,will be used password:opencron"
-:defPassword
+set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
 
 if exist "%OPENCRON_BASE%\.password" goto readPassword
+
+:readPassword
 for /f "delims=" %%p in ("%OPENCRON_BASE%\.password") do (
     if "%%p" == "" goto defPassword
     set "OPENCRON_PASSWORD=%%p"
     goto :out
 )
-:readPassword
 :out
 
+:defPassword
+set "OPENCRON_PASSWORD=opencron"
+
+set optAction="%1"
+
+shift /0
+set "OPENCRON_PORT=%1"
+
+shift /0
+if "%1" == "" set "OPENCRON_PASSWORD=%OPENCRON_PASSWORD%"
+if not "%1" == "" set "OPENCRON_PASSWORD=%1"
+
+shift /0
+set "OPENCRON_HOST=%1"
+
 if exist "%OPENCRON_OUT%" goto setOut
-set OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out
+
 :setOut
+set OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out
 
 @REM ----- Execute The Requested Command ---------------------------------------
 echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
 echo Using OPENCRON_HOME:   "%OPENCRON_HOME%"
 echo Using OPENCRON_TMPDIR: "%OPENCRON_TMPDIR%"
 echo Using OPENCRON_PORT:   "%OPENCRON_PORT%"
+echo Using OPENCRON_HOST:   "%OPENCRON_HOST%"
 
 set _EXECJAVA=%_RUNJAVA%
 set MAINCLASS=org.opencron.agent.AgentBootstrap
 set ACTION=start
 
-if ""%1"" == ""start"" goto doStart
-if ""%1"" == ""stop"" goto doStop
-
-echo Usage:  OPENCRON ( commands ... )
-echo commands:
-echo   start             Start OPENCRON in a separate window
-echo   stop              Stop OPENCRON
-goto end
+if "%optAction%" == ""start"" goto doStart
+if "%optAction%" == ""stop"" goto doStop
 
 :doStart
-shift
 if "%TITLE%" == "" set TITLE=Opencron
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
 goto execCmd
 
 :doStop
-shift
 set ACTION=stop
 goto execCmd
 
 :execCmd
-set CMD_LINE_ARGS=
-:setArgs
-if ""%1""=="""" goto doneSetArgs
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setArgs
-:doneSetArgs
-
 %_EXECJAVA% ^
     -classpath "%CLASSPATH%" ^
     -Dopencron.home="%OPENCRON_HOME%" ^
@@ -196,6 +190,7 @@ goto setArgs
     -Dopencron.host="%OPENCRON_HOST%" ^
     -Dopencron.password="%OPENCRON_PASSWORD%" ^
     %MAINCLASS% %ACTION%
+
 
 goto end
 
