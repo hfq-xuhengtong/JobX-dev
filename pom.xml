@@ -65,7 +65,6 @@
         <slf4j.version>1.7.5</slf4j.version>
         <protostuff.version>1.1.2</protostuff.version>
         <objenesis.version>2.6</objenesis.version>
-        <asm.version>5.2</asm.version>
         <javassist.version>3.19.0-GA</javassist.version>
         <bytebuddy.version>1.6.3</bytebuddy.version>
         <hessian.version>4.0.38</hessian.version>
