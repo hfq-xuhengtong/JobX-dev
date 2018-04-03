@@ -18,14 +18,14 @@
 @REM specific language governing permissions and limitations
 @REM under the License.
 @REM
-@rem ---------------------------------------------------------------------------
-@rem Set JAVA_HOME or JRE_HOME if not already set, ensure any provided settings
-@rem are valid and consistent with the selected start-up options and set up the
-@rem endorsed directory.
-@rem ---------------------------------------------------------------------------
-@rem Make sure prerequisite environment variables are set
+@REM ---------------------------------------------------------------------------
+@REM Set JAVA_HOME or JRE_HOME if not already set, ensure any provided settings
+@REM are valid and consistent with the selected start-up options and set up the
+@REM endorsed directory.
+@REM ---------------------------------------------------------------------------
+@REM Make sure prerequisite environment variables are set
 
-@rem In debug mode we need a real JDK (JAVA_HOME)
+@REM In debug mode we need a real JDK (JAVA_HOME)
 
 echo  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \
 echo (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \
@@ -34,7 +34,7 @@ echo       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /
 echo           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/
 
 if ""%1"" == ""debug"" goto needJavaHome
-rem Otherwise either JRE or JDK are fine
+@REM Otherwise either JRE or JDK are fine
 if not "%JRE_HOME%" == "" goto gotJreHome
 if not "%JAVA_HOME%" == "" goto gotJavaHome
 echo Neither the JAVA_HOME nor the JRE_HOME environment variable is defined
@@ -42,7 +42,7 @@ echo At least one of these environment variable is needed to run this program
 goto exit
 
 :needJavaHome
-rem Check if we have a usable JDK
+@REM Check if we have a usable JDK
 if "%JAVA_HOME%" == "" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\javaw.exe" goto noJavaHome
@@ -58,47 +58,47 @@ echo NB: JAVA_HOME should point to a JDK not a JRE.
 goto exit
 
 :gotJavaHome
-rem No JRE given, use JAVA_HOME as JRE_HOME
+@REM No JRE given, use JAVA_HOME as JRE_HOME
 set "JRE_HOME=%JAVA_HOME%"
 
 :gotJreHome
-rem Check if we have a usable JRE
+@REM Check if we have a usable JRE
 if not exist "%JRE_HOME%\bin\java.exe" goto noJreHome
 if not exist "%JRE_HOME%\bin\javaw.exe" goto noJreHome
 goto okJava
 
 :noJreHome
-rem Needed at least a JRE
+@REM Needed at least a JRE
 echo The JRE_HOME environment variable is not defined correctly
 echo This environment variable is needed to run this program
 goto exit
 
 :okJava
-rem Don't override the endorsed dir if the user has set it previously
+@REM Don't override the endorsed dir if the user has set it previously
 if not "%JAVA_ENDORSED_DIRS%" == "" goto gotEndorseddir
-rem Java 9 no longer supports the java.endorsed.dirs
-rem system property. Only try to use it if
-rem OPENCRON_HOME/endorsed exists.
+@REM Java 9 no longer supports the java.endorsed.dirs
+@REM system property. Only try to use it if
+@REM OPENCRON_HOME/endorsed exists.
 if not exist "%OPENCRON_HOME%\endorsed" goto gotEndorseddir
 set "JAVA_ENDORSED_DIRS=%OPENCRON_HOME%\endorsed"
 :gotEndorseddir
 
-rem Don't override _RUNJAVA if the user has set it previously
+@REM Don't override _RUNJAVA if the user has set it previously
 if not "%_RUNJAVA%" == "" goto gotRunJava
-rem Set standard command for invoking Java.
-rem Also note the quoting as JRE_HOME may contain spaces.
+@REM Set standard command for invoking Java.
+@REM Also note the quoting as JRE_HOME may contain spaces.
 set _RUNJAVA="%JRE_HOME%\bin\java.exe"
 :gotRunJava
 
-rem Don't override _RUNJDB if the user has set it previously
-rem Also note the quoting as JAVA_HOME may contain spaces.
+@REM Don't override _RUNJDB if the user has set it previously
+@REM Also note the quoting as JAVA_HOME may contain spaces.
 if not "%_RUNJDB%" == "" goto gotRunJdb
 set _RUNJDB="%JAVA_HOME%\bin\jdb.exe"
 :gotRunJdb
 
 setlocal
 
-rem Guess OPENCRON_HOME if not defined
+@REM Guess OPENCRON_HOME if not defined
 set "CURRENT_DIR=%cd%"
 if not "%OPENCRON_HOME%" == "" goto gotHome
 set "OPENCRON_HOME=%CURRENT_DIR%"
@@ -122,7 +122,7 @@ set OPENCRON_SERVER=%OPENCRON_HOME%\opencron-server\target\opencron-server-%OPEN
 
 set "EXECUTABLE=%OPENCRON_HOME%\.mvn\mvnw.cmd"
 
-rem Check that target executable exists
+@REM Check that target executable exists
 if exist "%EXECUTABLE%" goto okExec
 echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program

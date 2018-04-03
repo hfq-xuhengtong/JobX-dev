@@ -36,6 +36,31 @@ printf "${GREEN_COLOR}  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) 
 printf "${GREEN_COLOR}       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /    ${RES}\n"
 printf "${GREEN_COLOR}           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/     ${RES}\n\n"
 
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+PRGDIR=`dirname "$PRG"`
+
+WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
+
+# Get standard environment variables
+############################################################################################
+OPENCRON_VERSION="1.2.0-RELEASE";                                                         ##
+OPENCRON_AGENT=${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz ##
+OPENCRON_SERVER=${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war ##
+DIST_HOME="${WORKDIR}/dist"                                                               ##
+############################################################################################
+
 echo_r () {
     # Color red: Error, Failed
     [ $# -ne 1 ] && return 1
@@ -69,31 +94,6 @@ CYGWIN*) cygwin=true;;
 Darwin*) darwin=true;;
 OS400*) os400=true;;
 esac
-
-# resolve links - $0 may be a softlink
-PRG="$0"
-
-while [ -h "$PRG" ]; do
-  ls=`ls -ld "$PRG"`
-  link=`expr "$ls" : '.*-> \(.*\)$'`
-  if expr "$link" : '/.*' > /dev/null; then
-    PRG="$link"
-  else
-    PRG=`dirname "$PRG"`/"$link"
-  fi
-done
-
-PRGDIR=`dirname "$PRG"`
-
-WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
-
-# Get standard environment variables
-############################################################################################
-OPENCRON_VERSION="1.2.0-RELEASE";                                                         ##
-OPENCRON_AGENT=${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz ##
-OPENCRON_SERVER=${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war ##
-DIST_HOME="${WORKDIR}/dist"                                                               ##
-############################################################################################
 
 # Make sure prerequisite environment variables are set
 if [ -z "$JAVA_HOME" -a -z "$JRE_HOME" ]; then
