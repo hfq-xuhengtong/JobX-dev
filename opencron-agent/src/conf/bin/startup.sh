@@ -48,12 +48,12 @@ if $os400; then
   # this will not work if the user belongs in secondary groups
   eval
 else
-  if [ ! -x "$PRGDIR"/"$EXECUTABLE" ]; then
-    echo "Cannot find $PRGDIR/$EXECUTABLE"
+  if [ ! -x "$PRGDIR"/bin/"$EXECUTABLE" ]; then
+    echo "Cannot find $PRGDIR/bin/$EXECUTABLE"
     echo "The file is absent or does not have execute permission"
     echo "This file is needed to run this program"
     exit 1
   fi
 fi
 
-exec "$PRGDIR"/"$EXECUTABLE" start "$@"
+exec "$PRGDIR"/bin/"$EXECUTABLE" start "$@"

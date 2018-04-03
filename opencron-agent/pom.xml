@@ -98,7 +98,7 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>${project.build.directory}/lib</classpathPrefix>
+                            <classpathPrefix>../lib</classpathPrefix>
                             <mainClass>org.opencron.agent.AgentBootstrap</mainClass>
                         </manifest>
                     </archive>

@@ -203,10 +203,12 @@ public class AgentBootstrap implements Serializable {
             /**
              * write pid to pidfile...
              */
-            IOUtils.writeText(Constants.OPENCRON_PID_FILE, getPid(), Constants.CHARSET_UTF8);
-
-            if (logger.isInfoEnabled()) {
-                logger.info("[opencron]agent started @ port:{},pid:{}", port, getPid());
+            if (!CommonUtils.isWindowOs()) {
+                Integer pid = getPid();
+                IOUtils.writeText(Constants.OPENCRON_PID_FILE, pid, Constants.CHARSET_UTF8);
+                if (logger.isInfoEnabled()) {
+                    logger.info("[opencron]agent started @ port:{},pid:{}", port, pid);
+                }
             }
 
             String machineId = MacUtils.getMachineId();
