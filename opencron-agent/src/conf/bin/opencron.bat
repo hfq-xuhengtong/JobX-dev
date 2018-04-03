@@ -38,7 +38,6 @@ setlocal
 
 @REM -----------------------------------------------------------------------------
 set OPENCRON_VERSION=1.2.0-RELEASE
-
 @REM -----------------------------------------------------------------------------
 
 @REM Suppress Terminate batch job on CTRL+C
@@ -64,19 +63,19 @@ if exist "%OPENCRON_HOME%\bin\opencron.bat" goto okHome
 cd ..
 set "OPENCRON_HOME=%cd%"
 cd "%CURRENT_DIR%"
-:gotHome
 
+:gotHome
 if exist "%OPENCRON_HOME%\bin\opencron.bat" goto okHome
 echo The OPENCRON_HOME environment variable is not defined correctly
 echo This environment variable is needed to run this program
 goto end
-:okHome
 
+:okHome
 @REM Copy OPENCRON_BASE from OPENCRON_HOME if not defined
 if not "%OPENCRON_BASE%" == "" goto gotBase
 set "OPENCRON_BASE=%OPENCRON_HOME%"
-:gotBase
 
+:gotBase
 @REM Ensure that neither OPENCRON_HOME nor OPENCRON_BASE contains a semi-colon
 @REM as this is used as the separator in the classpath and Java provides no
 @REM mechanism for escaping if the same character appears in the path. Check this
@@ -86,14 +85,14 @@ if "%OPENCRON_HOME%" == "%OPENCRON_HOME:;=%" goto homeNoSemicolon
 echo Using OPENCRON_HOME:   "%OPENCRON_HOME%"
 echo Unable to start as OPENCRON_HOME contains a semicolon (;) character
 goto end
-:homeNoSemicolon
 
+:homeNoSemicolon
 if "%OPENCRON_BASE%" == "%OPENCRON_BASE:;=%" goto baseNoSemicolon
 echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
 echo Unable to start as OPENCRON_BASE contains a semicolon (;) character
 goto end
-:baseNoSemicolon
 
+:baseNoSemicolon
 @REM Ensure that any user defined CLASSPATH variables are not used on startup,
 @REM but allow them to be specified in setenv.bat, in rare case when it is needed.
 set CLASSPATH=
@@ -104,13 +103,14 @@ call "%OPENCRON_BASE%\bin\setenv.bat"
 goto setenvDone
 :checkSetenvHome
 if exist "%OPENCRON_HOME%\bin\setenv.bat" call "%OPENCRON_HOME%\bin\setenv.bat"
-:setenvDone
 
+:setenvDone
 @REM Get standard Java environment variables
 if exist "%OPENCRON_HOME%\bin\setclasspath.bat" goto okSetclasspath
 echo Cannot find "%OPENCRON_HOME%\bin\setclasspath.bat"
 echo This file is needed to run this program
 goto end
+
 :okSetclasspath
 call "%OPENCRON_HOME%\bin\setclasspath.bat" %1
 if errorlevel 1 goto end
@@ -118,17 +118,27 @@ if errorlevel 1 goto end
 @REM Add on extra jar file to CLASSPATH
 @REM Note that there are no quotes as we do not want to introduce random
 @REM quotes into the CLASSPATH
+
 if "%CLASSPATH%" == "" goto emptyClasspath
 set "CLASSPATH=%CLASSPATH%;"
+
 :emptyClasspath
 set "CLASSPATH=%CLASSPATH%%OPENCRON_HOME%\lib\opencron-agent-%OPENCRON_VERSION%.jar"
 
 if not "%OPENCRON_TMPDIR%" == "" goto gotTmpdir
 
+if exist "%OPENCRON_BASE%\.password" goto readPassword
+
+if exist "%OPENCRON_OUT%" goto setOut
+
 :gotTmpdir
 set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
 
-if exist "%OPENCRON_BASE%\.password" goto readPassword
+:defPassword
+set "OPENCRON_PASSWORD=opencron"
+
+:setOut
+set OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out
 
 :readPassword
 for /f "delims=" %%p in ("%OPENCRON_BASE%\.password") do (
@@ -138,25 +148,17 @@ for /f "delims=" %%p in ("%OPENCRON_BASE%\.password") do (
 )
 :out
 
-:defPassword
-set "OPENCRON_PASSWORD=opencron"
-
 set optAction="%1"
-
 shift /0
+
 set "OPENCRON_PORT=%1"
-
 shift /0
+
 if "%1" == "" set "OPENCRON_PASSWORD=%OPENCRON_PASSWORD%"
 if not "%1" == "" set "OPENCRON_PASSWORD=%1"
-
 shift /0
+
 set "OPENCRON_HOST=%1"
-
-if exist "%OPENCRON_OUT%" goto setOut
-
-:setOut
-set OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out
 
 @REM ----- Execute The Requested Command ---------------------------------------
 echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
@@ -167,7 +169,6 @@ echo Using OPENCRON_HOST:   "%OPENCRON_HOST%"
 
 set _EXECJAVA=%_RUNJAVA%
 set MAINCLASS=org.opencron.agent.AgentBootstrap
-set ACTION=start
 
 if "%optAction%" == ""start"" goto doStart
 if "%optAction%" == ""stop"" goto doStop
@@ -175,6 +176,7 @@ if "%optAction%" == ""stop"" goto doStop
 :doStart
 if "%TITLE%" == "" set TITLE=Opencron
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
+set ACTION=start
 goto execCmd
 
 :doStop
@@ -191,11 +193,7 @@ goto execCmd
     -Dopencron.password="%OPENCRON_PASSWORD%" ^
     %MAINCLASS% %ACTION%
 
-
 goto end
 
-:exit
-exit /b 1
-
 :end
-exit /b 0
+exit
