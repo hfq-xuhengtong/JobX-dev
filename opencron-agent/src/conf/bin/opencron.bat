@@ -188,7 +188,14 @@ shift
 goto setArgs
 :doneSetArgs
 
-%_EXECJAVA% -classpath "%CLASSPATH%" -Dopencron.home="%OPENCRON_HOME%" -Djava.io.tmpdir="%OPENCRON_TMPDIR%" -Dopencron.port="%OPENCRON_PORT%" -Dopencron.host="%OPENCRON_HOST%" -Dopencron.password="%OPENCRON_PASSWORD%" %MAINCLASS% %ACTION% >> %OPENCRON_OUT%
+%_EXECJAVA% ^
+    -classpath "%CLASSPATH%" ^
+    -Dopencron.home="%OPENCRON_HOME%" ^
+    -Djava.io.tmpdir="%OPENCRON_TMPDIR%" ^
+    -Dopencron.port="%OPENCRON_PORT%" ^
+    -Dopencron.host="%OPENCRON_HOST%" ^
+    -Dopencron.password="%OPENCRON_PASSWORD%" ^
+    %MAINCLASS% %ACTION%
 
 goto end
 
