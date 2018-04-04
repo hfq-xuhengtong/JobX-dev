@@ -107,9 +107,14 @@ public class UserService {
         }
     }
 
+    /**
+     * if exists return true
+     * not exists return false
+     * @param name
+     * @return
+     */
     public boolean existsName(String name) {
-        String sql = "SELECT COUNT(1) FROM T_USER WHERE userName=?";
-        return (queryDao.sqlCount(sql, name)) > 0L;
+        return queryDao.hqlCount("select count(1) from User where userName=?",name)>0;
     }
 
 

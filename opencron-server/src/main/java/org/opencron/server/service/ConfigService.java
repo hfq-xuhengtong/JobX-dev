@@ -26,7 +26,6 @@ import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.DigestUtils;
 import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.*;
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -51,7 +50,7 @@ public class ConfigService {
     private JobService jobService;
 
     public Config getSysConfig() {
-        return queryDao.hqlUniqueQuery("from Config where configid = 1");
+        return queryDao.hqlUniqueQuery("from Config where configId = 1");
     }
 
     public void update(Config config) {
@@ -84,12 +83,8 @@ public class ConfigService {
         }
 
         //init config
-        long count = queryDao.hqlLongUniqueResult("select count(1) from Config");
+        long count = queryDao.hqlCount("select count(1) from Config");
         if (count == 0) {
-
-            Session session = queryDao.getSessionFactory().openSession();
-            session.getTransaction().begin();
-
             Config config = new Config();
             config.setConfigId(1L);
             config.setSenderEmail("you_mail_name");
@@ -98,30 +93,38 @@ public class ConfigService {
             config.setPassword("your_mail_pwd");
             config.setSendUrl("http://your_url");
             config.setSpaceTime(30);
-            session.save(config);
+            queryDao.save(config);
+        }
 
+        Role admin = queryDao.hqlUniqueQuery("from Role where roleId=1");
+        if (admin == null) {
             Role role = new Role();
             role.setRoleId(1L);
             role.setRoleName("admin");
             role.setDescription("view privileges");
-            session.save(role);
+            queryDao.save(role);
+        }
 
-            Role superRole = new Role();
-            superRole.setRoleId(999L);
-            superRole.setRoleName("superAdmin");
-            superRole.setDescription("all privileges");
-            session.save(superRole);
 
-            session.getTransaction().commit();
+        Role superAdmin = queryDao.hqlUniqueQuery("from Role where roleId=999");
+        if (superAdmin == null) {
+            Role role = new Role();
+            role.setRoleId(999L);
+            role.setRoleName("superAdmin");
+            role.setDescription("view privileges");
+            queryDao.save(role);
+        }
 
-            User user = new User();
+        User user = queryDao.hqlUniqueQuery("from User where userName=?","opencron");
+        if (user == null) {
+            user = new User();
             user.setUserName("opencron");
             user.setPassword(DigestUtils.md5Hex("opencron").toUpperCase());
             user.setRoleId(999L);
             user.setRealName("opencron");
             user.setEmail("benjobs@qq.com");
             user.setQq("benjobs@qq.com");
-            user.setContact("13800138000");
+            user.setContact("18500193260");
             userService.addUser(user);
         }
 

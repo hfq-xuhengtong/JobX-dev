@@ -21,10 +21,7 @@
 
 package org.opencron.server.controller;
 
-import org.opencron.common.Constants;
-import org.opencron.common.util.DigestUtils;
 import org.opencron.common.util.IOUtils;
-import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.support.OpencronTools;
 import org.opencron.server.service.AgentService;
 import org.opencron.server.service.UserService;
@@ -42,10 +39,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -146,7 +141,7 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "get.do", method = RequestMethod.POST)
     @ResponseBody
-    public User get(HttpServletResponse response, Long id) {
+    public User get(Long id) {
         return userService.queryUserById(id);
     }
 
