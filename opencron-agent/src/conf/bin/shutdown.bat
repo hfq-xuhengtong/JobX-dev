@@ -1,5 +1,7 @@
 @echo off
+@REM
 @REM Copyright (c) 2015 The Opencron Project
+@REM
 @REM <p>
 @REM Licensed to the Apache Software Foundation (ASF) under one
 @REM or more contributor license agreements. See the NOTICE file
@@ -18,7 +20,6 @@
 @REM specific language governing permissions and limitations
 @REM under the License.
 @REM
-
 @REM ---------------------------------------------------------------------------
 @REM Stop script for the OPENCRON agent
 @REM ---------------------------------------------------------------------------
