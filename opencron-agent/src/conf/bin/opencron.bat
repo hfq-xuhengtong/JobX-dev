@@ -56,22 +56,9 @@ exit /B %RETVAL%
 del /Q "%TEMP%\%~nx0.run" >NUL 2>&1
 
 @REM Guess OPENCRON_HOME if not defined
-set "CURRENT_DIR=%cd%"
-if not "%OPENCRON_HOME%" == "" goto gotHome
-set "OPENCRON_HOME=%CURRENT_DIR%"
-if exist "%OPENCRON_HOME%\bin\opencron.bat" goto okHome
-cd ..
-set "OPENCRON_HOME=%cd%"
-cd "%CURRENT_DIR%"
-
-:gotHome
-if exist "%OPENCRON_HOME%\bin\opencron.bat" goto okHome
-echo The OPENCRON_HOME environment variable is not defined correctly
-echo This environment variable is needed to run this program
-goto end
-
-:okHome
-@REM Copy OPENCRON_BASE from OPENCRON_HOME if not defined
+set "WORK_DIR=%~dp0"
+cd "%WORK_DIR%.."
+set OPENCRON_HOME=%cd%
 if not "%OPENCRON_BASE%" == "" goto gotBase
 set "OPENCRON_BASE=%OPENCRON_HOME%"
 
@@ -148,7 +135,7 @@ for /f "delims=" %%p in ("%OPENCRON_BASE%\.password") do (
 )
 :out
 
-set optAction="%1"
+set optAction=%1
 shift /0
 
 set "OPENCRON_PORT=%1"
@@ -167,23 +154,14 @@ echo Using OPENCRON_TMPDIR: "%OPENCRON_TMPDIR%"
 echo Using OPENCRON_PORT:   "%OPENCRON_PORT%"
 echo Using OPENCRON_HOST:   "%OPENCRON_HOST%"
 
-set _EXECJAVA=%_RUNJAVA%
-set MAINCLASS=org.opencron.agent.AgentBootstrap
-
-if "%optAction%" == ""start"" goto doStart
-if "%optAction%" == ""stop"" goto doStop
-
-:doStart
 if "%TITLE%" == "" set TITLE=Opencron
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
-set ACTION=start
-goto execCmd
+set MAINCLASS=org.opencron.agent.AgentBootstrap
 
-:doStop
-set ACTION=stop
-goto execCmd
+if "%optAction%" == "start" goto doStart
+if "%optAction%" == "stop" goto doStop
 
-:execCmd
+:doStart
 %_EXECJAVA% ^
     -classpath "%CLASSPATH%" ^
     -Dopencron.home="%OPENCRON_HOME%" ^
@@ -191,9 +169,19 @@ goto execCmd
     -Dopencron.port="%OPENCRON_PORT%" ^
     -Dopencron.host="%OPENCRON_HOST%" ^
     -Dopencron.password="%OPENCRON_PASSWORD%" ^
-    %MAINCLASS% %ACTION%
-
+    %MAINCLASS% start
 goto end
 
+:doStop
+%_EXECJAVA% ^
+    -classpath "%CLASSPATH%" ^
+    -Dopencron.home="%OPENCRON_HOME%" ^
+    %MAINCLASS% stop
+goto end
+
+
+:exit
+exit /b 1
+
 :end
-exit
+exit /b 0

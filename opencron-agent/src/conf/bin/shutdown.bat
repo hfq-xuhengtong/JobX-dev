@@ -26,38 +26,22 @@
 setlocal
 
 @REM Guess OPENCRON_HOME if not defined
-set "CURRENT_DIR=%cd%"
-if not "%OPENCRON_HOME%" == "" goto gotHome
-set "OPENCRON_HOME=%CURRENT_DIR%"
-if exist "%OPENCRON_HOME%\bin\opencron.bat" goto okHome
-cd ..
-set "OPENCRON_HOME=%cd%"
-cd "%CURRENT_DIR%"
-:gotHome
-if exist "%OPENCRON_HOME%\bin\opencron.bat" goto okHome
-echo The OPENCRON_HOME environment variable is not defined correctly
-echo This environment variable is needed to run this program
-goto end
-:okHome
+set WORK_DIR=%~dp0
+cd "%WORK_DIR%.."
+set OPENCRON_HOME=%cd%
+set EXECUTABLE=%OPENCRON_HOME%\bin\opencron.bat
 
-set "EXECUTABLE=%OPENCRON_HOME%\bin\opencron.bat"
-
-@REM Check that target executable exists
 if exist "%EXECUTABLE%" goto okExec
 echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
-goto end
+goto exit
+
 :okExec
-
-@REM Get @REMaining unshifted command line arguments and save them in the
-set CMD_LINE_ARGS=
-:setArgs
-if ""%1""=="""" goto doneSetArgs
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setArgs
-:doneSetArgs
-
 call "%EXECUTABLE%" stop
+goto end
+
+:exit
+exit /b 1
 
 :end
+exit /b 0

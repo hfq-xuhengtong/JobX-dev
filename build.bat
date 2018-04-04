@@ -99,30 +99,19 @@ set _RUNJDB="%JAVA_HOME%\bin\jdb.exe"
 setlocal
 
 @REM Guess OPENCRON_HOME if not defined
-set "CURRENT_DIR=%cd%"
-if not "%OPENCRON_HOME%" == "" goto gotHome
-set "OPENCRON_HOME=%CURRENT_DIR%"
-if exist "%OPENCRON_HOME%\.mvn\mvnw.cmd" goto okHome
-cd ..
-set "OPENCRON_HOME=%cd%"
-cd "%CURRENT_DIR%"
-:gotHome
-if exist "%OPENCRON_HOME%\.mvn\mvnw.cmd" goto okHome
-echo The OPENCRON_HOME environment variable is not defined correctly
-echo This environment variable is needed to run this program
-goto end
-:okHome
+
+set "WORK_DIR=%~dp0"
+set "OPENCRON_HOME=%WORK_DIR%"
+set "OPENCRON_BASE=%OPENCRON_HOME%"
 
 @REM #################################################################################################
 set OPENCRON_VERSION=1.2.0-RELEASE
 set DIST_HOME=%OPENCRON_HOME%\dist
 set OPENCRON_AGENT=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%OPENCRON_VERSION%.tar.gz
 set OPENCRON_SERVER=%OPENCRON_HOME%\opencron-server\target\opencron-server-%OPENCRON_VERSION%.war
+set "EXECUTABLE=%OPENCRON_HOME%\.mvn\mvnw.cmd"
 @REM #################################################################################################
 
-set "EXECUTABLE=%OPENCRON_HOME%\.mvn\mvnw.cmd"
-
-@REM Check that target executable exists
 if exist "%EXECUTABLE%" goto okExec
 echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
