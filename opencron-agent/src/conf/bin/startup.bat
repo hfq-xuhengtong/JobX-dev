@@ -2,7 +2,6 @@
 @REM
 @REM Copyright (c) 2015 The Opencron Project
 @REM
-@REM <p>
 @REM Licensed to the Apache Software Foundation (ASF) under one
 @REM or more contributor license agreements. See the NOTICE file
 @REM distributed with this work for additional information
@@ -10,9 +9,9 @@
 @REM to you under the Apache License, Version 2.0 (the
 @REM "License"); you may not use this file except in compliance
 @REM with the License. You may obtain a copy of the License at
-@REM <p>
+@REM
 @REM http://www.apache.org/licenses/LICENSE-2.0
-@REM <p>
+@REM
 @REM Unless required by applicable law or agreed to in writing,
 @REM software distributed under the License is distributed on an
 @REM "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
