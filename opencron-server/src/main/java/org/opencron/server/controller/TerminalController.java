@@ -155,7 +155,7 @@ public class TerminalController extends BaseController {
      * @throws Exception
      */
     @RequestMapping("reopen.htm")
-    public String reopen(HttpSession session, Long id, String token) {
+    public String reopen(Long id, String token) {
         String reKey = id + "_" + token;
         Terminal terminal = terminalContext.remove(reKey);//reKey
         if (terminal != null) {

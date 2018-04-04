@@ -29,7 +29,6 @@ import org.opencron.server.tag.PageBean;
 import org.opencron.server.domain.Role;
 import org.opencron.server.domain.User;
 import org.opencron.server.vo.Status;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -100,7 +99,7 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
-    public String add(HttpSession session, User user) {
+    public String add(User user) {
         userService.addUser(user);
         return "redirect:/user/view.htm";
     }
@@ -124,7 +123,7 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
-    public String edit(HttpSession session, User user) throws SchedulerException {
+    public String edit(HttpSession session, User user) {
         User user1 = userService.getUserById(user.getUserId());
         if (notEmpty(user.getRoleId()) && OpencronTools.isPermission(session)) {
             user1.setRoleId(user.getRoleId());

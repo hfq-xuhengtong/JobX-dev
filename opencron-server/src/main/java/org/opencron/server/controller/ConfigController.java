@@ -62,7 +62,7 @@ public class ConfigController extends BaseController {
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
-    public String edit(HttpSession session, Config config) {
+    public String edit(Config config) {
         Config cfg = configService.getSysConfig();
         cfg.setSenderEmail(config.getSenderEmail());
         cfg.setConfigId(configService.getSysConfig().getConfigId());
