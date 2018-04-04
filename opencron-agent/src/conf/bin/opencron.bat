@@ -112,40 +112,28 @@ set "CLASSPATH=%CLASSPATH%;"
 :emptyClasspath
 set "CLASSPATH=%CLASSPATH%%OPENCRON_HOME%\lib\opencron-agent-%OPENCRON_VERSION%.jar"
 
-if not "%OPENCRON_TMPDIR%" == "" goto gotTmpdir
-
-if exist "%OPENCRON_BASE%\.password" goto readPassword
-
-if exist "%OPENCRON_OUT%" goto setOut
-
-:gotTmpdir
+@REM ----- Environment Variable ---------------------------------------
 set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
+set "OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out"
+set "OPENCRON_PORT=1577"
+if not exist "%OPENCRON_BASE%\.password" set "OPENCRON_PASSWORD=opencron"
+set Action=%1
+shift /0;
 
-:defPassword
-set "OPENCRON_PASSWORD=opencron"
-
-:setOut
-set OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out
-
-:readPassword
-for /f "delims=" %%p in ("%OPENCRON_BASE%\.password") do (
-    if "%%p" == "" goto defPassword
-    set "OPENCRON_PASSWORD=%%p"
-    goto :out
-)
-:out
-
-set optAction=%1
+:setArgs
+set "ARGS=%1"
 shift /0
-
-set "OPENCRON_PORT=%1"
-shift /0
-
-if "%1" == "" set "OPENCRON_PASSWORD=%OPENCRON_PASSWORD%"
-if not "%1" == "" set "OPENCRON_PASSWORD=%1"
-shift /0
-
-set "OPENCRON_HOST=%1"
+if ""%ARGS%""=="""" goto doneSetArgs
+if "%ARGS%"=="-P" set "OPENCRON_PORT=%1"
+if "%ARGS%"=="-p" set "OPENCRON_PASSWORD=%1"
+if "%ARGS%"=="-h" set "OPENCRON_HOST=%1"
+set "prefix=%ARGS:~0,2%"
+if "%prefix%"=="%ARGS%" goto setArgs
+if "%prefix%" == "-P" set "OPENCRON_PORT=%ARGS:-P=%"
+if "%prefix%" == "-p" set "OPENCRON_PASSWORD=%ARGS:-p=%"
+if "%prefix%" == "-h" set "OPENCRON_HOST=%ARGS:-h=%"
+goto setArgs
+:doneSetArgs
 
 @REM ----- Execute The Requested Command ---------------------------------------
 echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
@@ -158,8 +146,16 @@ if "%TITLE%" == "" set TITLE=Opencron
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
 set MAINCLASS=org.opencron.agent.AgentBootstrap
 
-if "%optAction%" == "start" goto doStart
-if "%optAction%" == "stop" goto doStop
+if "%Action%" == "start" goto doStart
+if "%Action%" == "stop" goto doStop
+if "%Action%" == "version" goto doVersion
+
+echo Usage:  opencron ( commands ... )
+echo commands:
+echo  start             Start Opencron-Agent
+echo  stop              Stop Opencron-Agent
+echo  version           print Opencron Version
+goto  end
 
 :doStart
 %_EXECJAVA% ^
@@ -179,6 +175,9 @@ goto end
     %MAINCLASS% stop
 goto end
 
+:doVersion
+echo %OPENCRON_VERSION%
+goto end
 
 :exit
 exit /b 1

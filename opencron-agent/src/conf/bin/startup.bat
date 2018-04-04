@@ -31,23 +31,24 @@ cd "%WORK_DIR%.."
 set OPENCRON_HOME=%cd%
 set EXECUTABLE=%OPENCRON_HOME%\bin\opencron.bat
 
-
 if exist "%EXECUTABLE%" goto okExec
 echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
 goto exit
 
 :okExec
-set /p port=please input port(default 1577,if use default please pass Enter)
-set /p pass=please input password(default opencron,if use default please pass Enter)
-set /p host=please input host(if use default please pass Enter)
+@REM Get remaining unshifted command line arguments and save them in the
+set CMD_LINE_ARGS=
+:setArgs
+if ""%1""=="""" goto doneSetArgs
+set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
+shift
+goto setArgs
+:doneSetArgs
 
-if "%port%" == "" set "port=1577"
-if "%pass%" == "" set "pass=opencron"
+call "%EXECUTABLE%" start %CMD_LINE_ARGS%
 
-call "%EXECUTABLE%" start %port% %pass% %host%
-
-goto end
+:end
 
 :exit
 exit /b 1

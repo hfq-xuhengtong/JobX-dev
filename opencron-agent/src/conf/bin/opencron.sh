@@ -307,12 +307,6 @@ case "$1" in
             if [ ! -f "$OPENCRON_BASE/.password" ];then
                   OPENCRON_PASSWORD="opencron";
                   echo_w "opencron password not input,will be used password:opencron"
-            else
-                #.password file already exists but empty
-               if [ x`cat "$OPENCRON_BASE/.password"` = x"" ];then
-                  OPENCRON_PASSWORD="opencron";
-                  echo_r "opencron password not input,will be used password:opencron"
-               fi
             fi
         fi
 
