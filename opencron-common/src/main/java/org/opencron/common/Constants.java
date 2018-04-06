@@ -63,6 +63,8 @@ public class Constants {
 
     public static final String PARAM_DEF_USER_KEY = "opencron";
 
+    public static final String PARAM_DEF_PASSWORD_KEY = "opencron";
+
     public static final String PARAM_PROXYHOST_KEY = "proxyHost";
 
     public static final String PARAM_PROXYPORT_KEY = "proxyPort";
