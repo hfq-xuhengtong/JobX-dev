@@ -155,29 +155,60 @@ public class AgentBootstrap implements Serializable {
      * @throws Exception
      */
     private void init() {
-        this.port = Constants.OPENCRON_PORT;
-        this.host = Constants.OPENCRON_HOST;
-        if (CommonUtils.isEmpty(this.host)) {
-            this.host = AgentProperties.getProperty(Constants.PARAM_OPENCRON_HOST_KEY);
+        /**
+         * port
+         */
+        String portStr = SystemPropertyUtils.get(Constants.PARAM_OPENCRON_PORT_KEY);
+        if (isEmpty(portStr)) {
+            portStr = AgentProperties.getProperty(Constants.PARAM_OPENCRON_PORT_KEY);
+        }
+        if (isEmpty(portStr)) {
+            throw new ExceptionInInitializerError("[opencron] agent port must be not null");
+        }
+        this.port = CommonUtils.toInt(portStr, 0);
+        if (NetUtils.isInvalidPort(this.port)) {
+            throw new ExceptionInInitializerError("[opencron] agent port error,must be between 0 and 65535");
         }
 
-        String inpass = Constants.OPENCRON_PASSWORD;
-        if (notEmpty(inpass)) {
+        //host
+        this.host = SystemPropertyUtils.get(Constants.PARAM_OPENCRON_HOST_KEY);
+        if (isEmpty(this.host)) {
+            this.host = AgentProperties.getProperty(Constants.PARAM_OPENCRON_HOST_KEY);
+        }
+        if (notEmpty(this.host) && NetUtils.isValidAddress(this.host)) {
+            throw new ExceptionInInitializerError("[opencron] agent host is valid");
+        }
+
+        //password
+        /**
+         * 1)input
+         * 2)passFile
+         * 3)confFile
+         * 先从启动脚本里读取password(-p{password}) 如果启动里未输入,则读取上次是密码.password,
+         * 如果本地密码记录.password不存在,则从conf文件中读取密码,如果conf中未设置,报错退出...
+         *
+         */
+        this.password = SystemPropertyUtils.get(Constants.PARAM_OPENCRON_PASSWORD_KEY);
+        if (notEmpty(this.password)) {
+            this.password = DigestUtils.md5Hex(this.password);
             Constants.OPENCRON_PASSWORD_FILE.delete();
-            this.password = DigestUtils.md5Hex(inpass);
             IOUtils.writeText(Constants.OPENCRON_PASSWORD_FILE, this.password, Constants.CHARSET_UTF8);
         } else {
             //.password file already exists
             if (Constants.OPENCRON_PASSWORD_FILE.exists()) {
                 //read password from .password file
                 this.password = IOUtils.readText(Constants.OPENCRON_PASSWORD_FILE, Constants.CHARSET_UTF8).trim();
+            } else {
+                //read pass from conf
+                this.password = AgentProperties.getProperty(Constants.PARAM_OPENCRON_PASSWORD_KEY);
+                if (notEmpty(this.password)) {
+                    this.password = DigestUtils.md5Hex(this.password);
+                    Constants.OPENCRON_PASSWORD_FILE.delete();
+                    IOUtils.writeText(Constants.OPENCRON_PASSWORD_FILE, this.password, Constants.CHARSET_UTF8);
+                } else {
+                    throw new ExceptionInInitializerError("[opencron] agent password cat not be null");
+                }
             }
-        }
-
-        if (isEmpty(this.password)) {
-            this.password = DigestUtils.md5Hex(AgentProperties.getProperty(Constants.PARAM_OPENCRON_PASSWORD_KEY));
-            Constants.OPENCRON_PASSWORD_FILE.delete();
-            IOUtils.writeText(Constants.OPENCRON_PASSWORD_FILE, this.password, Constants.CHARSET_UTF8);
         }
 
         SystemPropertyUtils.setProperty(Constants.PARAM_OPENCRON_PASSWORD_KEY, this.password);

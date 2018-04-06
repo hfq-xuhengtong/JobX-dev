@@ -63,8 +63,6 @@ public class Constants {
 
     public static final String PARAM_DEF_USER_KEY = "opencron";
 
-    public static final String PARAM_DEF_PASSWORD_KEY = "opencron";
-
     public static final String PARAM_PROXYHOST_KEY = "proxyHost";
 
     public static final String PARAM_PROXYPORT_KEY = "proxyPort";
@@ -107,8 +105,6 @@ public class Constants {
 
     public static final String PARAM_OPENCRON_PORT_KEY = "opencron.port";
 
-    public static final String PARAM_DEF_OPENCRON_PORT_KEY = "1577";
-
     public static final String PARAM_CACHED_AGENT_ID_KEY = "opencron_agent";
 
     public static final String PARAM_CACHED_JOB_ID_KEY = "opencron_job";
@@ -148,30 +144,16 @@ public class Constants {
     public static final String OPENCRON_CACHED = PropertyPlaceholder.get(Constants.PARAM_CACHED_NAME_KEY);
 
     public static final String OPENCRON_HOME = SystemPropertyUtils.get(PARAM_OPENCRON_HOME_KEY);
-
-    /**
-     * port
-     */
-    public static final Integer OPENCRON_PORT = Integer.valueOf(SystemPropertyUtils.get(PARAM_OPENCRON_PORT_KEY, PARAM_DEF_OPENCRON_PORT_KEY));
-    /**
-     * password
-     */
-    public static final String OPENCRON_PASSWORD = SystemPropertyUtils.get(PARAM_OPENCRON_PASSWORD_KEY, PARAM_DEF_PASSWORD_KEY);
-
-    /**
-     * agenthost
-     */
-    public static final String OPENCRON_HOST = SystemPropertyUtils.get(PARAM_OPENCRON_HOST_KEY);
-    /**
-     * pid
-     */
-    public static final File OPENCRON_PID_FILE = new File(SystemPropertyUtils.get("opencron.pid", "/var/run/opencron.pid"));
-
     /**
      * password file
      */
 
     public static final File OPENCRON_PASSWORD_FILE = new File(OPENCRON_HOME + File.separator + ".password");
+
+    /**
+     * pid
+     */
+    public static final File OPENCRON_PID_FILE = new File(SystemPropertyUtils.get("opencron.pid", OPENCRON_HOME + "/opencron.pid"));
 
     /**
      * monitor file

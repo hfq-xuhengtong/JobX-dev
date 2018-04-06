@@ -36,17 +36,8 @@ echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
 goto exit
 
-:okExec
-@REM Get remaining unshifted command line arguments and save them in the
-set CMD_LINE_ARGS=
-:setArgs
-if ""%1""=="""" goto doneSetArgs
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setArgs
-:doneSetArgs
 
-call "%EXECUTABLE%" start %CMD_LINE_ARGS%
+call "%EXECUTABLE%" start
 
 :end
 

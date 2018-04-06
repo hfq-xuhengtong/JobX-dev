@@ -299,19 +299,10 @@ case "$1" in
             esac
         done
 
-        if [ -z "$OPENCRON_PORT" ];then
-            OPENCRON_PORT=1577;
-            echo_w "opencron port not input,will be used port:1577"
-        elif [ $OPENCRON_PORT -lt 0 ] || [ $OPENCRON_PORT -gt 65535 ];then
-            echo_r "port error,muse be between 0 and 65535!"
-        fi
-
-        if [ -z "$OPENCRON_PASSWORD" ];then
-            #.password file not exists
-            if [ ! -f "$OPENCRON_BASE/.password" ];then
-                  OPENCRON_PASSWORD="opencron";
-                  echo_w "opencron password not input,will be used password:opencron"
-            fi
+        if [ ! -z "$OPENCRON_PORT" ];then
+          if [ $OPENCRON_PORT -lt 0 ] || [ $OPENCRON_PORT -gt 65535 ];then
+             echo_r "port error,muse be between 0 and 65535!"
+          fi
         fi
 
         if [ ! -z "$OPENCRON_PID" ]; then

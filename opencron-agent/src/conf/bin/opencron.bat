@@ -41,10 +41,6 @@
 
 setlocal
 
-@REM -----------------------------------------------------------------------------
-set OPENCRON_VERSION=1.2.0-RELEASE
-@REM -----------------------------------------------------------------------------
-
 @REM Suppress Terminate batch job on CTRL+C
 if not ""%1"" == ""run"" goto mainEntry
 if "%TEMP%" == "" goto mainEntry
@@ -60,12 +56,16 @@ exit /B %RETVAL%
 :mainEntry
 del /Q "%TEMP%\%~nx0.run" >NUL 2>&1
 
+@REM -----------------------------------------------------------------------------
 @REM Guess OPENCRON_HOME if not defined
+set OPENCRON_VERSION=1.2.0-RELEASE
 set "WORK_DIR=%~dp0"
 cd "%WORK_DIR%.."
 set OPENCRON_HOME=%cd%
 if not "%OPENCRON_BASE%" == "" goto gotBase
 set "OPENCRON_BASE=%OPENCRON_HOME%"
+set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
+@REM -----------------------------------------------------------------------------
 
 :gotBase
 @REM Ensure that neither OPENCRON_HOME nor OPENCRON_BASE contains a semi-colon
@@ -117,42 +117,19 @@ set "CLASSPATH=%CLASSPATH%;"
 :emptyClasspath
 set "CLASSPATH=%CLASSPATH%%OPENCRON_HOME%\lib\opencron-agent-%OPENCRON_VERSION%.jar"
 
-@REM ----- Environment Variable ---------------------------------------
-set "OPENCRON_TMPDIR=%OPENCRON_BASE%\temp"
-set "OPENCRON_OUT=%OPENCRON_BASE%\logs\opencron.out"
-set "OPENCRON_PORT=1577"
-if not exist "%OPENCRON_BASE%\.password" set "OPENCRON_PASSWORD=opencron"
-set Action=%1
-shift /0;
-
-:setArgs
-set "ARGS=%1"
-shift /0
-if ""%ARGS%""=="""" goto doneSetArgs
-if "%ARGS%"=="-P" set "OPENCRON_PORT=%1"
-if "%ARGS%"=="-p" set "OPENCRON_PASSWORD=%1"
-if "%ARGS%"=="-h" set "OPENCRON_HOST=%1"
-set "prefix=%ARGS:~0,2%"
-if "%prefix%"=="%ARGS%" goto setArgs
-if "%prefix%" == "-P" set "OPENCRON_PORT=%ARGS:-P=%"
-if "%prefix%" == "-p" set "OPENCRON_PASSWORD=%ARGS:-p=%"
-if "%prefix%" == "-h" set "OPENCRON_HOST=%ARGS:-h=%"
-goto setArgs
-:doneSetArgs
 
 @REM ----- Execute The Requested Command ---------------------------------------
 echo Using OPENCRON_BASE:   "%OPENCRON_BASE%"
 echo Using OPENCRON_HOME:   "%OPENCRON_HOME%"
 echo Using OPENCRON_TMPDIR: "%OPENCRON_TMPDIR%"
-echo Using OPENCRON_PORT:   "%OPENCRON_PORT%"
-echo Using OPENCRON_HOST:   "%OPENCRON_HOST%"
 
 if "%TITLE%" == "" set TITLE=Opencron
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
 set MAINCLASS=org.opencron.agent.AgentBootstrap
 
-if "%Action%" == "start" goto doStart
-if "%Action%" == "stop" goto doStop
+set Action=%1
+if "%Action%" == "start" goto doAction
+if "%Action%" == "stop" goto doAction
 if "%Action%" == "version" goto doVersion
 
 echo Usage:  opencron ( commands ... )
@@ -162,22 +139,15 @@ echo  stop              Stop Opencron-Agent
 echo  version           print Opencron Version
 goto  end
 
-:doStart
+@REM  -------------------------------------------------------------------------------------
+@REM window平台下所有的参数(port,password,host都从conf.properties文件中读取,启动脚本里不带任务参数)
+@REM
+:doAction
 %_EXECJAVA% ^
     -classpath "%CLASSPATH%" ^
     -Dopencron.home="%OPENCRON_HOME%" ^
     -Djava.io.tmpdir="%OPENCRON_TMPDIR%" ^
-    -Dopencron.port="%OPENCRON_PORT%" ^
-    -Dopencron.host="%OPENCRON_HOST%" ^
-    -Dopencron.password="%OPENCRON_PASSWORD%" ^
-    %MAINCLASS% start
-goto end
-
-:doStop
-%_EXECJAVA% ^
-    -classpath "%CLASSPATH%" ^
-    -Dopencron.home="%OPENCRON_HOME%" ^
-    %MAINCLASS% stop
+    %MAINCLASS% %Action%
 goto end
 
 :doVersion
