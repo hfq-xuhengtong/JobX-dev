@@ -651,6 +651,7 @@ public class ExecuteService implements Job {
     }
 
     public boolean ping(Agent agent) {
+        boolean pong = false;
         try {
             Response response = caller.sentSync(Request.request(
                     agent.getHost(),
@@ -660,11 +661,16 @@ public class ExecuteService implements Job {
                     Constants.RPC_TIMEOUT,
                     agent.getProxyAgent()
             ));
-            return response != null && response.isSuccess();
+            pong = response != null && response.isSuccess();
         } catch (Exception e) {
             logger.error("[opencron]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
-            return false;
         }
+
+        if (agent.getAgentId()!=null && !agent.getStatus().equals(pong)) {
+            agent.setStatus(pong);
+            agentService.merge(agent);
+        }
+        return pong;
     }
 
     public String guid(Agent agent) {

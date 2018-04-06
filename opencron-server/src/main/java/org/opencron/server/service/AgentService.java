@@ -193,7 +193,7 @@ public class AgentService {
         if (notEmpty(id)) {
             hql += " and agentId !=" + id;
         }
-        return queryDao.hqlIntUniqueResult(hql, false, name) > 0;
+        return queryDao.hqlCount(hql, false, name) > 0;
     }
 
     public boolean checkDelete(Long id) {
@@ -203,7 +203,7 @@ public class AgentService {
         }
         //检查该执行器是否定义的有任务
         String hql = "select count(1) from Job where deleted=? and agentId=? ";
-        return queryDao.hqlIntUniqueResult(hql, false, id) > 0;
+        return queryDao.hqlCount(hql, false, id) > 0;
     }
 
     public void delete(Long id) {
@@ -218,7 +218,7 @@ public class AgentService {
         if (notEmpty(id)) {
             hql += " and agentId != " + id;
         }
-        return queryDao.hqlIntUniqueResult(hql, false, host) > 0;
+        return queryDao.hqlCount(hql, false, host) > 0;
     }
 
 
@@ -258,15 +258,6 @@ public class AgentService {
             hql += " and agentid in (" + user.getAgentIds() + ")";
         }
         return queryDao.hqlQuery(hql, false);
-    }
-
-    public Agent getByHost(String host) {
-        String hql = "from Agent where deleted=? and host=?";
-        Agent agent = queryDao.hqlUniqueQuery(hql, false, host);
-        if (agent != null) {
-            agent.setUsers(getAgentUsers(agent));
-        }
-        return agent;
     }
 
     public Agent getAgentByMachineId(String machineId) {
