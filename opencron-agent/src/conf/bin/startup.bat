@@ -36,7 +36,7 @@ echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
 goto exit
 
-
+:okExec
 call "%EXECUTABLE%" start
 
 :end

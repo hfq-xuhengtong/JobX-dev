@@ -139,9 +139,6 @@ echo  stop              Stop Opencron-Agent
 echo  version           print Opencron Version
 goto  end
 
-@REM  -------------------------------------------------------------------------------------
-@REM window平台下所有的参数(port,password,host都从conf.properties文件中读取,启动脚本里不带任务参数)
-@REM
 :doAction
 %_EXECJAVA% ^
     -classpath "%CLASSPATH%" ^

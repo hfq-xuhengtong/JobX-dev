@@ -28,11 +28,14 @@
 
 @REM In debug mode we need a real JDK (JAVA_HOME)
 
+echo\
+echo\
 echo  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \
 echo (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \
 echo  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )
 echo       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /
 echo           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/
+echo\
 
 if ""%1"" == ""debug"" goto needJavaHome
 @REM Otherwise either JRE or JDK are fine
@@ -129,6 +132,7 @@ if not exist "%DIST_HOME%" mkdir %DIST_HOME%
 copy %OPENCRON_AGENT% %DIST_HOME%
 copy %OPENCRON_SERVER% %DIST_HOME%
 echo [opencron] build opencron @Version %OPENCRON_VERSION% successfully! please goto %DIST_HOME%
+pause
 
 :exit
 exit /b 1
