@@ -123,7 +123,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
                 }
             });
         } else {
-            logger.info("create file success:" + requestFile.getFile().getName() + "--" + requestFile.getFileMD5() + "[" + handlerContext.channel().remoteAddress() + "]");
             ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
             responseFile.setEnd(true);
             handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
