@@ -88,7 +88,22 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
 
         //first
         if (start == 0) {
-            File file = new File(requestFile.getSavePath(), requestFile.getFile().getName());
+            File savePath = new File(requestFile.getSavePath());
+            if (!savePath.exists()) {
+                ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
+                responseFile.setEnd(true);
+                response.setExitCode(Constants.StatusCode.NOTFOUND.getValue()).setSuccess(false).setUploadFile(responseFile).end();
+                handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                        if (logger.isInfoEnabled()) {
+                            logger.info("[opencron] Netty upload file {} error!savePath is not found MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                        }
+                    }
+                });
+                return;
+            }
+            File file = new File(savePath, requestFile.getFile().getName());
             if (file.exists()) {
                 String existMD5 = IOUtils.getFileMD5(file);
                 if (existMD5.equals(requestFile.getFileMD5())) {

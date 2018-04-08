@@ -26,6 +26,7 @@ import org.opencron.common.Constants;
 import org.opencron.common.exception.PingException;
 import org.opencron.common.job.Action;
 import org.opencron.common.job.Request;
+import org.opencron.common.job.RequestFile;
 import org.opencron.common.job.Response;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.HttpClientUtils;
@@ -769,6 +770,20 @@ public class ExecuteService implements Job {
                 ).setParams(ParamsMap.map().set("connType", ConnType.getByType(agent.getProxy()).getName())));
     }
 
+
+    public Response upload(Agent agent, RequestFile requestFile) {
+        Request request = Request.request(
+                agent.getHost(),
+                agent.getPort(),
+                Action.UPLOAD,
+                agent.getPassword(),
+                null,
+                agent.getProxyAgent());
+
+        request.setUploadFile(requestFile);
+        return caller.sentSync(request);
+    }
+
     /**
      * 校验任务执行权限
      */
@@ -810,6 +825,7 @@ public class ExecuteService implements Job {
     private void printLostJobInfo(JobInfo jobInfo, String message) {
 
     }
+
 
 
 }

@@ -22,6 +22,7 @@ package org.opencron.rpc.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.opencron.common.Constants;
 import org.opencron.common.job.*;
 import org.opencron.common.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -87,12 +88,21 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
             nettyClient.getRpcFuture(response.getId()).done(response);
             return;
         }
-
         ResponseFile responseFile = response.getUploadFile();
         if (responseFile.isEnd()) {
             randomAccessFile.close();
             response.setUploadFile(responseFile);
-            nettyClient.getRpcFuture(response.getId()).done(response);
+            //有后续动作...
+            if (requestFile.getPostCmd()!=null) {
+                request.setAction(Action.EXECUTE);
+                request.putParam(Constants.PARAM_COMMAND_KEY, requestFile.getPostCmd())
+                        .putParam(Constants.PARAM_PID_KEY, requestFile.getFileMD5())
+                        .putParam(Constants.PARAM_TIMEOUT_KEY, Constants.RPC_TIMEOUT+"")
+                        .putParam(Constants.PARAM_SUCCESSEXIT_KEY, "1");
+                handlerContext.writeAndFlush(request);
+            }else {
+                nettyClient.getRpcFuture(response.getId()).done(response);
+            }
         } else {
             long start = responseFile.getStart();
             if (start != -1) {

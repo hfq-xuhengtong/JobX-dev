@@ -21,8 +21,13 @@
 
 package org.opencron.server.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.opencron.common.job.Request;
+import org.opencron.common.job.RequestFile;
+import org.opencron.common.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,10 +44,8 @@ import org.opencron.server.vo.Status;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.opencron.common.util.WebUtils.*;
 
@@ -180,4 +183,37 @@ public class AgentController extends BaseController {
         String path = executeService.path(agent);
         return path == null ? "" : path + "/.password";
     }
+
+    @RequestMapping(value = "upload.do", method = RequestMethod.POST)
+    @ResponseBody
+    public Status upload(HttpSession httpSession,Long agentId,@RequestParam(value = "file", required = false) MultipartFile file,String savePath,String postcmd) throws IOException {
+        Agent agent = agentService.getAgent(agentId);
+
+        String rootPath = httpSession.getServletContext().getRealPath("/");
+        String path = rootPath.replaceFirst("/$", "") + "/upload/";
+
+        File upFile = new File(path, file.getName());
+        if (!upFile.exists()) {
+            upFile.mkdirs();
+            file.transferTo(upFile);
+        }else {
+            String existMD5 = DigestUtils.md5Hex(file.getBytes());
+            String thisMD5 = IOUtils.getFileMD5(upFile);
+            //server端已经存在该文件
+            if (!existMD5.equals(thisMD5)) {
+                upFile.delete();
+                file.transferTo(upFile);
+            }
+        }
+
+        RequestFile requestFile = new RequestFile(upFile);
+        requestFile.setSavePath(savePath);
+        requestFile.setPostCmd(postcmd);
+
+        executeService.upload(agent,requestFile);
+
+        return Status.TRUE;
+    }
+
+
 }

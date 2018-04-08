@@ -19,7 +19,7 @@
                 <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
             </c:if>
             <c:if test="${w.status eq true}">
-                <span class="label label-success">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+                <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
             </c:if>
         </td>
         <td id="warning_${w.agentId}">
@@ -36,6 +36,9 @@
                         <i aria-hidden="true" class="fa fa-plus-square-o"></i>
                     </a>&nbsp;&nbsp;
                     <c:if test="${permission eq true}">
+                        <a href="#" onclick="upload('${w.agentId}')" title="上传文件">
+                            <i aria-hidden="true" class="fa fa-upload"></i>
+                        </a>&nbsp;&nbsp;
                         <a href="#" onclick="edit('${w.agentId}')" title="编辑">
                             <i aria-hidden="true" class="fa fa-edit"></i>
                         </a>&nbsp;&nbsp;

@@ -173,6 +173,48 @@
             $("#proxy0").bind("click",toggle.proxy.hide).next().bind("click",toggle.proxy.hide);
 
         });
+        
+        function upload(agentId) {
+            /*if (!$(".pong_"+agentId).length) {
+                alert("执行器失联,请检查执行器连接");
+                return;
+            }*/
+            $("#upfileModal").modal("show");
+
+            var ok = true;
+
+            var savePath = $("#savePath").val();
+            if (!savePath) {
+                $("#savePath_lab").show();
+                ok = false;
+            }
+
+            var file = $('input[name=upfile]')[0].files[0];
+            if (!file) {
+                $("#savePath_lab").show();
+                ok = false;
+            }
+
+            if (!ok) return;
+
+            var formData = new FormData();
+            formData.append("agentId",agentId);
+            formData.append("savePath",savePath);
+            formData.append("file",file);
+            formData.append("postcmd",$("#postcmd").val());
+
+            $.ajax({
+                url: "${contextPath}/agent/upload.do",
+                type: "post",
+                data: formData,
+                processData: false,
+                contentType:false,
+                success:function (data) {
+
+                }
+            });
+
+        }
 
         function edit(id) {
             ajax({
@@ -713,7 +755,7 @@
                             <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
                         </c:if>
                         <c:if test="${w.status eq true}">
-                            <span class="label label-success">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+                            <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
                         </c:if>
                     </td>
                     <td id="warning_${w.agentId}">
@@ -730,6 +772,7 @@
                                     <i aria-hidden="true" class="fa fa-plus-square-o"></i>
                                 </a>&nbsp;&nbsp;
                                 <c:if test="${permission eq true}">
+                                    <a href="#" onclick="upload(${w.agentId})" title="上传文件"><i aria-hidden="true" class="fa fa-upload"></i></a>&nbsp;&nbsp;
                                     <a href="#" onclick="edit('${w.agentId}')" title="编辑"><i aria-hidden="true" class="fa fa-edit"></i></a>&nbsp;&nbsp;
                                     <a href="#" onclick="editPwd('${w.agentId}')" title="修改密码"><i aria-hidden="true" class="fa fa-lock"></i></a>&nbsp;&nbsp;
                                     <a href="#" onclick="remove('${w.agentId}')" title="删除"><i aria-hidden="true" class="fa fa-times"></i></a>&nbsp;&nbsp;
@@ -885,6 +928,50 @@
                         <button type="button" class="btn btn-sm" onclick="savePwd()">保存</button>
                         &nbsp;&nbsp;
                         <button type="button" class="btn btn-sm"  onclick="inputPwd()" data-dismiss="modal">关闭</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件上传 -->
+    <div class="modal fade" id="upfileModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
+                    <h4>文件上传</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form" id="upform">
+                    <div class="form-group">
+                        <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径&nbsp;</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="savePath"
+                                   placeholder="请输入目标保存路径">&nbsp;&nbsp;<label class="error_msg" id="savePath_lab">目标保存路径不能为空</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="upfile" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-file"></i>&nbsp;上传文件&nbsp;</label>
+                        <div class="col-md-9">
+                            <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile"/>
+                            <label class="error_msg" id="upfile_lab">上传文件不能为空</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="postcmd" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-th-large"></i>&nbsp;后续动作&nbsp;</label>
+                        <div class="col-md-9">
+                            <textarea class="form-control " id="postcmd" placeholder="如上传完毕解压之类的指令,非必须"></textarea>
+                        </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <center>
+                        <button type="button" class="btn btn-sm" id="sshbtn" onclick="saveFile()">保存</button>
+                        &nbsp;&nbsp;
+                        <button type="button" class="btn btn-sm" data-dismiss="modal">关闭</button>
                     </center>
                 </div>
             </div>
