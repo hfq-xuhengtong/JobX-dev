@@ -330,58 +330,6 @@ public class JobController extends BaseController {
         return Status.TRUE;
     }
 
-    @RequestMapping(value = "scan.do", method = RequestMethod.POST)
-    @ResponseBody
-    public List<CrontabInfo> scan(Long agentId) {
-
-        Agent agent = agentService.getAgent(agentId);
-
-        String crontab = executeService.scan(agent);
-
-        List<CrontabInfo> crontabs = new ArrayList<CrontabInfo>(0);
-
-        if (crontab != null) {
-
-            Scanner scanner = new Scanner(crontab);
-            int index = 0;
-            while (scanner.hasNext()) {
-                String line = scanner.nextLine();
-                if (CommonUtils.notEmpty(line)) {
-                    line = line.trim();
-                    //已注释打头...
-                    if (line.startsWith("#")) {
-                        continue;
-                    }
-
-                    String args[] = line.split("\\s+");
-                    //无效的crontab表达式
-                    if (args.length < 5) {
-                        continue;
-                    }
-                    StringBuilder cronBuilder = new StringBuilder();
-                    StringBuilder cmdBuilder = new StringBuilder();
-
-                    for (int i = 0; i < args.length; i++) {
-                        if (i <= 4) {
-                            cronBuilder.append(args[i]).append(" ");
-                        } else {
-                            cmdBuilder.append(args[i]).append(" ");
-                        }
-                    }
-
-                    String cmd = cmdBuilder.toString().trim();
-                    if (cmd.startsWith("#")) {
-                        continue;
-                    }
-                    String cron = cronBuilder.toString().trim();
-                    CrontabInfo crontabInfo = new CrontabInfo(++index, cron, cmd);
-                    crontabs.add(crontabInfo);
-                }
-            }
-        }
-        return crontabs;
-    }
-
     @RequestMapping("goexec.htm")
     public String goExec(HttpSession session, Model model) {
         model.addAttribute("agents", agentService.getOwnerAgents(session));

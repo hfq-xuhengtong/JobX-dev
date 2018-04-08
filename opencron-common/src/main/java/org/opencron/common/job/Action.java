@@ -31,9 +31,8 @@ public enum Action {
     KILL(5),
     PROXY(6),
     GUID(7),
-    CRONTAB(8),
-    RESTART(9),
-    UPLOAD(10);
+    RESTART(8),
+    UPLOAD(9);
 
     private final int value;
 

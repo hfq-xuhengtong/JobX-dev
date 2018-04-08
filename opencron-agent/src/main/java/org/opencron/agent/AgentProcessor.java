@@ -88,8 +88,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                 return proxy(request);
             case MONITOR:
                 return monitor(request);
-            case CRONTAB:
-                return scanCrontab(request);
             case RESTART:
                 restart(request);
                 break;
@@ -385,12 +383,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             return response.setMessage(guid).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue());
         }
         return response.setSuccess(false).setExitCode(Constants.StatusCode.ERROR_EXIT.getValue());
-    }
-
-    @Override
-    public Response scanCrontab(Request request) {
-        String crontab = CommandUtils.executeScript("crontab -l");
-        return Response.response(request).setMessage(crontab).end();
     }
 
     /**

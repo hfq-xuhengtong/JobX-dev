@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.opencron.common.job.Request;
 import org.opencron.common.job.RequestFile;
+import org.opencron.common.job.Response;
 import org.opencron.common.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -63,8 +64,6 @@ public class AgentController extends BaseController {
     @RequestMapping("view.htm")
     public String queryAllAgent(HttpSession session, HttpServletRequest request, Model model, PageBean pageBean) {
         agentService.getOwnerAgent(session, pageBean);
-        request.setAttribute("scanAgent", session.getAttribute("scanAgent"));
-        session.removeAttribute("scanAgent");
         model.addAttribute("connAgents", agentService.getAgentByConnType(Constants.ConnType.CONN));
         return "/agent/view";
     }
@@ -108,7 +107,7 @@ public class AgentController extends BaseController {
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
-    public String add(HttpServletRequest request, HttpSession session, Agent agent) throws Exception {
+    public String add(Agent agent) throws Exception {
         if (!agent.getWarning()) {
             agent.setMobiles(null);
             agent.setEmailAddress(null);
@@ -120,8 +119,7 @@ public class AgentController extends BaseController {
         agent.setPassword(DigestUtils.md5Hex(agent.getPassword()));
         agent.setStatus(true);
         agent.setDeleted(false);
-        agent = agentService.merge(agent);
-        session.setAttribute("scanAgent", agent);
+        agentService.merge(agent);
         return "redirect:/agent/view.htm";
     }
 
@@ -205,14 +203,11 @@ public class AgentController extends BaseController {
                 file.transferTo(upFile);
             }
         }
-
         RequestFile requestFile = new RequestFile(upFile);
         requestFile.setSavePath(savePath);
         requestFile.setPostCmd(postcmd);
-
-        executeService.upload(agent,requestFile);
-
-        return Status.TRUE;
+        Response response = executeService.upload(agent,requestFile);
+        return Status.create(response.isSuccess());
     }
 
 

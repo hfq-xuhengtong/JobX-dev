@@ -45,41 +45,6 @@
 
         $(document).ready(function () {
 
-            if( "${scanAgent}" ) {
-
-                swal({
-                    title: "",
-                    text: "要扫描执行器[${scanAgent.name}]crontab里定义的任务到系统吗？",
-                    type: "warning",
-                    showCancelButton: true,
-                    closeOnConfirm: false,
-                    confirmButtonText: "扫描"
-                }, function() {
-                    ajax({
-                        type: "post",
-                        url:"${contextPath}/job/scan.do",
-                        data:{"agentId":"${scanAgent.agentId}"}
-                    },function (data) {
-                        if (data.length == 0){
-                            alert("执行器[${scanAgent.name}]未扫描到有效的crontab任务!");
-                        }else {
-                            $("div[class^='sweet-']").remove();
-                            $(".modal-backdrop").remove();
-                            var template = $("#crontab_template").html();
-                            var line = "";
-                            $.each(data,function (i,n) {
-                                line += template.replace("#exp#",n.exp).replace("#cmd#",n.cmd);
-                            });
-
-                            var html = $("#crontabModal").attr("template");
-                            html = html.replace("#crontab#",line);
-                            $("#crontabForm").html(html);
-                            $("#crontabModal").modal("show");
-                        }
-                    })
-                });
-            }
-
             $("#size").change(function () {
                 var pageSize = $("#size").val();
                 window.location.href = "${contextPath}/agent/view.htm?pageSize=" + pageSize;
@@ -656,13 +621,6 @@
         }
     </script>
 
-     <script type="text/html" id="crontab_template">
-         <tr>
-             <td><input type="text" class="form-control" placeholder="crontab表达式" value="#exp#"></td>
-             <td><input type="text" class="form-control" placeholder="执行命令" value="#cmd#"></td>
-         </tr>
-      </script>
-
     <style type="text/css">
         .visible-md i {
             font-size: 15px;
@@ -996,29 +954,6 @@
                         <button type="button" class="btn btn-sm" id="filebtn">上传</button>
                         &nbsp;&nbsp;
                         <button type="button" class="btn btn-sm" data-dismiss="modal">关闭</button>
-                    </center>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="crontabModal" tabindex="-1" role="dialog" aria-hidden="true"
-    template="<table class='table'><thead><tr><td class='col-md-3'>表达式</td><td class='col-md-9'>命令</td></tr></thead><tbody>#crontab#</tbody></table>">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
-                    <h4>新增CRONTAB</h4>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal" role="form" id="crontabForm">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <center>
-                        <button type="button" class="btn btn-sm" onclick="saveCron()">保存</button>
-                        &nbsp;&nbsp;
-                        <button type="button" class="btn btn-sm"  onclick="inputCron()" data-dismiss="modal">关闭</button>
                     </center>
                 </div>
             </div>
