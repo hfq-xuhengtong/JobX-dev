@@ -210,7 +210,9 @@
                 processData: false,
                 contentType:false,
                 success:function (data) {
-
+                    if (data.status) {
+                        alertMsg("上传成功")
+                    }
                 }
             });
 
