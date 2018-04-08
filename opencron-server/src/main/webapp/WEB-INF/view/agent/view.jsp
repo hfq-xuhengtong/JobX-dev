@@ -183,7 +183,8 @@
             $(".file-progress").hide();
             $("#upform")[0].reset();
             $("#upfileModal").modal("show");
-            $("#upform").find(".form-group").css("")
+            opencron.tipDefault("#savePath");
+            opencron.tipDefault("#upfile");
 
             $("#filebtn").click(function () {
                 var ok = true;
@@ -970,20 +971,21 @@
                         <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径</label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="savePath" placeholder="请输入目标保存路径">
-                            <span class="tips" tip="目标保存路径不能为空"></span>
+                            <span class="tips" tip="目标文件在执行器上的保存路径">目标文件在执行器上的保存路径</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="upfile" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-file"></i>&nbsp;上传文件</label>
                         <div class="col-md-9">
                             <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile">
-                            <span class="tips" tip="上传文件不能为空"></span>
+                            <span class="tips" tip="要上传到执行器的目标文件">要上传到执行器的目标文件</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="postcmd" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-th-large"></i>&nbsp;后续动作</label>
                         <div class="col-md-9">
-                            <textarea class="form-control " id="postcmd" placeholder="如上传完毕解压之类的指令,非必须(该文件用$1代替)"></textarea>
+                            <textarea class="form-control" id="postcmd" placeholder="例: tar -xzvf $1"></textarea>
+                            <span class="tips">如上传完毕解压之类的指令,非必须(该文件用$1代替)</span>
                         </div>
                         </div>
                     </form>
