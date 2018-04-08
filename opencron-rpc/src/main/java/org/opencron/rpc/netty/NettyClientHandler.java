@@ -81,10 +81,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext handlerContext, Response response) throws Exception {
-        if (logger.isInfoEnabled()) {
-            logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
-        }
         if (!response.getAction().equals(Action.UPLOAD)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
+            }
             nettyClient.getRpcFuture(response.getId()).done(response);
             return;
         }

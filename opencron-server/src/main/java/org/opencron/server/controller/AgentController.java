@@ -192,7 +192,7 @@ public class AgentController extends BaseController {
         String rootPath = httpSession.getServletContext().getRealPath("/");
         String path = rootPath.replaceFirst("/$", "") + "/upload/";
 
-        File upFile = new File(path, file.getName());
+        File upFile = new File(path, file.getOriginalFilename());
         if (!upFile.exists()) {
             upFile.mkdirs();
             file.transferTo(upFile);

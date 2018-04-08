@@ -175,47 +175,60 @@
         });
         
         function upload(agentId) {
-            /*if (!$(".pong_"+agentId).length) {
+
+            if (!$(".pong_"+agentId).length) {
                 alert("执行器失联,请检查执行器连接");
                 return;
-            }*/
+            }
+            $("#fileTitle").text("文件上传");
+            $(".file-progress").hide();
+            $("#upform")[0].reset();
             $("#upfileModal").modal("show");
+            $("#upform").find(".form-group").css("")
 
-            var ok = true;
-
-            var savePath = $("#savePath").val();
-            if (!savePath) {
-                $("#savePath_lab").show();
-                ok = false;
-            }
-
-            var file = $('input[name=upfile]')[0].files[0];
-            if (!file) {
-                $("#savePath_lab").show();
-                ok = false;
-            }
-
-            if (!ok) return;
-
-            var formData = new FormData();
-            formData.append("agentId",agentId);
-            formData.append("savePath",savePath);
-            formData.append("file",file);
-            formData.append("postcmd",$("#postcmd").val());
-
-            $.ajax({
-                url: "${contextPath}/agent/upload.do",
-                type: "post",
-                data: formData,
-                processData: false,
-                contentType:false,
-                success:function (data) {
-                    if (data.status) {
-                        alertMsg("上传成功")
-                    }
+            $("#sshbtn").click(function () {
+                var ok = true;
+                var savePath = $("#savePath").val();
+                if (!savePath) {
+                    opencron.tipError("#savePath","目标保存路径不能为空");
+                    ok = false;
+                }else {
+                    opencron.tipOk("#savePath");
                 }
-            });
 
+                var file = $('input[id=upfile]')[0].files[0];
+                if (!file) {
+                    opencron.tipError("#upfile","上传文件不能为空");
+                    ok = false;
+                }else {
+                    opencron.tipOk("#upfile");
+                }
+
+                if (!ok) return;
+
+                var formData = new FormData();
+                formData.append("agentId",agentId);
+                formData.append("savePath",savePath);
+                formData.append("file",file);
+                formData.append("postcmd",$("#postcmd").val());
+                $("#fileTitle").text("上传中");
+                $(".file-progress").show();
+
+                $.ajax({
+                    url: "${contextPath}/agent/upload.do",
+                    type: "post",
+                    data: formData,
+                    processData: false,
+                    contentType:false,
+                    dataType:"JSON",
+                    success:function (data) {
+                        if (data.status) {
+                            $("#upfileModal").modal("hide");
+                            alertMsg("上传成功");
+                        }
+                    }
+                });
+            });
         }
 
         function edit(id) {
@@ -654,6 +667,9 @@
         .visible-md i {
             font-size: 15px;
         }
+        .error_msg {
+            color: RED;
+        }
     </style>
 
 </head>
@@ -864,7 +880,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="comment" class="col-lab control-label" title="次执行器描述信息">描述信息：</label>
+                            <label for="comment" class="col-lab control-label" title="此执行器描述信息">描述信息：</label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control " id="comment"/>&nbsp;
                             </div>
@@ -942,26 +958,31 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
-                    <h4>文件上传</h4>
+                    <h4 id="fileTitle">文件上传</h4>
                 </div>
+
+                <div class="progress progress-striped active file-progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div><div>上传中</div>
+                </div>
+
                 <div class="modal-body">
                     <form class="form-horizontal" role="form" id="upform">
                     <div class="form-group">
-                        <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径&nbsp;</label>
+                        <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="savePath"
-                                   placeholder="请输入目标保存路径">&nbsp;&nbsp;<label class="error_msg" id="savePath_lab">目标保存路径不能为空</label>
+                            <input type="text" class="form-control" id="savePath" placeholder="请输入目标保存路径">
+                            <span class="tips" tip="目标保存路径不能为空"></span>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="upfile" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-file"></i>&nbsp;上传文件&nbsp;</label>
+                        <label for="upfile" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-file"></i>&nbsp;上传文件</label>
                         <div class="col-md-9">
-                            <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile"/>
-                            <label class="error_msg" id="upfile_lab">上传文件不能为空</label>
+                            <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile">
+                            <span class="tips" tip="上传文件不能为空"></span>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="postcmd" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-th-large"></i>&nbsp;后续动作&nbsp;</label>
+                        <label for="postcmd" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-th-large"></i>&nbsp;后续动作</label>
                         <div class="col-md-9">
                             <textarea class="form-control " id="postcmd" placeholder="如上传完毕解压之类的指令,非必须"></textarea>
                         </div>
@@ -971,7 +992,7 @@
 
                 <div class="modal-footer">
                     <center>
-                        <button type="button" class="btn btn-sm" id="sshbtn" onclick="saveFile()">保存</button>
+                        <button type="button" class="btn btn-sm" id="sshbtn">保存</button>
                         &nbsp;&nbsp;
                         <button type="button" class="btn btn-sm" data-dismiss="modal">关闭</button>
                     </center>
