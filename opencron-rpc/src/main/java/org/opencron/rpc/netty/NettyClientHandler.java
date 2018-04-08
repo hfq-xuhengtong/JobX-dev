@@ -94,6 +94,13 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
             response.setUploadFile(responseFile);
             //有后续动作...
             if (requestFile.getPostCmd()!=null) {
+                //replace $1
+                String postCmd = requestFile.getPostCmd().replaceAll("[^\\s+]+\\$1|\\$1",request.getUploadFile().getFile().getName());
+                String cd = "cd "+ requestFile.getSavePath();
+                //cd savePath....
+                if (!requestFile.getPostCmd().startsWith(cd)) {
+                    requestFile.setPostCmd(cd + " && " + postCmd);
+                }
                 request.setAction(Action.EXECUTE);
                 request.putParam(Constants.PARAM_COMMAND_KEY, requestFile.getPostCmd())
                         .putParam(Constants.PARAM_PID_KEY, requestFile.getFileMD5())

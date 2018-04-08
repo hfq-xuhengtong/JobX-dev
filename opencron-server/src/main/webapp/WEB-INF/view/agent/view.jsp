@@ -175,7 +175,6 @@
         });
         
         function upload(agentId) {
-
             if (!$(".pong_"+agentId).length) {
                 alert("执行器失联,请检查执行器连接");
                 return;
@@ -186,7 +185,7 @@
             $("#upfileModal").modal("show");
             $("#upform").find(".form-group").css("")
 
-            $("#sshbtn").click(function () {
+            $("#filebtn").click(function () {
                 var ok = true;
                 var savePath = $("#savePath").val();
                 if (!savePath) {
@@ -984,7 +983,7 @@
                     <div class="form-group">
                         <label for="postcmd" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-th-large"></i>&nbsp;后续动作</label>
                         <div class="col-md-9">
-                            <textarea class="form-control " id="postcmd" placeholder="如上传完毕解压之类的指令,非必须"></textarea>
+                            <textarea class="form-control " id="postcmd" placeholder="如上传完毕解压之类的指令,非必须(该文件用$1代替)"></textarea>
                         </div>
                         </div>
                     </form>
@@ -992,7 +991,7 @@
 
                 <div class="modal-footer">
                     <center>
-                        <button type="button" class="btn btn-sm" id="sshbtn">保存</button>
+                        <button type="button" class="btn btn-sm" id="filebtn">上传</button>
                         &nbsp;&nbsp;
                         <button type="button" class="btn btn-sm" data-dismiss="modal">关闭</button>
                     </center>
