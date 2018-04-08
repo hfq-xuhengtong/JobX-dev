@@ -25,6 +25,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.opencron.common.Constants;
 import org.opencron.common.job.*;
 import org.opencron.common.logging.LoggerFactory;
+import org.opencron.common.util.CommonUtils;
 import org.slf4j.Logger;
 
 import java.io.RandomAccessFile;
@@ -93,10 +94,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
             randomAccessFile.close();
             response.setUploadFile(responseFile);
             //有后续动作...
-            if (requestFile.getPostCmd()!=null) {
+            if (CommonUtils.notEmpty(requestFile.getPostCmd())) {
                 //replace $1
-                String postCmd = requestFile.getPostCmd().replaceAll("[^\\s+]+\\$1|\\$1",request.getUploadFile().getFile().getName());
-                String cd = "cd "+ requestFile.getSavePath();
+                String postCmd = requestFile.getPostCmd().replaceAll("[^\\s+]+\\$1|\\$1", request.getUploadFile().getFile().getName());
+                String cd = "cd " + requestFile.getSavePath();
                 //cd savePath....
                 if (!requestFile.getPostCmd().startsWith(cd)) {
                     requestFile.setPostCmd(cd + " && " + postCmd);
@@ -104,10 +105,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
                 request.setAction(Action.EXECUTE);
                 request.putParam(Constants.PARAM_COMMAND_KEY, requestFile.getPostCmd())
                         .putParam(Constants.PARAM_PID_KEY, requestFile.getFileMD5())
-                        .putParam(Constants.PARAM_TIMEOUT_KEY, Constants.RPC_TIMEOUT+"")
+                        .putParam(Constants.PARAM_TIMEOUT_KEY, Constants.RPC_TIMEOUT + "")
                         .putParam(Constants.PARAM_SUCCESSEXIT_KEY, "1");
                 handlerContext.writeAndFlush(request);
-            }else {
+            } else {
                 nettyClient.getRpcFuture(response.getId()).done(response);
             }
         } else {

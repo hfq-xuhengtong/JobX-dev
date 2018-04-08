@@ -354,7 +354,7 @@ case "$1" in
         -Dopencron.port="$OPENCRON_PORT" \
         -Dopencron.host="$OPENCRON_HOST" \
         -Dopencron.password="$OPENCRON_PASSWORD" \
-        org.opencron.agent.AgentBootstrap start 2>&1 "&";
+        org.opencron.agent.AgentBootstrap start >> $OPENCRON_OUT 2>&1 "&";
 
       if [ ! -z "$OPENCRON_PID" ]; then
          echo +x $! > "$OPENCRON_PID"
@@ -405,7 +405,7 @@ case "$1" in
             -classpath "\"$CLASSPATH\"" \
             -Dopencron.home="$OPENCRON_HOME" \
             -Dopencron.pid="$OPENCRON_PID" \
-            org.opencron.agent.AgentBootstrap stop
+            org.opencron.agent.AgentBootstrap stop >> $OPENCRON_OUT 2>&1 "&";
 
           # stop failed. Shutdown port disabled? Try a normal kill.
           if [ $? != 0 ]; then

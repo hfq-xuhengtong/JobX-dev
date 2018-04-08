@@ -190,6 +190,8 @@
                         if (data.status) {
                             $("#upfileModal").modal("hide");
                             alertMsg("上传成功");
+                        }else {
+                            alert("上传或后续动作失败");
                         }
                     }
                 });
@@ -743,20 +745,20 @@
                         <c:if test="${w.proxy eq 1}">代理</c:if>
                     </td>
                     <td class="text-center">
-                            <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                                <a href="${contextPath}/job/add.htm?id=${w.agentId}" title="新任务">
-                                    <i aria-hidden="true" class="fa fa-plus-square-o"></i>
-                                </a>&nbsp;&nbsp;
-                                <c:if test="${permission eq true}">
-                                    <a href="#" onclick="upload(${w.agentId})" title="上传文件"><i aria-hidden="true" class="fa fa-upload"></i></a>&nbsp;&nbsp;
-                                    <a href="#" onclick="edit('${w.agentId}')" title="编辑"><i aria-hidden="true" class="fa fa-edit"></i></a>&nbsp;&nbsp;
-                                    <a href="#" onclick="editPwd('${w.agentId}')" title="修改密码"><i aria-hidden="true" class="fa fa-lock"></i></a>&nbsp;&nbsp;
-                                    <a href="#" onclick="remove('${w.agentId}')" title="删除"><i aria-hidden="true" class="fa fa-times"></i></a>&nbsp;&nbsp;
-                                </c:if>
-                                <a href="${contextPath}/agent/detail/${w.agentId}.htm" title="查看详情">
-                                    <i aria-hidden="true" class="fa fa-eye"></i>
-                                </a>
-                            </div>
+                        <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                            <a href="${contextPath}/job/add.htm?id=${w.agentId}" title="新任务">
+                                <i aria-hidden="true" class="fa fa-plus-square-o"></i>
+                            </a>&nbsp;&nbsp;
+                            <c:if test="${permission eq true}">
+                                <a href="#" onclick="upload(${w.agentId})" title="上传文件"><i aria-hidden="true" class="fa fa-upload"></i></a>&nbsp;&nbsp;
+                                <a href="#" onclick="edit('${w.agentId}')" title="编辑"><i aria-hidden="true" class="fa fa-edit"></i></a>&nbsp;&nbsp;
+                                <a href="#" onclick="editPwd('${w.agentId}')" title="修改密码"><i aria-hidden="true" class="fa fa-lock"></i></a>&nbsp;&nbsp;
+                                <a href="#" onclick="remove('${w.agentId}')" title="删除"><i aria-hidden="true" class="fa fa-times"></i></a>&nbsp;&nbsp;
+                            </c:if>
+                            <a href="${contextPath}/agent/detail/${w.agentId}.htm" title="查看详情">
+                                <i aria-hidden="true" class="fa fa-eye"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
             </c:forEach>

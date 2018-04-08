@@ -758,7 +758,11 @@ public class ExecuteService implements Job {
                 agent.getProxyAgent());
 
         request.setUploadFile(requestFile);
-        return caller.sentSync(request);
+        Response response = caller.sentSync(request);
+        if (!response.isSuccess()) {
+            response.setSuccess(response.getExitCode() == StatusCode.SUCCESS_EXIT.getValue());
+        }
+        return response;
     }
 
     /**
