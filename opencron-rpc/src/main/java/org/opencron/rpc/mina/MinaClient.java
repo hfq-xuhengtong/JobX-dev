@@ -37,7 +37,7 @@ public class MinaClient extends AbstractClient {
     private static Logger logger = LoggerFactory.getLogger(MinaClient.class);
 
     @Override
-    public void connect() {
+    public void connect(Request request) {
         if (connector == null) {
             connector = new NioSocketConnector();
             connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Request.class, Response.class)));
@@ -50,9 +50,8 @@ public class MinaClient extends AbstractClient {
         }
     }
 
-
     @Override
-    public Response sentSync(final Request request) throws Exception {
+    public Response invokeSync(final Request request) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request);
@@ -66,7 +65,7 @@ public class MinaClient extends AbstractClient {
     }
 
     @Override
-    public void sentOneWay(final Request request) throws Exception {
+    public void invokeOneWay(final Request request) throws Exception {
         ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request);
@@ -78,14 +77,14 @@ public class MinaClient extends AbstractClient {
     }
 
     @Override
-    public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
+    public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request, callback);
             connect.addListener(new AbstractClient.FutureListener(rpcFuture));
             connect.getSession().write(request);
         } else {
-            throw new IllegalArgumentException("[opencron] MinaRPC sentAsync channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[opencron] MinaRPC invokeAsync channel not active. request id:" + request.getId());
         }
     }
 

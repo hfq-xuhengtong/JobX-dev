@@ -27,7 +27,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Request implements Serializable {
+public class Request implements Serializable  {
 
     private RpcType rpcType = RpcType.ASYNC;
     private String host;
@@ -38,6 +38,7 @@ public class Request implements Serializable {
     private Action action;
     private String password;
     private Long proxyAgent;
+    private RequestFile uploadFile;
     private Map<String, String> params;
 
     public Request() {
@@ -161,5 +162,13 @@ public class Request implements Serializable {
     public Request setProxyAgent(Long proxyAgent) {
         this.proxyAgent = proxyAgent;
         return this;
+    }
+
+    public RequestFile getUploadFile() {
+        return uploadFile;
+    }
+
+    public void setUploadFile(RequestFile uploadFile) {
+        this.uploadFile = uploadFile;
     }
 }

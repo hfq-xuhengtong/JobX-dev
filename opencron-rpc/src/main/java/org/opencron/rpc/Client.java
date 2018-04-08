@@ -21,11 +21,12 @@
 package org.opencron.rpc;
 
 import org.opencron.common.ext.SPI;
+import org.opencron.common.job.Request;
 
 @SPI
 public interface Client extends Invoker {
 
-    void connect();
+    void connect(Request request);
 
     void disconnect() throws Throwable;
 

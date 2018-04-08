@@ -55,10 +55,11 @@ public class Response implements Serializable {
     private long startTime;
     private long endTime;
     private String message;
+    private ResponseFile uploadFile;
     private Throwable throwable;
 
     public static Response response(Request request) {
-        return new Response().setAction(request.getAction()).setId(request.getId()).start();
+        return  new Response().setAction(request.getAction()).setId(request.getId()).start();
     }
 
     public Action getAction() {
@@ -148,6 +149,15 @@ public class Response implements Serializable {
 
     public Response setId(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public ResponseFile getUploadFile() {
+        return uploadFile;
+    }
+
+    public Response setUploadFile(ResponseFile uploadFile) {
+        this.uploadFile = uploadFile;
         return this;
     }
 }

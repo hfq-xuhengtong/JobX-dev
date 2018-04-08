@@ -32,7 +32,8 @@ public enum Action {
     PROXY(6),
     GUID(7),
     CRONTAB(8),
-    RESTART(9);
+    RESTART(9),
+    UPLOAD(10);
 
     private final int value;
 

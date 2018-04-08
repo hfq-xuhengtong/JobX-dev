@@ -21,13 +21,16 @@
 package org.opencron.rpc.netty;
 
 import io.netty.channel.*;
-import org.opencron.common.job.Request;
-import org.opencron.common.job.Response;
-import org.opencron.common.job.RpcType;
+import org.opencron.common.Constants;
+import org.opencron.common.job.*;
 import org.opencron.common.logging.LoggerFactory;
+import org.opencron.common.util.IOUtils;
 import org.opencron.rpc.ServerHandler;
 import org.slf4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * @author benjobs
@@ -38,6 +41,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     private Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
 
     private ServerHandler handler;
+
+    private volatile long start = 0;
+
+    private RandomAccessFile randomAccessFile;
 
     public NettyServerHandler(ServerHandler handler) {
         this.handler = handler;
@@ -52,20 +59,83 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext handlerContext,final Request request) throws Exception {
+    protected void channelRead0(ChannelHandlerContext handlerContext, final Request request) throws Exception {
+
         if (logger.isDebugEnabled()) {
             logger.debug("[opencron]Receive request {}" + request.getId());
         }
-        Response response = handler.handle(request);
-        if (request.getRpcType() != RpcType.ONE_WAY) {
-            handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
+
+        if (!request.getAction().equals(Action.UPLOAD)) {
+            Response response = handler.handle(request);
+            if (request.getRpcType() != RpcType.ONE_WAY) {
+                handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                        if (logger.isInfoEnabled()) {
+                            logger.info("[opencron] Send response for request id:{},action:{}", request.getId(), request.getAction());
+                        }
+                    }
+                });
+            }
+            return;
+        }
+
+        Response response = Response.response(request).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setSuccess(true);
+
+        final RequestFile requestFile = request.getUploadFile();
+
+        if (requestFile.getBytes() == null||requestFile.getEndPos() == -1) return;
+
+        //first
+        if (start == 0) {
+            File file = new File(requestFile.getSavePath(), requestFile.getFile().getName());
+            if (file.exists()) {
+                String existMD5 = IOUtils.getFileMD5(file);
+                if (existMD5.equals(requestFile.getFileMD5())) {
+                    ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
+                    responseFile.setEnd(true);
+                    handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                            if (logger.isInfoEnabled()) {
+                                logger.info("[opencron] Netty upload file {} exists! MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                            }
+                        }
+                    });
+                    return;
+                }
+            }
+            randomAccessFile = new RandomAccessFile(file, "rw");
+        }
+        randomAccessFile.seek(start);
+        randomAccessFile.write(requestFile.getBytes());
+        start = start + requestFile.getEndPos();
+
+        if (requestFile.getEndPos() > 0 && start < requestFile.getFileSize()) {
+            final ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5(), (start * 100) / requestFile.getFileSize());
+            responseFile.setReadBuffer(requestFile.getReadBuffer());
+            handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[opencron] Send response for request id:{},action:{}", request.getId(), request.getAction());
+                        logger.info("[opencron] Netty upload progress:{}!for request id:{},action:{}", responseFile.getProgress(), request.getId(), request.getAction());
                     }
                 }
             });
+        } else {
+            logger.info("create file success:" + requestFile.getFile().getName() + "--" + requestFile.getFileMD5() + "[" + handlerContext.channel().remoteAddress() + "]");
+            ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
+            responseFile.setEnd(true);
+            handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("[opencron] Netty upload file done!for request id:{},action:{}", request.getId(), request.getAction());
+                    }
+                }
+            });
+            randomAccessFile.close();
+            randomAccessFile = null;
         }
     }
 
@@ -79,6 +149,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if (randomAccessFile != null) {
+            try {
+                randomAccessFile.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         cause.printStackTrace();
         ctx.close();
     }

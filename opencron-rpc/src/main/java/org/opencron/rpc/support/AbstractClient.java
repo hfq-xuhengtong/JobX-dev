@@ -30,8 +30,10 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.opencron.common.Constants;
 import org.opencron.common.job.Request;
+import org.opencron.common.job.Response;
 import org.opencron.common.util.HttpUtils;
 import org.opencron.rpc.Client;
+import org.opencron.rpc.InvokeCallback;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.mina.ConnectWrapper;
 import org.opencron.rpc.netty.ChannelWrapper;
@@ -57,8 +59,22 @@ public abstract class AbstractClient implements Client {
 
     public final ConcurrentHashMap<Long, RpcFuture> futureTable = new ConcurrentHashMap<Long, RpcFuture>(256);
 
-    public AbstractClient() {
-        this.connect();
+    @Override
+    public Response sentSync(Request request) throws Exception {
+        this.connect(request);
+        return invokeSync(request);
+    }
+
+    @Override
+    public void sentOneWay(Request request) throws Exception {
+        this.connect(request);
+        invokeOneWay(request);
+    }
+
+    @Override
+    public void sentAsync(Request request, InvokeCallback callback) throws Exception {
+        this.connect(request);
+        invokeAsync(request,callback);
     }
 
     public ConnectFuture getConnect(Request request) {
@@ -174,7 +190,13 @@ public abstract class AbstractClient implements Client {
     }
 
     @Override
-    public abstract void connect();
+    public abstract void connect(Request request);
+
+    public abstract Response invokeSync(Request request) throws Exception;
+
+    public abstract void invokeOneWay(Request request) throws Exception;
+
+    public abstract void invokeAsync(Request request, InvokeCallback callback) throws Exception;
 
     @Override
     public void disconnect() throws Throwable {

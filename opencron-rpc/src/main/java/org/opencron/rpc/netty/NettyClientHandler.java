@@ -22,10 +22,11 @@ package org.opencron.rpc.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.opencron.common.job.Response;
+import org.opencron.common.job.*;
 import org.opencron.common.logging.LoggerFactory;
-import org.opencron.rpc.RpcFuture;
 import org.slf4j.Logger;
+
+import java.io.RandomAccessFile;
 
 /**
  * @author benjobs
@@ -36,17 +37,89 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     private NettyClient nettyClient;
 
-    public NettyClientHandler(NettyClient nettyClient) {
+    private Request request;
+
+    private int byteRead;
+
+    public RandomAccessFile randomAccessFile;
+
+    private RequestFile requestFile;
+
+
+    public NettyClientHandler(NettyClient nettyClient, Request request) {
         this.nettyClient = nettyClient;
+        this.request = request;
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Response response) throws Exception {
+    public void channelActive(ChannelHandlerContext handlerContext) throws Exception {
+        if (request.getAction().equals(Action.UPLOAD)) {
+            try {
+                requestFile = request.getUploadFile();
+                randomAccessFile = new RandomAccessFile(requestFile.getFile(), "r");
+                requestFile.setFileSize(randomAccessFile.length());
+                randomAccessFile.seek(requestFile.getStarPos());
+                byte[] bytes = new byte[requestFile.getReadBuffer()];
+                if ((byteRead = randomAccessFile.read(bytes)) != -1) {
+                    requestFile.setEndPos(byteRead);
+                    requestFile.setBytes(bytes);
+                    request.setUploadFile(requestFile);
+                    handlerContext.writeAndFlush(request);
+                    requestFile.setBytes(null);
+                    requestFile.setEndPos(-1);
+                    logger.info("[opencron] NettyRPC file upload，readLength starting... request id:{}", request.getId());
+                } else {
+                    logger.info("[opencron] NettyRPC file upload，readLength done! request id:{}", request.getId());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext handlerContext, Response response) throws Exception {
         if (logger.isInfoEnabled()) {
             logger.info("[opencron] nettyRPC client receive response id:{}", response.getId());
         }
-        RpcFuture rpcFuture = nettyClient.getRpcFuture(response.getId());
-        rpcFuture.done(response);
+        if (!response.getAction().equals(Action.UPLOAD)) {
+            nettyClient.getRpcFuture(response.getId()).done(response);
+            return;
+        }
+
+        ResponseFile responseFile = response.getUploadFile();
+        if (responseFile.isEnd()) {
+            randomAccessFile.close();
+            response.setUploadFile(responseFile);
+            nettyClient.getRpcFuture(response.getId()).done(response);
+        } else {
+            long start = responseFile.getStart();
+            if (start != -1) {
+                randomAccessFile = new RandomAccessFile(requestFile.getFile(), "r");
+                randomAccessFile.seek(start);
+                int needSize = (int) (requestFile.getFileSize() - start);
+                int sendLength = responseFile.getReadBuffer();
+                if (needSize < sendLength) {
+                    sendLength = needSize;
+                }
+                byte[] bytes = new byte[sendLength];
+                if (needSize > 0 && (byteRead = randomAccessFile.read(bytes)) != -1) {
+                    try {
+                        requestFile.setEndPos(byteRead);
+                        requestFile.setBytes(bytes);
+                        request.setUploadFile(requestFile);
+                        handlerContext.writeAndFlush(request);
+                        requestFile.setBytes(null);
+                        requestFile.setEndPos(-1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    randomAccessFile.close();
+                }
+            }
+        }
     }
 
     @Override

@@ -35,6 +35,8 @@ import org.opencron.rpc.InvokeCallback;
 import org.opencron.rpc.RpcFuture;
 import org.opencron.rpc.support.AbstractClient;
 
+import java.util.concurrent.TimeoutException;
+
 /**
  * agent OpencronCaller
  *
@@ -48,7 +50,7 @@ public class NettyClient extends AbstractClient {
     private static final NioEventLoopGroup NIO_EVENT_LOOP_GROUP = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyClientWorker", true));
 
     @Override
-    public void connect() {
+    public void connect(final Request request) {
         int timeout = 3000;
         if (this.bootstrap == null) {
             this.bootstrap = new Bootstrap().group(NIO_EVENT_LOOP_GROUP)
@@ -63,7 +65,7 @@ public class NettyClient extends AbstractClient {
                             channel.pipeline().addLast(
                                     NettyCodecAdapter.getCodecAdapter().getDecoder(Response.class),
                                     NettyCodecAdapter.getCodecAdapter().getEncoder(Request.class),
-                                    new NettyClientHandler(NettyClient.this)
+                                    new NettyClientHandler(NettyClient.this,request)
                             );
                         }
                     });
@@ -71,36 +73,36 @@ public class NettyClient extends AbstractClient {
     }
 
     @Override
-    public Response sentSync(final Request request) throws Exception {
+    public Response invokeSync(final Request request) throws TimeoutException {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
             final RpcFuture rpcFuture = new RpcFuture(request);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
             return rpcFuture.get();
         } else {
-            throw new IllegalArgumentException("[opencron] NettyRPC sentSync channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[opencron] NettyRPC invokeSync channel not active. request id:" + request.getId());
         }
     }
 
     @Override
-    public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
+    public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
             final RpcFuture rpcFuture = new RpcFuture(request, callback);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
         } else {
-            throw new IllegalArgumentException("[opencron] NettyRPC sentAsync channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[opencron] NettyRPC invokeAsync channel not active. request id:" + request.getId());
         }
     }
 
     @Override
-    public void sentOneWay(final Request request) throws Exception {
+    public void invokeOneWay(final Request request) throws Exception {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
             final RpcFuture rpcFuture = new RpcFuture(request);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
         } else {
-            throw new IllegalArgumentException("[opencron] NettyRPC sentAsync sentOneway channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[opencron] NettyRPC invokeAsync invokeOneway channel not active. request id:" + request.getId());
         }
     }
 

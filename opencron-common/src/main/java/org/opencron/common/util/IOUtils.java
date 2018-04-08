@@ -22,6 +22,10 @@
 package org.opencron.common.util;
 
 import java.io.*;
+import java.math.BigInteger;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,7 +136,7 @@ public abstract class IOUtils implements Serializable {
         }
     }
 
-    public static byte[] readFileToArray(File file) throws IOException {
+    public static byte[] toByteArray(File file) throws IOException {
         InputStream input = null;
         try {
             input = openInputStream(file);
@@ -150,6 +154,7 @@ public abstract class IOUtils implements Serializable {
             }
 
             byte[] data = new byte[(int) size];
+
             int offset = 0;
             int readed;
 
@@ -393,5 +398,16 @@ public abstract class IOUtils implements Serializable {
         AssertUtils.notNull(type);
         return type.getProtectionDomain().getCodeSource().getLocation().getFile();
     }
+
+    public static long getFileSize(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        FileChannel fileChannel = fis.getChannel();
+        return fileChannel.size();
+    }
+
+    public static String getFileMD5(File file) throws IOException {
+        return DigestUtils.md5Hex(toByteArray(file));
+    }
+
 
 }
