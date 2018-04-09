@@ -63,7 +63,7 @@ public class ConfigService {
          * for version 1.1.0 update to version 1.2.0(ip rename to host)
          */
         try {
-            Query query = queryDao.createQuery("update Agent set host=ip where host!=null and ip!=null");
+            Query query = queryDao.createQuery("update Agent set host=ip where host=null and ip!=null");
             query.executeUpdate();
         } catch (Exception e) {
             //skip
