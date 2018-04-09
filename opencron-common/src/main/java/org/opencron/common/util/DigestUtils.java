@@ -26,9 +26,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.Validate;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -360,7 +357,7 @@ public abstract class DigestUtils {
      */
     public static String desEncrypt(String key, String data) throws Exception {
         byte[] bt = desEncrypt(key.getBytes(), data.getBytes());
-        String strs = new BASE64Encoder().encode(bt);
+        String strs = Base64.encodeBase64String(bt);
         return strs;
     }
 
@@ -376,8 +373,7 @@ public abstract class DigestUtils {
     public static String desDecrypt(String key, String data) throws Exception {
         if (data == null)
             return null;
-        BASE64Decoder decoder = new BASE64Decoder();
-        byte[] buf = decoder.decodeBuffer(data);
+        byte[] buf =  Base64.decodeBase64(data);
         byte[] bt = desDecrypt(key.getBytes(), buf);
         return new String(bt);
     }
@@ -421,7 +417,7 @@ public abstract class DigestUtils {
             e.printStackTrace();
         }
         if (b != null) {
-            s = new BASE64Encoder().encode(b);
+            s = Base64.encodeBase64String(b);
         }
         return s;
     }
@@ -431,9 +427,8 @@ public abstract class DigestUtils {
         byte[] b = null;
         String result = null;
         if (s != null) {
-            BASE64Decoder decoder = new BASE64Decoder();
             try {
-                b = decoder.decodeBuffer(s);
+                b = Base64.decodeBase64(s);
                 result = new String(b, "utf-8");
             } catch (Exception e) {
                 e.printStackTrace();
