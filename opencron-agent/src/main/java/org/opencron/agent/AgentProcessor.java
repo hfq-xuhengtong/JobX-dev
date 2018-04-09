@@ -77,6 +77,10 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         switch (action) {
             case PING:
                 return ping(request);
+            case PATH:
+                return path(request);
+            case LISTPATH:
+                return listPath(request);
             case EXECUTE:
                 return execute(request);
             case PASSWORD:

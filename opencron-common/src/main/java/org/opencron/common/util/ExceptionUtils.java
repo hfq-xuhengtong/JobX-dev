@@ -22,15 +22,10 @@
 package org.opencron.common.util;
 
 import org.opencron.common.util.internal.Unsafe;
-import org.opencron.common.util.internal.UnsafeReferenceFieldUpdater;
-import org.opencron.common.util.internal.UnsafeUpdater;
 
 import java.io.*;
 
 public class ExceptionUtils {
-
-    private static final UnsafeReferenceFieldUpdater<Throwable, Throwable> cause_updater =
-            UnsafeUpdater.newReferenceFieldUpdater(Throwable.class, "cause");
 
     /**
      * Raises an exception bypassing compiler checks for checked exceptions.
@@ -63,18 +58,6 @@ public class ExceptionUtils {
         throw (E) t;
     }
 
-    public static <T extends Throwable> T cutCause(T cause) {
-        Throwable rootCause = cause;
-        while (rootCause.getCause() != null) {
-            rootCause = rootCause.getCause();
-        }
-
-        if (rootCause != cause) {
-            cause.setStackTrace(rootCause.getStackTrace());
-            cause_updater.set(cause, cause);
-        }
-        return cause;
-    }
 
     public static String stackTrace(Throwable t) {
         if (t == null) {

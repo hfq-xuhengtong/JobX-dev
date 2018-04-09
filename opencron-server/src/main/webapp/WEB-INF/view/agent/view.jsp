@@ -144,6 +144,7 @@
                 alert("执行器失联,请检查执行器连接");
                 return;
             }
+            $("#fileId").val(agentId);
             $("#fileTitle").text("文件上传");
             $(".file-progress").hide();
             $("#upform")[0].reset();
@@ -196,6 +197,22 @@
                     }
                 });
             });
+        }
+        
+        
+        function listfile() {
+            var agentId = $("#fileId").val();
+            var path = $("#path").val();
+            ajax({
+                type:"post",
+                url: "${contextPath}/agent/listpath.do",
+                data: {
+                    "agentId": agentId,
+                    "path":path
+                }
+            },function (data) {
+                console.log(data.path);
+            })
         }
 
         function edit(id) {
@@ -938,14 +955,17 @@
                     <div class="form-group">
                         <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="savePath" ><i class="fa fa-folder-open file-icon"></i>
+                            <input id="fileId" type="hidden">
+                            <input id="path" type="hidden" value="/">
+                            <input type="text" class="form-control" id="savePath" onclick="listfile()"><i class="fa fa-folder-open file-icon" onclick="listfile()"></i>
                             <span class="tips" tip="目标文件在执行器上的保存路径">目标文件在执行器上的保存路径</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="upfile" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-file"></i>&nbsp;上传文件</label>
                         <div class="col-md-9">
-                            <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile">
+
+                            <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile" >
                             <span class="tips" tip="要上传到执行器的目标文件">要上传到执行器的目标文件</span>
                         </div>
                     </div>
