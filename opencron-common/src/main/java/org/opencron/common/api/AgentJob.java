@@ -9,6 +9,8 @@ public interface AgentJob {
 
     Response path(Request request);
 
+    Response listPath(Request request);
+
     Response monitor(Request request);
 
     Response execute(Request request);

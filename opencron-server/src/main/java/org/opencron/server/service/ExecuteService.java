@@ -708,6 +708,16 @@ public class ExecuteService implements Job {
         }
     }
 
+    public Response listPath(Agent agent, String path) {
+        return caller.sentSync(Request.request(
+                agent.getHost(),
+                agent.getPort(),
+                Action.LISTPATH,
+                agent.getPassword(),
+                Constants.RPC_TIMEOUT,
+                agent.getProxyAgent()).putParam(Constants.PARAM_PATH_KEY,path));
+    }
+
     /**
      * 修改密码
      */

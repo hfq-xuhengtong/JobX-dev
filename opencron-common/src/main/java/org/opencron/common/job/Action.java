@@ -25,14 +25,15 @@ package org.opencron.common.job;
 public enum Action {
     PING(0),
     PATH(1),
-    MONITOR(2),
-    EXECUTE(3),
-    PASSWORD(4),
-    KILL(5),
-    PROXY(6),
-    GUID(7),
-    RESTART(8),
-    UPLOAD(9);
+    LISTPATH(2),
+    MONITOR(3),
+    EXECUTE(4),
+    PASSWORD(5),
+    KILL(6),
+    PROXY(7),
+    GUID(8),
+    RESTART(9),
+    UPLOAD(10);
 
     private final int value;
 

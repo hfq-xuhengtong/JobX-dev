@@ -630,6 +630,14 @@
         .error_msg {
             color: RED;
         }
+
+        .file-icon {
+            position: absolute;
+            right: 15px;
+            top: 8px;
+            font-size: 19px;
+            visibility: visible;
+        }
     </style>
 
 </head>
@@ -930,7 +938,7 @@
                     <div class="form-group">
                         <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="savePath" placeholder="请输入目标保存路径">
+                            <input type="text" class="form-control" id="savePath" ><i class="fa fa-folder-open file-icon"></i>
                             <span class="tips" tip="目标文件在执行器上的保存路径">目标文件在执行器上的保存路径</span>
                         </div>
                     </div>

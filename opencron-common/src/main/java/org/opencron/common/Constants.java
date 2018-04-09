@@ -123,6 +123,8 @@ public class Constants {
 
     public static final String PARAM_TERMINAL_PREFIX_KEY = "opencron_term_";
 
+    public static final String PARAM_PATH_KEY = "path";
+
     public static final String PARAM_CSRF_NAME_KEY = "csrf";
 
     public static final String PARAM_LOGIN_MSG_KEY = "loginMsg";

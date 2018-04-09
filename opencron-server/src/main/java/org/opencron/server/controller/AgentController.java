@@ -23,7 +23,9 @@ package org.opencron.server.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opencron.common.job.Request;
 import org.opencron.common.job.RequestFile;
@@ -180,6 +182,19 @@ public class AgentController extends BaseController {
         Agent agent = agentService.getAgent(agentId);
         String path = executeService.path(agent);
         return path == null ? "" : path + "/.password";
+    }
+
+    @RequestMapping(value = "listpath.do", method = RequestMethod.POST)
+    @ResponseBody
+    public Map getPath(Long agentId,String path) {
+        Agent agent = agentService.getAgent(agentId);
+        Map<String,Object> map = new HashMap<String, Object>(0);
+        Response response = executeService.listPath(agent,path);
+        map.put("status",response.isSuccess());
+        if (response.isSuccess()) {
+            map.put("path",response.getResult());
+        }
+        return map;
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
