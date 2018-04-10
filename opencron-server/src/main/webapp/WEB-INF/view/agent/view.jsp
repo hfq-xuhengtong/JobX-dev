@@ -7,7 +7,8 @@
 <html lang="en">
 <head>
     <script type="text/javascript" src="${contextPath}/static/js/clipboard.js?resId=${resourceId}"></script> <!-- jQuery Library -->
-
+    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.core.min.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+    <link rel="stylesheet" href="${contextPath}/static/js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
     <script type="text/javascript">
 
         var toggle = {
@@ -85,6 +86,7 @@
                 });
             }, 1000 * 10);
 
+
             $("#name").focus(function () {
                 $("#checkName").html("");
             });
@@ -152,10 +154,12 @@
             opencron.tipDefault("#savePath");
             opencron.tipDefault("#upfile");
 
+            $(".treePath").hide();
             $("#filebtn").click(function () {
+                $(".treePath").hide();
                 var ok = true;
                 var savePath = $("#savePath").val();
-                if (!savePath) {
+                if (savePath.length == 0) {
                     opencron.tipError("#savePath","目标保存路径不能为空");
                     ok = false;
                 }else {
@@ -198,21 +202,60 @@
                 });
             });
         }
-        
-        
+
         function listfile() {
+            $(".treePath").show();
             var agentId = $("#fileId").val();
-            var path = $("#path").val();
-            ajax({
-                type:"post",
-                url: "${contextPath}/agent/listpath.do",
-                data: {
-                    "agentId": agentId,
-                    "path":path
+            var needInit = false;
+            if("undefined" != typeof lastAgent) {
+                if (lastAgent!=agentId) {
+                    needInit = true;
+                }else {
+                    needInit = false;
                 }
-            },function (data) {
-                console.log(data.path);
-            })
+            }else {
+                needInit = true;
+            }
+            lastAgent = agentId;
+
+            if (needInit) {
+                var settings = {
+                    async: {
+                        enable: true,
+                        url:"${contextPath}/agent/listpath.do",
+                        autoParam:["path"],
+                        otherParam: ["agentId",agentId],
+                        dataType:"json",
+                        dataFilter: function (treeId, parentNode, childNodes) {
+                            if (!childNodes||!childNodes.status) return null;
+                            childNodes = eval("("+childNodes.path+")");
+                            for (var i=0, l=childNodes.length; i<l; i++) {
+                                childNodes[i].isParent = childNodes[i].isDirectory == "0";
+                                childNodes[i].iconSkin = "icon";
+                            }
+                            return childNodes;
+                        }
+                    },
+                    callback: {
+                        onClick: function (event, treeId, treeNode) {
+                            if (treeNode.isDirectory == "0") {
+                                $("#savePath").val(treeNode.path)
+                            }
+                        }
+                    }
+                }
+                var rootNode = [
+                    {
+                        name:"/",
+                        isParent:true,
+                        isDirectory:"0",
+                        path:"/",
+                        open:true,
+                        iconSkin:"icon"
+                    }
+                ];
+                $.fn.zTree.init( $("#treePath"),settings,rootNode);
+            }
         }
 
         function edit(id) {
@@ -655,6 +698,58 @@
             font-size: 19px;
             visibility: visible;
         }
+
+        .ztree {
+            width: 96.788%;
+            height: 210px;
+            background-color: rgba(76,77,78,.96);
+            position: absolute;
+            top: 34px;
+            z-index: 99;
+            overflow-y: scroll;
+            overflow-x: auto;
+        }
+
+        .ztree li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .ztree li a:link,a:visited{
+            text-decoration:none;  /*超链接无下划线*/
+        }
+        .ztree li a:hover{
+            text-decoration:underline;  /*鼠标放上去有下划线*/
+        }
+
+        .ztree li a.curSelectedNode{
+            background-color: rgba(10,210,255,0.87);
+            color: #1E1E1E;
+            border: none;
+        }
+
+        .treePathClose {
+            cursor: pointer;
+            position: absolute;
+            top: 200px;
+            z-index: 200;
+            left: 400px;
+            font-size: 30px;
+        }
+
+        .cleanPath{
+            position: absolute;
+            cursor: pointer;
+            top: 205px;
+            z-index: 200;
+            left: 368px;
+            font-size: 25px;
+        }
+
+        .ztree li span.button.icon_ico_open { margin-top:-2px; margin-right:5px;background: url('${contextPath}/static/img/folder-open.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.icon_ico_close {margin-top:-2px; margin-right:5px;background: url('${contextPath}/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.icon_ico_docu { margin-top:-2px;margin-right:5px;background: url('${contextPath}/static/img/file.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+
     </style>
 
 </head>
@@ -900,7 +995,7 @@
                                 您已经连续三次输入无效的密码,请进入执行器下,执行下面的命令,复制密码原文到秘文输入框,或者重新输入<a href="#"  onclick="inputPwd();" style="color: dodgerblue">原密码</a>
                             </div>
                             <div style="margin-bottom: 5px;">
-                                <input class="btn btn-default" id="pwdPath" type="text" style="width: 80%;text-align: left" readonly></input>
+                                <input class="btn btn-default" id="pwdPath" type="text" style="width: 80%;text-align: left" readonly/>
                                <button class="btn btn-default" type="button" id="copy-btn" data-clipboard-action="copy" data-clipboard-target="#pwdPath" aria-label="已复制" style="width: 15%">复制</button>
                            </div>
                         </label>
@@ -956,15 +1051,17 @@
                         <label for="savePath" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-leaf"></i>&nbsp;保存路径</label>
                         <div class="col-md-9">
                             <input id="fileId" type="hidden">
-                            <input id="path" type="hidden" value="/">
-                            <input type="text" class="form-control" id="savePath" onclick="listfile()"><i class="fa fa-folder-open file-icon" onclick="listfile()"></i>
+                            <input type="text" class="form-control" id="savePath" onclick="listfile()" readonly>
                             <span class="tips" tip="目标文件在执行器上的保存路径">目标文件在执行器上的保存路径</span>
+                            <ul id="treePath" class="ztree treePath" style="display: none;"></ul>
+                            <span class="icon cleanPath treePath" onclick="javascript:$('#savePath').val('')">&#61771;</span>
+                            <i class="md md-close treePathClose treePath" onclick="javascript:$('.treePath').hide();"></i>
                         </div>
+
                     </div>
                     <div class="form-group">
                         <label for="upfile" class="col-lab control-label">&nbsp;&nbsp;<i class="glyphicon glyphicon-file"></i>&nbsp;上传文件</label>
                         <div class="col-md-9">
-
                             <input type="file" class="form-control" data-show-preview="false" id="upfile" value="请点击上传文件" name="upfile" >
                             <span class="tips" tip="要上传到执行器的目标文件">要上传到执行器的目标文件</span>
                         </div>

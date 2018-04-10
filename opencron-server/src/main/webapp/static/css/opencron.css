@@ -3,6 +3,10 @@
     visibility: hidden;
 }
 
+.hide {
+    display:none;
+}
+
 .form-horizontal > .form-group{
     padding-bottom:2px;
 }

@@ -30,6 +30,7 @@ import java.util.Map;
 import org.opencron.common.job.Request;
 import org.opencron.common.job.RequestFile;
 import org.opencron.common.job.Response;
+import org.opencron.common.util.CommonUtils;
 import org.opencron.common.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -187,12 +188,15 @@ public class AgentController extends BaseController {
     @RequestMapping(value = "listpath.do", method = RequestMethod.POST)
     @ResponseBody
     public Map getPath(Long agentId,String path) {
+        if (CommonUtils.isEmpty(path)) {
+            path = "/";
+        }
         Agent agent = agentService.getAgent(agentId);
         Map<String,Object> map = new HashMap<String, Object>(0);
         Response response = executeService.listPath(agent,path);
         map.put("status",response.isSuccess());
         if (response.isSuccess()) {
-            map.put("path",response.getResult());
+            map.put("path",response.getResult().get(Constants.PARAM_LISTPATH_PATH_KEY));
         }
         return map;
     }

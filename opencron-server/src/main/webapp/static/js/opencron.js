@@ -99,7 +99,7 @@ var opencron = {
         }
         var pel = el.parent();
         pel.find(".ok").remove();
-        pel.find(".tips").html("<font color='red'><i class='glyphicon glyphicon-remove-sign'></i>&nbsp;"+message+"</font>");
+        pel.find(".tips").css("visibility","visible").html("<font color='red'><i class='glyphicon glyphicon-remove-sign'></i>&nbsp;"+message+"</font>");
     },
     tipDefault:function (el) {
         if (typeof(el) == "string"){

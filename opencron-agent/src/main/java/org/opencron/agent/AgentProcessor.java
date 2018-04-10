@@ -118,19 +118,23 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     @Override
     public Response listPath(Request request) {
         Response response = Response.response(request).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue());
-        String path = request.getParams().get(Constants.PARAM_PATH_KEY);
+        String path = request.getParams().get(Constants.PARAM_LISTPATH_PATH_KEY);
         if (CommonUtils.isEmpty(path)) return response.setSuccess(false).end();
         File file = new File(path);
         if (!file.exists()) {
             return response.setSuccess(false).end();
         }
         Map<String,String> result = new HashMap<String, String>(0);
+        List<Map<String,String>> data = new ArrayList<Map<String,String>>(0);
         for (File itemFile:file.listFiles()) {
             if (itemFile.isHidden()) continue;
-            // directory--0
-            // file  ----1
-            result.put(itemFile.getName(),itemFile.isDirectory()?"0":"1");
+            Map<String,String> itemMap = new HashMap<String, String>(0);
+            itemMap.put(Constants.PARAM_LISTPATH_NAME_KEY,itemFile.getName());
+            itemMap.put(Constants.PARAM_LISTPATH_PATH_KEY,itemFile.getAbsolutePath());
+            itemMap.put(Constants.PARAM_LISTPATH_ISDIRECTORY_KEY,itemFile.isDirectory()?"0":"1");
+            data.add(itemMap);
         }
+        result.put(Constants.PARAM_LISTPATH_PATH_KEY,JSON.toJSONString(data));
         response.setSuccess(true).setResult(result).end();
         return response;
     }

@@ -715,7 +715,7 @@ public class ExecuteService implements Job {
                 Action.LISTPATH,
                 agent.getPassword(),
                 Constants.RPC_TIMEOUT,
-                agent.getProxyAgent()).putParam(Constants.PARAM_PATH_KEY,path));
+                agent.getProxyAgent()).putParam(Constants.PARAM_LISTPATH_PATH_KEY,path));
     }
 
     /**
