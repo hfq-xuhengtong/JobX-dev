@@ -206,56 +206,42 @@
         function listfile() {
             $(".treePath").show();
             var agentId = $("#fileId").val();
-            var needInit = false;
-            if("undefined" != typeof lastAgent) {
-                if (lastAgent!=agentId) {
-                    needInit = true;
-                }else {
-                    needInit = false;
-                }
-            }else {
-                needInit = true;
-            }
-            lastAgent = agentId;
-
-            if (needInit) {
-                var settings = {
-                    async: {
-                        enable: true,
-                        url:"${contextPath}/agent/listpath.do",
-                        autoParam:["path"],
-                        otherParam: ["agentId",agentId],
-                        dataType:"json",
-                        dataFilter: function (treeId, parentNode, childNodes) {
-                            if (!childNodes||!childNodes.status) return null;
-                            childNodes = eval("("+childNodes.path+")");
-                            for (var i=0, l=childNodes.length; i<l; i++) {
-                                childNodes[i].isParent = childNodes[i].isDirectory == "0";
-                                childNodes[i].iconSkin = "icon";
-                            }
-                            return childNodes;
+            var settings = {
+                async: {
+                    enable: true,
+                    url:"${contextPath}/agent/listpath.do",
+                    autoParam:["path"],
+                    otherParam: ["agentId",agentId],
+                    dataType:"json",
+                    dataFilter: function (treeId, parentNode, childNodes) {
+                        if (!childNodes||!childNodes.status) return null;
+                        childNodes = eval("("+childNodes.path+")");
+                        for (var i=0, l=childNodes.length; i<l; i++) {
+                            childNodes[i].isParent = childNodes[i].isDirectory == "0";
+                            childNodes[i].iconSkin = "icon";
                         }
-                    },
-                    callback: {
-                        onClick: function (event, treeId, treeNode) {
-                            if (treeNode.isDirectory == "0") {
-                                $("#savePath").val(treeNode.path)
-                            }
+                        return childNodes;
+                    }
+                },
+                callback: {
+                    onClick: function (event, treeId, treeNode) {
+                        if (treeNode.isDirectory == "0") {
+                            $("#savePath").val(treeNode.path)
                         }
                     }
                 }
-                var rootNode = [
-                    {
-                        name:"/",
-                        isParent:true,
-                        isDirectory:"0",
-                        path:"/",
-                        open:true,
-                        iconSkin:"icon"
-                    }
-                ];
-                $.fn.zTree.init( $("#treePath"),settings,rootNode);
             }
+            var rootNode = [
+                {
+                    name:"/",
+                    isParent:true,
+                    isDirectory:"0",
+                    path:"/",
+                    open:true,
+                    iconSkin:"icon"
+                }
+            ];
+            $.fn.zTree.init( $("#treePath"),settings,rootNode);
         }
 
         function edit(id) {
@@ -706,25 +692,16 @@
             position: absolute;
             top: 34px;
             z-index: 99;
-            overflow-y: scroll;
+            overflow-y: auto;
             overflow-x: auto;
         }
 
         .ztree li a {
             color: #fff;
-            text-decoration: none;
-        }
-
-        .ztree li a:link,a:visited{
-            text-decoration:none;  /*超链接无下划线*/
-        }
-        .ztree li a:hover{
-            text-decoration:underline;  /*鼠标放上去有下划线*/
         }
 
         .ztree li a.curSelectedNode{
-            background-color: rgba(10,210,255,0.87);
-            color: #1E1E1E;
+            background-color: #d4d4d4;
             border: none;
         }
 
@@ -733,22 +710,22 @@
             position: absolute;
             top: 200px;
             z-index: 200;
-            left: 400px;
+            left: 387px;
             font-size: 30px;
         }
 
-        .cleanPath{
+        .cleanPath {
             position: absolute;
             cursor: pointer;
             top: 205px;
             z-index: 200;
-            left: 368px;
+            left: 350px;
             font-size: 25px;
         }
 
-        .ztree li span.button.icon_ico_open { margin-top:-2px; margin-right:5px;background: url('${contextPath}/static/img/folder-open.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
-        .ztree li span.button.icon_ico_close {margin-top:-2px; margin-right:5px;background: url('${contextPath}/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
-        .ztree li span.button.icon_ico_docu { margin-top:-2px;margin-right:5px;background: url('${contextPath}/static/img/file.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.icon_ico_open { margin-right:5px;background: url('/static/img/folder-open.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.icon_ico_close { margin-right:5px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.icon_ico_docu { margin-right:5px;background: url('/static/img/file.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
 
     </style>
 

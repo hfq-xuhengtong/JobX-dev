@@ -86,6 +86,8 @@ public class OpencronRegistry {
 
     private Integer serverSize = 0;//server集群大小
 
+    private Integer preServerSize = 0;
+
     //在server销毁之前会将server从zookeeper中移除,这有可能会在此触发回调事件,而回调触发的时候server可能已经终止.
     private volatile boolean destroy = false;
 
@@ -199,12 +201,14 @@ public class OpencronRegistry {
 
                     lock.lock();
 
+                    preServerSize = serverSize;
+
+                    serverSize = children.size();
+
                     if (destroy) {
                         return;
                     }
-
                     servers = children;
-
                     //一致性哈希计算出每个Job落在哪个server上
                     ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
@@ -219,9 +223,6 @@ public class OpencronRegistry {
                             jobRemove(jobId);
                         }
                     }
-
-                    dispatchedInfo(children.size());
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -280,8 +281,6 @@ public class OpencronRegistry {
                             jobRemove(job);
                         }
 
-                        dispatchedInfo(serverSize);
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -323,7 +322,6 @@ public class OpencronRegistry {
      */
     private void jobDispatch(Long jobId) {
         try {
-
             this.lock.lock();
             if (Constants.OPENCRON_CLUSTER) {
                 this.jobs.put(jobId, jobId);
@@ -342,6 +340,7 @@ public class OpencronRegistry {
                     this.schedulerService.put(jobInfo);
                     break;
             }
+            dispatchedInfo(1,jobId);
         } catch (Exception e) {
             new RuntimeException(e);
         } finally {
@@ -357,6 +356,7 @@ public class OpencronRegistry {
             }
             this.opencronCollector.remove(jobId);
             this.schedulerService.remove(jobId);
+            dispatchedInfo(0,jobId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -364,26 +364,33 @@ public class OpencronRegistry {
         }
     }
 
-    private void dispatchedInfo(Integer serverSize) {
-        String headerformat = line(1) + tab(1);
-        String bodyformat = line(1) + tab(3);
-        String endformat = line(2);
+    /**
+     * action 1:addJob
+     *        0:removeJob
+     * @param action
+     */
+    private void dispatchedInfo(int action,Long jobId) {
+        String headerFormat = line(1) + tab(1);
+        String bodyFormat = line(1) + tab(3);
+        String endFormat = line(2);
 
-        String infoformat = headerformat + "███████████████ [opencron] serverChanged,print dispatched info ███████████████" +
-                bodyformat + "datetime: \"{}\"" +
-                bodyformat + "previous serverSize:{}" +
-                bodyformat + "current serverSize:{}" +
-                bodyformat + "jobs:[ {} ]" + endformat;
+        String infoFormat = headerFormat + "███████████████ [opencron] serverChanged,print dispatched info ███████████████" +
+                bodyFormat + "datetime: \"{}\"" +
+                bodyFormat + "previous serverSize:{}" +
+                bodyFormat + "current serverSize:{}" +
+                bodyFormat + "action:{}" +
+                bodyFormat + "jobId:{}" +
+                bodyFormat + "totalJobs:[ {} ]" + endFormat;
 
         logger.info(
-                infoformat,
+                infoFormat,
                 DateUtils.formatFullDate(new Date()),
+                this.preServerSize,
                 this.serverSize,
-                serverSize,
+                action==0?" removeJob " : "addJob",
+                jobId,
                 StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
-
-        this.serverSize = serverSize;
     }
 
 }
