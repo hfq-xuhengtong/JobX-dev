@@ -24,21 +24,27 @@ package org.opencron.registry.api;
  * @author benjobs
  */
 
-import org.opencron.registry.URL;
+import org.opencron.registry.zookeeper.ZookeeperClient;
 
 /**
  * @author benjobs
  */
 public interface Registry {
 
+    boolean isAvailable();
+
+    void recover() throws Exception;
+
+    void  destroy();
     /**
      * 注册数据
      */
-    void register(URL url, String path, boolean ephemeral);
+    void register(String path, boolean ephemeral);
 
     /**
      * 取消注册.
      */
-    void unregister(URL url, String path);
+    void unRegister(String path);
 
+    ZookeeperClient getClient();
 }

@@ -137,6 +137,12 @@ public class Constants {
 
     public static final String PARAM_SKIN_NAME_KEY = "skin";
 
+    public static final String PARAM_ANYHOST_KEY = "anyhost";
+
+    public static final String PARAM_ANYHOST_VALUE = "0.0.0.0";
+
+    public static final String PARAM_LOCALHOST_KEY = "localhost";
+
     public static final String CHARSET_UTF8 = "utf-8";
 
     public static final String CHARSET_ISO88591 = "iso-8859-1";

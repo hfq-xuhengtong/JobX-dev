@@ -391,6 +391,10 @@ public final class URL {
         return urls;
     }
 
+    public boolean isAnyHost() {
+        return Constants.PARAM_ANYHOST_VALUE.equals(host) || getParameter(Constants.PARAM_ANYHOST_KEY, false);
+    }
+
     public URL getUrlParameter(String key) {
         URL u = getUrls().get(key);
         if (u != null) {

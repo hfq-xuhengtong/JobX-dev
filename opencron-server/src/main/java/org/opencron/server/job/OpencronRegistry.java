@@ -23,12 +23,15 @@ package org.opencron.server.job;
 
 import net.sf.ehcache.store.chm.ConcurrentHashMap;
 import org.opencron.common.Constants;
+import org.opencron.common.ext.ExtensionLoader;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.common.util.*;
 import org.opencron.registry.URL;
-import org.opencron.registry.api.RegistryService;
+import org.opencron.registry.api.Registry;
 import org.opencron.registry.zookeeper.ChildListener;
 import org.opencron.registry.zookeeper.ZookeeperClient;
+import org.opencron.registry.zookeeper.ZookeeperRegistry;
+import org.opencron.registry.zookeeper.ZookeeperTransporter;
 import org.opencron.server.domain.Agent;
 import org.opencron.server.domain.Job;
 import org.opencron.server.service.*;
@@ -74,9 +77,11 @@ public class OpencronRegistry {
 
     private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
 
-    private final RegistryService registryService = new RegistryService();
+    private ZookeeperTransporter transporter = ExtensionLoader.load(ZookeeperTransporter.class);
 
-    private final ZookeeperClient zookeeperClient = registryService.getZKClient(registryURL);;
+    private final Registry registryService = new ZookeeperRegistry(registryURL,transporter);
+
+    private final ZookeeperClient zookeeperClient = registryService.getClient();
 
     private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
@@ -92,6 +97,10 @@ public class OpencronRegistry {
     private volatile boolean destroy = false;
 
     private Lock lock = new ReentrantLock();
+
+    public OpencronRegistry(){
+
+    }
 
     public void initialize() {
         //server第一次启动检查所有的agent是否可用
@@ -134,12 +143,12 @@ public class OpencronRegistry {
         //job unregister
         if (CommonUtils.notEmpty(jobs)) {
             for (Long job : jobs.keySet()) {
-                this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + job);
+                this.registryService.unRegister(Constants.ZK_REGISTRY_JOB_PATH + "/" + job);
             }
         }
 
         //server unregister
-        this.registryService.unregister(registryURL, registryPath);
+        this.registryService.unRegister(registryPath);
     }
 
     public void registryAgent() {
@@ -232,7 +241,7 @@ public class OpencronRegistry {
         });
 
         //将server加入到注册中心
-        this.registryService.register(registryURL, registryPath, true);
+        this.registryService.register(registryPath, true);
 
         //register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -241,7 +250,7 @@ public class OpencronRegistry {
                 if (logger.isInfoEnabled()) {
                     logger.info("[opencron] run shutdown hook now...");
                 }
-                registryService.unregister(registryURL, registryPath);
+                registryService.unRegister(registryPath);
             }
         }, "OpencronShutdownHook"));
 
@@ -300,7 +309,7 @@ public class OpencronRegistry {
     //job新增的时候手动触发.....
     public void jobRegister(Long jobId) {
         if (Constants.OPENCRON_CLUSTER) {
-            this.registryService.register(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+            this.registryService.register( Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
         } else {
             this.jobDispatch(jobId);
         }
@@ -309,7 +318,7 @@ public class OpencronRegistry {
     //job删除的时候手动触发.....
     public void jobUnRegister(Long jobId) {
         if (Constants.OPENCRON_CLUSTER) {
-            this.registryService.unregister(registryURL, Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
+            this.registryService.unRegister(Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId);
         } else {
             this.jobRemove(jobId);
         }

@@ -23,13 +23,16 @@ package org.opencron.server.support;
 
 
 import org.opencron.common.Constants;
+import org.opencron.common.ext.ExtensionLoader;
 import org.opencron.common.ext.MethodMark;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.common.util.*;
 import org.opencron.registry.URL;
-import org.opencron.registry.api.RegistryService;
+import org.opencron.registry.api.Registry;
 import org.opencron.registry.zookeeper.ChildListener;
 import org.opencron.registry.zookeeper.ZookeeperClient;
+import org.opencron.registry.zookeeper.ZookeeperRegistry;
+import org.opencron.registry.zookeeper.ZookeeperTransporter;
 import org.opencron.server.job.OpencronRegistry;
 import org.opencron.server.service.TerminalService;
 import org.opencron.server.vo.Status;
@@ -65,7 +68,7 @@ public class TerminalClusterProcessor {
 
     private static String registryPath;
 
-    private static RegistryService registryService;
+    private static Registry registry;
 
     private static ZookeeperClient zookeeperClient;
 
@@ -87,8 +90,9 @@ public class TerminalClusterProcessor {
             logger.info("[opencron] Terminal init zookeeper....");
             registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
             registryPath = Constants.ZK_REGISTRY_TERM_PATH;
-            registryService = new RegistryService();
-            zookeeperClient = registryService.getZKClient(registryURL);
+            ZookeeperTransporter transporter = ExtensionLoader.load(ZookeeperTransporter.class);
+            registry = new ZookeeperRegistry(registryURL,transporter);
+            zookeeperClient = registry.getClient();
         }
     }
 
@@ -122,7 +126,7 @@ public class TerminalClusterProcessor {
                                         if (methodLock.get(child) != null) {
                                             //唤醒doWork里的等待...
                                             methodLock.remove(child);
-                                            registryService.unregister(registryURL, registryPath + "/" + child);
+                                            registry.unRegister(registryPath + "/" + child);
                                         }
                                     } else if (child.startsWith(ZK_TERM_INSTANCE_PREFIX)) {
                                         if (array[1].equalsIgnoreCase(OpencronTools.SERVER_ID)) {
@@ -135,7 +139,7 @@ public class TerminalClusterProcessor {
                                         if (terminalMapping.containsKey(token) && terminalMapping.containsValue(OpencronTools.SERVER_ID)) {
                                             logger.info("[opencron] Terminal method :{} in this server", methodMap.get(methodName).getName());
                                             //unregister
-                                            registryService.unregister(registryURL, registryPath + "/" + child);
+                                            registry.unRegister(registryPath + "/" + child);
                                             //invoke...
                                             Object[] param = OpencronTools.getCachedManager().get(token.concat(methodName), Object[].class);
                                             param = CommonUtils.arrayInsertIndex(param, 0, methodName);
@@ -147,7 +151,7 @@ public class TerminalClusterProcessor {
                                                     e.printStackTrace();
                                                 } finally {
                                                     String pathx = registryPath + "/" + ZK_TERM_METHOD_DONE_PREFIX + token.concat("_").concat(methodName);
-                                                    registryService.register(registryURL, pathx, true);
+                                                    registry.register(pathx, true);
                                                 }
                                             }
                                         }
@@ -171,7 +175,7 @@ public class TerminalClusterProcessor {
 
         //method_token_method
         String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(methodMD5);
-        registryService.register(registryURL, registryPath + "/" + data, true);
+        registry.register(registryPath + "/" + data, true);
 
         String lock = data.replace(ZK_TERM_METHOD_PREFIX, ZK_TERM_METHOD_DONE_PREFIX);
         this.methodLock.put(lock, lock);
@@ -243,13 +247,13 @@ public class TerminalClusterProcessor {
     //该实例绑定在该机器下 term@_server_termId
     public void registry(String termId) {
         if (Constants.OPENCRON_CLUSTER) {
-            registryService.register(registryURL, registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId, true);
+            registry.register(registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId, true);
         }
     }
 
     public void unregistry(String termId) {
         if (Constants.OPENCRON_CLUSTER) {
-            registryService.unregister(registryURL, registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId);
+            registry.unRegister(registryPath + "/" + ZK_TERM_INSTANCE_PREFIX + OpencronTools.SERVER_ID + "_" + termId);
         }
     }
 
