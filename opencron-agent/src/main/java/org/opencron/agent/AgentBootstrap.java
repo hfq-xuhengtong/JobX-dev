@@ -31,7 +31,8 @@ import org.opencron.common.ext.ExtensionLoader;
 import org.opencron.common.util.*;
 import org.opencron.common.logging.LoggerFactory;
 import org.opencron.registry.URL;
-import org.opencron.registry.api.RegistryService;
+import org.opencron.registry.zookeeper.ZookeeperRegistry;
+import org.opencron.registry.zookeeper.ZookeeperTransporter;
 import org.opencron.rpc.ServerHandler;
 import org.opencron.rpc.Server;
 import org.slf4j.Logger;
@@ -270,8 +271,10 @@ public class AgentBootstrap implements Serializable {
 
             String registryAddress = AgentProperties.getProperty(Constants.PARAM_OPENCRON_REGISTRY_KEY);
             final URL url = URL.valueOf(registryAddress);
-            final RegistryService registryService = new RegistryService();
-            registryService.register(url, this.registryPath, true);
+
+            ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
+            final ZookeeperRegistry registry = new ZookeeperRegistry(url,transporter);
+            registry.register(this.registryPath, true);
 
             if (logger.isInfoEnabled()) {
                 logger.info("[opencron] agent register to zookeeper done");
@@ -283,7 +286,7 @@ public class AgentBootstrap implements Serializable {
                     if (logger.isInfoEnabled()) {
                         logger.info("[opencron] run shutdown hook now...");
                     }
-                    registryService.unregister(url, AgentBootstrap.this.registryPath);
+                    registry.unRegister(AgentBootstrap.this.registryPath);
                 }
             }, "OpencronShutdownHook"));
         } catch (Exception e) {
