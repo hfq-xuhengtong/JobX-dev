@@ -47,7 +47,7 @@ public class ZookeeperRegistry implements Registry {
 
     private URL registryUrl;
 
-    public ZookeeperRegistry(URL url, ZookeeperTransporter  zookeeperTransporter) {
+    public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         if (url.isAnyHost()) {
             throw new IllegalStateException("[opencron] registry address == null");
         }
@@ -98,7 +98,7 @@ public class ZookeeperRegistry implements Registry {
     @Override
     public void register(String path, boolean ephemeral) {
         try {
-            zkClient.create(path,ephemeral);
+            zkClient.create(path, ephemeral);
         } catch (Throwable e) {
             throw new RpcException("[opencron] Failed to register " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
