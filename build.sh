@@ -54,12 +54,12 @@ PRGDIR=`dirname "$PRG"`
 WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
 
 # Get standard environment variables
-############################################################################################
-OPENCRON_VERSION="1.2.0-RELEASE";                                                         ##
-OPENCRON_AGENT=${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz ##
-OPENCRON_SERVER=${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war ##
-DIST_HOME="${WORKDIR}/dist"                                                               ##
-############################################################################################
+##############################################################################################
+OPENCRON_VERSION="1.2.0-RELEASE";                                                           ##
+OPENCRON_AGENT=${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz   ##
+OPENCRON_SERVER=${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war   ##
+DIST_HOME="${WORKDIR}/dist"                                                                 ##
+##############################################################################################
 
 echo_r () {
     # Color red: Error, Failed
