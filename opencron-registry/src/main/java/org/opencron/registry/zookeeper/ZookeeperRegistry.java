@@ -39,8 +39,6 @@ public class ZookeeperRegistry implements Registry {
 
     private final static Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
 
-    private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
-
     private final Set<URL> failedRegistered = new ConcurrentHashSet<URL>();
 
     private final ZookeeperClient zkClient;
@@ -51,7 +49,7 @@ public class ZookeeperRegistry implements Registry {
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter  zookeeperTransporter) {
         if (url.isAnyHost()) {
-            throw new IllegalStateException("registry address == null");
+            throw new IllegalStateException("[opencron] registry address == null");
         }
         this.registryUrl = url;
         zkClient = zookeeperTransporter.connect(url);
@@ -66,18 +64,7 @@ public class ZookeeperRegistry implements Registry {
                 }
             }
         });
-    }
-
-    static String appendDefaultPort(String address) {
-        if (address != null && address.length() > 0) {
-            int i = address.indexOf(':');
-            if (i < 0) {
-                return address + ":" + DEFAULT_ZOOKEEPER_PORT;
-            } else if (Integer.parseInt(address.substring(i + 1)) == 0) {
-                return address.substring(0, i + 1) + DEFAULT_ZOOKEEPER_PORT;
-            }
-        }
-        return address;
+        this.registered.add(url);
     }
 
     @Override
@@ -90,7 +77,7 @@ public class ZookeeperRegistry implements Registry {
         try {
             zkClient.close();
         } catch (Exception e) {
-            logger.warn("Failed to close zookeeper client " + getUrl() + ", cause: " + e.getMessage(), e);
+            logger.warn("[opencron] Failed to close zookeeper client " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
@@ -100,7 +87,7 @@ public class ZookeeperRegistry implements Registry {
         Set<URL> recoverRegistered = new HashSet<URL>(getRegistered());
         if (!recoverRegistered.isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("Recover register url " + recoverRegistered);
+                logger.info("[opencron] Recover register url " + recoverRegistered);
             }
             for (URL url : recoverRegistered) {
                 failedRegistered.add(url);
@@ -113,7 +100,7 @@ public class ZookeeperRegistry implements Registry {
         try {
             zkClient.create(path,ephemeral);
         } catch (Throwable e) {
-            throw new RpcException("Failed to register " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+            throw new RpcException("[opencron] Failed to register " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
@@ -122,7 +109,7 @@ public class ZookeeperRegistry implements Registry {
         try {
             zkClient.delete(path);
         } catch (Throwable e) {
-            throw new RpcException("Failed to unregister " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+            throw new RpcException("[opencron] Failed to unregister " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
@@ -137,7 +124,7 @@ public class ZookeeperRegistry implements Registry {
 
     protected void setUrl(URL url) {
         if (url == null) {
-            throw new IllegalArgumentException("registry url == null");
+            throw new IllegalArgumentException("[opencron] registry url == null");
         }
         this.registryUrl = url;
     }

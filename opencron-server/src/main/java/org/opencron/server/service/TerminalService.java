@@ -123,9 +123,7 @@ public class TerminalService {
                             keyFile.delete();
                         }
                         //将数据库中的私钥写到用户的机器上
-
                         IOUtils.writeFile(keyFile, new ByteArrayInputStream(terminal.getPrivateKey()));
-
                         if (notEmpty(terminal.getPhrase())) {
                             //设置带口令的密钥
                             jSch.addIdentity(terminal.getPrivateKeyPath(), terminal.getPhrase());
@@ -138,7 +136,6 @@ public class TerminalService {
                     }
                     break;
                 case ACCOUNT:
-
                     session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
                     session.setPassword(terminal.getPassword());
                     break;
