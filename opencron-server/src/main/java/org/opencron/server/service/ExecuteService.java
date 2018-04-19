@@ -44,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -505,7 +504,16 @@ public class ExecuteService implements Job {
             exec.submit(new Runnable() {
                 @Override
                 public void run() {
-                    final JobInfo job = jobService.getJobInfoById(cord.getJobId());
+
+                    JobInfo job = jobService.getJobInfoById(cord.getJobId());
+
+                    final  Agent agent = agentService.getAgent(cord.getAgentId());
+
+                    //现场执行的job
+                    if (cord.getExecType() == ExecType.BATCH.getStatus()) {
+                        job = new JobInfo(cord.getUserId(),cord.getCommand(),agent);
+                    }
+
                     try {
                         semaphore.acquire();
                         //临时的改成停止中...
@@ -515,14 +523,15 @@ public class ExecuteService implements Job {
                         recordService.merge(cord);
                         //向远程机器发送kill指令
 
+                        final JobInfo finalJob = job;
                         caller.sentAsync(
                                 Request.request(
-                                        job.getHost(),
-                                        job.getPort(),
+                                        agent.getHost(),
+                                        agent.getPort(),
                                         Action.KILL,
-                                        job.getPassword(),
+                                        agent.getPassword(),
                                         Constants.RPC_TIMEOUT,
-                                        job.getAgent().getProxyAgent()
+                                        agent.getProxyAgent()
                                 ).putParam(
                                         Constants.PARAM_PID_KEY,
                                         cord.getPid())
@@ -532,7 +541,7 @@ public class ExecuteService implements Job {
                                         cord.setStatus(RunStatus.STOPED.getStatus());
                                         cord.setEndTime(new Date());
                                         recordService.merge(cord);
-                                        printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", job, cord.getPid());
+                                        printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", finalJob, cord.getPid());
                                     }
 
                                     @Override
@@ -540,7 +549,7 @@ public class ExecuteService implements Job {
                                         cord.setStatus(RunStatus.STOPED.getStatus());
                                         cord.setEndTime(new Date());
                                         recordService.merge(cord);
-                                        printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", job, cord.getPid());
+                                        printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", finalJob, cord.getPid());
                                     }
                                 });
                     } catch (Exception e) {
