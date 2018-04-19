@@ -157,8 +157,8 @@ public class AgentService {
         //agent unRegister
         opencronRegistry.agentUnRegister(agent);
 
-        //重新注册agent
-        if (!agent.getDeleted()) {
+        //未删除,且未失联,则重新注册agent
+        if (!agent.getDeleted()||agent.getStatus()) {
             opencronRegistry.agentRegister(agent);
         }
 
@@ -166,8 +166,8 @@ public class AgentService {
         List<JobInfo> jobs = jobService.getJobByAgentId(agent.getAgentId());
         for (JobInfo jobInfo:jobs) {
             opencronRegistry.jobUnRegister(jobInfo.getJobId());
-            //如果Agent未删除,则重新分配该agent上的job
-            if (agent.getDeleted()) {
+            ////未删除,且未失联,则重新注册agent上的job
+            if (!agent.getDeleted()||agent.getStatus()) {
                 opencronRegistry.jobRegister(jobInfo.getJobId());
             }
         }
@@ -351,9 +351,9 @@ public class AgentService {
                     agent.setEmailAddress(null);
                     agent.setProxy(Constants.ConnType.CONN.getType());
                     agent.setProxyAgent(null);
-                    agent.setStatus(true);
+                    agent.setStatus(false);
                     agent.setDeleted(false);
-                    if (executeService.ping(agent)) {
+                    if (!executeService.ping(agent)) {
                         merge(agent);
                     }
                 } else {

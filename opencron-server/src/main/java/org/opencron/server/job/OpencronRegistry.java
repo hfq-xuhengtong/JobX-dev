@@ -342,7 +342,7 @@ public class OpencronRegistry {
                 agent.getPassword(),
                 agent.getHost(),
                 agent.getPort());
-        registryService.unRegister(registryPath);
+        registryService.register(registryPath,true);
     }
 
     /**
