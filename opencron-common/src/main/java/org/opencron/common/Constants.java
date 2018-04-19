@@ -107,9 +107,9 @@ public class Constants {
 
     public static final String PARAM_OPENCRON_PORT_KEY = "opencron.port";
 
-    public static final String PARAM_CACHED_AGENT_ID_KEY = "opencron_agent";
+    public static final String PARAM_CACHED_AGENT_KEY = "opencron_agent";
 
-    public static final String PARAM_CACHED_JOB_ID_KEY = "opencron_job";
+    public static final String PARAM_CACHED_JOB_KEY = "opencron_job";
 
     public static final String PARAM_LOGIN_USER_KEY = "opencron_user";
 

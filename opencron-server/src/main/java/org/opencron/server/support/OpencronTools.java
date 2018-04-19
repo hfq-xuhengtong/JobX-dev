@@ -140,21 +140,32 @@ public final class OpencronTools {
         private static Map<String, Object> cache = new ConcurrentHashMap<String, Object>(0);
 
         public static Object get(String key) {
+            if (Constants.OPENCRON_CLUSTER) {
+                return getCachedManager().get(key,Object.class);
+            }
             return cache.get(key);
         }
 
         public static <T> T get(String key, Class<T> clazz) {
+            if (Constants.OPENCRON_CLUSTER) {
+                return getCachedManager().get(key,clazz);
+            }
             return (T) cache.get(key);
         }
 
         public static void put(String key, Object value) {
+            if (Constants.OPENCRON_CLUSTER) {
+                getCachedManager().set(key,value);
+            }
             cache.put(key, value);
         }
 
         public static Object remove(String key) {
+            if (Constants.OPENCRON_CLUSTER) {
+                getCachedManager().remove(key,Object.class);
+            }
             return cache.remove(key);
         }
-
     }
 
     public static class Auth {

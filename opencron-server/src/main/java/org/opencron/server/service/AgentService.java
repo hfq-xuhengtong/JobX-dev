@@ -28,12 +28,12 @@ import org.opencron.common.Constants;
 import org.opencron.common.util.CommonUtils;
 import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.User;
+import org.opencron.server.job.OpencronRegistry;
 import org.opencron.server.support.OpencronTools;
 import org.opencron.server.tag.PageBean;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.opencron.server.domain.Agent;
 import org.opencron.server.vo.JobInfo;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -58,29 +58,33 @@ public class AgentService {
     private JobService jobService;
 
     @Autowired
-    private SchedulerService schedulerService;
-
-    @Autowired
     private NoticeService noticeService;
 
     @Autowired
     private ConfigService configService;
+
+    @Autowired
+    private OpencronRegistry opencronRegistry;
+
+    @Autowired
+    private SchedulerService schedulerService;
+
 
     public List<Agent> getAgentByConnType(Constants.ConnType connType) {
         return queryDao.hqlQuery("from Agent where deleted=? and status=? and proxy=?", false, true, connType.getType());
     }
 
     public List<Agent> getAll() {
-        List<Agent> agents = OpencronTools.CACHE.get(Constants.PARAM_CACHED_AGENT_ID_KEY, List.class);
+        List<Agent> agents = OpencronTools.CACHE.get(Constants.PARAM_CACHED_AGENT_KEY, List.class);
         if (CommonUtils.isEmpty(agents)) {
-            flushAgent();
+            flushLocalAgent();
         }
-        return OpencronTools.CACHE.get(Constants.PARAM_CACHED_AGENT_ID_KEY, List.class);
+        return OpencronTools.CACHE.get(Constants.PARAM_CACHED_AGENT_KEY, List.class);
     }
 
-    private synchronized void flushAgent() {
+    private synchronized void flushLocalAgent() {
         OpencronTools.CACHE.put(
-                Constants.PARAM_CACHED_AGENT_ID_KEY,
+                Constants.PARAM_CACHED_AGENT_KEY,
                 queryDao.hqlQuery("from Agent where deleted=?", false)
         );
     }
@@ -139,50 +143,39 @@ public class AgentService {
 
 
     public Agent merge(Agent agent) {
-        /**
-         * 修改过agent
-         */
-        boolean update = false;
         if (agent.getAgentId() != null) {
             //从数据库获取最新的agent,防止已经被删除的agent当在监测时重新给改为非删除...
             Agent dbAgent = getAgent(agent.getAgentId());
-
             //已经删除的过滤掉..
             if (dbAgent.getDeleted()) {
                 return agent;
             }
-            update = true;
         }
 
-        /**
-         * fix bug.....
-         * 修改了agent要刷新所有在任务队列里对应的作业,
-         * 否则一段端口改变了,任务队列里的还是更改前的连接端口,
-         * 当作业执行的时候就会连接失败...
-         *
-         */
-        if (update) {
-            agent = (Agent) queryDao.merge(agent);
-            /**
-             * 获取该执行器下所有的自动执行,并且是quartz类型的作业
-             */
-            List<JobInfo> jobInfos = jobService.getJobInfoByAgentId(agent.getAgentId(), Constants.CronType.QUARTZ);
-            try {
-                schedulerService.put(jobInfos);
-            } catch (SchedulerException e) {
-                /**
-                 * 创新任务列表失败,抛出异常,整个事务回滚...
-                 */
-                throw new RuntimeException(e.getCause());
+        agent = (Agent) queryDao.merge(agent);
+
+        //agent unRegister
+        opencronRegistry.agentUnRegister(agent);
+
+        //重新注册agent
+        if (!agent.getDeleted()) {
+            opencronRegistry.agentRegister(agent);
+        }
+
+        //job unRegister
+        List<JobInfo> jobs = jobService.getJobByAgentId(agent.getAgentId());
+        for (JobInfo jobInfo:jobs) {
+            opencronRegistry.jobUnRegister(jobInfo.getJobId());
+            //如果Agent未删除,则重新分配该agent上的job
+            if (agent.getDeleted()) {
+                opencronRegistry.jobRegister(jobInfo.getJobId());
             }
-        } else {
-            agent = (Agent) queryDao.merge(agent);
         }
 
         /**
          * 同步缓存...
          */
-        flushAgent();
+        flushLocalAgent();
 
         return agent;
 
@@ -210,7 +203,8 @@ public class AgentService {
         Agent agent = getAgent(id);
         agent.setDeleted(true);
         queryDao.save(agent);
-        flushAgent();
+        opencronRegistry.agentUnRegister(agent);
+        flushLocalAgent();
     }
 
     public boolean existshost(Long id, String host) {
@@ -238,7 +232,7 @@ public class AgentService {
                 if (flag) {
                     agent.setPassword(pwd1);
                     this.merge(agent);
-                    flushAgent();
+                    flushLocalAgent();
                     return "true";
                 } else {
                     return "false";

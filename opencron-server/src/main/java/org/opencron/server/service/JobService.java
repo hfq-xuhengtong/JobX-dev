@@ -31,16 +31,13 @@ import org.opencron.common.util.collection.ParamsMap;
 import org.opencron.server.dao.QueryDao;
 import org.opencron.server.domain.Job;
 import org.opencron.server.domain.User;
-import org.opencron.server.job.OpencronCollector;
+import org.opencron.server.job.OpencronRegistry;
 import org.opencron.server.support.OpencronTools;
 import org.opencron.server.tag.PageBean;
 
 
 import org.opencron.common.util.CommonUtils;
 import org.opencron.server.vo.JobInfo;
-import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,43 +63,10 @@ public class JobService {
     private SchedulerService schedulerService;
 
     @Autowired
-    private OpencronCollector opencronCollector;
-
-    private Logger logger = LoggerFactory.getLogger(JobService.class);
+    private OpencronRegistry opencronRegistry;
 
     public Job getJob(Long jobId) {
         return queryDao.get(Job.class, jobId);
-    }
-
-    /**
-     * 获取将要执行的任务
-     *
-     * @return
-     */
-    public List<JobInfo> getJobInfo(CronType cronType) {
-        String sql = "SELECT T.*,D.name AS agentName,D.port,D.host,D.password FROM T_JOB AS T " +
-                "LEFT JOIN T_AGENT AS D " +
-                "ON T.agentId = D.agentId " +
-                "WHERE IFNULL(T.flowNum,0)=0 " +
-                "AND cronType=? " +
-                "AND T.deleted=0 AND T.pause=0 ";
-        List<JobInfo> jobs = queryDao.sqlQuery(JobInfo.class, sql, cronType.getType());
-        queryJobMore(jobs);
-        return jobs;
-    }
-
-    public List<JobInfo> getJobInfoByAgentId(Long agentId, CronType cronType) {
-        String sql = "SELECT T.*,D.name AS agentName,D.port,D.host,D.password FROM T_JOB AS T " +
-                "INNER JOIN T_AGENT D " +
-                "ON T.agentId = D.agentId " +
-                "WHERE IFNULL(T.flowNum,0)=0 " +
-                "AND cronType=? " +
-                "AND T.deleted=0 AND T.pause=0 " +
-                "AND D.agentId=? ";
-
-        List<JobInfo> jobs = queryDao.sqlQuery(JobInfo.class, sql, cronType.getType(), agentId);
-        queryJobMore(jobs);
-        return jobs;
     }
 
     private void queryJobMore(List<JobInfo> jobs) {
@@ -128,15 +92,16 @@ public class JobService {
     }
 
     public List<Job> getAll() {
-        List<Job> jobs = OpencronTools.CACHE.get(Constants.PARAM_CACHED_JOB_ID_KEY, List.class);
+        List<Job> jobs = OpencronTools.CACHE.get(Constants.PARAM_CACHED_JOB_KEY, List.class);
         if (CommonUtils.isEmpty(jobs)) {
-            flushJob();
+            flushLocalJob();
         }
-        return OpencronTools.CACHE.get(Constants.PARAM_CACHED_JOB_ID_KEY, List.class);
+        return OpencronTools.CACHE.get(Constants.PARAM_CACHED_JOB_KEY, List.class);
     }
 
-    private synchronized void flushJob() {
-        OpencronTools.CACHE.put(Constants.PARAM_CACHED_JOB_ID_KEY, queryDao.hqlQuery("from Job where deleted = false"));
+    //本地缓存中的job列表
+    private synchronized void flushLocalJob() {
+        OpencronTools.CACHE.put(Constants.PARAM_CACHED_JOB_KEY, queryDao.hqlQuery("from Job where deleted = false"));
     }
 
     public PageBean<JobInfo> getJobInfoPage(HttpSession session, PageBean pageBean, JobInfo job) {
@@ -201,9 +166,9 @@ public class JobService {
 
 
     public Job merge(Job job) {
-        Job saveJob = (Job) queryDao.merge(job);
-        flushJob();
-        return saveJob;
+        job = (Job) queryDao.merge(job);
+        flushLocalJob();
+        return job;
     }
 
     public JobInfo getJobInfoById(Long id) {
@@ -299,7 +264,7 @@ public class JobService {
             }
             queryDao.createSQLQuery(sql).executeUpdate();
             schedulerService.syncTigger(jobId);
-            flushJob();
+            flushLocalJob();
         }
     }
 
@@ -377,41 +342,16 @@ public class JobService {
             return false;
         }
 
-        CronType cronType = CronType.getByType(job.getCronType());
-
-        switch (cronType) {
-            case QUARTZ:
-                try {
-                    if (jobBean.getPause()) {
-                        //暂停任务
-                        schedulerService.pause(jobBean.getJobId());
-                    } else {
-                        //恢复任务
-                        schedulerService.resume(jobBean.getJobId());
-                    }
-                    job.setPause(jobBean.getPause());
-                    merge(job);
-                    return true;
-                } catch (SchedulerException e) {
-                    logger.error("[opencron] pauseQuartzJob error:{}", e.getLocalizedMessage());
-                    return false;
-                }
-            case CRONTAB:
-                try {
-                    if (jobBean.getPause()) {
-                        opencronCollector.remove(jobBean.getJobId());
-                    } else {
-                        JobInfo jobInfo = getJobInfoById(job.getJobId());
-                        opencronCollector.add(jobInfo);
-                    }
-                    job.setPause(jobBean.getPause());
-                    merge(job);
-                    return true;
-                } catch (Exception e) {
-                    logger.error("[opencron] pauseCrontabJob error:{}", e.getLocalizedMessage());
-                    return false;
-                }
+        //暂停任务
+        if (jobBean.getPause()) {
+            opencronRegistry.jobUnRegister(jobBean.getJobId());
+        }else {
+            //恢复任务
+            opencronRegistry.jobRegister(jobBean.getJobId());
         }
+
+        job.setPause(jobBean.getPause());
+        merge(job);
         return true;
     }
 

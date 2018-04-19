@@ -107,11 +107,7 @@ public class OpencronRegistry {
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
             for (Agent agent : agentList) {
-                boolean ping = executeService.ping(agent);
-                if (!agent.getStatus().equals(ping)) {
-                    agent.setStatus(ping);
-                    agentService.merge(agent);
-                }
+                executeService.ping(agent);
             }
         }
 
@@ -322,6 +318,31 @@ public class OpencronRegistry {
         } else {
             this.jobRemove(jobId);
         }
+    }
+
+    public void agentUnRegister (Agent agent){
+        //mac_password
+        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, agent.getMachineId(), agent.getPassword());
+        registryService.unRegister(registryPath);
+
+        registryPath = String.format("%s/%s_%s_%s_%s",
+                Constants.ZK_REGISTRY_AGENT_PATH,
+                agent.getMachineId(),
+                agent.getPassword(),
+                agent.getHost(),
+                agent.getPort());
+
+        registryService.unRegister(registryPath);
+    }
+
+    public void agentRegister (Agent agent){
+        String registryPath = String.format("%s/%s_%s_%s_%s",
+                Constants.ZK_REGISTRY_AGENT_PATH,
+                agent.getMachineId(),
+                agent.getPassword(),
+                agent.getHost(),
+                agent.getPort());
+        registryService.unRegister(registryPath);
     }
 
     /**

@@ -67,7 +67,7 @@ public class Job implements Serializable {
 
     private String mobiles;
 
-    private Boolean pause;//任务是否暂停(true:已经暂停,false:未暂停)
+    private Boolean pause = false;//任务是否暂停(true:已经暂停,false:未暂停)
 
     @Lob
     @Column(columnDefinition = "TEXT")
