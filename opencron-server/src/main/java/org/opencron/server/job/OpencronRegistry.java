@@ -73,13 +73,14 @@ public class OpencronRegistry {
     @Autowired
     private ExecuteService executeService;
 
-    private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));;
+    private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_OPENCRON_REGISTRY_KEY));
+    ;
 
     private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + OpencronTools.SERVER_ID;
 
     private ZookeeperTransporter transporter = ExtensionLoader.load(ZookeeperTransporter.class);
 
-    private final Registry registryService = new ZookeeperRegistry(registryURL,transporter);
+    private final Registry registryService = new ZookeeperRegistry(registryURL, transporter);
 
     private final ZookeeperClient zookeeperClient = registryService.getClient();
 
@@ -98,7 +99,7 @@ public class OpencronRegistry {
 
     private Lock lock = new ReentrantLock();
 
-    public OpencronRegistry(){
+    public OpencronRegistry() {
 
     }
 
@@ -305,7 +306,7 @@ public class OpencronRegistry {
     //job新增的时候手动触发.....
     public void jobRegister(Long jobId) {
         if (Constants.OPENCRON_CLUSTER) {
-            this.registryService.register( Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
+            this.registryService.register(Constants.ZK_REGISTRY_JOB_PATH + "/" + jobId, true);
         } else {
             this.jobDispatch(jobId);
         }
@@ -320,7 +321,7 @@ public class OpencronRegistry {
         }
     }
 
-    public void agentUnRegister (Agent agent){
+    public void agentUnRegister(Agent agent) {
         //mac_password
         String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, agent.getMachineId(), agent.getPassword());
         registryService.unRegister(registryPath);
@@ -335,14 +336,14 @@ public class OpencronRegistry {
         registryService.unRegister(registryPath);
     }
 
-    public void agentRegister (Agent agent){
+    public void agentRegister(Agent agent) {
         String registryPath = String.format("%s/%s_%s_%s_%s",
                 Constants.ZK_REGISTRY_AGENT_PATH,
                 agent.getMachineId(),
                 agent.getPassword(),
                 agent.getHost(),
                 agent.getPort());
-        registryService.register(registryPath,true);
+        registryService.register(registryPath, true);
     }
 
     /**
@@ -370,7 +371,7 @@ public class OpencronRegistry {
                     this.schedulerService.put(jobInfo);
                     break;
             }
-            dispatchedInfo(1,jobId);
+            dispatchedInfo(1, jobId);
         } catch (Exception e) {
             new RuntimeException(e);
         } finally {
@@ -386,7 +387,7 @@ public class OpencronRegistry {
             }
             this.opencronCollector.remove(jobId);
             this.schedulerService.remove(jobId);
-            dispatchedInfo(0,jobId);
+            dispatchedInfo(0, jobId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -396,10 +397,11 @@ public class OpencronRegistry {
 
     /**
      * action 1:addJob
-     *        0:removeJob
+     * 0:removeJob
+     *
      * @param action
      */
-    private void dispatchedInfo(int action,Long jobId) {
+    private void dispatchedInfo(int action, Long jobId) {
         String headerFormat = line(1) + tab(1);
         String bodyFormat = line(1) + tab(3);
         String endFormat = line(2);
@@ -417,7 +419,7 @@ public class OpencronRegistry {
                 DateUtils.formatFullDate(new Date()),
                 this.preServerSize,
                 this.serverSize,
-                action==0?" removeJob " : "addJob",
+                action == 0 ? " removeJob " : "addJob",
                 jobId,
                 StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
