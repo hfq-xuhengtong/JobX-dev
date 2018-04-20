@@ -1,4 +1,0 @@
-curator=org.opencron.registry.zookeeper.curator.CuratorZookeeperTransporter
-zkclient=org.opencron.registry.zookeeper.zkclient.ZkclientZookeeperTransporter
-
-org.opencron.registry.zookeeper.zkclient.ZkclientZookeeperTransporter

@@ -5,24 +5,24 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencron</groupId>
-    <artifactId>opencron</artifactId>
+    <groupId>com.jobxhub</groupId>
+    <artifactId>jobx</artifactId>
     <version>1.2.0-RELEASE</version>
     <modules>
-        <module>opencron-common</module>
-        <module>opencron-registry</module>
-        <module>opencron-rpc</module>
-        <module>opencron-examples</module>
-        <module>opencron-api</module>
-        <module>opencron-agent</module>
-        <module>opencron-server</module>
+        <module>jobx-common</module>
+        <module>jobx-registry</module>
+        <module>jobx-rpc</module>
+        <module>jobx-examples</module>
+        <module>jobx-api</module>
+        <module>jobx-agent</module>
+        <module>jobx-server</module>
     </modules>
     <packaging>pom</packaging>
 
     <scm>
-        <url>scm:git:git@github.com:wolfboys/opencron.git</url>
-        <connection>scm:git:git@github.com:wolfboys/opencron.git</connection>
-        <developerConnection>scm:git:git@github.com:wolfboys/opencron.git</developerConnection>
+        <url>scm:git:git@github.com:wolfboys/jobx.git</url>
+        <connection>scm:git:git@github.com:wolfboys/jobx.git</connection>
+        <developerConnection>scm:git:git@github.com:wolfboys/jobx.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -30,7 +30,7 @@
         <license>
             <name>Apache v2</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-            <distribution>opencron</distribution>
+            <distribution>jobx</distribution>
         </license>
     </licenses>
 
@@ -92,38 +92,38 @@
         <dependencies>
 
             <dependency>
-                <groupId>org.opencron</groupId>
-                <artifactId>opencron-common</artifactId>
+                <groupId>com.jobxhub</groupId>
+                <artifactId>jobx-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.opencron</groupId>
-                <artifactId>opencron-api</artifactId>
+                <groupId>com.jobxhub</groupId>
+                <artifactId>jobx-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.opencron</groupId>
-                <artifactId>opencron-registry</artifactId>
+                <groupId>com.jobxhub</groupId>
+                <artifactId>jobx-registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.opencron</groupId>
-                <artifactId>opencron-rpc</artifactId>
+                <groupId>com.jobxhub</groupId>
+                <artifactId>jobx-rpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.opencron</groupId>
-                <artifactId>opencron-agent</artifactId>
+                <groupId>com.jobxhub</groupId>
+                <artifactId>jobx-agent</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.opencron</groupId>
-                <artifactId>opencron-server</artifactId>
+                <groupId>com.jobxhub</groupId>
+                <artifactId>jobx-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2015 The Opencron Project
+# Copyright (c) 2015 The JobX Project
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
@@ -31,25 +31,25 @@ RES="\E[0m";
 echo_r () {
     # Color red: Error, Failed
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${RED_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${RED_COLOR}$1${RES}\n"
 }
 
 echo_g () {
     # Color green: Success
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${GREEN_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${GREEN_COLOR}$1${RES}\n"
 }
 
 echo_y () {
     # Color yellow: Warning
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${YELLOW_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${YELLOW_COLOR}$1${RES}\n"
 }
 
 echo_w () {
     # Color yellow: White
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${WHITE_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
 if [ -z "$JAVA_HOME" -a -z "$JRE_HOME" ]; then
@@ -107,7 +107,7 @@ WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
 
 # Get standard environment variables
 ###############################################################################################
-APP_ARTIFACT=opencron-server
+APP_ARTIFACT=jobx-server
 APP_VERSION="1.2.0-RELEASE";
 APP_WAR_NAME=${APP_ARTIFACT}-${APP_VERSION}.war
 MAVEN_TARGET_WAR="${WORKDIR}"/${APP_ARTIFACT}/target/${APP_WAR_NAME}
@@ -116,7 +116,7 @@ DIST_PATH=${WORKDIR}/dist/
 
 [ ! -d "${DIST_PATH}" ] && mkdir -p "${DIST_PATH}"
 
-DEPLOY_PATH=${WORKDIR}/dist/opencron-server
+DEPLOY_PATH=${WORKDIR}/dist/jobx-server
 
 STARTUP_SHELL=${WORKDIR}/${APP_ARTIFACT}/startup.sh
 
@@ -124,7 +124,7 @@ STARTUP_SHELL=${WORKDIR}/${APP_ARTIFACT}/startup.sh
 if [ ! -f "${DIST_PATH}/${APP_WAR_NAME}" ] ; then
     #dist下没有war包则检查server的target下是否有war包.
    if [ ! -f "${MAVEN_TARGET_WAR}" ] ; then
-      echo_w "[opencron] please build project first!"
+      echo_w "[JOBX] please build project first!"
       exit 0;
    else
       cp ${MAVEN_TARGET_WAR} ${DIST_PATH};

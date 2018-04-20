@@ -1,6 +1,6 @@
 @echo off
 @REM
-@REM Copyright (c) 2015 The Opencron Project
+@REM Copyright (c) 2015 The JobX Project
 @REM
 @REM Licensed to the Apache Software Foundation (ASF) under one
 @REM or more contributor license agreements. See the NOTICE file
@@ -34,7 +34,7 @@ echo  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \
 echo (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \
 echo  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )
 echo       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /
-echo           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/
+echo           /_/     ::jobx::(v1.2.0 RELEASE)       /_/_/_/
 echo\
 
 if ""%1"" == ""debug"" goto needJavaHome
@@ -82,9 +82,9 @@ goto exit
 if not "%JAVA_ENDORSED_DIRS%" == "" goto gotEndorseddir
 @REM Java 9 no longer supports the java.endorsed.dirs
 @REM system property. Only try to use it if
-@REM OPENCRON_HOME/endorsed exists.
-if not exist "%OPENCRON_HOME%\endorsed" goto gotEndorseddir
-set "JAVA_ENDORSED_DIRS=%OPENCRON_HOME%\endorsed"
+@REM JOBX_HOME/endorsed exists.
+if not exist "%JOBX_HOME%\endorsed" goto gotEndorseddir
+set "JAVA_ENDORSED_DIRS=%JOBX_HOME%\endorsed"
 :gotEndorseddir
 
 @REM Don't override _RUNJAVA if the user has set it previously
@@ -102,18 +102,18 @@ set _RUNJDB="%JAVA_HOME%\bin\jdb.exe"
 
 setlocal
 
-@REM Guess OPENCRON_HOME if not defined
+@REM Guess JOBX_HOME if not defined
 
 set "WORK_DIR=%~dp0"
-set "OPENCRON_HOME=%WORK_DIR%"
-set "OPENCRON_BASE=%OPENCRON_HOME%"
+set "JOBX_HOME=%WORK_DIR%"
+set "JOBX_BASE=%JOBX_HOME%"
 
 @REM #################################################################################################
-set OPENCRON_VERSION=1.2.0-RELEASE
-set DIST_HOME=%OPENCRON_HOME%\dist
-set OPENCRON_AGENT=%OPENCRON_HOME%\opencron-agent\target\opencron-agent-%OPENCRON_VERSION%.tar.gz
-set OPENCRON_SERVER=%OPENCRON_HOME%\opencron-server\target\opencron-server-%OPENCRON_VERSION%.war
-set "EXECUTABLE=%OPENCRON_HOME%\.mvn\mvnw.cmd"
+set JOBX_VERSION=1.2.0-RELEASE
+set DIST_HOME=%JOBX_HOME%\dist
+set JOBX_AGENT=%JOBX_HOME%\jobx-agent\target\jobx-agent-%JOBX_VERSION%.tar.gz
+set JOBX_SERVER=%JOBX_HOME%\jobx-server\target\jobx-server-%JOBX_VERSION%.war
+set "EXECUTABLE=%JOBX_HOME%\.mvn\mvnw.cmd"
 @REM #################################################################################################
 
 if exist "%EXECUTABLE%" goto okExec
@@ -129,9 +129,9 @@ goto exit
 :toDist
 if exist "%DIST_HOME%" rd /s /q %DIST_HOME%
 if not exist "%DIST_HOME%" mkdir %DIST_HOME%
-copy %OPENCRON_AGENT% %DIST_HOME%
-copy %OPENCRON_SERVER% %DIST_HOME%
-echo [opencron] build opencron @Version %OPENCRON_VERSION% successfully! please goto %DIST_HOME%
+copy %JOBX_AGENT% %DIST_HOME%
+copy %JOBX_SERVER% %DIST_HOME%
+echo [JOBX] build jobx @Version %JOBX_VERSION% successfully! please goto %DIST_HOME%
 pause
 
 :exit

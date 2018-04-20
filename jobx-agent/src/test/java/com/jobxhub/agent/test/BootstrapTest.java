@@ -1,0 +1,94 @@
+package com.jobxhub.agent.test;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import com.jobxhub.agent.AgentProcessor;
+import com.jobxhub.common.ext.ExtensionLoader;
+import com.jobxhub.common.logging.LoggerFactory;
+import com.jobxhub.common.util.SystemPropertyUtils;
+import com.jobxhub.rpc.Server;
+import org.slf4j.Logger;
+
+import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.InvocationTargetException;
+
+public class BootstrapTest implements Serializable {
+
+    private static final long serialVersionUID = 20150614L;
+
+    private static final Logger logger = LoggerFactory.getLogger(SystemPropertyUtils.class);
+
+    /**
+     * thrift server
+     */
+    private Server server;
+
+    /**
+     * bootstrap instance....
+     */
+    private static BootstrapTest daemon;
+
+    public static void main(String[] args) {
+
+        if (daemon == null) {
+            daemon = new BootstrapTest();
+        }
+
+        try {
+            daemon.start();
+            Thread.sleep(50000);
+        } catch (Throwable t) {
+            if (t instanceof InvocationTargetException && t.getCause() != null) {
+                t = t.getCause();
+            }
+            handleThrowable(t);
+            t.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    private void start() throws Exception {
+        try {
+
+            final int port = 1577;
+
+            String password = DigestUtils.md5Hex("jobx").toLowerCase();
+            SystemPropertyUtils.setProperty("jobx.port", port + "");
+            SystemPropertyUtils.setProperty("jobx.password", password);
+
+            this.server = ExtensionLoader.load(Server.class);
+            //new thread to start for netty server
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    server.start(port, new AgentProcessor());
+                }
+            }).start();
+
+            logger.info("[JOBX]agent started @ port:{},pid:{}", port, getPid());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleThrowable(Throwable t) {
+        if (t instanceof ThreadDeath) {
+            throw (ThreadDeath) t;
+        }
+        if (t instanceof VirtualMachineError) {
+            throw (VirtualMachineError) t;
+        }
+    }
+
+    private static Integer getPid() {
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+        String name = runtime.getName();
+        try {
+            return Integer.parseInt(name.substring(0, name.indexOf('@')));
+        } catch (Exception e) {
+        }
+        return -1;
+    }
+
+}

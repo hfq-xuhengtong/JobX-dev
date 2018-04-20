@@ -55,7 +55,7 @@ V1.1.0 by 2017-04-20
     
     7)server端增加踢人下线单一登录控制
 
-## opencron
+## jobx
 
     
 一个功能完善真正通用的linux定时任务调度定系统,满足多种场景下各种复杂的定时任务调度,同时集成了linux实时监控,webssh,提供一个方便管理定时任务的平台.
@@ -69,7 +69,7 @@ V1.1.0 by 2017-04-20
  -  正在运行的任务要kill掉很麻烦,查看进程然后才能kill
 ......
 
-opencron的出现将彻底的解决上面所有问题.功能如下:
+jobx的出现将彻底的解决上面所有问题.功能如下:
  -  自动化管理任务,提供可操作的web图形化管理
  -  要当场执行只需点击执行即可,非常方便
  -  时间规则支持quartz和crontab,更强大更灵活
@@ -107,22 +107,22 @@ Browser IE10+
    
 ## 安装说明
 
- opencron分为两个opencron-server端和opencron-agent端,opencron-server端即为一个web可视化的中央管理调度平台,opencron-agent为要管理的任务的机器
- agent和server都依赖zookeeper,安装部署opencron之前必须先安装和启动zookeeper,server和agent必须连接同一个zookeeper,server端依赖redis
+ jobx分为两个jobx-server端和jobx-agent端,jobx-server端即为一个web可视化的中央管理调度平台,jobx-agent为要管理的任务的机器
+ agent和server都依赖zookeeper,安装部署jobx之前必须先安装和启动zookeeper,server和agent必须连接同一个zookeeper,server端依赖redis
 
 ## 编译步骤:
 
 ```
 1)下载源码: 
-  > git clone https://github.com/wolfboys/opencron-dev.git
+  > git clone https://github.com/wolfboys/jobx-dev.git
 
 2):修改server端的配置信息
-   1:创建数据,数据库名字可以是opencron或者其他
-   2:进入opencron-server/src/main/resources 修改config.properties里的jdbc连接信息
+   1:创建数据,数据库名字可以是jobx或者其他
+   2:进入jobx-server/src/main/resources 修改config.properties里的jdbc连接信息
    
    #jdbc
    jdbc.driver=com.mysql.jdbc.Driver
-   jdbc.url=jdbc:mysql://${mysql_host}:3306/opencron?useUnicode=true&characterEncoding=UTF-8
+   jdbc.url=jdbc:mysql://${mysql_host}:3306/jobx?useUnicode=true&characterEncoding=UTF-8
    jdbc.username=${user}
    jdbc.password=${password}
    
@@ -132,24 +132,24 @@ Browser IE10+
    redis.port=${redis.port}
    
    #zookeeper
-   opencron.registry=zookeeper://${zookeeper_host}:2181?bakup=${zookeeper_host1}:2181,${zookeeper_host2}:2181
+   jobx.registry=zookeeper://${zookeeper_host}:2181?bakup=${zookeeper_host1}:2181,${zookeeper_host2}:2181
 3):进入源码目录并执行编译:
-   cd opencron
+   cd jobx
    sh build.sh
 编译完成的文件在build/dist下
 
 
-## opencron-agent 部署安装步骤
+## jobx-agent 部署安装步骤
 
 1) 执行运行agent.sh即可 或者手动部署agent
   
     手动部署agent步骤
     
-    将opencron-agent-${version}.tar.gz包拷贝到要管理任务的目标服务器,解包,会看到以下目录
+    将jobx-agent-${version}.tar.gz包拷贝到要管理任务的目标服务器,解包,会看到以下目录
     ---bin/
-    |  startup.sh          #agent的启动脚本,调用的是opencron.sh来完成
-    |  shutdown.sh         #agent停止脚本，调用的是opencron.sh来完成
-    |  opencron.sh         #agent控制启动|停止的脚本
+    |  startup.sh          #agent的启动脚本,调用的是jobx.sh来完成
+    |  shutdown.sh         #agent停止脚本，调用的是jobx.sh来完成
+    |  jobx.sh         #agent控制启动|停止的脚本
     |  monitor.sh          #实时监控获取数据需要的脚本,由系统调度
     |  kill.sh             #kill任务时需要的脚本,由系统调度
     ---conf/
@@ -160,34 +160,34 @@ Browser IE10+
     ---temp/
     | *.sh                 #用于存放项目生成的零时文件的目录
     ---logs
-    | opencron.out         #项目启动会产生的Log文件
+    | jobx.out         #项目启动会产生的Log文件
     
-    > tar -xzvf opencron-agent-${version}.tar.gz
+    > tar -xzvf jobx-agent-${version}.tar.gz
     1)修改conf/conf.properties里的配置信息
         #zookepper注册中心
-        opencron.registry=zookeeper://${zookeeper_host}:2181
+        jobx.registry=zookeeper://${zookeeper_host}:2181
         #agent Ip,确保server可以通过此ip访问到该agent(主要实现agent自动注册)
-        opencron.host=127.0.0.1
-    2)启动opencron-agent 进入opencron-agent/bin
-    > cd opencron-agent/bin
+        jobx.host=127.0.0.1
+    2)启动jobx-agent 进入jobx-agent/bin
+    > cd jobx-agent/bin
     > sh startup.sh
-    这里可以接受两个参数，分别是服务启动的端口和密码(默认端口是:1577,默认密码:opencron)以及agent自动注册的url和密码 
+    这里可以接受两个参数，分别是服务启动的端口和密码(默认端口是:1577,默认密码:jobx)以及agent自动注册的url和密码 
     如要指定参数启动命令如下:
     > sh startup.sh -P10001 -p123456
     参数说明:
     -P (大写的p)为agent启动的端口，选填，如果不输入默认启动端口是1577
-    -p (小写的p)为当前agent的连接密码,选填，如果不输入默认连接该机器的密码是opencron
+    -p (小写的p)为当前agent的连接密码,选填，如果不输入默认连接该机器的密码是jobx
     以下两个参数为agent自动注册需要的两个参数（选填）
     该脚本启动之后agent就自动注册到server端了
-    更多详细的启动信息请查看logs/opencron.out
+    更多详细的启动信息请查看logs/jobx.out
     
-    3)停止opencron-agent 进入opencron-agent/bin 执行：
-    > cd opencron-agent/bin
+    3)停止jobx-agent 进入jobx-agent/bin 执行：
+    > cd jobx-agent/bin
     > sh shutdown.sh
 
 ```
   
-## opencron-server 部署步骤:
+## jobx-server 部署步骤:
 
 ```
 1):编译好项目源码
@@ -197,7 +197,7 @@ Browser IE10+
   1:自动部署执行server.sh即可,该项目已经内置了Tomcat和Jetty,要实现自动部署很简单,运行项目根路径下的server.sh即可完成启动(默认运行的是Tomcat)
   2:手动发布 tomcat或者其他web服务器 
   tomcat发布项目步骤:
-     找到build/dist/opencron-server.war
+     找到build/dist/jobx-server.war
      tomcat部署有两种部署方式
      1):直接部署到webapps下:
         1:下载tomcat8或者以上版本(http://tomcat.apache.org)
@@ -214,9 +214,9 @@ Browser IE10+
           > vi ${tomcat_home}/webapps/ROOT/WEB-INF/classes/config.properties
         6:完成启动
      2):通过配置server.xml外部指向
-        1:将war包解压到指定的路径,如 /data/www/opencron,并删除war包
+        1:将war包解压到指定的路径,如 /data/www/jobx,并删除war包
         2:更改jdbc配置文件
-           vi /data/www/opencron/WEB-INF/classes/config.properties
+           vi /data/www/jobx/WEB-INF/classes/config.properties
         3:进入tomcat的conf中修改server.xml配置文件
            下面附上我的完整的server.xml配置:
            
@@ -259,7 +259,7 @@ Browser IE10+
                     <Engine name="Catalina" defaultHost="localhost">
                            <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
                            <Host name="localhost"
-                                   appBase="/data/www/opencron"
+                                   appBase="/data/www/jobx"
                                    unpackWARs="true"
                                    autoDeploy="false"
                                    xmlValidation="false"
@@ -267,7 +267,7 @@ Browser IE10+
                                    URIEncoding="UTF-8">
            
                            <Context path="/"
-                                   docBase="/data/www/opencron"
+                                   docBase="/data/www/jobx"
                                    debug="0"
                                    reloadable="true"/>
                            </Host>
@@ -282,9 +282,9 @@ Browser IE10+
            
         启动tomcat,打开浏览器以$ip:$port的方式访问,如:  http://192.168.0.188:8080   
         
-  不论哪种方式部署,第一次会自动创建表,默认初始用户名opencron,密码opencron,第一次登陆会提示修改密码.
+  不论哪种方式部署,第一次会自动创建表,默认初始用户名jobx,密码jobx,第一次登陆会提示修改密码.
       
-3):进入到opencron的管理端,如果agent也启动了,应该可以直接在server的执行器页面看到agent,则添加任务即可...
+3):进入到jobx的管理端,如果agent也启动了,应该可以直接在server的执行器页面看到agent,则添加任务即可...
 
 ```  
 
@@ -301,17 +301,17 @@ Browser IE10+
 4):如果server端用nginx做反向代理,配置如下:
 
    
-upstream opencron {
+upstream jobx {
      server 127.0.0.1:8080;
 }
 
 server {
     listen 80;
-    server_name www.opencron.org;
-    root /data/www/opencron/;
+    server_name www.jobx.org;
+    root /data/www/jobx/;
 
     location / {
-        proxy_pass        http://opencron;
+        proxy_pass        http://jobx;
         proxy_set_header   Host             $host;
         proxy_set_header   X-Real-IP        $remote_addr;
         proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
@@ -328,7 +328,7 @@ server {
 
     #这里必须这么配置,否则web终端无法使用
     location  ^~  /terminal.ws {
-        proxy_pass http://opencron;
+        proxy_pass http://jobx;
         proxy_redirect    off;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header Host $host;
@@ -343,5 +343,5 @@ server {
 
 ```
 
-更多问题请加入opencron交流群156429713,欢迎大家加入
+更多问题请加入jobx交流群156429713,欢迎大家加入
     

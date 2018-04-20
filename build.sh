@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2015 The Opencron Project
+# Copyright (c) 2015 The JobX Project
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
@@ -34,7 +34,7 @@ printf "${GREEN_COLOR}  /\     ____  ____  ___  ____  ______________  ____  \ \ 
 printf "${GREEN_COLOR} (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \    ${RES}\n"
 printf "${GREEN_COLOR}  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )   ${RES}\n"
 printf "${GREEN_COLOR}       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /    ${RES}\n"
-printf "${GREEN_COLOR}           /_/     ::opencron::(v1.2.0 RELEASE)       /_/_/_/     ${RES}\n\n"
+printf "${GREEN_COLOR}           /_/     ::jobx::(v1.2.0 RELEASE)       /_/_/_/     ${RES}\n\n"
 
 # resolve links - $0 may be a softlink
 PRG="$0"
@@ -55,34 +55,34 @@ WORKDIR=`cd "$PRGDIR" >/dev/null; pwd`;
 
 # Get standard environment variables
 ##############################################################################################
-OPENCRON_VERSION="1.2.0-RELEASE";                                                           ##
-OPENCRON_AGENT=${WORKDIR}/opencron-agent/target/opencron-agent-${OPENCRON_VERSION}.tar.gz   ##
-OPENCRON_SERVER=${WORKDIR}/opencron-server/target/opencron-server-${OPENCRON_VERSION}.war   ##
+JOBX_VERSION="1.2.0-RELEASE";                                                           ##
+JOBX_AGENT=${WORKDIR}/jobx-agent/target/jobx-agent-${JOBX_VERSION}.tar.gz   ##
+JOBX_SERVER=${WORKDIR}/jobx-server/target/jobx-server-${JOBX_VERSION}.war   ##
 DIST_HOME="${WORKDIR}/dist"                                                                 ##
 ##############################################################################################
 
 echo_r () {
     # Color red: Error, Failed
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${RED_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${RED_COLOR}$1${RES}\n"
 }
 
 echo_g () {
     # Color green: Success
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${GREEN_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${GREEN_COLOR}$1${RES}\n"
 }
 
 echo_y () {
     # Color yellow: Warning
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${YELLOW_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${YELLOW_COLOR}$1${RES}\n"
 }
 
 echo_w () {
     # Color yellow: White
     [ $# -ne 1 ] && return 1
-    printf "[${BLUE_COLOR}opencron${RES}] ${WHITE_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}jobx${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -154,7 +154,7 @@ fi
 # Don't override the endorsed dir if the user has set it previously
 if [ -z "$JAVA_ENDORSED_DIRS" ]; then
   # Set the default -Djava.endorsed.dirs argument
-  JAVA_ENDORSED_DIRS="$OPENCRON_HOME"/endorsed
+  JAVA_ENDORSED_DIRS="$JOBX_HOME"/endorsed
 fi
 
 if [ -z "$JAVACMD" ] ; then
@@ -184,7 +184,7 @@ if [ "`$JAVACMD -version 2>&1 | head -1|grep "openjdk"|wc -l`"x == "1"x ]; then
   exit 1;
 fi
 
-echo_w "build opencron Starting...";
+echo_w "build jobx Starting...";
 
 if [ ! -f "${WORKDIR}/.mvn/mvnw" ];then
     echo_r "ERROR: ${WORKDIR}/.mvn/mvnw is not exists,This file is needed to run this program!"
@@ -197,11 +197,11 @@ retval=$?
 
 if [ ${retval} -eq 0 ] ; then
     [ ! -d "${DIST_HOME}" ] && mkdir ${DIST_HOME} || rm -rf  ${DIST_HOME}/* ;
-    cp ${OPENCRON_AGENT} ${DIST_HOME}
-    cp ${OPENCRON_SERVER} ${DIST_HOME}
-    printf "[${BLUE_COLOR}opencron${RES}] ${WHITE_COLOR}build opencron @Version ${OPENCRON_VERSION} successfully! please goto${RES} ${GREEN_COLOR}${DIST_HOME}${RES}\n"
+    cp ${JOBX_AGENT} ${DIST_HOME}
+    cp ${JOBX_SERVER} ${DIST_HOME}
+    printf "[${BLUE_COLOR}jobx${RES}] ${WHITE_COLOR}build jobx @Version ${JOBX_VERSION} successfully! please goto${RES} ${GREEN_COLOR}${DIST_HOME}${RES}\n"
     exit 0
 else
-    echo_r "build opencron failed! please try again "
+    echo_r "build jobx failed! please try again "
     exit 1
 fi

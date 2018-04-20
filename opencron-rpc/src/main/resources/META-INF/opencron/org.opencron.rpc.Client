@@ -1,5 +1,0 @@
-netty=org.opencron.rpc.netty.NettyClient
-mina=org.opencron.rpc.mina.MinaClient
-
-#default client
-org.opencron.rpc.netty.NettyClient

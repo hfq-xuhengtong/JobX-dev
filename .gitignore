@@ -8,5 +8,5 @@
 */.settings
 */.DS_Store
 .idea/
-opencron-server/src/main/webapp/upload/
-opencron-server/webapp/
+jobx-server/src/main/webapp/upload/
+jobx-server/webapp/
