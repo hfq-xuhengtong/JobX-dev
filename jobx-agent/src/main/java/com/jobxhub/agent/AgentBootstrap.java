@@ -235,7 +235,7 @@ public class AgentBootstrap implements Serializable {
             /**
              * write pid to pidfile...
              */
-            if (!CommonUtils.isWindowOs()) {
+            if (!CommonUtils.isWindows()) {
                 Integer pid = getPid();
                 IOUtils.writeText(Constants.JOBX_PID_FILE, pid, Constants.CHARSET_UTF8);
                 if (logger.isInfoEnabled()) {

@@ -62,7 +62,7 @@ public class JettyLauncher implements Launcher {
 
         //init param
         appContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
-        if (CommonUtils.isWindowOs()) {
+        if (CommonUtils.isWindows()) {
             appContext.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
         }
 
