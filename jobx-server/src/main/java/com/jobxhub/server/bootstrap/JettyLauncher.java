@@ -50,7 +50,6 @@ public class JettyLauncher implements Launcher {
         Server server = new Server(new QueuedThreadPool(Constants.WEB_THREADPOOL_SIZE));
 
         WebAppContext appContext = new WebAppContext();
-
         String resourceBasePath = "";
         //开发者模式
         if (devMode) {
