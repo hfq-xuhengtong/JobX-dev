@@ -704,7 +704,4 @@ public class Constants {
         }
     }
 
-
-    public class PARAM_ONLINE_USER_KEY {
-    }
 }
