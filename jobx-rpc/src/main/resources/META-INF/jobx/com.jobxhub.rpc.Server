@@ -1,5 +1,5 @@
-netty=NettyServer
-mina=MinaServer
+netty=com.jobxhub.rpc.netty.NettyServer
+mina=com.jobxhub.rpc.mina.MinaServer
 
 #default NettyServer
-NettyServer
+com.jobxhub.rpc.netty.NettyServer

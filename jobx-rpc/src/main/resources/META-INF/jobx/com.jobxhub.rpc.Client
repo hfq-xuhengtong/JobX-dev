@@ -2,4 +2,4 @@ netty=com.jobxhub.rpc.netty.NettyClient
 mina=com.jobxhub.rpc.mina.MinaClient
 
 #default client
-netty
+com.jobxhub.rpc.netty.NettyClient
