@@ -74,7 +74,6 @@ public class JobXRegistry {
     private ExecuteService executeService;
 
     private final URL registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_JOBX_REGISTRY_KEY));
-    ;
 
     private final String registryPath = Constants.ZK_REGISTRY_SERVER_PATH + "/" + JobXTools.SERVER_ID;
 
