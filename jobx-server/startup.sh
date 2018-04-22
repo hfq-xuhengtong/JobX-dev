@@ -8,13 +8,14 @@ GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
 RES="\E[0m";
 
-printf "${GREEN_COLOR}                                                                  ${RES}\n"
-printf "${GREEN_COLOR}                                                      __ _ _      ${RES}\n"
-printf "${GREEN_COLOR}  /\     ____  ____  ___  ____  ______________  ____  \ \ \ \     ${RES}\n"
-printf "${GREEN_COLOR} (())   / __ \/ __ \/ _ \/ __ \/ ___/ ___/ __ \/ __ \  \ \ \ \    ${RES}\n"
-printf "${GREEN_COLOR}  \/   / /_/ / /_/ /  __/ / / / /__/ /  / /_/ / / / /   ) ) ) )   ${RES}\n"
-printf "${GREEN_COLOR}       \____/ .___/\___/_/ /_/\___/_/   \____/_/ /_/   / / / /    ${RES}\n"
-printf "${GREEN_COLOR}           /_/     ::jobx::(v1.2.0 RELEASE)       /_/_/_/     ${RES}\n\n"
+printf "${GREEN_COLOR}                                        __       ${RES}\n"
+printf "${GREEN_COLOR}   /\       ______          __  ______  / /      ${RES}\n"
+printf "${GREEN_COLOR}  (())     /_   _/ ____    / /_   ___ \/ /       ${RES}\n"
+printf "${GREEN_COLOR}   \/   __  / /   / __ \  / __ \  ___   /        ${RES}\n"
+printf "${GREEN_COLOR}       / /_/ /   / /_/ / / /_/ /  __    \        ${RES}\n"
+printf "${GREEN_COLOR}       \____/    \____/ /_.___/    / / \_\__     ${RES}\n"
+printf "${GREEN_COLOR}                                __/_/            ${RES}\n\n"
+
 
 echo_r () {
     # Color red: Error, Failed

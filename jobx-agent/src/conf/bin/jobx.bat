@@ -39,6 +39,16 @@
 @REM                   $JOBX_BASE/temp.
 @REM -----------------------------------------------------------------------------
 
+echo\
+echo                                           __
+echo     /\       ______          __  ______  / /  
+echo    (())     /_   _/ ____    / /_   ___ \/ /   
+echo     \/   __  / /   / __ \  / __ \  ___   /    
+echo         / /_/ /   / /_/ / / /_/ /  __    \    
+echo         \____/    \____/ /_.___/    / / \_\__ 
+echo                                  __/_/        
+echo\                                              
+
 setlocal
 
 @REM Suppress Terminate batch job on CTRL+C
