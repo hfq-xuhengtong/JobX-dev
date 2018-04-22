@@ -28,13 +28,13 @@ GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
 RES="\E[0m";
 
-printf "${GREEN_COLOR}                                         __      ${RES}\n"
-printf "${GREEN_COLOR}   /\       ______          __  ______  / /      ${RES}\n"
-printf "${GREEN_COLOR}  (())     /_   _/ ____    / /_   ___ \/ /       ${RES}\n"
-printf "${GREEN_COLOR}   \/   __  / /   / __ \  / __ \  ___   /        ${RES}\n"
-printf "${GREEN_COLOR}       / /_/ /   / /_/ / / /_/ /  __    \        ${RES}\n"
-printf "${GREEN_COLOR}       \____/    \____/ /_.___/    / / \_\__     ${RES}\n"
-printf "${GREEN_COLOR}                                __/_/            ${RES}\n\n"
+printf "${GREEN_COLOR}                                           ____     ${RES}\n"
+printf "${GREEN_COLOR}     /\      _______         ___  ______  /  /     ${RES}\n"
+printf "${GREEN_COLOR}    (())     /_   _/ ____    / /_   ___ \/  /      ${RES}\n"
+printf "${GREEN_COLOR}     \/   __  / /   / __ \  / __ \   ___   /       ${RES}\n"
+printf "${GREEN_COLOR}         / /_/ /   / /_/ / / /_/ /   __  . \       ${RES}\n"
+printf "${GREEN_COLOR}         \____/    \____/ /_.___/   __  / \_\__    ${RES}\n"
+printf "${GREEN_COLOR}                                  _____/           ${RES}\n\n"
 
 # resolve links - $0 may be a softlink
 PRG="$0"

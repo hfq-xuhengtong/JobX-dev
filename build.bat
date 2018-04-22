@@ -29,13 +29,13 @@
 @REM In debug mode we need a real JDK (JAVA_HOME)
 
 echo\
-echo                                           __
-echo     /\       ______          __  ______  / /
-echo    (())     /_   _/ ____    / /_   ___ \/ /
-echo     \/   __  / /   / __ \  / __ \  ___   /
-echo         / /_/ /   / /_/ / / /_/ /  __    \
-echo         \____/    \____/ /_.___/    / / \_\__
-echo                                  __/_/
+echo                                           ____   
+echo     /\      _______         ___  ______  /  /    
+echo    (())     /_   _/ ____    / /_   ___ \/  /     
+echo     \/   __  / /   / __ \  / __ \   ___   /      
+echo         / /_/ /   / /_/ / / /_/ /   __  . \      
+echo         \____/    \____/ /_.___/   __  / \_\__   
+echo                                  _____/          
 echo\
 
 if ""%1"" == ""debug"" goto needJavaHome
