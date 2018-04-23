@@ -246,12 +246,12 @@ function Validata() {
             $("#subForm")[0].reset();
             self.toggle.redo(1);
             this.tipDefault();
-            $("#subTitle").html("添加子作业").attr("action", "add");
+            $("#subTitle").html("添加作业依赖").attr("action", "add");
         },
 
         edit: function (id) {
             this.tipDefault();
-            $("#subTitle").html("编辑子作业").attr("action", "edit").attr("tid", id);
+            $("#subTitle").html("编辑作业依赖").attr("action", "edit").attr("tid", id);
             $("#" + id).find("input").each(function (index, element) {
                 if ($(element).attr("name") == "child.jobName") {
                     $("#jobName1").val(unEscapeHtml($(element).val()));
@@ -323,19 +323,9 @@ function Validata() {
                                 "<input type='hidden' name='child.timeout' value='" + $("#timeout1").val() + "'>" +
                                 "<input type='hidden' name='child.successExit' value='" + $("#successExit1").val() + "'>" +
                                 "<input type='hidden' name='child.comment' value='" + escapeHtml($("#comment1").val()) + "'>" +
-                                "<span onclick='jobxValidata.subJob.edit(\"" + timestamp + "\")' class='subjob_edit'>" +
-                                "   <a data-toggle='modal' href='#jobModal' title='编辑'>" +
-                                "       <i class='glyphicon glyphicon-pencil'></i>&nbsp;&nbsp;" +
-                                "       <span id='name_" + timestamp + "'>" + escapeHtml(_jobName) + "</span>" +
-                                "   </a>" +
-                                "</span>" +
-                                "<span class='delSubJob' onclick='jobxValidata.subJob.remove(this)' class='subjob_del'>" +
-                                "   <a href='#' title='删除'>" +
-                                "       <i class='glyphicon glyphicon-trash'></i>" +
-                                "   </a>" +
-                                "</span>" +
                                 "</li>";
                             $("#subJobDiv").append($(addHtml));
+                            addNode(timestamp,escapeHtml(_jobName));
                         } else if ($("#subTitle").attr("action") == "edit") {//编辑
                             var id = $("#subTitle").attr("tid");
                             $("#" + id).find("input").each(function (index, element) {
@@ -428,24 +418,13 @@ function Validata() {
             }
         },
 
-        runModel: function (type) {
-            if (type == "0") {
-                $("#runModelTip").html("串行: 流程任务里的每个任务按照定义的顺序依次执行");
-            }
-            if (type == "1") {
-                $("#runModelTip").html('并行: 流程任务里的所有子任务同时执行');
-            }
-        },
-
         subJob: function (_toggle) {
             if (_toggle == "1") {
                 $("#jobTypeTip").html("流程作业: 有多个作业组成一个作业组");
-                $("#subJob").show();
-                $("#runModel").show();
+                $(".subJob").show();
             } else {
                 $("#jobTypeTip").html("单一作业: 当前定义作业为要执行的目前作业");
-                $("#subJob").hide();
-                $("#runModel").hide();
+                $(".subJob").hide();
             }
         }
     };
@@ -468,20 +447,6 @@ Validata.prototype.ready = function () {
     });
     $("#cronType1").parent().parent().click(function () {
         _this.validata.cronExp();
-    });
-
-    $("#runModel0").next().click(function () {
-        _this.toggle.runModel(0);
-    });
-    $("#runModel0").parent().parent().click(function () {
-        _this.toggle.runModel(0);
-    });
-
-    $("#runModel1").next().click(function () {
-        _this.toggle.runModel(1);
-    });
-    $("#runModel1").parent().parent().click(function () {
-        _this.toggle.runModel(1);
     });
 
     $("#redo01").next().click(function () {

@@ -7,10 +7,11 @@
 <html lang="en">
 <head>
     <script type="text/javascript" src="${contextPath}/static/js/clipboard.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+
     <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.core.min.js?resId=${resourceId}"></script> <!-- jQuery Library -->
     <link rel="stylesheet" href="${contextPath}/static/js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
-    <script type="text/javascript">
 
+    <script type="text/javascript">
         var toggle = {
             contact:{
                 show:function () {

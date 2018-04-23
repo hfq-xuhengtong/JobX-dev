@@ -18,8 +18,7 @@
             padding: 4px 15px;
             width: 350px;
         }
-
-        .delSubJob{
+        .subjob_del{
             float:right;margin-right:2px
         }
     </style>
@@ -178,7 +177,7 @@
                                     <span  onclick="jobxValidata.subJob.edit('${c.jobId}')">
                                         <a data-toggle="modal" href="#jobModal" title="编辑"><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;<span id="name_${c.jobId}">${c.jobName}</span></a>
                                     </span>
-                                    <span class='delSubJob' onclick='jobxValidata.subJob.remove(this)'>
+                                    <span class='subjob_del' onclick='jobxValidata.subJob.remove(this)'>
                                         <a href='javascript:void(0)' title='删除'><i class='glyphicon glyphicon-trash'></i></a>
                                     </span>
                                     <input type="hidden" name="child.jobId" value="${c.jobId}">

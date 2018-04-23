@@ -6,31 +6,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.core.min.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+    <link rel="stylesheet" href="${contextPath}/static/js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.excheck.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.exedit.min.js"></script>
+
     <style type="text/css">
-        .subJobUl li {
+        #sortJob{
             background-color: rgba(0, 0, 0, 0.3);
             border-radius: 13px;
-            height: 26px;
-            list-style: outside none none;
-            margin-bottom: 4px;
-            padding: 4px 15px;
-            width: 350px;
+            width:450px;
         }
-
-        .subjob_edit{
-            position:absolute;right:35px;
-        }
-
-        .subjob_del{
-            position:absolute;right: 20px;
+        .ztree li a {
+            color: #fff;
         }
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
 
     <script type="text/javascript">
-        $(document).ready(function () {
+        var setting = {
+            edit: {
+                enable: true,
+                showRemoveBtn: true,
+                showRenameBtn: false,
+                drag:{
+                    inner:true,
+                    prev:true,
+                    next:true,
+                    isMove:true
+                }
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                beforeDrag: beforeDrag,
+                beforeDrop: beforeDrop,
+                onClick: onClick
+            }
+        };
+
+        function beforeDrag(treeId, treeNodes) {
+            for (var i=0,l=treeNodes.length; i<l; i++) {
+                if (treeNodes[i].drag === false) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        function beforeDrop(treeId, treeNodes, targetNode, moveType) {
+            return targetNode ? targetNode.drop !== false : true;
+        }
+
+        function addNode(id,name) {
+            var zTree = $.fn.zTree.getZTreeObj("sortJob");
+            zTree.addNodes(null, {id:id, pId:0, name:name,drag:true});
+        }
+
+        function onClick(event, treeId, treeNode, clickFlag) {
+            jobxValidata.subJob.edit(treeNode.id);
+            $('#jobModal').modal('show');
+        }
+
+        $(document).ready(function(){
             window.jobxValidata = new Validata('${contextPath}');
+            var currJob = [{ id:1, pId:0, name:"当前作业", open:true}];
+            $.fn.zTree.init($("#sortJob"), setting,currJob );
         });
     </script>
 
@@ -114,18 +158,6 @@
                     </div>
                 </div>
 
-                <%-- <div class="form-group">
-                     <label class="col-lab control-label"><i class="glyphicons glyphicons-saw-blade"></i>&nbsp;&nbsp;命令类型：</label>
-                     <div class="col-md-10">
-                         <label for="script-shell" class="radio-label"><input type="radio" name="scriptType" id="script-shell" value="0" checked>shell&nbsp;&nbsp;&nbsp;</label>
-                         <label for="script-python" class="radio-label"><input type="radio" name="scriptType" id="script-python" value="1">python&nbsp;&nbsp;&nbsp;</label>
-                         <label for="script-bat" class="radio-label"><input type="radio" name="scriptType" id="script-bat" value="2">bat&nbsp;&nbsp;&nbsp;</label>
-                         <label for="script-php" class="radio-label"><input type="radio" name="scriptType" id="script-php" value="3">php&nbsp;&nbsp;&nbsp;</label>
-                         <label for="script-powerShell" class="radio-label"><input type="radio" name="scriptType" id="script-powerShell" value="4">powerShell&nbsp;&nbsp;&nbsp;</label>
-                         <br><span class="tips"><b>*&nbsp;</b>该命令的类型</span>
-                     </div>
-                 </div><br>--%>
-
                 <div class="form-group">
                     <label for="successExit" class="col-lab control-label wid150"><i class="glyphicons glyphicons-tags"></i>&nbsp;&nbsp;成功标识&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">
@@ -170,85 +202,15 @@
                 </div>
 
                 <div class="form-group">
-                    <span id="subJob" style="display: none">
-                        <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;作业依赖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <span class="subJob" style="display: none">
+                        <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-sort"></i>&nbsp;&nbsp;作业依赖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                         <div class="col-md-10" style="top: -5px;">
                             <a data-toggle="modal" href="#jobModal" onclick="jobxValidata.subJob.add()" class="btn btn-sm m-t-10">添加作业依赖</a>
                         </div>
-
-                         <div class="col-md-10" style="top:5px;margin-left: 110px;">
-                            <ul id="subJobDiv" class="subJobUl">
-                                <li id="1524476188000" style="position: relative">
-                                    <span id="name_1524476188000">121`22</span>
-                                    <input name="child.jobId" value="" type="hidden">
-                                    <input name="child.jobName" value="121`22" type="hidden">
-                                    <input name="child.agentId" value="3" type="hidden">
-                                    <input name="child.command" value="MjEyMQ==" type="hidden">
-                                    <input name="child.redo" value="1" type="hidden">
-                                    <input name="child.runCount" value="12" type="hidden">
-                                    <input name="child.timeout" value="0" type="hidden">
-                                    <input name="child.successExit" value="0" type="hidden">
-                                    <input name="child.comment" value="" type="hidden">
-                                     <span onclick="opencronValidata.subJob.edit('1524476188000')" class="subjob_edit">
-                                        <a data-toggle="modal" href="#jobModal" title="编辑">
-                                            <i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;
-                                        </a>
-                                    </span>
-                                    <span class="delSubJob" onclick="opencronValidata.subJob.remove(this)" class="subjob_del">
-                                        <a href="#" title="删除">
-                                            <i class="glyphicon glyphicon-trash"></i>
-                                        </a>
-                                    </span>
-                                </li>
-
-                                <li id="152447618800033" style="position: relative">
-                                    <span id="name_152447618800033">job123</span>
-                                    <input name="child.jobId" value="" type="hidden">
-                                    <input name="child.jobName" value="job123" type="hidden">
-                                    <input name="child.agentId" value="3" type="hidden">
-                                    <input name="child.command" value="MjEyMQ==" type="hidden">
-                                    <input name="child.redo" value="1" type="hidden">
-                                    <input name="child.runCount" value="12" type="hidden">
-                                    <input name="child.timeout" value="0" type="hidden">
-                                    <input name="child.successExit" value="0" type="hidden">
-                                    <input name="child.comment" value="" type="hidden">
-                                     <span onclick="opencronValidata.subJob.edit('1524476188000')" style="position:absolute;right:35px;">
-                                        <a data-toggle="modal" href="#jobModal" title="编辑">
-                                            <i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;
-                                        </a>
-                                    </span>
-                                    <span class="delSubJob" onclick="opencronValidata.subJob.remove(this)" style="position:absolute;right: 20px;">
-                                        <a href="#" title="删除">
-                                            <i class="glyphicon glyphicon-trash"></i>
-                                        </a>
-                                    </span>
-                                </li>
-
-                                <li id="152447618800011" style="position: relative">
-                                    <span id="name_152447618800011">lastJOB</span>
-                                    <input name="child.jobId" value="" type="hidden">
-                                    <input name="child.jobName" value="lastJOB" type="hidden">
-                                    <input name="child.agentId" value="3" type="hidden">
-                                    <input name="child.command" value="MjEyMQ==" type="hidden">
-                                    <input name="child.redo" value="1" type="hidden">
-                                    <input name="child.runCount" value="12" type="hidden">
-                                    <input name="child.timeout" value="0" type="hidden">
-                                    <input name="child.successExit" value="0" type="hidden">
-                                    <input name="child.comment" value="" type="hidden">
-                                     <span onclick="opencronValidata.subJob.edit('1524476188000')" style="position:absolute;right:35px;">
-                                        <a data-toggle="modal" href="#jobModal" title="编辑">
-                                            <i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;
-                                        </a>
-                                    </span>
-                                    <span class="delSubJob" onclick="opencronValidata.subJob.remove(this)" style="position:absolute;right: 20px;">
-                                        <a href="#" title="删除">
-                                            <i class="glyphicon glyphicon-trash"></i>
-                                        </a>
-                                    </span>
-                                </li>
-                            </ul>
+                         <div class="col-md-10" style="top:5px;margin-left:150px;">
+                            <ul id="sortJob" class="ztree"></ul>
+                            <ul id="subJobDiv" style="display: none;"></ul>
                         </div>
-
                     </span>
                 </div>
 
