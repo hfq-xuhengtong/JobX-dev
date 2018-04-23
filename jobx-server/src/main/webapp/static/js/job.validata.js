@@ -314,17 +314,6 @@ function Validata() {
                             var timestamp = Date.parse(new Date());
                             var addHtml =
                                 "<li id='" + timestamp + "'>" +
-                                "<span onclick='jobxValidata.subJob.edit(\"" + timestamp + "\")'>" +
-                                "   <a data-toggle='modal' href='#jobModal' title='编辑'>" +
-                                "       <i class='glyphicon glyphicon-pencil'></i>&nbsp;&nbsp;" +
-                                "       <span id='name_" + timestamp + "'>" + escapeHtml(_jobName) + "</span>" +
-                                "   </a>" +
-                                "</span>" +
-                                "<span class='delSubJob' onclick='jobxValidata.subJob.remove(this)'>" +
-                                "   <a href='#' title='删除'>" +
-                                "       <i class='glyphicon glyphicon-trash'></i>" +
-                                "   </a>" +
-                                "</span>" +
                                 "<input type='hidden' name='child.jobId' value=''>" +
                                 "<input type='hidden' name='child.jobName' value='" + escapeHtml(_jobName) + "'>" +
                                 "<input type='hidden' name='child.agentId' value='" + $("#agentId1").val() + "'>" +
@@ -334,6 +323,17 @@ function Validata() {
                                 "<input type='hidden' name='child.timeout' value='" + $("#timeout1").val() + "'>" +
                                 "<input type='hidden' name='child.successExit' value='" + $("#successExit1").val() + "'>" +
                                 "<input type='hidden' name='child.comment' value='" + escapeHtml($("#comment1").val()) + "'>" +
+                                "<span onclick='jobxValidata.subJob.edit(\"" + timestamp + "\")' class='subjob_edit'>" +
+                                "   <a data-toggle='modal' href='#jobModal' title='编辑'>" +
+                                "       <i class='glyphicon glyphicon-pencil'></i>&nbsp;&nbsp;" +
+                                "       <span id='name_" + timestamp + "'>" + escapeHtml(_jobName) + "</span>" +
+                                "   </a>" +
+                                "</span>" +
+                                "<span class='delSubJob' onclick='jobxValidata.subJob.remove(this)' class='subjob_del'>" +
+                                "   <a href='#' title='删除'>" +
+                                "       <i class='glyphicon glyphicon-trash'></i>" +
+                                "   </a>" +
+                                "</span>" +
                                 "</li>";
                             $("#subJobDiv").append($(addHtml));
                         } else if ($("#subTitle").attr("action") == "edit") {//编辑

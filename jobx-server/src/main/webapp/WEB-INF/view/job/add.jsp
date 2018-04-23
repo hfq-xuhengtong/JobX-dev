@@ -9,14 +9,20 @@
     <style type="text/css">
         .subJobUl li {
             background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 1px;
+            border-radius: 13px;
             height: 26px;
             list-style: outside none none;
-            margin-top: -27px;
-            margin-bottom: 29px;
-            margin-left: 100px;
+            margin-bottom: 4px;
             padding: 4px 15px;
             width: 350px;
+        }
+
+        .subjob_edit{
+            position:absolute;right:35px;
+        }
+
+        .subjob_del{
+            position:absolute;right: 20px;
         }
     </style>
 
@@ -54,7 +60,6 @@
     <div class="block-area" id="basic">
         <div class="tile p-15 textured">
             <form class="form-horizontal" role="form" id="jobform" action="${contextPath}/job/save.do" method="post"></br>
-
                 <input type="hidden" name="command" id="command">
                 <div class="form-group">
                     <label for="agentId" class="col-lab control-label wid150"><i class="glyphicon glyphicon-leaf"></i>&nbsp;&nbsp;执&nbsp;&nbsp;行&nbsp;&nbsp;器&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -163,25 +168,88 @@
                         <br><span class="tips" id="jobTypeTip">单一作业: 当前定义作业为要执行的目标&nbsp;流程作业: 有多个作业组成作业组</span>
                     </div>
                 </div>
-                <br>
 
                 <div class="form-group">
                     <span id="subJob" style="display: none">
-                        <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;子&nbsp;&nbsp;作&nbsp;&nbsp;&nbsp;业&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                        <div class="col-md-10">
-                            <a data-toggle="modal" href="#jobModal" onclick="jobxValidata.subJob.add()" class="btn btn-sm m-t-10">添加子作业</a>
-                            <ul id="subJobDiv" class="subJobUl"></ul>
+                        <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;作业依赖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                        <div class="col-md-10" style="top: -5px;">
+                            <a data-toggle="modal" href="#jobModal" onclick="jobxValidata.subJob.add()" class="btn btn-sm m-t-10">添加作业依赖</a>
                         </div>
-                    </span>
-                </div>
 
-                <div class="form-group" id="runModel" style="display:none">
-                    <label class="col-lab control-label wid150"><i class="glyphicon  glyphicon-sort-by-attributes"></i>&nbsp;&nbsp;运行顺序&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <div class="col-md-10">
-                        <label for="runModel0" class="radio-label"><input type="radio" name="runModel" value="0" id="runModel0" checked>串行&nbsp;&nbsp;&nbsp;</label>
-                        <label for="runModel1" class="radio-label"><input type="radio" name="runModel" value="1" id="runModel1">并行</label>&nbsp;&nbsp;&nbsp;
-                        <br><span class="tips" id="runModelTip">串行: 流程任务里的每个任务按照定义的顺序依次执行</span>
-                    </div>
+                         <div class="col-md-10" style="top:5px;margin-left: 110px;">
+                            <ul id="subJobDiv" class="subJobUl">
+                                <li id="1524476188000" style="position: relative">
+                                    <span id="name_1524476188000">121`22</span>
+                                    <input name="child.jobId" value="" type="hidden">
+                                    <input name="child.jobName" value="121`22" type="hidden">
+                                    <input name="child.agentId" value="3" type="hidden">
+                                    <input name="child.command" value="MjEyMQ==" type="hidden">
+                                    <input name="child.redo" value="1" type="hidden">
+                                    <input name="child.runCount" value="12" type="hidden">
+                                    <input name="child.timeout" value="0" type="hidden">
+                                    <input name="child.successExit" value="0" type="hidden">
+                                    <input name="child.comment" value="" type="hidden">
+                                     <span onclick="opencronValidata.subJob.edit('1524476188000')" class="subjob_edit">
+                                        <a data-toggle="modal" href="#jobModal" title="编辑">
+                                            <i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;
+                                        </a>
+                                    </span>
+                                    <span class="delSubJob" onclick="opencronValidata.subJob.remove(this)" class="subjob_del">
+                                        <a href="#" title="删除">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    </span>
+                                </li>
+
+                                <li id="152447618800033" style="position: relative">
+                                    <span id="name_152447618800033">job123</span>
+                                    <input name="child.jobId" value="" type="hidden">
+                                    <input name="child.jobName" value="job123" type="hidden">
+                                    <input name="child.agentId" value="3" type="hidden">
+                                    <input name="child.command" value="MjEyMQ==" type="hidden">
+                                    <input name="child.redo" value="1" type="hidden">
+                                    <input name="child.runCount" value="12" type="hidden">
+                                    <input name="child.timeout" value="0" type="hidden">
+                                    <input name="child.successExit" value="0" type="hidden">
+                                    <input name="child.comment" value="" type="hidden">
+                                     <span onclick="opencronValidata.subJob.edit('1524476188000')" style="position:absolute;right:35px;">
+                                        <a data-toggle="modal" href="#jobModal" title="编辑">
+                                            <i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;
+                                        </a>
+                                    </span>
+                                    <span class="delSubJob" onclick="opencronValidata.subJob.remove(this)" style="position:absolute;right: 20px;">
+                                        <a href="#" title="删除">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    </span>
+                                </li>
+
+                                <li id="152447618800011" style="position: relative">
+                                    <span id="name_152447618800011">lastJOB</span>
+                                    <input name="child.jobId" value="" type="hidden">
+                                    <input name="child.jobName" value="lastJOB" type="hidden">
+                                    <input name="child.agentId" value="3" type="hidden">
+                                    <input name="child.command" value="MjEyMQ==" type="hidden">
+                                    <input name="child.redo" value="1" type="hidden">
+                                    <input name="child.runCount" value="12" type="hidden">
+                                    <input name="child.timeout" value="0" type="hidden">
+                                    <input name="child.successExit" value="0" type="hidden">
+                                    <input name="child.comment" value="" type="hidden">
+                                     <span onclick="opencronValidata.subJob.edit('1524476188000')" style="position:absolute;right:35px;">
+                                        <a data-toggle="modal" href="#jobModal" title="编辑">
+                                            <i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;
+                                        </a>
+                                    </span>
+                                    <span class="delSubJob" onclick="opencronValidata.subJob.remove(this)" style="position:absolute;right: 20px;">
+                                        <a href="#" title="删除">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </span>
                 </div>
 
                 <div class="form-group">
@@ -234,7 +302,7 @@
                 <div class="modal-header">
                     <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i>
                     </button>
-                    <h4 id="subTitle" action="add" tid="">添加子作业</h4>
+                    <h4 id="subTitle" action="add" tid="">添加作业依赖</h4>
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal" role="form" id="subForm"><br>
