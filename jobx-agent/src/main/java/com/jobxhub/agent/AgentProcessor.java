@@ -21,6 +21,7 @@
 package com.jobxhub.agent;
 
 import com.alibaba.fastjson.JSON;
+import com.sun.tools.corba.se.idl.Compile;
 import org.apache.commons.exec.*;
 import org.hyperic.sigar.SigarException;
 import com.jobxhub.common.Constants;
@@ -98,12 +99,12 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response ping(Request request) {
-        Map<String,String> platform = new HashMap<String, String>(0);
+        Map<String, String> platform = new HashMap<String, String>(0);
         //agent Platform...
         if (CommonUtils.isWindows()) {
-            platform.put(Constants.PARAM_OS_KEY,Constants.Platform.Windows.toString());
-        }else {
-            platform.put(Constants.PARAM_OS_KEY,Constants.Platform.Unix.toString());
+            platform.put(Constants.PARAM_OS_KEY, Constants.Platform.Windows.toString());
+        } else {
+            platform.put(Constants.PARAM_OS_KEY, Constants.Platform.Unix.toString());
         }
         return Response.response(request).setResult(platform).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
     }
@@ -126,17 +127,17 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         if (!file.exists()) {
             return response.setSuccess(false).end();
         }
-        Map<String,String> result = new HashMap<String, String>(0);
-        List<Map<String,String>> data = new ArrayList<Map<String,String>>(0);
-        for (File itemFile:file.listFiles()) {
+        Map<String, String> result = new HashMap<String, String>(0);
+        List<Map<String, String>> data = new ArrayList<Map<String, String>>(0);
+        for (File itemFile : file.listFiles()) {
             if (itemFile.isHidden()) continue;
-            Map<String,String> itemMap = new HashMap<String, String>(0);
-            itemMap.put(Constants.PARAM_LISTPATH_NAME_KEY,itemFile.getName());
-            itemMap.put(Constants.PARAM_LISTPATH_PATH_KEY,itemFile.getAbsolutePath());
-            itemMap.put(Constants.PARAM_LISTPATH_ISDIRECTORY_KEY,itemFile.isDirectory()?"0":"1");
+            Map<String, String> itemMap = new HashMap<String, String>(0);
+            itemMap.put(Constants.PARAM_LISTPATH_NAME_KEY, itemFile.getName());
+            itemMap.put(Constants.PARAM_LISTPATH_PATH_KEY, itemFile.getAbsolutePath());
+            itemMap.put(Constants.PARAM_LISTPATH_ISDIRECTORY_KEY, itemFile.isDirectory() ? "0" : "1");
             data.add(itemMap);
         }
-        result.put(Constants.PARAM_LISTPATH_PATH_KEY,JSON.toJSONString(data));
+        result.put(Constants.PARAM_LISTPATH_PATH_KEY, JSON.toJSONString(data));
         response.setSuccess(true).setResult(result).end();
         return response;
     }
@@ -178,7 +179,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             logger.info("[JOBX]:execute:{},pid:{}", command, pid);
         }
 
-        File shellFile = CommandUtils.createShellFile(command, pid, EXITCODE_SCRIPT);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -199,12 +199,11 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             exitValue = Integer.parseInt(successExit);
         }
 
+        File shellFile = CommandUtils.createShellFile(command, pid, EXITCODE_SCRIPT);
+
         try {
-            String runCmd= "";
-            if (!CommonUtils.isWindows()) {
-                runCmd= "/bin/bash +x ";
-            }
-            CommandLine commandLine = CommandLine.parse(runCmd+shellFile.getAbsoluteFile());
+            String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
+            CommandLine commandLine = CommandLine.parse(runCmd + shellFile.getAbsoluteFile());
             final DefaultExecutor executor = new DefaultExecutor();
 
             ExecuteStreamHandler stream = new PumpStreamHandler(outputStream, outputStream);
@@ -292,7 +291,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                         try {
                             if (CommonUtils.isWindows()) {
                                 response.setMessage(text);
-                            }else {
+                            } else {
                                 text = text.replaceAll(String.format(REPLACE_REX, shellFile.getAbsolutePath()), "");
                                 response.setMessage(text.substring(0, text.lastIndexOf(EXITCODE_KEY)));
                                 exitValue = Integer.parseInt(text.substring(text.lastIndexOf(EXITCODE_KEY) + EXITCODE_KEY.length() + 1).trim());

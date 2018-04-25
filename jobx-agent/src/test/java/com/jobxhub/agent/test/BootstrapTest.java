@@ -56,6 +56,9 @@ public class BootstrapTest implements Serializable {
             String password = DigestUtils.md5Hex("jobx").toLowerCase();
             SystemPropertyUtils.setProperty("jobx.port", port + "");
             SystemPropertyUtils.setProperty("jobx.password", password);
+            SystemPropertyUtils.setProperty("jobx.host", "10.211.55.5");
+            SystemPropertyUtils.setProperty("jobx.registry", "zookeeper://10.211.55.2:2181");
+            SystemPropertyUtils.setProperty("java.io.tmpdir", "Y:\\GitHub\\JobX\\jobx-agent\\src\\test\\java\\com\\jobxhub\\agent\\test");
 
             this.server = ExtensionLoader.load(Server.class);
             //new thread to start for netty server

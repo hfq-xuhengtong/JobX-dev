@@ -20,6 +20,18 @@
         .ztree li a {
             color: #fff;
         }
+
+        .ztree li a.curSelectedNode {
+            background:none;
+             color:white;
+             border:none;
+        }
+        .ztree li span.button.ico_open { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.ico_close { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        .ztree li span.button.ico_docu { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+        /*.ztree li span.switch.root_open {background-image: none}
+        .ztree li span.switch.roots_open {background-image:none}
+        .ztree li span.switch.bottom_open{background-image: none}*/
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -28,7 +40,9 @@
         var setting = {
             edit: {
                 enable: true,
-                showRemoveBtn: true,
+                showRemoveBtn: function(treeId, treeNode) {
+                    return treeNode.id != 0;
+                },
                 showRenameBtn: false,
                 drag:{
                     inner:true,
@@ -45,7 +59,15 @@
             callback: {
                 beforeDrag: beforeDrag,
                 beforeDrop: beforeDrop,
-                onClick: onClick
+                beforeRemove:function(treeId, treeNode){
+                    if (treeNode.id == 0 ) {
+                        return false;
+                    }
+                },
+                onClick: onClick,
+                beforeCollapse:function () {
+                    return true;
+                }
             }
         };
 
@@ -67,14 +89,16 @@
         }
 
         function onClick(event, treeId, treeNode, clickFlag) {
-            jobxValidata.subJob.edit(treeNode.id);
-            $('#jobModal').modal('show');
+            if (treeNode.id != 0) {
+                jobxValidata.subJob.edit(treeNode.id);
+                $('#jobModal').modal('show');
+            }
         }
 
         $(document).ready(function(){
             window.jobxValidata = new Validata('${contextPath}');
-            var currJob = [{ id:1, pId:0, name:"当前作业", open:true}];
-            $.fn.zTree.init($("#sortJob"), setting,currJob );
+            var currentJob = [{ id:0, pId:0, name:"当前作业", open:true,showRemoveBtn:false}];
+            $.fn.zTree.init($("#sortJob"), setting,currentJob );
         });
     </script>
 
