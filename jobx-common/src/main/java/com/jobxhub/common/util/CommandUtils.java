@@ -47,12 +47,16 @@ public abstract class CommandUtils implements Serializable {
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 
-        String tempShellFilePath = dirPath + File.separator + shellFileName + ".sh";
+        String tempShellFilePath = dirPath + File.separator + shellFileName + (CommonUtils.isWindows()?".bat":".sh");
         File shellFile = new File(tempShellFilePath);
         try {
             if (!shellFile.exists()) {
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(tempShellFilePath)));
-                out.write("#!/bin/bash\n\n" + command + exitScript);
+                if (CommonUtils.isWindows()) {
+                    out.write("@echo off\n\n" + command);
+                }else {
+                    out.write("#!/bin/bash\n\n" + command + exitScript);
+                }
                 out.flush();
                 out.close();
             }

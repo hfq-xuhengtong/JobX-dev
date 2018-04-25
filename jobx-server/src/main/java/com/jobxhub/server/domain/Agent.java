@@ -47,6 +47,10 @@ public class Agent implements Serializable {
     @Transient
     private String ip;
     private String host;
+    /**
+     * 操作系统类型(1:unix,0:window)
+     */
+    private Integer platform;
     private Integer port;
     private String name;
     private String password;
@@ -106,6 +110,14 @@ public class Agent implements Serializable {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
     }
 
     public Integer getPort() {
@@ -259,7 +271,9 @@ public class Agent implements Serializable {
                 "agentId=" + agentId +
                 ", machineId='" + machineId + '\'' +
                 ", proxyAgent=" + proxyAgent +
+                ", ip='" + ip + '\'' +
                 ", host='" + host + '\'' +
+                ", platform=" + platform +
                 ", port=" + port +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +

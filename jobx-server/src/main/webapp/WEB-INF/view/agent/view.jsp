@@ -383,7 +383,7 @@
                             type: "post",
                             url: "${contextPath}/verify/ping.do",
                             data: {
-                                 "proxy": proxy,
+                                "proxy": proxy,
                                 "proxyId": $("#proxyAgent").val(),
                                 "host": host,
                                 "port": port,
@@ -603,7 +603,7 @@
                 return false;
             }
             if (!jobx.testIp(host)) {
-                alert("请填写正确的IP地址!");
+                alert("请填写正确的主机地址!");
                 return false;
             }
             var port = $("#port").val();

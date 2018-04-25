@@ -21,6 +21,8 @@
 
 package com.jobxhub.common.util;
 
+import com.jobxhub.common.Constants;
+
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;

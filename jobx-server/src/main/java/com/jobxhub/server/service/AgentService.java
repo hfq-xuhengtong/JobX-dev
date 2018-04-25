@@ -221,7 +221,7 @@ public class AgentService {
         boolean verify;
         if (type) {//直接输入的密钥
             agent.setPassword(pwd0);
-            verify = executeService.ping(agent);
+            verify = executeService.ping(agent).isSuccess();
         } else {//密码...
             verify = DigestUtils.md5Hex(pwd0).equals(agent.getPassword());
         }
@@ -313,7 +313,7 @@ public class AgentService {
         if (CommonUtils.isEmpty(info)) return;
         String[] array = info.split("_");
         //非法注册信息
-        if (array.length != 2 && array.length != 4) {
+        if (array.length != 3 && array.length != 5) {
             return;
         }
 
@@ -323,50 +323,55 @@ public class AgentService {
          * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
          *
          */
+        //mac_platform_password
         String macId = array[0];
-        String password = array[1];
+        int platform = Integer.valueOf(array[1]);
+        String password = array[2];
         Agent agent = getAgentByMachineId(macId);
-        if (array.length == 2) {
+        if (array.length == 3) {
             //密码一致
             if (agent != null && agent.getPassword().equals(password)) {
                 doConnect(agent);
             }
-        } else {
-            String host = array[2];
-            String port = array[3];
+            return;
+        }
+        //mac_platform_password_host_port
+        String host = array[3];
+        String port = array[4];
+        if (agent == null) {
+            agent = getAgentByHost(host);
+            //根据macid和host都找不到该机器则认为是新的机器.
             if (agent == null) {
-                agent = getAgentByHost(host);
-                //根据macid和host都找不到该机器则认为是新的机器.
-                if (agent == null) {
-                    //新的机器，需要自动注册.
-                    agent = new Agent();
-                    agent.setHost(host);
-                    agent.setName(host);
-                    agent.setPort(Integer.valueOf(port));
-                    agent.setMachineId(macId);
-                    agent.setPassword(password);
-                    agent.setComment("auto registered.");
-                    agent.setWarning(false);
-                    agent.setMobiles(null);
-                    agent.setEmailAddress(null);
-                    agent.setProxy(Constants.ConnType.CONN.getType());
-                    agent.setProxyAgent(null);
-                    agent.setStatus(false);
-                    agent.setDeleted(false);
-                    if (!executeService.ping(agent)) {
-                        merge(agent);
-                    }
-                } else {
-                    agent.setMachineId(macId);
-                    if (agent.getPassword().equals(password)) {
-                        doConnect(agent);
-                    }
+                //新的机器，需要自动注册.
+                agent = new Agent();
+                agent.setHost(host);
+                agent.setPlatform(platform);
+                agent.setName(host);
+                agent.setPort(Integer.valueOf(port));
+                agent.setMachineId(macId);
+                agent.setPassword(password);
+                agent.setComment("auto registered.");
+                agent.setWarning(false);
+                agent.setMobiles(null);
+                agent.setEmailAddress(null);
+                agent.setProxy(Constants.ConnType.CONN.getType());
+                agent.setProxyAgent(null);
+                agent.setStatus(false);
+                agent.setDeleted(false);
+                if (executeService.ping(agent).isSuccess()) {
+                    merge(agent);
                 }
             } else {
-                //密码一致
+                agent.setMachineId(macId);
                 if (agent.getPassword().equals(password)) {
                     doConnect(agent);
                 }
+            }
+        } else {
+            //密码一致
+            if (agent.getPassword().equals(password)) {
+                agent.setPlatform(platform);
+                doConnect(agent);
             }
         }
     }

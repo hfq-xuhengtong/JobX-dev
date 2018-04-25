@@ -79,6 +79,8 @@ public class Constants {
 
     public static final String PARAM_NEWPASSWORD_KEY = "newPassword";
 
+    public static final String PARAM_OS_KEY = "os";
+
     public static final String PARAM_PID_KEY = "pid";
 
     public static final String PARAM_COMMAND_KEY = "command";
@@ -701,6 +703,84 @@ public class Constants {
                 return false;
             }
             return JETTY.getName().equalsIgnoreCase(name.trim());
+        }
+    }
+
+    public enum Platform {
+
+        Windows("Windows",0),
+
+        Unix("Unix",1),
+
+        Linux("Linux",2),
+
+        Mac_OS("Mac OS",3),
+
+        Mac_OS_X("Mac OS X",4),
+
+        OS2("OS/2",5),
+
+        Solaris("Solaris",6),
+
+        SunOS("SunOS",7),
+
+        MPEiX("MPE/iX",8),
+
+        HP_UX("HP-UX",9),
+
+        AIX("AIX",10),
+
+        OS390("OS/390",11),
+
+        FreeBSD("FreeBSD",12),
+
+        Irix("Irix",13),
+
+        Digital_Unix("Digital Unix",14),
+
+        NetWare_411("NetWare",15),
+
+        OSF1("OSF1",16),
+
+        OpenVMS("OpenVMS",17),
+
+        Others("Others",18);
+
+        private String name;
+        private int index;
+
+        Platform(String name,int index){
+            this.name = name;
+            this.index = index;
+        }
+
+        public String toString(){
+            return name;
+        }
+
+        public static Platform getByName(String name) {
+            for (Platform platform : Platform.values()) {
+                if (platform.getName().equals(name)) {
+                    return platform;
+                }
+            }
+            return null;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
         }
     }
 

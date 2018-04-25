@@ -98,7 +98,14 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response ping(Request request) {
-        return Response.response(request).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
+        Map<String,String> platform = new HashMap<String, String>(0);
+        //agent Platform...
+        if (CommonUtils.isWindows()) {
+            platform.put(Constants.PARAM_OS_KEY,Constants.Platform.Windows.toString());
+        }else {
+            platform.put(Constants.PARAM_OS_KEY,Constants.Platform.Unix.toString());
+        }
+        return Response.response(request).setResult(platform).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
     }
 
     @Override
@@ -193,9 +200,11 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
 
         try {
-
-            CommandLine commandLine = CommandLine.parse(String.format("/bin/bash +x %s", shellFile.getAbsoluteFile()));
-
+            String runCmd= "/bin/bash +x ";
+            if (CommonUtils.isWindows()) {
+                runCmd = "call ";
+            }
+            CommandLine commandLine = CommandLine.parse(runCmd+shellFile.getAbsoluteFile());
             final DefaultExecutor executor = new DefaultExecutor();
 
             ExecuteStreamHandler stream = new PumpStreamHandler(outputStream, outputStream);
@@ -222,7 +231,9 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                             //call  kill...
                             request.setAction(Action.KILL);
                             try {
-                                kill(request);
+                                if (!CommonUtils.isWindows()) {
+                                    kill(request);
+                                }
                                 response.setExitCode(Constants.StatusCode.TIME_OUT.getValue());
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -272,18 +283,20 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                 }
             }
         } finally {
-
             exitValue = resultHandler.getExitValue();
-
             if (CommonUtils.notEmpty(outputStream.toByteArray())) {
                 try {
                     outputStream.flush();
                     String text = outputStream.toString();
                     if (notEmpty(text)) {
                         try {
-                            text = text.replaceAll(String.format(REPLACE_REX, shellFile.getAbsolutePath()), "");
-                            response.setMessage(text.substring(0, text.lastIndexOf(EXITCODE_KEY)));
-                            exitValue = Integer.parseInt(text.substring(text.lastIndexOf(EXITCODE_KEY) + EXITCODE_KEY.length() + 1).trim());
+                            if (CommonUtils.isWindows()) {
+                                response.setMessage(text);
+                            }else {
+                                text = text.replaceAll(String.format(REPLACE_REX, shellFile.getAbsolutePath()), "");
+                                response.setMessage(text.substring(0, text.lastIndexOf(EXITCODE_KEY)));
+                                exitValue = Integer.parseInt(text.substring(text.lastIndexOf(EXITCODE_KEY) + EXITCODE_KEY.length() + 1).trim());
+                            }
                         } catch (IndexOutOfBoundsException e) {
                             response.setMessage(text);
                         }

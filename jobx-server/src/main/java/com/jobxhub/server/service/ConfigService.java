@@ -21,6 +21,7 @@
 
 package com.jobxhub.server.service;
 
+import com.jobxhub.common.Constants;
 import org.hibernate.Query;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DigestUtils;
@@ -64,6 +65,16 @@ public class ConfigService {
          */
         try {
             Query query = queryDao.createQuery("update Agent set host=ip where host=null and ip!=null");
+            query.executeUpdate();
+        } catch (Exception e) {
+            //skip
+        }
+
+        /**
+         * for version 1.1.0 update to version 1.2.0(add platform)
+         */
+        try {
+            Query query = queryDao.createQuery("update Agent set platform=? where platform=null",Constants.Platform.Unix.getIndex());
             query.executeUpdate();
         } catch (Exception e) {
             //skip

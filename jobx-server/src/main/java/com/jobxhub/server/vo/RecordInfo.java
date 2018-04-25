@@ -47,6 +47,7 @@ public class RecordInfo implements Serializable {
     private Long userId;
     private String operateUname;
     private Long agentId;
+    private Integer platform;//agent系统类型
     private String agentName;
     private String jobName;
     private String host;
@@ -297,5 +298,13 @@ public class RecordInfo implements Serializable {
 
     public void setLastChild(Boolean lastChild) {
         this.lastChild = lastChild;
+    }
+
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
     }
 }

@@ -22,6 +22,7 @@
 package com.jobxhub.server.controller;
 
 import com.jobxhub.common.Constants;
+import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.server.domain.Agent;
 import it.sauronsoftware.cron4j.SchedulingPattern;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -63,31 +65,37 @@ public class VerifyController extends BaseController {
 
     @RequestMapping(value = "ping.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
+    public Map validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
         Agent agent = new Agent();
         agent.setProxy(proxy);
         agent.setHost(host);
         agent.setPort(port);
         agent.setPassword(password);
 
+        Map<String,Object> result = new HashMap<String, Object>(0);
+
         if (proxy == Constants.ConnType.PROXY.getType()) {
             agent.setProxy(Constants.ConnType.CONN.getType());
             if (proxyId != null) {
                 Agent proxyAgent = agentService.getAgent(proxyId);
                 if (proxyAgent == null) {
-                    return Status.FALSE;
+                    result.put("status",false);
+                    return result;
                 }
                 agent.setProxyAgent(proxyId);
                 //需要代理..
                 agent.setProxy(Constants.ConnType.PROXY.getType());
             }
         }
-        boolean ping = executeService.ping(agent);
-
-        if (!ping) {
+        Response response = executeService.ping(agent);
+        if (!response.isSuccess()) {
             logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), port));
+            result.put("status",false);
+            return result;
         }
-        return Status.create(ping);
+        result.put("status",true);
+        result.put("platform",response.getResult().get(Constants.PARAM_OS_KEY));
+        return result;
     }
 
     @RequestMapping(value = "guid.do", method = RequestMethod.POST)

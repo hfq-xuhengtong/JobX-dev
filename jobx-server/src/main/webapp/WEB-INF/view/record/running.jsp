@@ -220,19 +220,22 @@
                         <c:if test="${r.jobType eq 1}">流程作业</c:if>
                         <c:if test="${r.jobType eq 0}">单一作业</c:if>
                     </td>
-                    <td class="text-center">
-                        <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                            <a href="#" onclick="killJob('${r.recordId}')" title="kill">
-                                <i class="glyphicon glyphicon-stop"></i>
-                            </a>&nbsp;&nbsp;
+                    <%--只有unix下才可以kill--%>
+                    <c:if test="${r.platform eq 1}">
+                        <td class="text-center">
+                            <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                                <a href="#" onclick="killJob('${r.recordId}')" title="kill">
+                                    <i class="glyphicon glyphicon-stop"></i>
+                                </a>&nbsp;&nbsp;
 
-                        <c:if test="${r.status ne 4}">
-                            <a href="#" onclick="restartJob('${r.recordId}','${r.jobId}')" title="结束并重启">
-                                <i class="glyphicon glyphicon-refresh"></i>
-                            </a>&nbsp;&nbsp;
-                        </c:if>
-                        </div>
-                    </td>
+                            <c:if test="${r.status ne 4}">
+                                <a href="#" onclick="restartJob('${r.recordId}','${r.jobId}')" title="结束并重启">
+                                    <i class="glyphicon glyphicon-refresh"></i>
+                                </a>&nbsp;&nbsp;
+                            </c:if>
+                            </div>
+                        </td>
+                    </c:if>
                 </tr>
             </c:forEach>
             </tbody>

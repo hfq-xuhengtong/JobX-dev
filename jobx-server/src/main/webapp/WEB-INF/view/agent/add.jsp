@@ -155,6 +155,7 @@
                 },function (data) {
                     if (data.status) {
                         jobx.tipOk("#port");
+                        $("#platform").val(data.platform);
                         ajax({
                             url: "${contextPath}/verify/guid.do",
                             type: "post",
@@ -354,6 +355,7 @@
                         <label for="host" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;主机地址&nbsp;&nbsp;<b>*</b></label>
                         <div class="col-md-10">
                             <input type="text" class="form-control input-sm" id="host" name="host">
+                            <input type="hidden" id="platform" name="platform">
                             <span class="tips" tip="必填项,主机地址为IP地址,或者可以连接到该Agent的网址">必填项,执行器Host为IP地址,或者可以连接到该Agent的网址</span>
                         </div>
                     </div>
