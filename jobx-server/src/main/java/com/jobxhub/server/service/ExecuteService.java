@@ -687,6 +687,7 @@ public class ExecuteService implements Job {
                 agentService.merge(agent);
             }
         }
+        agent.setStatus(pong);
         return response;
     }
 

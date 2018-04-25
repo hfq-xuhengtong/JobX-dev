@@ -200,9 +200,9 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
 
         try {
-            String runCmd= "/bin/bash +x ";
-            if (CommonUtils.isWindows()) {
-                runCmd = "call ";
+            String runCmd= "";
+            if (!CommonUtils.isWindows()) {
+                runCmd= "/bin/bash +x ";
             }
             CommandLine commandLine = CommandLine.parse(runCmd+shellFile.getAbsoluteFile());
             final DefaultExecutor executor = new DefaultExecutor();
