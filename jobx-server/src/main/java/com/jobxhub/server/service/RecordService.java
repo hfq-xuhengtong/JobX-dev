@@ -58,7 +58,7 @@ public class RecordService {
     public PageBean query(HttpSession session, PageBean<RecordInfo> pageBean, RecordInfo recordInfo, String queryTime, boolean status) {
         String sql = "SELECT R.recordId,R.jobId,R.command,R.success,R.startTime,R.status,R.redoCount,R.jobType,R.groupId," +
                 "CASE WHEN R.status IN (1,3,5,6) THEN R.endTime WHEN R.status IN (0,2,4) THEN NOW() END AS endTime," +
-                "R.execType,T.jobName,T.agentId,D.name AS agentName,D.platform,D.password,D.host,T.cronExp,U.userName AS operateUname FROM T_RECORD AS R " +
+                "R.execType,T.jobName,T.agentId,D.name AS agentName,D.password,D.host,T.cronExp,U.userName AS operateUname FROM T_RECORD AS R " +
                 "LEFT JOIN T_JOB AS T " +
                 "ON R.jobId = T.jobId " +
                 "LEFT JOIN T_AGENT AS D " +

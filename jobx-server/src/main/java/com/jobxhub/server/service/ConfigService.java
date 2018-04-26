@@ -21,7 +21,6 @@
 
 package com.jobxhub.server.service;
 
-import com.jobxhub.common.Constants;
 import org.hibernate.Query;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DigestUtils;
