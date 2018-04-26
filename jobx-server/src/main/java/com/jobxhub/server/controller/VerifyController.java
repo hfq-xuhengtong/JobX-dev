@@ -29,6 +29,7 @@ import it.sauronsoftware.cron4j.SchedulingPattern;
 import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.ExecuteService;
 import com.jobxhub.server.vo.Status;
+import org.apache.zookeeper.data.Stat;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,37 +66,31 @@ public class VerifyController extends BaseController {
 
     @RequestMapping(value = "ping.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
+    public Status validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
         Agent agent = new Agent();
         agent.setProxy(proxy);
         agent.setHost(host);
         agent.setPort(port);
         agent.setPassword(password);
 
-        Map<String,Object> result = new HashMap<String, Object>(0);
-
         if (proxy == Constants.ConnType.PROXY.getType()) {
             agent.setProxy(Constants.ConnType.CONN.getType());
             if (proxyId != null) {
                 Agent proxyAgent = agentService.getAgent(proxyId);
                 if (proxyAgent == null) {
-                    result.put("status",false);
-                    return result;
+                    return Status.FALSE;
                 }
                 agent.setProxyAgent(proxyId);
                 //需要代理..
                 agent.setProxy(Constants.ConnType.PROXY.getType());
             }
         }
-        Response response = executeService.ping(agent);
-        if (!response.isSuccess()) {
+        boolean pong = executeService.ping(agent);
+        if (!pong) {
             logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), port));
-            result.put("status",false);
-            return result;
+            return Status.FALSE;
         }
-        result.put("status",true);
-        result.put("platform",response.getResult().get(Constants.PARAM_OS_KEY));
-        return result;
+        return Status.TRUE;
     }
 
     @RequestMapping(value = "guid.do", method = RequestMethod.POST)

@@ -22,6 +22,7 @@
 package com.jobxhub.common.util;
 
 
+import com.jobxhub.common.Constants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -42,7 +43,7 @@ public abstract class CommandUtils implements Serializable {
 
     private static final long serialVersionUID = 6458428317155311192L;
 
-    public static File createShellFile(String command, String shellFileName, String exitScript) {
+    public static File createShellFile(String command, String shellFileName) {
         String dirPath = IOUtils.getTempFolderPath();
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
@@ -55,7 +56,7 @@ public abstract class CommandUtils implements Serializable {
                 if (CommonUtils.isWindows()) {
                     out.write("@echo off\n\n" + command);
                 }else {
-                    out.write("#!/bin/bash\n\n" + command + exitScript);
+                    out.write("#!/bin/bash\n\n" + command + Constants.JOBX_UNIX_EXITCODE_SCRIPT);
                 }
                 out.flush();
                 out.close();

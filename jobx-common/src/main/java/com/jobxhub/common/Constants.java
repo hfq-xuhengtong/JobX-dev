@@ -151,6 +151,7 @@ public class Constants {
     /**
      * Name of the system property containing
      */
+
     public static final Boolean JOBX_CLUSTER = PropertyPlaceholder.getBoolean(Constants.PARAM_JOBX_CLUSTER_KEY);
 
     public static final String JOBX_CACHED = PropertyPlaceholder.get(Constants.PARAM_CACHED_NAME_KEY);
@@ -176,6 +177,12 @@ public class Constants {
      * kill file
      */
     public static final File JOBX_KILL_SHELL = new File(JOBX_HOME + "/bin/kill.sh");
+
+
+    public static final String JOBX_UNIX_EXITCODE_KEY = "exitCode";
+
+
+    public static final String JOBX_UNIX_EXITCODE_SCRIPT = String.format("\n\necho %s:$?", JOBX_UNIX_EXITCODE_KEY);
 
 
     public enum CachedProvider implements Serializable {

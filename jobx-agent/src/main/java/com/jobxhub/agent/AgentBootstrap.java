@@ -258,19 +258,18 @@ public class AgentBootstrap implements Serializable {
                 platform = Constants.Platform.Windows.getIndex();
             }
 
-            //mac_platform_password
-            this.registryPath = String.format("%s/%s_%d_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,platform,this.password);
+            //mac_password
+            this.registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,this.password);
 
             if (CommonUtils.isEmpty(this.host)) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("[JOBX] agent host not input,auto register can not be run，you can add this agent by yourself");
                 }
             } else {
-                //mac_platform_password_host_port
-                this.registryPath = String.format("%s/%s_%d_%s_%s_%s",
+                //mac_password_host_port
+                this.registryPath = String.format("%s/%s_%s_%s_%s",
                         Constants.ZK_REGISTRY_AGENT_PATH,
                         machineId,
-                        platform,
                         this.password,
                         this.host,
                         this.port);

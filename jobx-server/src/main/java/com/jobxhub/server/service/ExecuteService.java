@@ -644,7 +644,7 @@ public class ExecuteService implements Job {
      * 任务执行前 检测通信
      */
     private void checkPing(JobInfo job, Record record) throws PingException {
-        boolean ping = ping(job.getAgent()).isSuccess();
+        boolean ping = ping(job.getAgent());
         if (!ping) {
             //已完成
             record.setStatus(RunStatus.DONE.getStatus());
@@ -661,26 +661,20 @@ public class ExecuteService implements Job {
         }
     }
 
-    public Response ping(Agent agent) {
-        Response response = null;
-        Request request = Request.request(
-                agent.getHost(),
-                agent.getPort(),
-                Action.PING,
-                agent.getPassword(),
-                Constants.RPC_TIMEOUT,
-                agent.getProxyAgent());
+    public boolean ping(Agent agent) {
+        boolean pong = false;
         try {
-            response = caller.sentSync(request);
+            Response response = caller.sentSync(Request.request(
+                    agent.getHost(),
+                    agent.getPort(),
+                    Action.PING,
+                    agent.getPassword(),
+                    Constants.RPC_TIMEOUT,
+                    agent.getProxyAgent()));
+            pong = response!=null && response.isSuccess();
         } catch (Exception e) {
             logger.error("[JOBX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
         }
-
-        if (response == null) {
-            response = Response.response(request);
-            response.setSuccess(false);
-        }
-        boolean pong = response.isSuccess();
         if (agent.getAgentId()!=null) {
             if (agent.getStatus() == null || !agent.getStatus().equals(pong)) {
                 agent.setStatus(pong);
@@ -688,7 +682,7 @@ public class ExecuteService implements Job {
             }
         }
         agent.setStatus(pong);
-        return response;
+        return pong;
     }
 
     public String guid(Agent agent) {

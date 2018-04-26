@@ -47,12 +47,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     private Client client = null;
 
-    private final String REPLACE_REX = "%s:\\sline\\s[0-9]+:";
-
-    private String EXITCODE_KEY = "exitCode";
-
-    private String EXITCODE_SCRIPT = String.format("\n\necho %s:$?", EXITCODE_KEY);
-
     private AgentMonitor agentMonitor = new AgentMonitor();
 
     @Override
@@ -179,7 +173,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             logger.info("[JOBX]:execute:{},pid:{}", command, pid);
         }
 
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         final Response response = Response.response(request);
@@ -199,7 +192,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             exitValue = Integer.parseInt(successExit);
         }
 
-        File shellFile = CommandUtils.createShellFile(command, pid, EXITCODE_SCRIPT);
+        File shellFile = CommandUtils.createShellFile(command, pid);
 
         try {
             String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
@@ -292,9 +285,11 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                             if (CommonUtils.isWindows()) {
                                 response.setMessage(text);
                             } else {
-                                text = text.replaceAll(String.format(REPLACE_REX, shellFile.getAbsolutePath()), "");
-                                response.setMessage(text.substring(0, text.lastIndexOf(EXITCODE_KEY)));
-                                exitValue = Integer.parseInt(text.substring(text.lastIndexOf(EXITCODE_KEY) + EXITCODE_KEY.length() + 1).trim());
+                                String replaceReg = shellFile.getAbsolutePath().concat(":\\sline\\s[0-9]+:");
+                                text = text.replaceAll(replaceReg, "");
+                                String message = getUnixExecuteMessage(text);
+                                response.setMessage(message);
+                                exitValue = getUnixExecuteExitCode(text);
                             }
                         } catch (IndexOutOfBoundsException e) {
                             response.setMessage(text);
@@ -333,6 +328,8 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         return response;
     }
 
+
+
     @Override
     public Response password(Request request) {
         String newPassword = request.getParams().get(Constants.PARAM_NEWPASSWORD_KEY);
@@ -353,19 +350,22 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
 
         Response response = Response.response(request);
-        String text = CommandUtils.executeShell(Constants.JOBX_KILL_SHELL, pid, EXITCODE_SCRIPT);
+        String text = CommandUtils.executeShell(Constants.JOBX_KILL_SHELL, pid);
         String message = "";
         Integer exitVal = 0;
 
         if (notEmpty(text)) {
             try {
-                message = text.substring(0, text.lastIndexOf(EXITCODE_KEY));
-                exitVal = Integer.parseInt(text.substring(text.lastIndexOf(EXITCODE_KEY) + EXITCODE_KEY.length() + 1).trim());
+                if (CommonUtils.isWindows()) {
+
+                }else {
+                    message = getUnixExecuteMessage(text);
+                    exitVal = getUnixExecuteExitCode(text);
+                }
             } catch (StringIndexOutOfBoundsException e) {
                 message = text;
             }
         }
-
         response.setExitCode(Constants.StatusCode.ERROR_EXIT.getValue().equals(exitVal) ? Constants.StatusCode.ERROR_EXIT.getValue() : Constants.StatusCode.SUCCESS_EXIT.getValue())
                 .setMessage(message)
                 .end();
@@ -431,6 +431,14 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     @Override
     public void restart(Request request) {
 
+    }
+
+    private Integer getUnixExecuteExitCode(String text) {
+        return Integer.parseInt(text.substring(text.lastIndexOf(Constants.JOBX_UNIX_EXITCODE_SCRIPT) + Constants.JOBX_UNIX_EXITCODE_SCRIPT.length() + 1).trim());
+    }
+
+    private String getUnixExecuteMessage(String text) {
+        return text.substring(0, text.lastIndexOf(Constants.JOBX_UNIX_EXITCODE_SCRIPT));
     }
 
 }

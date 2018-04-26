@@ -71,16 +71,6 @@ public class ConfigService {
         }
 
         /**
-         * for version 1.1.0 update to version 1.2.0(add platform)
-         */
-        try {
-            Query query = queryDao.createQuery("update Agent set platform=? where platform=null",Constants.Platform.Unix.getIndex());
-            query.executeUpdate();
-        } catch (Exception e) {
-            //skip
-        }
-
-        /**
          * for version 1.1.0 update to version 1.2.0(api support,init token)
          */
         List<Job> jobs = queryDao.createQuery("from Job where token=null").list();
