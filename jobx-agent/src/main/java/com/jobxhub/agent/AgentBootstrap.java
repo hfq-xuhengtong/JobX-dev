@@ -252,12 +252,6 @@ public class AgentBootstrap implements Serializable {
              * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
              * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
              */
-
-            int platform = Constants.Platform.Unix.getIndex();
-            if (CommonUtils.isWindows()) {
-                platform = Constants.Platform.Windows.getIndex();
-            }
-
             //mac_password
             this.registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,this.password);
 
@@ -295,6 +289,7 @@ public class AgentBootstrap implements Serializable {
                     registry.unRegister(AgentBootstrap.this.registryPath);
                 }
             }, "JobXShutdownHook"));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
