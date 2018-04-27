@@ -158,7 +158,7 @@ public class AgentService {
         jobxRegistry.agentUnRegister(agent);
 
         //未删除,且未失联,则重新注册agent
-        if (!agent.getDeleted()||agent.getStatus()) {
+        if (!agent.getDeleted() && agent.getStatus()) {
             jobxRegistry.agentRegister(agent);
         }
 
@@ -167,7 +167,7 @@ public class AgentService {
         for (JobInfo jobInfo:jobs) {
             jobxRegistry.jobUnRegister(jobInfo.getJobId());
             ////未删除,且未失联,则重新注册agent上的job
-            if (!agent.getDeleted()||agent.getStatus()) {
+            if (!agent.getDeleted() && agent.getStatus()) {
                 jobxRegistry.jobRegister(jobInfo.getJobId());
             }
         }
@@ -230,6 +230,8 @@ public class AgentService {
                 pwd1 = DigestUtils.md5Hex(pwd1);
                 Boolean flag = executeService.password(agent, pwd1);
                 if (flag) {
+                    //将老密码的agent实例从zookeeper中移除
+                    jobxRegistry.agentUnRegister(agent);
                     agent.setPassword(pwd1);
                     this.merge(agent);
                     flushLocalAgent();
