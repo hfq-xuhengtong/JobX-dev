@@ -23,8 +23,8 @@
 
         .ztree li a.curSelectedNode {
             background:none;
-             color:white;
-             border:none;
+            color:white;
+            border:none;
         }
         .ztree li span.button.ico_open { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
         .ztree li span.button.ico_close { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
@@ -172,6 +172,56 @@
                         <span class="tips" id="expTip" tip="请采用unix/linux的时间格式表达式,如 00 01 * * *">请采用unix/linux的时间格式表达式,如 00 01 * * *</span>
                     </div>
                 </div>
+
+                <div id="cronSelector" class="form-group cronExpDiv" style="display: none;">
+                    <label class="col-lab control-label wid150">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <div class="col-md-10">
+                        <select id="year" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" selected="selected">每年</option>
+                            <c:forEach var="i" begin="2018" end="2050" step="1">
+                                <option value="${i}">${i}年</option>
+                            </c:forEach>
+                        </select>
+                        <select id="month" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" selected="selected">每月</option>
+                            <c:forEach var="i" begin="1" end="12" step="1">
+                                <option value="${i}">${i}月</option>
+                            </c:forEach>
+                        </select>
+                        <select id="day" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" selected="selected">每日</option>
+                            <c:forEach var="i" begin="1" end="31" step="1">
+                                <option value="${i}">${i}日</option>
+                            </c:forEach>
+                        </select>
+                        <select id="week" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" selected="selected">每星期</option>
+                            <c:forEach var="i" begin="1" end="7" step="1">
+                                <option value="${i}">星期${i}</option>
+                            </c:forEach>
+                        </select>
+                        <select id="hour" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" selected="selected">每时</option>
+                            <c:forEach var="i" begin="0" end="23" step="1">
+                                <option value="${i}">${i}时</option>
+                            </c:forEach>
+                        </select>
+                        <select id="minutes" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" selected="selected">每分</option>
+                            <c:forEach var="i" begin="0" end="59" step="1">
+                                <option value="${i}">${i}分</option>
+                            </c:forEach>
+                        </select>
+                        <select id="seconds" size="8" multiple="multiple" style="width:75px;">
+                            <option value="*" >每秒</option>
+                            <c:forEach var="i" begin="0" end="59" step="1">
+                                <option value="${i}">${i}秒</option>
+                            </c:forEach>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-sm" id="remove-cron-btn">收起</button>
+                    </div>
+                </div>
+
                 <br>
 
                 <div class="form-group">

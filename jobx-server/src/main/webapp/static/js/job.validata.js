@@ -27,8 +27,8 @@ function Validata() {
                 jobx.tipError("#jobName" + prefix, "必填项,作业名称不能为空");
                 this.status = false;
             } else {
-                if (_jobName.length < 4 || _jobName.length > 17) {
-                    jobx.tipError("#jobName" + prefix, "作业名称不能小于4个字符并且不能超过16个字符!");
+                if (_jobName.length < 4 || _jobName.length > 51) {
+                    jobx.tipError("#jobName" + prefix, "作业名称不能小于4个字符并且不能超过50个字符!");
                     this.status = false;
                 } else {
                     var _this = this;
@@ -59,6 +59,10 @@ function Validata() {
 
         cronExp: function () {
             var cronType = $('input[type="radio"][name="cronType"]:checked').val();
+
+            if(cronType == 0){
+                $('#cronSelector').slideUp()
+            }
 
             if ( !arguments[0] && cronType == 0) {
                 $("#cronTip").css("visibility","visible").html("crontab: unix/linux的时间格式表达式 ");
@@ -518,6 +522,56 @@ Validata.prototype.ready = function () {
         delay: 100
     });
 
+    $("#year,#month,#day,#week,#hour,#minutes,#seconds").click(function () {
+        var cronExp = "";
+        var year = $("#year").val();
+        if(year.length > 1 && year.indexOf("*") == 0){
+            year = year.toString().substr(2);
+        }
+        var month = $("#month").val();
+        if(month.length > 1 && month.indexOf("*") == 0){
+            month = month.toString().substr(2);
+        }
+        var day = $("#day").val();
+        if(day.length > 1 && day.indexOf("*") == 0){
+            day = day.toString().substr(2);
+        }
+        var week = $("#week").val();
+        if(!week){week="*";}
+        if(week.length > 1 && week.indexOf("*") == 0){
+            week = week.toString().substr(2);
+        }
+        if(week>0){
+            week = parseInt(week)+1;
+            if(week==8) week=1;
+        }
+
+        var hour = $("#hour").val();
+        if(hour.length > 1 && hour.indexOf("*") == 0){
+            hour = hour.toString().substr(2);
+        }
+        var minutes = $("#minutes").val();
+        if(minutes.length > 1 && minutes.indexOf("*") == 0){
+            minutes = minutes.toString().substr(2);
+        }
+        var seconds = $("#seconds").val();
+        if(seconds.length > 1 && seconds.indexOf("*") == 0){
+            seconds = seconds.toString().substr(2);
+        }
+
+        cronExp = seconds + " " + minutes + " " + hour + " " ;
+        if(week == "*"){
+            cronExp += day + " " + month + " ? ";
+        }else if(day == "*" && week != "*"){
+            cronExp += "? " + month + " " + week + " ";
+        }else if(day != "*" && week != "*"){
+            alert("日期和星期不能同时选择!");
+            return false;
+        }
+        cronExp += year;
+        $("#cronExp").val(cronExp);
+    });
+
     $("#save-btn").click(function () {
         _this.validata.verify();
         if(_this.validata.status){
@@ -544,6 +598,10 @@ Validata.prototype.ready = function () {
         _this.subJob.verify();
     });
 
+    $("#remove-cron-btn").click(function () {
+        $('#cronSelector').slideUp()
+    });
+
     $("#jobName").blur(function () {
         _this.validata.jobName();
     }).focus(function () {
@@ -553,14 +611,14 @@ Validata.prototype.ready = function () {
     $("#cronExp").blur(function () {
         _this.validata.cronExp();
     }).focus(function () {
-        var type = $('input[type="radio"][name="cronType"]:checked').val();
-        if (type == 0) {
+        //var type = $('input[type="radio"][name="cronType"]:checked').val();
+        if ($('#cronType0').prop("checked")) {
             $("#cronTip").css("visibility","visible").html("crontab: unix/linux的时间格式表达式 ");
             $("#expTip").css("visibility","visible").html('crontab: 请采用unix/linux的时间格式表达式,如 00 01 * * *');
-        }
-        if (type == 1) {
+        } else {
             $("#cronTip").css("visibility","visible").html('quartz: quartz框架的时间格式表达式');
             $("#expTip").css("visibility","visible").html('quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
+            $('#cronSelector').slideDown()
         }
     });
 
