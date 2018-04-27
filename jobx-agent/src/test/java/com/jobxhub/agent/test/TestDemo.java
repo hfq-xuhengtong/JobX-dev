@@ -6,6 +6,14 @@ public class TestDemo {
 
     @Test
     public void test1(){
-        System.out.println(" call d:\\job.bat".replaceAll("^call\\s+",""));
+
+       // String xx = System.getProperty("xx");
+       // System.out.println(xx);
+
+       // System.setProperty("xx","123322242");
+
+        System.out.println(System.getProperty("xx"));
+
+
     }
 }

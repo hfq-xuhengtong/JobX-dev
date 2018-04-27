@@ -170,7 +170,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         boolean timeoutFlag = timeout > 0;
 
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX]:execute:{},pid:{}", command, pid);
+            logger.info("[JobX]:execute:{},pid:{}", command, pid);
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -267,11 +267,11 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                     watchdog.stop();
                 }
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]:job has be killed!at pid :{}", request.getParams().get(Constants.PARAM_PID_KEY));
+                    logger.info("[JobX]:job has be killed!at pid :{}", request.getParams().get(Constants.PARAM_PID_KEY));
                 }
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]:job execute error:{}", e.getCause().getMessage());
+                    logger.info("[JobX]:job execute error:{}", e.getCause().getMessage());
                 }
             }
         } finally {
@@ -298,7 +298,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                     outputStream.close();
                 } catch (Exception e) {
                     if (logger.isErrorEnabled()) {
-                        logger.error("[JOBX]:error:{}", e);
+                        logger.error("[JobX]:error:{}", e);
                     }
                 }
             }
@@ -320,7 +320,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
 
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX]:execute result:{}", response.toString());
+            logger.info("[JobX]:execute result:{}", response.toString());
         }
 
         watchdog.stop();
@@ -346,7 +346,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     public Response kill(Request request) {
         String pid = request.getParams().get(Constants.PARAM_PID_KEY);
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX]:kill pid:{}", pid);
+            logger.info("[JobX]:kill pid:{}", pid);
         }
 
         Response response = Response.response(request);
@@ -371,7 +371,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                 .end();
 
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX]:kill result:{}" + response);
+            logger.info("[JobX]:kill result:{}" + response);
         }
         return response;
     }
@@ -404,7 +404,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             e.printStackTrace();
             response = Response.response(request);
             response.setExitCode(Constants.StatusCode.ERROR_EXIT.getValue())
-                    .setMessage("[JOBX]:proxy error:" + e.getLocalizedMessage())
+                    .setMessage("[JobX]:proxy error:" + e.getLocalizedMessage())
                     .setSuccess(false)
                     .end();
         }

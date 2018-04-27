@@ -68,16 +68,16 @@ public class Startup {
         }
 
         if (portParam == null) {
-            System.out.printf("[JOBX]Server At default port %d Starting...\n", startPort);
+            System.out.printf("[JobX]Server At default port %d Starting...\n", startPort);
         } else {
             try {
                 startPort = Integer.parseInt(portParam);
                 if (startPort <= MIN_PORT || startPort > MAX_PORT) {
-                    throw new IllegalArgumentException("[JOBX] server port error: " + portParam);
+                    throw new IllegalArgumentException("[JobX] server port error: " + portParam);
                 }
-                System.out.printf("[JOBX]server At port %d Starting...\n", startPort);
+                System.out.printf("[JobX]server At port %d Starting...\n", startPort);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("[JOBX] server port error: " + portParam);
+                throw new IllegalArgumentException("[JobX] server port error: " + portParam);
             }
         }
 

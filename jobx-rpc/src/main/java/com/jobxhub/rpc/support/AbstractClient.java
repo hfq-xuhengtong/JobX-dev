@@ -91,18 +91,18 @@ public abstract class AbstractClient implements Client {
             if (connectFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
                 if (connectWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[JOBX] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
+                        logger.info("[JobX] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
                     }
                     this.connectTable.put(request.getAddress(), connectWrapper);
                     return connectFuture;
                 } else {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("[JOBX] MinaRPC getConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
+                        logger.warn("[JobX] MinaRPC getConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
                     }
                 }
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[JOBX] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, connectFuture);
+                    logger.warn("[JobX] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, connectFuture);
                 }
             }
         }
@@ -122,18 +122,18 @@ public abstract class AbstractClient implements Client {
             if (channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
                 if (channelWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[JOBX] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
+                        logger.info("[JobX] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
                     }
                     this.channelTable.put(request.getAddress(), channelWrapper);
                     return channelWrapper.getChannel();
                 } else {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("[JOBX] NettyRPC getChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
+                        logger.warn("[JobX] NettyRPC getChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
                     }
                 }
             } else {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[JOBX] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, channelFuture);
+                    logger.warn("[JobX] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, channelFuture);
                 }
             }
         }
@@ -155,12 +155,12 @@ public abstract class AbstractClient implements Client {
         public void operationComplete(ChannelFuture future) throws Exception {
             if (future.isSuccess()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] NettyRPC sent success, request id:{}", rpcFuture.getRequest().getId());
+                    logger.info("[JobX] NettyRPC sent success, request id:{}", rpcFuture.getRequest().getId());
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] NettyRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
+                    logger.info("[JobX] NettyRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
                 }
                 if (this.rpcFuture != null) {
                     rpcFuture.caught(future.cause());
@@ -173,12 +173,12 @@ public abstract class AbstractClient implements Client {
         public void operationComplete(IoFuture future) {
             if (future.isDone()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] MinaRPC sent success, request id:{}", rpcFuture.getRequest().getId());
+                    logger.info("[JobX] MinaRPC sent success, request id:{}", rpcFuture.getRequest().getId());
                 }
                 return;
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] MinaRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
+                    logger.info("[JobX] MinaRPC sent failure, request id:{}", rpcFuture.getRequest().getId());
                 }
                 if (rpcFuture != null) {
                     rpcFuture.caught(getConnect(rpcFuture.getRequest()).getException());

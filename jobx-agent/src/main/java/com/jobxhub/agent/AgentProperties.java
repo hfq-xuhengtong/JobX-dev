@@ -80,14 +80,14 @@ public class AgentProperties {
             } catch (Throwable t) {
                 handleThrowable(t);
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[JOBX] init properties error:{}", t.getMessage());
+                    logger.warn("[JobX] init properties error:{}", t.getMessage());
                 }
             } finally {
                 try {
                     is.close();
                 } catch (IOException ioe) {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("[JOBX]Could not close jobx properties file", ioe);
+                        logger.warn("[JobX]Could not close jobx properties file", ioe);
                     }
                 }
             }
@@ -96,20 +96,10 @@ public class AgentProperties {
         if (is == null) {
             // Do something
             if (logger.isWarnEnabled()) {
-                logger.warn("[JOBX]Failed to load jobx properties file");
+                logger.warn("[JobX]Failed to load jobx properties file");
             }
             // That's fine - we have reasonable defaults.
             properties = new Properties();
-        }
-
-        // Register the properties as system properties
-        Enumeration<?> enumeration = properties.propertyNames();
-        while (enumeration.hasMoreElements()) {
-            String name = (String) enumeration.nextElement();
-            String value = properties.getProperty(name);
-            if (value != null) {
-                System.setProperty(name, value);
-            }
         }
     }
 

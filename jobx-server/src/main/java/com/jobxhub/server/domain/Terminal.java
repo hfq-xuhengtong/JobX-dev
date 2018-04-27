@@ -213,7 +213,7 @@ public class Terminal implements Serializable {
         try {
             return RSAUtils.decryptByPrivateKey(this.privateKey, JobXTools.Auth.getPrivateKey());
         } catch (Exception e) {
-            throw new RuntimeException("[JOBX] getPrivateKey error!");
+            throw new RuntimeException("[JobX] getPrivateKey error!");
         }
     }
 

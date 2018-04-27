@@ -52,7 +52,7 @@ public class ExceptionHandler implements HandlerExceptionResolver {
         String exception = byteArrayOutputStream.toString();
 
         view.getModel().put("error", "URL:" + WebUtils.getWebUrlPath(httpServletRequest) + httpServletRequest.getRequestURI() + "\r\n\r\nERROR:" + exception);
-        logger.error("[JOBX]error:{}", ex.getLocalizedMessage());
+        logger.error("[JobX]error:{}", ex.getLocalizedMessage());
         view.setViewName("/error/500");
         return view;
     }

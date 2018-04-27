@@ -72,7 +72,7 @@ public class MinaCodecAdapter implements ProtocolCodecFactory {
             int dataLength = in.getInt();
 
             if (in.remaining() < dataLength) {
-                //logger.warn("[JOBX]serializer error!body length < {}", dataLength);
+                //logger.warn("[JobX]serializer error!body length < {}", dataLength);
                 in.reset();
                 return false;
             }

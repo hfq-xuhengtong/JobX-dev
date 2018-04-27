@@ -121,3 +121,7 @@ public class VerifyController extends BaseController {
         return ParamsMap.map().set("status", true).set("macId", macId);
     }
 }
+
+
+//49|27|41|62|42|47|61|46|8|45|58|52|59
+//

@@ -89,7 +89,7 @@ public class ExecuteService implements Job {
         try {
             ExecuteService executeService = (ExecuteService) jobExecutionContext.getJobDetail().getJobDataMap().get("jobBean");
             executeService.execute(jobInfo, ExecType.AUTO);
-            this.printLog("[JOBX] job:{} at {}:{}", jobInfo, null);
+            this.printLog("[JobX] job:{} at {}:{}", jobInfo, null);
         } catch (Exception e) {
             if (logger.isErrorEnabled()) {
                 logger.error(e.getLocalizedMessage(), e);
@@ -135,7 +135,7 @@ public class ExecuteService implements Job {
                     @Override
                     public void done(Response response) {
 
-                        logger.info("[JOBX]:execute response:{}", response.toString());
+                        logger.info("[JobX]:execute response:{}", response.toString());
 
                         setRecordDone(record, response);
 
@@ -280,7 +280,7 @@ public class ExecuteService implements Job {
         while (true) {
             if (exec.isTerminated()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]SameTimeJob,All doned!");
+                    logger.info("[JobX]SameTimeJob,All doned!");
                 }
             }
         }
@@ -399,7 +399,7 @@ public class ExecuteService implements Job {
         while (true) {
             if (exec.isTerminated()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]batchExecuteJob doned!");
+                    logger.info("[JobX]batchExecuteJob doned!");
                 }
                 break;
             }
@@ -560,7 +560,7 @@ public class ExecuteService implements Job {
                         noticeService.notice(job, null);
                         loggerError("killed error:jobName:%s at host:%s,port:%d,pid:%s", job, cord.getPid() + " failed info: " + e.getMessage(), e);
 
-                        logger.error("[JOBX] job rumModel with SAMETIME error:{}", e.getMessage());
+                        logger.error("[JobX] job rumModel with SAMETIME error:{}", e.getMessage());
 
                         result.add(false);
                     }
@@ -571,7 +571,7 @@ public class ExecuteService implements Job {
         exec.shutdown();
         while (true) {
             if (exec.isTerminated()) {
-                logger.info("[JOBX] SAMETIMEjob done!");
+                logger.info("[JobX] SAMETIMEjob done!");
                 return !result.contains(false);
             }
         }
@@ -593,7 +593,7 @@ public class ExecuteService implements Job {
                 .putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout() + "")
                 .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit())
         );
-        logger.info("[JOBX]:execute response:{}", response.toString());
+        logger.info("[JobX]:execute response:{}", response.toString());
         setRecordDone(record, response);
         return response;
     }
@@ -673,7 +673,7 @@ public class ExecuteService implements Job {
                     agent.getProxyAgent()));
             pong = response!=null && response.isSuccess();
         } catch (Exception e) {
-            logger.error("[JOBX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
+            logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
         }
         if (agent.getAgentId()!=null) {
             if (agent.getStatus() == null || !agent.getStatus().equals(pong)) {
@@ -697,7 +697,7 @@ public class ExecuteService implements Job {
             );
             return response.getMessage();
         } catch (Exception e) {
-            logger.error("[JOBX]getguid failed,host:{},port:{}", agent.getHost(), agent.getPort());
+            logger.error("[JobX]getguid failed,host:{},port:{}", agent.getHost(), agent.getPort());
             return null;
         }
     }
@@ -714,7 +714,7 @@ public class ExecuteService implements Job {
             );
             return response.getMessage();
         } catch (Exception e) {
-            logger.error("[JOBX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
+            logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
             return null;
         }
     }

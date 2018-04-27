@@ -58,13 +58,13 @@ public class SftpMonitor extends TimerTask implements SftpProgressMonitor {
                 sendProgressMessage(transfered);
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] Sftp file transfering is done.");
+                    logger.info("[JobX] Sftp file transfering is done.");
                 }
                 setEnd(true); // 如果当前已传输数据大小等于文件总大小，说明已完成，设置end
             }
         } else {
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] Sftp file transfering is done.cancel timer");
+                logger.info("[JobX] Sftp file transfering is done.cancel timer");
             }
             stop(); // 如果传输结束，停止timer记时器
             return;
@@ -73,7 +73,7 @@ public class SftpMonitor extends TimerTask implements SftpProgressMonitor {
 
     public void stop() {
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX] Sftp progress monitor Stopping...");
+            logger.info("[JobX] Sftp progress monitor Stopping...");
         }
         if (timer != null) {
             timer.cancel();
@@ -82,13 +82,13 @@ public class SftpMonitor extends TimerTask implements SftpProgressMonitor {
             isScheduled = false;
         }
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX] Sftp progress monitor Stoped.");
+            logger.info("[JobX] Sftp progress monitor Stoped.");
         }
     }
 
     public void start() {
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX] Sftp progress monitor Starting...");
+            logger.info("[JobX] Sftp progress monitor Starting...");
         }
         if (timer == null) {
             timer = new Timer();
@@ -102,11 +102,11 @@ public class SftpMonitor extends TimerTask implements SftpProgressMonitor {
             double d = ((double) transfered * 100) / (double) fileSize;
             DecimalFormat df = new DecimalFormat("#.##");
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] Sftp Sending progress message: {} %", df.format(d));
+                logger.info("[JobX] Sftp Sending progress message: {} %", df.format(d));
             }
         } else {
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] Sftp Sending progress message: ", transfered);
+                logger.info("[JobX] Sftp Sending progress message: ", transfered);
             }
         }
     }

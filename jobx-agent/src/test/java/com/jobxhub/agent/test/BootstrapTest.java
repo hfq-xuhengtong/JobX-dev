@@ -69,7 +69,7 @@ public class BootstrapTest implements Serializable {
                 }
             }).start();
 
-            logger.info("[JOBX]agent started @ port:{},pid:{}", port, getPid());
+            logger.info("[JobX]agent started @ port:{},pid:{}", port, getPid());
         } catch (Exception e) {
             e.printStackTrace();
         }

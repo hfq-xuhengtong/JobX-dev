@@ -88,7 +88,7 @@ public class JettyLauncher implements Launcher {
         server.setDumpBeforeStop(false);
         server.setStopAtShutdown(true);
         server.setHandler(appContext);
-        logger.info("[JOBX] JettyLauncher starting...");
+        logger.info("[JobX] JettyLauncher starting...");
         server.start();
     }
 

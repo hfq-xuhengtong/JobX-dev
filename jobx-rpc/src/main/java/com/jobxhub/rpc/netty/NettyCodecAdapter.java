@@ -74,12 +74,12 @@ public class NettyCodecAdapter<T> {
                     out.writeBytes(data);
                 } else {
                     if (logger.isErrorEnabled()) {
-                        logger.error("[JOBX] NettyCodecAdapter encode error: this encode target is not instanceOf {}", this.type.getName());
+                        logger.error("[JobX] NettyCodecAdapter encode error: this encode target is not instanceOf {}", this.type.getName());
                     }
                 }
             } catch (Exception e) {
                 if (logger.isErrorEnabled()) {
-                    logger.error("[JOBX] NettyCodecAdapter encode error:", stackTrace(e));
+                    logger.error("[JobX] NettyCodecAdapter encode error:", stackTrace(e));
                 }
             }
 
@@ -111,7 +111,7 @@ public class NettyCodecAdapter<T> {
                 out.add(serializer.deserialize(data,type));
             } catch (Exception e) {
                 if (logger.isErrorEnabled()) {
-                    logger.error("[JOBX] NettyCodecAdapter decode error:", stackTrace(e));
+                    logger.error("[JobX] NettyCodecAdapter decode error:", stackTrace(e));
                 }
             }
         }

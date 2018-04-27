@@ -76,7 +76,7 @@ DEPLOY_PATH=${WORKDIR}/dist/jobx-agent
 if [ ! -f "${DIST_PATH}/${APP_TAR_NAME}" ] ; then
     #dist下没有tar包则检查agent的target下是否有tar包.
    if [ ! -f "${MAVEN_TARGET_TAR}" ] ; then
-      echo_r "[JOBX] please build project first!"
+      echo_r "[JobX] please build project first!"
       exit 0;
    else
       cp ${MAVEN_TARGET_TAR} ${DIST_PATH};

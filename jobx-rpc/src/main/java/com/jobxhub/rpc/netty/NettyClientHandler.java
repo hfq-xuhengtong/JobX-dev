@@ -69,9 +69,9 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
                     handlerContext.writeAndFlush(request);
                     requestFile.setBytes(null);
                     requestFile.setEndPos(-1);
-                    logger.info("[JOBX] NettyRPC file upload，readLength starting... request id:{}", request.getId());
+                    logger.info("[JobX] NettyRPC file upload，readLength starting... request id:{}", request.getId());
                 } else {
-                    logger.info("[JOBX] NettyRPC file upload，readLength done! request id:{}", request.getId());
+                    logger.info("[JobX] NettyRPC file upload，readLength done! request id:{}", request.getId());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,7 +84,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
     protected void channelRead0(ChannelHandlerContext handlerContext, Response response) throws Exception {
         if (!response.getAction().equals(Action.UPLOAD)) {
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] nettyRPC client receive response id:{}", response.getId());
+                logger.info("[JobX] nettyRPC client receive response id:{}", response.getId());
             }
             nettyClient.getRpcFuture(response.getId()).done(response);
             return;

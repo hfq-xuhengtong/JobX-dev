@@ -49,7 +49,7 @@ public class ZookeeperRegistry implements Registry {
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         if (url.isAnyHost()) {
-            throw new IllegalStateException("[JOBX] registry address == null");
+            throw new IllegalStateException("[JobX] registry address == null");
         }
         this.registryUrl = url;
         zkClient = zookeeperTransporter.connect(url);
@@ -77,7 +77,7 @@ public class ZookeeperRegistry implements Registry {
         try {
             zkClient.close();
         } catch (Exception e) {
-            logger.warn("[JOBX] Failed to close zookeeper client " + getUrl() + ", cause: " + e.getMessage(), e);
+            logger.warn("[JobX] Failed to close zookeeper client " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
@@ -87,7 +87,7 @@ public class ZookeeperRegistry implements Registry {
         Set<URL> recoverRegistered = new HashSet<URL>(getRegistered());
         if (!recoverRegistered.isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] Recover register url " + recoverRegistered);
+                logger.info("[JobX] Recover register url " + recoverRegistered);
             }
             for (URL url : recoverRegistered) {
                 failedRegistered.add(url);
@@ -100,7 +100,7 @@ public class ZookeeperRegistry implements Registry {
         try {
             zkClient.create(path, ephemeral);
         } catch (Throwable e) {
-            throw new RpcException("[JOBX] Failed to register " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+            throw new RpcException("[JobX] Failed to register " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
@@ -109,7 +109,7 @@ public class ZookeeperRegistry implements Registry {
         try {
             zkClient.delete(path);
         } catch (Throwable e) {
-            throw new RpcException("[JOBX] Failed to unregister " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+            throw new RpcException("[JobX] Failed to unregister " + getUrl() + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
@@ -124,7 +124,7 @@ public class ZookeeperRegistry implements Registry {
 
     protected void setUrl(URL url) {
         if (url == null) {
-            throw new IllegalArgumentException("[JOBX] registry url == null");
+            throw new IllegalArgumentException("[JobX] registry url == null");
         }
         this.registryUrl = url;
     }

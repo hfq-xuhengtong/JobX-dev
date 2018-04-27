@@ -57,10 +57,10 @@ public class MinaServer implements Server {
         try {
             acceptor.bind(this.socketAddress);
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] MinaServer start at address:{} success", port);
+                logger.info("[JobX] MinaServer start at address:{} success", port);
             }
         } catch (IOException e) {
-            logger.error("[JOBX] MinaServer start failure: {}", stackTrace(e));
+            logger.error("[JobX] MinaServer start failure: {}", stackTrace(e));
         }
     }
 
@@ -71,11 +71,11 @@ public class MinaServer implements Server {
                 acceptor.dispose();
             }
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] MinaServer stoped!");
+                logger.info("[JobX] MinaServer stoped!");
             }
         } catch (Throwable e) {
             if (logger.isErrorEnabled()) {
-                logger.error("[JOBX] MinaServer stop error:{}", stackTrace(e));
+                logger.error("[JobX] MinaServer stop error:{}", stackTrace(e));
             }
         }
     }

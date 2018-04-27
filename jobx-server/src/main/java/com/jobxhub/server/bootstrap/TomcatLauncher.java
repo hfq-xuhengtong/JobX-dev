@@ -72,10 +72,10 @@ public class TomcatLauncher implements Launcher {
             @Override
             public void lifecycleEvent(LifecycleEvent event) {
                 if (event.getLifecycle().equals(Lifecycle.START_EVENT)) {
-                    logger.info("[JOBX] TomcatLauncher starting...");
+                    logger.info("[JobX] TomcatLauncher starting...");
                 }
                 if (event.getLifecycle().equals(Lifecycle.STOP_EVENT)) {
-                    logger.info("[JOBX] TomcatLauncher stopping...");
+                    logger.info("[JobX] TomcatLauncher stopping...");
                 }
             }
         });

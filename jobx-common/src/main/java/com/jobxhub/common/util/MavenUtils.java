@@ -52,7 +52,7 @@ public class MavenUtils {
         } catch (XmlPullParserException e) {
             e.printStackTrace();
         }
-        throw new IllegalArgumentException("[JOBX]:mavenUtils getModel error,please check " + pom);
+        throw new IllegalArgumentException("[JobX]:mavenUtils getModel error,please check " + pom);
     }
 
     private Model getParentModel() {

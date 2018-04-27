@@ -85,11 +85,11 @@ public class NettyServer implements Server {
                 public void operationComplete(ChannelFuture future) {
                     if (future.isSuccess()) {
                         if (logger.isInfoEnabled()) {
-                            logger.info("[JOBX] NettyServer start at address:{} success", port);
+                            logger.info("[JobX] NettyServer start at address:{} success", port);
                         }
                     } else {
                         if (logger.isErrorEnabled()) {
-                            logger.error("[JOBX] NettyServer start at address:{} failure", port);
+                            logger.error("[JobX] NettyServer start at address:{} failure", port);
                         }
                     }
                 }
@@ -97,7 +97,7 @@ public class NettyServer implements Server {
 
         } catch (InterruptedException e) {
             if (logger.isInfoEnabled()) {
-                logger.error("[JOBX] NettyServer start failure: {}", stackTrace(e));
+                logger.error("[JobX] NettyServer start failure: {}", stackTrace(e));
             }
         }
     }
@@ -111,11 +111,11 @@ public class NettyServer implements Server {
                 workerGroup.shutdownGracefully();
             }
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] NettyServer stoped!");
+                logger.info("[JobX] NettyServer stoped!");
             }
         } catch (Throwable e) {
             if (logger.isErrorEnabled()) {
-                logger.error("[JOBX] NettyServer stop error:{}", stackTrace(e));
+                logger.error("[JobX] NettyServer stop error:{}", stackTrace(e));
             }
         }
     }

@@ -53,7 +53,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     @Override
     public void channelActive(ChannelHandlerContext handlerContext) {
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX] agent channelActive Active...");
+            logger.info("[JobX] agent channelActive Active...");
         }
         handlerContext.fireChannelActive();
     }
@@ -62,7 +62,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     protected void channelRead0(ChannelHandlerContext handlerContext, final Request request) throws Exception {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("[JOBX]Receive request {}" + request.getId());
+            logger.debug("[JobX]Receive request {}" + request.getId());
         }
 
         if (!request.getAction().equals(Action.UPLOAD)) {
@@ -72,7 +72,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) throws Exception {
                         if (logger.isInfoEnabled()) {
-                            logger.info("[JOBX] Send response for request id:{},action:{}", request.getId(), request.getAction());
+                            logger.info("[JobX] Send response for request id:{},action:{}", request.getId(), request.getAction());
                         }
                     }
                 });
@@ -97,7 +97,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) throws Exception {
                         if (logger.isInfoEnabled()) {
-                            logger.info("[JOBX] Netty upload file {} error!savePath is not found MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                            logger.info("[JobX] Netty upload file {} error!savePath is not found MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
                         }
                     }
                 });
@@ -113,7 +113,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
                         @Override
                         public void operationComplete(ChannelFuture channelFuture) throws Exception {
                             if (logger.isInfoEnabled()) {
-                                logger.info("[JOBX] Netty upload file {} exists! MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                                logger.info("[JobX] Netty upload file {} exists! MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
                             }
                         }
                     });
@@ -133,7 +133,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[JOBX] Netty upload progress:{}!for request id:{},action:{}", responseFile.getProgress(), request.getId(), request.getAction());
+                        logger.info("[JobX] Netty upload progress:{}!for request id:{},action:{}", responseFile.getProgress(), request.getId(), request.getAction());
                     }
                 }
             });
@@ -144,7 +144,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[JOBX] Netty upload file done!for request id:{},action:{}", request.getId(), request.getAction());
+                        logger.info("[JobX] Netty upload file done!for request id:{},action:{}", request.getId(), request.getAction());
                     }
                 }
             });
@@ -156,7 +156,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         if (logger.isErrorEnabled()) {
-            logger.error("[JOBX] agent channelInactive");
+            logger.error("[JobX] agent channelInactive");
         }
         super.channelInactive(ctx);
     }

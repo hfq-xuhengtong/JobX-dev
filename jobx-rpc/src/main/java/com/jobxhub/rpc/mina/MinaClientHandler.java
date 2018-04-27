@@ -44,7 +44,7 @@ public class MinaClientHandler extends IoHandlerAdapter {
     public void messageReceived(IoSession session, Object message) throws Exception {
         Response response = (Response) message;
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX] minaRPC client receive response id:{}", response.getId());
+            logger.info("[JobX] minaRPC client receive response id:{}", response.getId());
         }
         RpcFuture rpcFuture = this.minaClient.getRpcFuture(response.getId());
         rpcFuture.done(response);

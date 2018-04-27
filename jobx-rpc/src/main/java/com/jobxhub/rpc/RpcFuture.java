@@ -104,14 +104,14 @@ public class RpcFuture {
             this.response = response;
             long useTime = System.currentTimeMillis() - startTime;
             if (useTime > this.timeout) {
-                logger.warn("[JOBX]Service response time is too slow. Request id:{}. Response Time:{}",this.futureId,useTime);
+                logger.warn("[JobX]Service response time is too slow. Request id:{}. Response Time:{}",this.futureId,useTime);
             }
             if (done != null) {
                 done.signal();
             }
             if (this.invokeCallback != null ) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] async callback invoke");
+                    logger.info("[JobX] async callback invoke");
                 }
                 this.invokeCallback();
             }
@@ -141,25 +141,25 @@ public class RpcFuture {
 
     private void invokeCallback() {
         if (this.response == null) {
-            throw new IllegalStateException("[JOBX]response cannot be null. host:"+this.request.getAddress() + ",action: "+ this.request.getAction());
+            throw new IllegalStateException("[JobX]response cannot be null. host:"+this.request.getAddress() + ",action: "+ this.request.getAction());
         }
         if ( this.response.getThrowable() == null ) {
             try {
                 invokeCallback.done(this.response);
             } catch (Exception e) {
-                logger.error("[JOBX]callback done invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
+                logger.error("[JobX]callback done invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
             }
         }  else {
             try {
                 invokeCallback.caught(response.getThrowable());
             } catch (Exception e) {
-                logger.error("[JOBX]callback caught invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
+                logger.error("[JobX]callback caught invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
             }
         }
     }
 
     public TimeoutException getTimeoutException() {
-        return new TimeoutException("[JOBX] RPC timeout! host:"+request.getAddress()+",action:"+request.getAction());
+        return new TimeoutException("[JobX] RPC timeout! host:"+request.getAddress()+",action:"+request.getAction());
     }
 
     private void scanAndCleanTimeOut() {

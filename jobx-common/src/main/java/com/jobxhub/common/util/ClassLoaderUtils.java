@@ -95,10 +95,10 @@ public final class ClassLoaderUtils {
     public static void loadJar(String jarFilePath) {
         File jarFile = new File(jarFilePath);
         if (!jarFile.exists()) {
-            throw new IllegalArgumentException("[JOBX] jarFilePath:" + jarFilePath + " is not exists");
+            throw new IllegalArgumentException("[JobX] jarFilePath:" + jarFilePath + " is not exists");
         }
         if (jarFile.isFile()) {
-            throw new IllegalArgumentException("[JOBX] jarFile " + jarFilePath + " is not file");
+            throw new IllegalArgumentException("[JobX] jarFile " + jarFilePath + " is not file");
         }
         loadPath(jarFile.getAbsolutePath());
     }
@@ -106,14 +106,14 @@ public final class ClassLoaderUtils {
     public static void loadJars(String path) {
         File jarDir = new File(path);
         if (!jarDir.exists()) {
-            throw new IllegalArgumentException("[JOBX] jarPath:" + path + " is not exists");
+            throw new IllegalArgumentException("[JobX] jarPath:" + path + " is not exists");
         }
         if (!jarDir.isDirectory()) {
-            throw new IllegalArgumentException("[JOBX] jarPath:" + path + " is not directory");
+            throw new IllegalArgumentException("[JobX] jarPath:" + path + " is not directory");
         }
 
         if (jarDir.listFiles().length == 0) {
-            throw new IllegalArgumentException("[JOBX] have not jar in path:" + path);
+            throw new IllegalArgumentException("[JobX] have not jar in path:" + path);
         }
 
         for (File jarFile : jarDir.listFiles()) {

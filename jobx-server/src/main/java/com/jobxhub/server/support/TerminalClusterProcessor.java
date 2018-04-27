@@ -87,7 +87,7 @@ public class TerminalClusterProcessor {
      */
     static {
         if (Constants.JOBX_CLUSTER) {
-            logger.info("[JOBX] Terminal init zookeeper....");
+            logger.info("[JobX] Terminal init zookeeper....");
             registryURL = URL.valueOf(PropertyPlaceholder.get(Constants.PARAM_JOBX_REGISTRY_KEY));
             registryPath = Constants.ZK_REGISTRY_TERM_PATH;
             ZookeeperTransporter transporter = ExtensionLoader.load(ZookeeperTransporter.class);
@@ -137,7 +137,7 @@ public class TerminalClusterProcessor {
                                         String methodName = array[2];
                                         //该方法在该机器上
                                         if (terminalMapping.containsKey(token) && terminalMapping.containsValue(JobXTools.SERVER_ID)) {
-                                            logger.info("[JOBX] Terminal method :{} in this server", methodMap.get(methodName).getName());
+                                            logger.info("[JobX] Terminal method :{} in this server", methodMap.get(methodName).getName());
                                             //unregister
                                             registry.unRegister(registryPath + "/" + child);
                                             //invoke...
@@ -171,7 +171,7 @@ public class TerminalClusterProcessor {
 
         JobXTools.getCachedManager().set(token.concat(methodMD5), param);
 
-        logger.info("[JOBX] Terminal registry to zookeeper");
+        logger.info("[JobX] Terminal registry to zookeeper");
 
         //method_token_method
         String data = ZK_TERM_METHOD_PREFIX + token.concat("_").concat(methodMD5);

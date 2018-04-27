@@ -150,7 +150,7 @@ public class TerminalService {
                 return Terminal.AuthStatus.AUTH_FAIL;
             } else if (e.getMessage().toLowerCase().contains("unknownhostexception")) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]:error: DNS Lookup Failed ");
+                    logger.info("[JobX]:error: DNS Lookup Failed ");
                 }
                 return Terminal.AuthStatus.HOST_FAIL;
             } else if (e instanceof BadPaddingException) {//RSA解码错误..密码错误...

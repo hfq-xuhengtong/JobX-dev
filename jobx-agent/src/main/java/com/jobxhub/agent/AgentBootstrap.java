@@ -164,11 +164,11 @@ public class AgentBootstrap implements Serializable {
             portStr = AgentProperties.getProperty(Constants.PARAM_JOBX_PORT_KEY);
         }
         if (isEmpty(portStr)) {
-            throw new ExceptionInInitializerError("[JOBX] agent port must be not null");
+            throw new ExceptionInInitializerError("[JobX] agent port must be not null");
         }
         this.port = CommonUtils.toInt(portStr, 0);
         if (NetUtils.isInvalidPort(this.port)) {
-            throw new ExceptionInInitializerError("[JOBX] agent port error,must be between 0 and 65535");
+            throw new ExceptionInInitializerError("[JobX] agent port error,must be between 0 and 65535");
         }
 
         //host
@@ -177,7 +177,7 @@ public class AgentBootstrap implements Serializable {
             this.host = AgentProperties.getProperty(Constants.PARAM_JOBX_HOST_KEY);
         }
         if (notEmpty(this.host) && NetUtils.isValidAddress(this.host)) {
-            throw new ExceptionInInitializerError("[JOBX] agent host is valid");
+            throw new ExceptionInInitializerError("[JobX] agent host is valid");
         }
 
         //password
@@ -185,7 +185,7 @@ public class AgentBootstrap implements Serializable {
          * 1)input
          * 2)passFile
          * 3)confFile
-         * 先从启动脚本里读取password(-p{password}) 如果启动里未输入,则读取上次是密码.password,
+         * 先从启动脚本里读取password(-p{password}) 如果启动里未输入,则读取上次的密码.password,
          * 如果本地密码记录.password不存在,则从conf文件中读取密码,如果conf中未设置,报错退出...
          *
          */
@@ -207,12 +207,12 @@ public class AgentBootstrap implements Serializable {
                     Constants.JOBX_PASSWORD_FILE.delete();
                     IOUtils.writeText(Constants.JOBX_PASSWORD_FILE, this.password, Constants.CHARSET_UTF8);
                 } else {
-                    throw new ExceptionInInitializerError("[JOBX] agent password cat not be null");
+                    throw new ExceptionInInitializerError("[JobX] agent password cat not be null");
                 }
             }
         }
 
-        SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY, this.password);
+        SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY,this.password);
 
         //init sigar
         String libPath = System.getProperty("java.library.path");
@@ -239,13 +239,13 @@ public class AgentBootstrap implements Serializable {
                 Integer pid = getPid();
                 IOUtils.writeText(Constants.JOBX_PID_FILE, pid, Constants.CHARSET_UTF8);
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]agent started @ port:{},pid:{}", port, pid);
+                    logger.info("[JobX]agent started @ port:{},pid:{}", port, pid);
                 }
             }
 
             String machineId = MacUtils.getMachineId();
             if (machineId == null) {
-                throw new IllegalArgumentException("[JOBX] getUniqueId error.");
+                throw new IllegalArgumentException("[JobX] getUniqueId error.");
             }
 
             /**
@@ -257,7 +257,7 @@ public class AgentBootstrap implements Serializable {
 
             if (CommonUtils.isEmpty(this.host)) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("[JOBX] agent host not input,auto register can not be run，you can add this agent by yourself");
+                    logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
                 }
             } else {
                 //mac_password_host_port
@@ -277,14 +277,14 @@ public class AgentBootstrap implements Serializable {
             registry.register(this.registryPath, true);
 
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX] agent register to zookeeper done");
+                logger.info("[JobX] agent register to zookeeper done");
             }
 
             //register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
                     if (logger.isInfoEnabled()) {
-                        logger.info("[JOBX] run shutdown hook now...");
+                        logger.info("[JobX] run shutdown hook now...");
                     }
                     registry.unRegister(AgentBootstrap.this.registryPath);
                 }
@@ -322,7 +322,7 @@ public class AgentBootstrap implements Serializable {
             awaitSocket = new ServerSocket(shutdownPort);
         } catch (IOException e) {
             if (logger.isErrorEnabled()) {
-                logger.error("[JOBX] agent .await: create[{}] ", shutdownPort, e);
+                logger.error("[JobX] agent .await: create[{}] ", shutdownPort, e);
             }
             return;
         }
@@ -348,12 +348,12 @@ public class AgentBootstrap implements Serializable {
                         // This should never happen but bug 56684 suggests that
                         // it does.
                         if (logger.isWarnEnabled()) {
-                            logger.warn("[JOBX] agentServer accept.timeout", Long.valueOf(System.currentTimeMillis() - acceptStartTime), ste);
+                            logger.warn("[JobX] agentServer accept.timeout", Long.valueOf(System.currentTimeMillis() - acceptStartTime), ste);
                         }
                         continue;
                     } catch (AccessControlException ace) {
                         if (logger.isWarnEnabled()) {
-                            logger.warn("[JOBX] agentServer .accept security exception: {}", ace.getMessage(), ace);
+                            logger.warn("[JobX] agentServer .accept security exception: {}", ace.getMessage(), ace);
                         }
                         continue;
                     } catch (IOException e) {
@@ -361,7 +361,7 @@ public class AgentBootstrap implements Serializable {
                             break;
                         }
                         if (logger.isErrorEnabled()) {
-                            logger.error("[JOBX] agent .await: accept: ", e);
+                            logger.error("[JobX] agent .await: accept: ", e);
                         }
                         break;
                     }
@@ -380,7 +380,7 @@ public class AgentBootstrap implements Serializable {
                             ch = stream.read();
                         } catch (IOException e) {
                             if (logger.isWarnEnabled()) {
-                                logger.warn("[JOBX] agent .await: read: ", e);
+                                logger.warn("[JobX] agent .await: read: ", e);
                             }
                             ch = -1;
                         }
@@ -402,7 +402,7 @@ public class AgentBootstrap implements Serializable {
                     break;
                 } else {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("[JOBX] agent .await: Invalid command '" + command.toString() + "' received");
+                        logger.warn("[JobX] agent .await: Invalid command '" + command.toString() + "' received");
                     }
                 }
             }
@@ -442,12 +442,12 @@ public class AgentBootstrap implements Serializable {
             socket.close();
         } catch (ConnectException ce) {
             if (logger.isErrorEnabled()) {
-                logger.error("[JOBX] Agent.stop error:{} ", ce);
+                logger.error("[JobX] Agent.stop error:{} ", ce);
             }
             System.exit(1);
         } catch (Exception e) {
             if (logger.isErrorEnabled()) {
-                logger.error("[JOBX] Agent.stop error:{} ", e);
+                logger.error("[JobX] Agent.stop error:{} ", e);
             }
             System.exit(1);
         }

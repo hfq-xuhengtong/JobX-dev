@@ -110,7 +110,7 @@ public class NoticeService {
     }
 
     private String getMessage(Agent agent, String message) {
-        String msgFormat = "[JOBX] 机器:%s(%s:%s)%s\n\r\t\t--%s";
+        String msgFormat = "[JobX] 机器:%s(%s:%s)%s\n\r\t\t--%s";
         return String.format(msgFormat, agent.getName(), agent.getHost(), agent.getPort(), message, DateUtils.formatFullDate(new Date()));
     }
 

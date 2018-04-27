@@ -86,7 +86,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
         if (referer != null && !referer.startsWith(urlPath)) {
             response.sendRedirect("/");
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX]Bad request,redirect to login page");
+                logger.info("[JobX]Bad request,redirect to login page");
             }
             JobXTools.invalidSession(request);
             return false;
@@ -98,13 +98,13 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                 //跳到登陆页面
                 response.sendRedirect("/");
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]User not login,redirect to login page");
+                    logger.info("[JobX]User not login,redirect to login page");
                 }
                 return false;
             }
         } catch (IllegalStateException e) {
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX]Session already invalidated,redirect to login page");
+                logger.info("[JobX]Session already invalidated,redirect to login page");
             }
             response.sendRedirect("/");
             return false;
@@ -118,7 +118,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                         || requestURI.contains("/agent/add")
                         || requestURI.contains("/agent/edit"))) {
             if (logger.isInfoEnabled()) {
-                logger.info("[JOBX]illegal or limited access");
+                logger.info("[JobX]illegal or limited access");
             }
             return false;
         }
@@ -127,7 +127,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
             if (!verifyCSRF(request)) {
                 response.sendRedirect("/");
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX]Bad request,redirect to login page");
+                    logger.info("[JobX]Bad request,redirect to login page");
                 }
                 JobXTools.invalidSession(request);
                 return false;

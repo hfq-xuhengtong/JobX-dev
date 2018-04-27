@@ -57,17 +57,17 @@ public final class JobXTools {
         if (Constants.JOBX_CLUSTER) {
             Constants.CachedProvider provider = Constants.CachedProvider.getByName(Constants.JOBX_CACHED);
             if (provider == null) {
-                throw new ExceptionInInitializerError("[JOBX] please check parameter 'jobx.cached' value,must be 'redis' or 'memcached'");
+                throw new ExceptionInInitializerError("[JobX] please check parameter 'jobx.cached' value,must be 'redis' or 'memcached'");
             }
             String conf = String.format(Constants.SESSION_CONF_FORMAT,provider.getName());
             try {
                 Enumeration<URL> urls = JobXTools.class.getClassLoader().getResources(conf);
                 if (urls == null || !urls.hasMoreElements()) {
-                    throw new ExceptionInInitializerError("[JOBX] cache conf file ["+conf+"] not found!");
+                    throw new ExceptionInInitializerError("[JobX] cache conf file ["+conf+"] not found!");
                 }
                 cachedContext = new ClassPathXmlApplicationContext("classpath*:".concat(conf));
             } catch (IOException e) {
-                throw new ExceptionInInitializerError("[JOBX] init cache conf error:"+ e );
+                throw new ExceptionInInitializerError("[JobX] init cache conf error:"+ e );
             }
         }
     }
@@ -178,7 +178,7 @@ public final class JobXTools {
                     IOUtils.writeText(pubFile, publicKey, Constants.CHARSET_UTF8);
                     IOUtils.writeText(prvFile, privateKey, Constants.CHARSET_UTF8);
                 } catch (Exception e) {
-                    logger.error("[JOBX] error:{}" + e.getMessage());
+                    logger.error("[JobX] error:{}" + e.getMessage());
                     throw new RuntimeException("init RSA'publicKey and privateKey error!");
                 }
             }

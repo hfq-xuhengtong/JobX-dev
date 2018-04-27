@@ -49,7 +49,7 @@ public class MacUtils {
             }
             return buffer.toString();
         } catch (Exception e) {
-            throw new UnknownException("[JOBX] getMacAddress error");
+            throw new UnknownException("[JobX] getMacAddress error");
         }
     }
 
@@ -86,7 +86,7 @@ public class MacUtils {
             e.printStackTrace();
         }
         if (list.isEmpty()) {
-            throw new UnknownException("[JOBX] getAllMac error");
+            throw new UnknownException("[JobX] getAllMac error");
         }
         //按照字典顺序排序
         return new TreeSet<String>(list);

@@ -207,7 +207,7 @@ public class DashboardController extends BaseController {
         if (status == 200) {
             //登陆成功了则生成csrf...
             String csrf = JobXTools.generateCSRF(request, response);
-            logger.info("[JOBX]login seccussful,generate csrf:{}", csrf);
+            logger.info("[JobX]login seccussful,generate csrf:{}", csrf);
 
             User user = JobXTools.getUser(session);
             //提示用户更改默认密码

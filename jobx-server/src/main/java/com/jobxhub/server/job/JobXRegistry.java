@@ -115,13 +115,13 @@ public class JobXRegistry {
             return;
         }
 
-        //扫描agent自动注册到server
+        //扫描zookeeper里已有的agent,连接....
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
         if (CommonUtils.notEmpty(children)) {
             for (String agent : children) {
                 agents.put(agent, agent);
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] agent auto connected! info:{}", agent);
+                    logger.info("[JobX] agent auto connected! info:{}", agent);
                 }
                 agentService.doConnect(agent);
             }
@@ -131,7 +131,7 @@ public class JobXRegistry {
     public void destroy() {
         destroy = true;
         if (logger.isInfoEnabled()) {
-            logger.info("[JOBX] run destroy now...");
+            logger.info("[JobX] run destroy now...");
         }
 
         if (!Constants.JOBX_CLUSTER) return;
@@ -163,7 +163,7 @@ public class JobXRegistry {
                     for (String agent : children) {
                         agents.put(agent, agent);
                         if (logger.isInfoEnabled()) {
-                            logger.info("[JOBX] agent connected! info:{}", agent);
+                            logger.info("[JobX] agent connected! info:{}", agent);
                         }
                         agentService.doConnect(agent);
                     }
@@ -174,14 +174,14 @@ public class JobXRegistry {
                         if (!agents.containsKey(agent)) {
                             //新增...
                             agents.put(agent, agent);
-                            logger.info("[JOBX] agent connected! info:{}", agent);
+                            logger.info("[JobX] agent connected! info:{}", agent);
                             agentService.doConnect(agent);
                         }
                     }
                     if (CommonUtils.notEmpty(unAgents)) {
                         for (String child : unAgents.keySet()) {
                             agents.remove(child);
-                            logger.info("[JOBX] agent doDisconnect! info:{}", child);
+                            logger.info("[JobX] agent doDisconnect! info:{}", child);
                             agentService.doDisconnect(child);
                         }
                     }
@@ -244,7 +244,7 @@ public class JobXRegistry {
             @Override
             public void run() {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JOBX] run shutdown hook now...");
+                    logger.info("[JobX] run shutdown hook now...");
                 }
                 registryService.unRegister(registryPath);
             }

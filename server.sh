@@ -124,7 +124,7 @@ STARTUP_SHELL=${WORKDIR}/${APP_ARTIFACT}/startup.sh
 if [ ! -f "${DIST_PATH}/${APP_WAR_NAME}" ] ; then
     #dist下没有war包则检查server的target下是否有war包.
    if [ ! -f "${MAVEN_TARGET_WAR}" ] ; then
-      echo_w "[JOBX] please build project first!"
+      echo_w "[JobX] please build project first!"
       exit 0;
    else
       cp ${MAVEN_TARGET_WAR} ${DIST_PATH};

@@ -60,7 +60,7 @@ public class MinaClient extends AbstractClient {
             connect.getSession().write(request);
             return rpcFuture.get();
         } else {
-            throw new IllegalArgumentException("[JOBX] MinaRPC channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[JobX] MinaRPC channel not active. request id:" + request.getId());
         }
     }
 
@@ -72,7 +72,7 @@ public class MinaClient extends AbstractClient {
             connect.addListener(new AbstractClient.FutureListener(rpcFuture));
             connect.getSession().write(request);
         } else {
-            throw new IllegalArgumentException("[JOBX] MinaRPC channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[JobX] MinaRPC channel not active. request id:" + request.getId());
         }
     }
 
@@ -84,7 +84,7 @@ public class MinaClient extends AbstractClient {
             connect.addListener(new AbstractClient.FutureListener(rpcFuture));
             connect.getSession().write(request);
         } else {
-            throw new IllegalArgumentException("[JOBX] MinaRPC invokeAsync channel not active. request id:" + request.getId());
+            throw new IllegalArgumentException("[JobX] MinaRPC invokeAsync channel not active. request id:" + request.getId());
         }
     }
 
