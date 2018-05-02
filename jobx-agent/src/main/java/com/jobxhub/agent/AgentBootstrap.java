@@ -506,6 +506,8 @@ public class AgentBootstrap implements Serializable {
         if (macId == null) {
             macId = MacUtils.getMachineId();
             IOUtils.writeText(Constants.JOBX_UID_FILE, macId, Constants.CHARSET_UTF8);
+            Constants.JOBX_UID_FILE.setReadable(true,false);
+            Constants.JOBX_UID_FILE.setWritable(false,false);
         }
 
         return macId;
