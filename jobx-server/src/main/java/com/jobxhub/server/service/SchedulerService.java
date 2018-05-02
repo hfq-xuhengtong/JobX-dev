@@ -134,11 +134,7 @@ public final class SchedulerService {
     public void syncTigger(JobInfo job) throws Exception {
         //将该作业从zookeeper中移除掉....
         jobxRegistry.jobUnRegister(job.getJobId());
-
-        if (!job.getDeleted()) {
-            //新增或修改的job往zookeeper中同步一次...
-            jobxRegistry.jobRegister(job.getJobId());
-        }
+        jobxRegistry.jobRegister(job.getJobId());
     }
 
     public void syncTigger(Long jobId) throws Exception {

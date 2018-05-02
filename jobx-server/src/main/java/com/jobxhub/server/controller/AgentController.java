@@ -120,7 +120,6 @@ public class AgentController extends BaseController {
         }
         agent.setPassword(DigestUtils.md5Hex(agent.getPassword()));
         agent.setStatus(true);
-        agent.setDeleted(false);
         agentService.merge(agent);
         return "redirect:/agent/view.htm";
     }
@@ -140,7 +139,7 @@ public class AgentController extends BaseController {
     @ResponseBody
     public Status edit(Agent agentParam) {
         Agent agent = agentService.getAgent(agentParam.getAgentId());
-        BeanUtils.copyProperties(agentParam, agent, "machineId", "host", "password", "deleted", "status", "proxyAgent", "mobiles", "emailAddress");
+        BeanUtils.copyProperties(agentParam, agent, "machineId", "host", "password", "status", "proxyAgent", "mobiles", "emailAddress");
         if (Constants.ConnType.CONN.getType().equals(agentParam.getProxy())) {
             agent.setProxyAgent(null);
         } else {

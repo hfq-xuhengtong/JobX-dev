@@ -85,8 +85,6 @@ public class JobInfo implements Serializable {
     //运行时长(分钟)
     private Long timeout;
 
-    private Boolean deleted;
-
     private String token;
 
     private String callbackURL;
@@ -339,14 +337,6 @@ public class JobInfo implements Serializable {
 
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
     }
 
     public Boolean getPause() {

@@ -74,7 +74,6 @@ public class GroupService {
                 " ON A.agentId = T.agentId" +
                 " LEFT JOIN T_GROUP AS G" +
                 " ON T.groupId = G.groupId" +
-                " WHERE A.deleted=0 " +
                 " ORDER BY G.createTime ";
 
         Group noGroup = new Group();

@@ -57,7 +57,6 @@ public class Agent implements Serializable {
     private String emailAddress;
     private String mobiles;
     private Boolean status;
-    private Boolean deleted;//是否删除
     private Date notifyTime;//失败后发送通知告警的时间
     private String comment;
     private Date updateTime;
@@ -164,14 +163,6 @@ public class Agent implements Serializable {
         this.status = status;
     }
 
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
     public Date getNotifyTime() {
         return notifyTime;
     }
@@ -268,7 +259,6 @@ public class Agent implements Serializable {
                 ", emailAddress='" + emailAddress + '\'' +
                 ", mobiles='" + mobiles + '\'' +
                 ", status=" + status +
-                ", deleted=" + deleted +
                 ", notifyTime=" + notifyTime +
                 ", comment='" + comment + '\'' +
                 ", updateTime=" + updateTime +

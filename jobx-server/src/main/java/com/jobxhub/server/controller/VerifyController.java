@@ -85,9 +85,27 @@ public class VerifyController extends BaseController {
                 agent.setProxy(Constants.ConnType.PROXY.getType());
             }
         }
-        boolean pong = executeService.ping(agent);
+        boolean pong = executeService.ping(agent,false);
         if (!pong) {
             logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), port));
+            return Status.FALSE;
+        }
+        return Status.TRUE;
+    }
+
+    @RequestMapping(value = "ping2.do", method = RequestMethod.POST)
+    @ResponseBody
+    public Status ping(Long id) {
+        if (id == null) {
+            return Status.FALSE;
+        }
+        Agent agent = agentService.getAgent(id);
+        if (agent == null) {
+            return Status.FALSE;
+        }
+        boolean pong = executeService.ping(agent,false);
+        if (!pong) {
+            logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), agent.getPort()));
             return Status.FALSE;
         }
         return Status.TRUE;

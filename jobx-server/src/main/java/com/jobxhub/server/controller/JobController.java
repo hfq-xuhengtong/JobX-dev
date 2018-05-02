@@ -140,7 +140,6 @@ public class JobController extends BaseController {
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
         jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));
-        jobParam.setDeleted(false);
         if (jobParam.getJobId() != null) {
             Job job = jobService.getJob(jobParam.getJobId());
 
@@ -205,7 +204,6 @@ public class JobController extends BaseController {
                 child.setSuccessExit(StringUtils.htmlEncode((String) successExit[i]));
                 child.setTimeout(Integer.parseInt((String) timeout[i]));
                 child.setRedo(Integer.parseInt((String) redo[i]));
-                child.setDeleted(false);
                 if (child.getRedo() == 0) {
                     child.setRunCount(null);
                 } else {

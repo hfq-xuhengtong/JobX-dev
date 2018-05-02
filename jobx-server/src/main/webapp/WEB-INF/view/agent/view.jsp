@@ -461,6 +461,10 @@
         }
 
         function editPwd(id) {
+          /*  if (!$(".pong_"+id).length) {
+                alert("执行器失联,请检查执行器连接");
+                return;
+            }*/
             inputPwd();
             ajax({
                 type: "post",
@@ -474,9 +478,8 @@
                     $("#agentId").val(obj.agentId);
                     window.errorAgentPwd = 0;
                     $("#pwdModal").modal("show");
-
                 }
-            })
+            });
         }
 
         function remove(id) {
@@ -656,7 +659,7 @@
                 data: { "agentId": id },
                 dataType:"html"
             },function (result) {
-                if(result) {
+                if(result&&result.length>0) {
                     $("#pwdPath").val("more " + result);
                     $("#oldpwd").html('');
                     $("#pwdlable").html('<i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;文：');

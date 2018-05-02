@@ -33,7 +33,6 @@ import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.tag.PageBean;
 import org.apache.commons.codec.digest.DigestUtils;
 import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.vo.JobInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -55,9 +54,6 @@ public class AgentService {
     private ExecuteService executeService;
 
     @Autowired
-    private JobService jobService;
-
-    @Autowired
     private NoticeService noticeService;
 
     @Autowired
@@ -66,12 +62,8 @@ public class AgentService {
     @Autowired
     private JobXRegistry jobxRegistry;
 
-    @Autowired
-    private SchedulerService schedulerService;
-
-
     public List<Agent> getAgentByConnType(Constants.ConnType connType) {
-        return queryDao.hqlQuery("from Agent where deleted=? and status=? and proxy=?", false, true, connType.getType());
+        return queryDao.hqlQuery("from Agent where status=? and proxy=?", true, connType.getType());
     }
 
     public List<Agent> getAll() {
@@ -85,28 +77,32 @@ public class AgentService {
     private synchronized void flushLocalAgent() {
         JobXTools.CACHE.put(
                 Constants.PARAM_CACHED_AGENT_KEY,
-                queryDao.hqlQuery("from Agent where deleted=?", false)
+                queryDao.getAll(Agent.class)
         );
     }
 
     public List<Agent> getOwnerAgentByConnStatus(HttpSession session, Constants.ConnStatus status) {
-        String hql = "from Agent where deleted=? and status=?";
+        String hql = "from Agent where status=?";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            hql += " and agentId in (".concat(user.getAgentIds()).concat(")");
+            if (user.getAgentIds() != null) {
+                hql += " and agentId in (".concat(user.getAgentIds()).concat(")");
+            }
         }
-        return queryDao.hqlQuery(hql, false, status.isValue());
+        return queryDao.hqlQuery(hql, status.isValue());
     }
 
     public void getOwnerAgent(HttpSession session, PageBean pageBean) {
-        String hql = "from Agent where deleted=? ";
+        String hql = "from Agent  ";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            hql += " and agentId in (".concat(user.getAgentIds()).concat(")");
+            if (user.getAgentIds() != null) {
+                hql += " where agentId in (".concat(user.getAgentIds()).concat(")");
+            }
         }
         pageBean.verifyOrderBy("name", "name", "host", "port");
         hql += " order by " + pageBean.getOrderBy() + " " + pageBean.getOrder();
-        queryDao.hqlPageQuery(hql, pageBean, false);
+        queryDao.hqlPageQuery(hql, pageBean);
     }
 
     public Agent getAgent(Long id) {
@@ -142,51 +138,38 @@ public class AgentService {
     }
 
 
-    public Agent merge(Agent agent) {
-        if (agent.getAgentId() != null) {
-            //从数据库获取最新的agent,防止已经被删除的agent当在监测时重新给改为非删除...
-            Agent dbAgent = getAgent(agent.getAgentId());
-            //已经删除的过滤掉..
-            if (dbAgent.getDeleted()) {
-                return agent;
-            }
-        }
-
-        agent = (Agent) queryDao.merge(agent);
-
-        //agent unRegister
-        jobxRegistry.agentUnRegister(agent);
-
-        //未删除,且未失联,则重新注册agent
-        if (!agent.getDeleted() && agent.getStatus()) {
+    /**
+     * agent 连接状态修改
+     *
+     * @param agent
+     */
+    public void pong(Agent agent, Boolean pong, Boolean update) {
+        if (agent == null || agent.getAgentId() == null) return;
+        //卸载zookeeper里的agent
+        boolean verify = pong && jobxRegistry.exists(agent) == null;
+        if (verify) {
             jobxRegistry.agentRegister(agent);
+        }else {
+            jobxRegistry.agentUnRegister(agent);
         }
-
-        //job unRegister
-        List<JobInfo> jobs = jobService.getJobByAgentId(agent.getAgentId());
-        for (JobInfo jobInfo:jobs) {
-            jobxRegistry.jobUnRegister(jobInfo.getJobId());
-            ////未删除,且未失联,则重新注册agent上的job
-            if (!agent.getDeleted() && agent.getStatus()) {
-                jobxRegistry.jobRegister(jobInfo.getJobId());
-            }
+        agent.setStatus(pong);
+        if (update) {
+            queryDao.merge(agent);
         }
+    }
 
-        /**
-         * 同步缓存...
-         */
+    public Agent merge(Agent agent) {
+        agent = (Agent) queryDao.merge(agent);
         flushLocalAgent();
-
         return agent;
-
     }
 
     public boolean existsName(Long id, String name) {
-        String hql = "select count(1) from Agent where deleted=? and name=? ";
+        String hql = "select count(1) from Agent where name=? ";
         if (notEmpty(id)) {
             hql += " and agentId !=" + id;
         }
-        return queryDao.hqlCount(hql, false, name) > 0;
+        return queryDao.hqlCount(hql, name) > 0;
     }
 
     public boolean checkDelete(Long id) {
@@ -195,24 +178,25 @@ public class AgentService {
             return false;
         }
         //检查该执行器是否定义的有任务
-        String hql = "select count(1) from Job where deleted=? and agentId=? ";
-        return queryDao.hqlCount(hql, false, id) > 0;
+        String hql = "select count(1) from Job where agentId=? ";
+        return queryDao.hqlCount(hql, id) > 0;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         Agent agent = getAgent(id);
-        agent.setDeleted(true);
-        queryDao.save(agent);
+        queryDao.getSession().clear();
+        queryDao.delete(Agent.class,id);
         jobxRegistry.agentUnRegister(agent);
         flushLocalAgent();
     }
 
     public boolean existshost(Long id, String host) {
-        String hql = "select count(1) from Agent where deleted=? and host=? ";
+        String hql = "select count(1) from Agent where host=? ";
         if (notEmpty(id)) {
             hql += " and agentId != " + id;
         }
-        return queryDao.hqlCount(hql, false, host) > 0;
+        return queryDao.hqlCount(hql, host) > 0;
     }
 
 
@@ -221,7 +205,7 @@ public class AgentService {
         boolean verify;
         if (type) {//直接输入的密钥
             agent.setPassword(pwd0);
-            verify = executeService.ping(agent);
+            verify = executeService.ping(agent, false);
         } else {//密码...
             verify = DigestUtils.md5Hex(pwd0).equals(agent.getPassword());
         }
@@ -233,8 +217,7 @@ public class AgentService {
                     //将老密码的agent实例从zookeeper中移除
                     jobxRegistry.agentUnRegister(agent);
                     agent.setPassword(pwd1);
-                    this.merge(agent);
-                    flushLocalAgent();
+                    executeService.ping(agent, true);
                     return "true";
                 } else {
                     return "false";
@@ -248,33 +231,18 @@ public class AgentService {
     }
 
     public List<Agent> getOwnerAgents(HttpSession session) {
-        String hql = "from Agent where deleted=? ";
+        String hql = "from Agent ";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            hql += " and agentid in (" + user.getAgentIds() + ")";
+            hql += " where agentId in (" + user.getAgentIds() + ")";
         }
-        return queryDao.hqlQuery(hql, false);
+        return queryDao.hqlQuery(hql);
     }
 
     public Agent getAgentByMachineId(String machineId) {
-        String hql = "from Agent where deleted=? and machineId=?";
+        String hql = "from Agent where machineId=?";
         //不能保证macId的唯一性,可能两台机器存在同样的macId,这种概率可以忽略不计,这里为了程序的健壮性...
-        List<Agent> agents = queryDao.hqlQuery(hql, false, machineId);
-        if (CommonUtils.notEmpty(agents)) {
-            return agents.get(0);
-        }
-        return null;
-    }
-
-    /**
-     * 同一个host的机器只能有一条非删除的记录
-     *
-     * @param host
-     * @return
-     */
-    private Agent getAgentByHost(String host) {
-        String hql = "from Agent where deleted=? and host=?";
-        List<Agent> agents = queryDao.hqlQuery(hql, false, host);
+        List<Agent> agents = queryDao.hqlQuery(hql, machineId);
         if (CommonUtils.notEmpty(agents)) {
             return agents.get(0);
         }
@@ -286,19 +254,16 @@ public class AgentService {
     }
 
     public void doDisconnect(Agent agent) {
-        agent.setStatus(false);
         if (CommonUtils.isEmpty(agent.getNotifyTime()) || new Date().getTime() - agent.getNotifyTime().getTime() >= configService.getSysConfig().getSpaceTime() * 60 * 1000) {
             noticeService.notice(agent);
             //记录本次任务失败的时间
             agent.setNotifyTime(new Date());
         }
-        //save disconnect status to db.....
-        this.merge(agent);
+        this.pong(agent, false, true);
     }
 
     public void doConnect(Agent agent) {
-        agent.setStatus(true);
-        this.merge(agent);
+        this.pong(agent, true, true);
     }
 
     public void doDisconnect(String info) {
@@ -311,67 +276,72 @@ public class AgentService {
         }
     }
 
-    public void doConnect(String info) {
-        if (CommonUtils.isEmpty(info)) return;
-        String[] array = info.split("_");
-        //非法注册信息
+    public List<Agent> transfer(String registryInfo) {
+        if (CommonUtils.isEmpty(registryInfo)) return null;
+        String[] array = registryInfo.split("_");
         if (array.length != 2 && array.length != 4) {
+            return null;
+        }
+        String macId = array[0];
+        String password = array[1];
+        Agent agent = new Agent();
+        if (array.length == 2) {
+            agent.setMachineId(macId);
+            agent.setPassword(password);
+        } else {
+            String host = array[2];
+            String port = array[3];
+            agent.setMachineId(macId);
+            agent.setPassword(password);
+            agent.setHost(host);
+            agent.setPort(Integer.valueOf(port));
+        }
+        Agent agent1 = this.getAgentByMachineId(macId);
+        //index 0 registryAgent
+        //index 1 dbAgent
+        if (agent1 != null) {
+            return Arrays.asList(agent, agent1);
+        }
+        return Arrays.asList(agent, null);
+    }
+
+    /**
+     * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
+     * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
+     */
+    public void doConnect(List<Agent> transfers) {
+        if (transfers == null) return;
+        Agent registryAgent = transfers.get(0);
+        Agent agent = transfers.get(1);
+
+        //两个参数
+        if (registryAgent.getHost() == null) {
+            //密码一致
+            if (agent != null && registryAgent.getPassword().equals(agent.getPassword())) {
+                doConnect(agent);
+            }
             return;
         }
 
-        /**
-         *
-         * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
-         * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
-         *
-         */
-        //mac_password
-        String macId = array[0];
-        String password = array[1];
-        Agent agent = getAgentByMachineId(macId);
-        if (array.length == 2) {
+        //4个参数
+        if (agent != null) {
             //密码一致
-            if (agent != null && agent.getPassword().equals(password)) {
+            if (agent.getPassword().equals(registryAgent.getPassword())) {
                 doConnect(agent);
             }
             return;
         }
-        //mac_password_host_port
-        String host = array[2];
-        String port = array[3];
-        if (agent == null) {
-            agent = getAgentByHost(host);
-            //根据macid和host都找不到该机器则认为是新的机器.
-            if (agent == null) {
-                //新的机器，需要自动注册.
-                agent = new Agent();
-                agent.setHost(host);
-                agent.setName(host);
-                agent.setPort(Integer.valueOf(port));
-                agent.setMachineId(macId);
-                agent.setPassword(password);
-                agent.setComment("auto registered.");
-                agent.setWarning(false);
-                agent.setMobiles(null);
-                agent.setEmailAddress(null);
-                agent.setProxy(Constants.ConnType.CONN.getType());
-                agent.setProxyAgent(null);
-                agent.setStatus(false);
-                agent.setDeleted(false);
-                if (executeService.ping(agent)) {
-                    merge(agent);
-                }
-            } else {
-                agent.setMachineId(macId);
-                if (agent.getPassword().equals(password)) {
-                    doConnect(agent);
-                }
-            }
-        } else {
-            //密码一致
-            if (agent.getPassword().equals(password)) {
-                doConnect(agent);
-            }
+        //新的机器，需要自动注册.
+        registryAgent.setName(registryAgent.getHost());
+        registryAgent.setComment("auto registered.");
+        registryAgent.setWarning(false);
+        registryAgent.setMobiles(null);
+        registryAgent.setEmailAddress(null);
+        registryAgent.setProxy(Constants.ConnType.CONN.getType());
+        registryAgent.setProxyAgent(null);
+        if (executeService.ping(registryAgent, false)) {
+            registryAgent.setStatus(true);
+            merge(registryAgent);
         }
     }
 

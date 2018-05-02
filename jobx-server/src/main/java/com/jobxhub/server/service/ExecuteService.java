@@ -37,7 +37,6 @@ import com.jobxhub.server.domain.Agent;
 import com.jobxhub.server.domain.User;
 import com.jobxhub.server.job.JobXCaller;
 import com.jobxhub.server.vo.JobInfo;
-import com.mysql.jdbc.PacketTooBigException;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -86,6 +85,8 @@ public class ExecuteService implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         String key = jobExecutionContext.getJobDetail().getKey().getName();
         JobInfo jobInfo = (JobInfo) jobExecutionContext.getJobDetail().getJobDataMap().get(key);
+        Agent agent = agentService.getAgent(jobInfo.getAgentId());
+        jobInfo.setAgent(agent);
         try {
             ExecuteService executeService = (ExecuteService) jobExecutionContext.getJobDetail().getJobDataMap().get("jobBean");
             executeService.execute(jobInfo, ExecType.AUTO);
@@ -167,15 +168,13 @@ public class ExecuteService implements Job {
                             }
 
                         } catch (Exception e) {
-                            if (e instanceof PacketTooBigException) {
-                                //信息丢失,继续保存记录
-                                printLostJobInfo(job, record.getMessage());
-                                record.setMessage(null);
-                                recordService.merge(record);
-                                //发送警告信息
-                                noticeService.notice(job, PACKETTOOBIG_ERROR);
-                                loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
-                            }
+                            //信息丢失,继续保存记录
+                            printLostJobInfo(job, record.getMessage());
+                            record.setMessage(null);
+                            recordService.merge(record);
+                            //发送警告信息
+                            noticeService.notice(job, PACKETTOOBIG_ERROR);
+                            loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
                         }
                     }
 
@@ -194,10 +193,10 @@ public class ExecuteService implements Job {
                     //执行前先检测一次通信是否正常
                     checkPing(job, record);
                     Request request = Request.request(
-                            job.getHost(),
-                            job.getPort(),
+                            job.getAgent().getHost(),
+                            job.getAgent().getPort(),
                             Action.EXECUTE,
-                            job.getPassword(),
+                            job.getAgent().getPassword(),
                             job.getTimeout(),
                             job.getAgent().getProxyAgent())
                             .putParam(Constants.PARAM_COMMAND_KEY, job.getCommand())
@@ -333,11 +332,7 @@ public class ExecuteService implements Job {
             recordService.flowJobDone(record);
             return false;
         } catch (Exception e) {
-            if (e instanceof PacketTooBigException) {
-                record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:", job, PACKETTOOBIG_ERROR, e));
-            } else {
-                record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
-            }
+            record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
             //程序调用失败
             record.setSuccess(ResultStatus.FAILED.getStatus());
             record.setReturnCode(StatusCode.ERROR_EXEC.getValue());
@@ -453,10 +448,6 @@ public class ExecuteService implements Job {
             }
             this.printLog("execute successful:jobName:{} at host:{},port:{}", job, null);
         } catch (Exception e) {
-            if (e instanceof PacketTooBigException) {
-                noticeService.notice(job, PACKETTOOBIG_ERROR);
-                errorExec(record, this.loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e));
-            }
             noticeService.notice(job, e.getMessage());
             errorExec(record, this.loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
 
@@ -469,11 +460,7 @@ public class ExecuteService implements Job {
                 recordService.merge(record);
                 recordService.merge(parentRecord);
             } catch (Exception e) {
-                if (e instanceof PacketTooBigException) {
-                    record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:" + PACKETTOOBIG_ERROR, job, e.getMessage(), e));
-                } else {
-                    record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
-                }
+                record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
             }
 
         }
@@ -553,10 +540,6 @@ public class ExecuteService implements Job {
                                     }
                                 });
                     } catch (Exception e) {
-                        if (e instanceof PacketTooBigException) {
-                            noticeService.notice(job, PACKETTOOBIG_ERROR);
-                            loggerError("killed error:jobName:%s at host:%s,port:%d,pid:%s", job, cord.getPid() + " failed info: " + PACKETTOOBIG_ERROR, e);
-                        }
                         noticeService.notice(job, null);
                         loggerError("killed error:jobName:%s at host:%s,port:%d,pid:%s", job, cord.getPid() + " failed info: " + e.getMessage(), e);
 
@@ -582,10 +565,10 @@ public class ExecuteService implements Job {
      */
     private Response responseToRecord(final JobInfo job, final Record record) throws Exception {
         Response response = caller.sentSync(Request.request(
-                job.getHost(),
-                job.getPort(),
+                job.getAgent().getHost(),
+                job.getAgent().getPort(),
                 Action.EXECUTE,
-                job.getPassword(),
+                job.getAgent().getPassword(),
                 job.getTimeout(),
                 job.getAgent().getProxyAgent())
                 .putParam(Constants.PARAM_COMMAND_KEY, job.getCommand())
@@ -644,14 +627,14 @@ public class ExecuteService implements Job {
      * 任务执行前 检测通信
      */
     private void checkPing(JobInfo job, Record record) throws PingException {
-        boolean ping = ping(job.getAgent());
+        boolean ping = ping(job.getAgent(),true);
         if (!ping) {
             //已完成
             record.setStatus(RunStatus.DONE.getStatus());
             record.setReturnCode(StatusCode.ERROR_PING.getValue());
 
             String format = "can't to communicate with agent:%s(%s:%d),execute job:%s failed";
-            String content = String.format(format, job.getAgentName(), job.getHost(), job.getPort(), job.getJobName());
+            String content = String.format(format, job.getAgentName(), job.getAgent().getHost(), job.getAgent().getPort(), job.getJobName());
 
             record.setMessage(content);
             record.setSuccess(ResultStatus.FAILED.getStatus());
@@ -661,7 +644,13 @@ public class ExecuteService implements Job {
         }
     }
 
-    public boolean ping(Agent agent) {
+    /**
+     *
+     * @param agent
+     * @param updata 是否改agent status状态
+     * @return
+     */
+    public boolean ping(Agent agent,Boolean updata) {
         boolean pong = false;
         try {
             Response response = caller.sentSync(Request.request(
@@ -675,13 +664,7 @@ public class ExecuteService implements Job {
         } catch (Exception e) {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
         }
-        if (agent.getAgentId()!=null) {
-            if (agent.getStatus() == null || !agent.getStatus().equals(pong)) {
-                agent.setStatus(pong);
-                agentService.merge(agent);
-            }
-        }
-        agent.setStatus(pong);
+        agentService.pong(agent,pong,updata);
         return pong;
     }
 
@@ -704,15 +687,15 @@ public class ExecuteService implements Job {
 
     public String path(Agent agent) {
         try {
-            Response response = caller.sentSync(Request.request(
+           return caller.sentSync(
+                   Request.request(
                     agent.getHost(),
                     agent.getPort(),
                     Action.PATH,
                     null,
                     Constants.RPC_TIMEOUT,
                     agent.getProxyAgent())
-            );
-            return response.getMessage();
+           ).getMessage();
         } catch (Exception e) {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
             return null;
@@ -807,17 +790,17 @@ public class ExecuteService implements Job {
     private void printLog(String str, JobInfo job, String message) {
         if (message != null) {
             if (logger.isInfoEnabled()) {
-                logger.info(str, job.getJobName(), job.getHost(), job.getPort(), message);
+                logger.info(str, job.getJobName(), job.getAgent().getHost(), job.getAgent().getPort(), message);
             }
         } else {
             if (logger.isInfoEnabled()) {
-                logger.info(str, job.getJobName(), job.getHost(), job.getPort());
+                logger.info(str, job.getJobName(), job.getAgent().getHost(), job.getAgent().getPort());
             }
         }
     }
 
     private String loggerError(String str, JobInfo job, String message, Exception e) {
-        String errorInfo = String.format(str, job.getJobName(), job.getHost(), job.getPort(), message);
+        String errorInfo = String.format(str, job.getJobName(), job.getAgent().getHost(), job.getAgent().getPort(), message);
         if (logger.isErrorEnabled()) {
             logger.error(errorInfo, e);
         }

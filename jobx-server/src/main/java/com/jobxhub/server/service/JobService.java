@@ -80,7 +80,7 @@ public class JobService {
     }
 
     public List<Job> getJobsByJobType(HttpSession session, JobType jobType) {
-        String sql = "SELECT * FROM T_JOB WHERE deleted=0 AND jobType=?";
+        String sql = "SELECT * FROM T_JOB WHERE jobType=?";
         if (JobType.FLOW.equals(jobType)) {
             sql += " AND flowNum=0";
         }
@@ -101,7 +101,7 @@ public class JobService {
 
     //本地缓存中的job列表
     private synchronized void flushLocalJob() {
-        JobXTools.CACHE.put(Constants.PARAM_CACHED_JOB_KEY, queryDao.hqlQuery("from Job where deleted = false"));
+        JobXTools.CACHE.put(Constants.PARAM_CACHED_JOB_KEY, queryDao.getAll(Job.class));
     }
 
     public PageBean<JobInfo> getJobInfoPage(HttpSession session, PageBean pageBean, JobInfo job) {
@@ -111,8 +111,7 @@ public class JobService {
                 "ON T.agentId = D.agentId " +
                 "LEFT JOIN T_USER AS U " +
                 "ON T.userId = U.userId " +
-                "WHERE IFNULL(flowNum,0)=0 " +
-                "AND T.deleted=0 ";
+                "WHERE IFNULL(flowNum,0)=0 ";
         if (job != null) {
             if (notEmpty(job.getAgentId())) {
                 sql += " AND T.agentId=" + job.getAgentId();
@@ -148,8 +147,7 @@ public class JobService {
                     "ON T.agentId = D.agentId " +
                     "LEFT JOIN T_USER AS U " +
                     "ON T.userId = U.userId " +
-                    "WHERE T.deleted=0 " +
-                    "AND T.flowId = ? " +
+                    "WHERE T.flowId = ? " +
                     "AND T.flowNum>0 " +
                     "ORDER BY T.flowNum ASC";
             List<JobInfo> childJobs = queryDao.sqlQuery(JobInfo.class, sql, job.getFlowId());
@@ -205,7 +203,7 @@ public class JobService {
     }
 
     public boolean existsName(Long jobId, Long agentId, String name) {
-        String sql = "SELECT COUNT(1) FROM T_JOB WHERE agentId=? AND deleted=0 AND jobName=? ";
+        String sql = "SELECT COUNT(1) FROM T_JOB WHERE agentId=? AND jobName=? ";
         if (notEmpty(jobId)) {
             sql += " AND jobId != " + jobId + " AND flowId != " + jobId;
         }
@@ -249,7 +247,7 @@ public class JobService {
         Job job = getJob(jobId);
         if (job != null) {
             //单一任务,直接执行删除
-            String sql = "UPDATE T_JOB SET deleted=1 WHERE ";
+            String sql = "delete T_JOB WHERE ";
             if (job.getJobType().equals(JobType.SINGLETON.getCode())) {
                 sql += " jobId=" + jobId;
             }
@@ -363,8 +361,8 @@ public class JobService {
         Integer[] cronTypes = new Integer[2];
         cronTypes[0] = CronType.CRONTAB.getType();
         cronTypes[1] = CronType.QUARTZ.getType();
-        Map params = ParamsMap.map().set("cronType", cronTypes).set("deleted", false).set("pause", false);
-        String hql = "from Job where cronType in (:cronType) and deleted=:deleted and pause=:pause";
+        Map params = ParamsMap.map().set("cronType", cronTypes).set("pause", false);
+        String hql = "from Job where cronType in (:cronType) and pause=:pause";
         return queryDao.hqlQuery(hql, params);
     }
 }

@@ -157,6 +157,11 @@ public class Constants {
     public static final String JOBX_CACHED = PropertyPlaceholder.get(Constants.PARAM_CACHED_NAME_KEY);
 
     public static final String JOBX_HOME = SystemPropertyUtils.get(PARAM_JOBX_HOME_KEY);
+
+    public static final String JOBX_USER_HOME = SystemPropertyUtils.get("user.home") + File.separator + ".jobx";
+
+    public static final File JOBX_UID_FILE = new File(JOBX_USER_HOME,"uid");
+
     /**
      * password file
      */

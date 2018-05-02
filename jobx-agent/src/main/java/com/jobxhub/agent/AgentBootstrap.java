@@ -25,7 +25,6 @@ package com.jobxhub.agent;
  * Created by benjobs on 16/3/3.
  */
 
-import org.apache.commons.codec.digest.DigestUtils;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.ext.ExtensionLoader;
 import com.jobxhub.common.util.*;
@@ -82,10 +81,6 @@ public class AgentBootstrap implements Serializable {
      */
     private String host;
 
-    /**
-     * zookeeper registryPath
-     */
-    private String registryPath;
     /**
      * bootstrap instance....
      */
@@ -243,38 +238,16 @@ public class AgentBootstrap implements Serializable {
                 }
             }
 
-            String machineId = MacUtils.getMachineId();
-            if (machineId == null) {
-                throw new IllegalArgumentException("[JobX] getUniqueId error.");
-            }
-
             /**
              * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
              * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
              */
-            //mac_password
-            this.registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,this.password);
-
-            if (CommonUtils.isEmpty(this.host)) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
-                }
-            } else {
-                //mac_password_host_port
-                this.registryPath = String.format("%s/%s_%s_%s_%s",
-                        Constants.ZK_REGISTRY_AGENT_PATH,
-                        machineId,
-                        this.password,
-                        this.host,
-                        this.port);
-            }
-
             String registryAddress = AgentProperties.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);
             final URL url = URL.valueOf(registryAddress);
 
             ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
             final ZookeeperRegistry registry = new ZookeeperRegistry(url,transporter);
-            registry.register(this.registryPath, true);
+            registry.register(getRegistryPath(), true);
 
             if (logger.isInfoEnabled()) {
                 logger.info("[JobX] agent register to zookeeper done");
@@ -286,7 +259,7 @@ public class AgentBootstrap implements Serializable {
                     if (logger.isInfoEnabled()) {
                         logger.info("[JobX] run shutdown hook now...");
                     }
-                    registry.unRegister(AgentBootstrap.this.registryPath);
+                    registry.unRegister(getRegistryPath());
                 }
             }, "JobXShutdownHook"));
 
@@ -474,6 +447,68 @@ public class AgentBootstrap implements Serializable {
         } catch (Exception e) {
         }
         return -1;
+    }
+
+    private String getRegistryPath() {
+        //mac_password
+        String machineId = getMachineId();
+        if (machineId == null) {
+            throw new IllegalArgumentException("[JobX] getUniqueId error.");
+        }
+        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,getPassword());
+        if (CommonUtils.isEmpty(this.host)) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
+            }
+        } else {
+            //mac_password_host_port
+            registryPath = String.format("%s/%s_%s_%s_%s",
+                    Constants.ZK_REGISTRY_AGENT_PATH,
+                    machineId,
+                    getPassword(),
+                    this.host,
+                    this.port);
+        }
+        return registryPath;
+    }
+
+    /**
+     * password可能是动态的,比如,启动时是123,然后通过server改了密码了.
+     * @return
+     */
+    private String getPassword() {
+        return SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
+    }
+
+    /**
+     * 从用户的home/.jobx下读取UID文件
+     * @return
+     */
+    private String getMachineId() {
+        String macId = null;
+        if (Constants.JOBX_UID_FILE.exists()) {
+            if (Constants.JOBX_UID_FILE.isDirectory()) {
+                Constants.JOBX_UID_FILE.delete();
+            } else {
+                macId = IOUtils.readText(Constants.JOBX_UID_FILE, Constants.CHARSET_UTF8);
+                if (CommonUtils.notEmpty(macId)) {
+                    macId = StringUtils.clearLine(macId);
+                    if (macId.length() != 32) {
+                        Constants.JOBX_UID_FILE.delete();
+                        macId = null;
+                    }
+                }
+            }
+        } else {
+            Constants.JOBX_UID_FILE.getParentFile().mkdirs();
+        }
+
+        if (macId == null) {
+            macId = MacUtils.getMachineId();
+            IOUtils.writeText(Constants.JOBX_UID_FILE, macId, Constants.CHARSET_UTF8);
+        }
+
+        return macId;
     }
 
 }

@@ -83,7 +83,7 @@ public class JobXRegistry {
 
     private final ZookeeperClient zookeeperClient = registryService.getClient();
 
-    private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
+    private final Map<String, Agent> agents = new ConcurrentHashMap<String, Agent>(0);
 
     private final Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
 
@@ -107,7 +107,7 @@ public class JobXRegistry {
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
             for (Agent agent : agentList) {
-                executeService.ping(agent);
+                executeService.ping(agent,true);
             }
         }
 
@@ -119,11 +119,12 @@ public class JobXRegistry {
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
         if (CommonUtils.notEmpty(children)) {
             for (String agent : children) {
-                agents.put(agent, agent);
+                List<Agent> transfers = agentService.transfer(agent);
+                agents.put(agent,transfers.get(0));
                 if (logger.isInfoEnabled()) {
                     logger.info("[JobX] agent auto connected! info:{}", agent);
                 }
-                agentService.doConnect(agent);
+                agentService.doConnect(transfers);
             }
         }
     }
@@ -161,27 +162,29 @@ public class JobXRegistry {
 
                 if (agents.isEmpty()) {
                     for (String agent : children) {
-                        agents.put(agent, agent);
+                        List<Agent> transfers = agentService.transfer(agent);
+                        agents.put(agent,transfers.get(0));
                         if (logger.isInfoEnabled()) {
                             logger.info("[JobX] agent connected! info:{}", agent);
                         }
-                        agentService.doConnect(agent);
+                        agentService.doConnect(transfers);
                     }
                 } else {
-                    Map<String, String> unAgents = new ConcurrentHashMap<String, String>(agents);
+                    Map<String, Agent> unAgents = new ConcurrentHashMap<String, Agent>(agents);
                     for (String agent : children) {
                         unAgents.remove(agent);
                         if (!agents.containsKey(agent)) {
                             //新增...
-                            agents.put(agent, agent);
+                            List<Agent> transfers = agentService.transfer(agent);
                             logger.info("[JobX] agent connected! info:{}", agent);
-                            agentService.doConnect(agent);
+                            agents.put(agent,transfers.get(0));
+                            agentService.doConnect(transfers);
                         }
                     }
                     if (CommonUtils.notEmpty(unAgents)) {
                         for (String child : unAgents.keySet()) {
-                            agents.remove(child);
                             logger.info("[JobX] agent doDisconnect! info:{}", child);
+                            agents.remove(child);
                             agentService.doDisconnect(child);
                         }
                     }
@@ -324,6 +327,7 @@ public class JobXRegistry {
         //mac_password
         String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, agent.getMachineId(), agent.getPassword());
         registryService.unRegister(registryPath);
+        agents.remove(registryPath);
 
         registryPath = String.format("%s/%s_%s_%s_%s",
                 Constants.ZK_REGISTRY_AGENT_PATH,
@@ -333,6 +337,7 @@ public class JobXRegistry {
                 agent.getPort());
 
         registryService.unRegister(registryPath);
+        agents.remove(registryPath);
     }
 
     public void agentRegister(Agent agent) {
@@ -422,6 +427,20 @@ public class JobXRegistry {
                 jobId,
                 StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
+    }
+
+
+    public Agent exists(Agent agent) {
+        if (this.agents.isEmpty()) {
+            return null;
+        }
+       // this.agents.containsKey()
+        for (Map.Entry<String,Agent> info:this.agents.entrySet()) {
+            if (info.getKey().contains(agent.getMachineId())) {
+                return info.getValue();
+            }
+        }
+        return  null;
     }
 
 }

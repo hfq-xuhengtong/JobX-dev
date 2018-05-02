@@ -121,27 +121,27 @@ public class HibernateDao {
 
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    protected <K extends Serializable> void delete(Class<?> entityClass, K id) {
+    public <K extends Serializable> void delete(Class<?> entityClass, K id) {
         delete(getClassMetadata(entityClass).instantiate(id, null));
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    protected <T> T merge(T entity) {
+    public <T> T merge(T entity) {
         return (T) getSession().merge(entity);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    protected <T> T save(T entity) {
+    public <T> T save(T entity) {
         return (T) getSession().save(entity);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    protected void persist(Object entity) {
+    public void persist(Object entity) {
         getSession().persist(entity);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    protected <T> void save(List<T> entities) {
+    public <T> void save(List<T> entities) {
         StatelessSession session = sessionFactory.openStatelessSession();
         for (T entity : entities) {
             session.update(entity);

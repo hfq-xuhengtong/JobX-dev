@@ -68,7 +68,8 @@ public class MacUtils {
                     continue;
                 }
                 byte[] address = network.getHardwareAddress();
-                StringBuffer buffer = new StringBuffer("");
+                if (address==null) continue;
+                StringBuffer buffer = new StringBuffer();
                 for (int i = 0; i < address.length; i++) {
                     if (i > 0) {
                         buffer.append("-");
