@@ -162,12 +162,14 @@ public class JobXRegistry {
 
                 if (agents.isEmpty()) {
                     for (String agent : children) {
-                        List<Agent> transfers = agentService.transfer(agent);
-                        agents.put(agent,transfers.get(0));
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[JobX] agent connected! info:{}", agent);
+                        if (!agents.containsKey(agent)) {
+                            List<Agent> transfers = agentService.transfer(agent);
+                            agents.put(agent,transfers.get(0));
+                            if (logger.isInfoEnabled()) {
+                                logger.info("[JobX] agent connected! info:{}", agent);
+                            }
+                            agentService.doConnect(transfers);
                         }
-                        agentService.doConnect(transfers);
                     }
                 } else {
                     Map<String, Agent> unAgents = new ConcurrentHashMap<String, Agent>(agents);

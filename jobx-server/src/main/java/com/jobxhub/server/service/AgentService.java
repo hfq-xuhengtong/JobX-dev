@@ -146,11 +146,10 @@ public class AgentService {
     public void pong(Agent agent, Boolean pong, Boolean update) {
         if (agent == null || agent.getAgentId() == null) return;
         //卸载zookeeper里的agent
-        boolean verify = pong && jobxRegistry.exists(agent) == null;
-        if (verify) {
-            jobxRegistry.agentRegister(agent);
-        }else {
+        if (!pong) {
             jobxRegistry.agentUnRegister(agent);
+        }else {
+            jobxRegistry.agentRegister(agent);
         }
         agent.setStatus(pong);
         if (update) {
