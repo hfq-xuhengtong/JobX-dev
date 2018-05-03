@@ -137,7 +137,6 @@ public class AgentService {
         return isEmpty(users) ? Collections.<User>emptyList() : users;
     }
 
-
     /**
      * agent 连接状态修改
      *
@@ -271,39 +270,15 @@ public class AgentService {
         }
     }
 
-    public List<Agent> transfer(String registryInfo) {
-        if (CommonUtils.isEmpty(registryInfo)) return null;
-        String[] array = registryInfo.split("_");
-        if (array.length != 2 && array.length != 4) {
-            return null;
-        }
-        String macId = array[0];
-        String password = array[1];
-        Agent agent = new Agent();
-        if (array.length == 2) {
-            agent.setMachineId(macId);
-            agent.setPassword(password);
-        } else {
-            String host = array[2];
-            String port = array[3];
-            agent.setMachineId(macId);
-            agent.setPassword(password);
-            agent.setHost(host);
-            agent.setPort(Integer.valueOf(port));
-        }
-        Agent agent1 = this.getAgentByMachineId(macId);
-        return Arrays.asList(agent, agent1);
-    }
-
     /**
      * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
      * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
      */
-    public void doConnect(List<Agent> transfers) {
+    public void doConnect(String agentInfo) {
+        List<Agent> transfers = transfer(agentInfo);
         if (transfers == null) return;
         Agent registryAgent = transfers.get(0);
         Agent agent = transfers.get(1);
-
         //两个参数
         if (registryAgent.getHost() == null) {
             //密码一致
@@ -333,6 +308,30 @@ public class AgentService {
             registryAgent.setStatus(true);
             merge(registryAgent);
         }
+    }
+
+    public List<Agent> transfer(String registryInfo) {
+        if (CommonUtils.isEmpty(registryInfo)) return null;
+        String[] array = registryInfo.split("_");
+        if (array.length != 2 && array.length != 4) {
+            return null;
+        }
+        String macId = array[0];
+        String password = array[1];
+        Agent agent = new Agent();
+        if (array.length == 2) {
+            agent.setMachineId(macId);
+            agent.setPassword(password);
+        } else {
+            String host = array[2];
+            String port = array[3];
+            agent.setMachineId(macId);
+            agent.setPassword(password);
+            agent.setHost(host);
+            agent.setPort(Integer.valueOf(port));
+        }
+        Agent agent1 = this.getAgentByMachineId(macId);
+        return Arrays.asList(agent, agent1);
     }
 
 

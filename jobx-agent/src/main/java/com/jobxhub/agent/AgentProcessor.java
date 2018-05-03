@@ -21,7 +21,6 @@
 package com.jobxhub.agent;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.tools.corba.se.idl.Compile;
 import org.apache.commons.exec.*;
 import org.hyperic.sigar.SigarException;
 import com.jobxhub.common.Constants;

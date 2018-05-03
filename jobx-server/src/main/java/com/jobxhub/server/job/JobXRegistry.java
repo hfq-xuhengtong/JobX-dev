@@ -83,7 +83,7 @@ public class JobXRegistry {
 
     private final ZookeeperClient zookeeperClient = registryService.getClient();
 
-    private final Map<String, Agent> agents = new ConcurrentHashMap<String, Agent>(0);
+    private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
 
     private final Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
 
@@ -107,7 +107,7 @@ public class JobXRegistry {
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
             for (Agent agent : agentList) {
-                executeService.ping(agent,true);
+                executeService.pingWithPong(agent);
             }
         }
 
@@ -119,12 +119,11 @@ public class JobXRegistry {
         List<String> children = this.zookeeperClient.getChildren(Constants.ZK_REGISTRY_AGENT_PATH);
         if (CommonUtils.notEmpty(children)) {
             for (String agent : children) {
-                List<Agent> transfers = agentService.transfer(agent);
-                agents.put(agent,transfers.get(0));
+                agents.put(agent,agent);
                 if (logger.isInfoEnabled()) {
                     logger.info("[JobX] agent auto connected! info:{}", agent);
                 }
-                agentService.doConnect(transfers);
+                agentService.doConnect(agent);
             }
         }
     }
@@ -162,25 +161,21 @@ public class JobXRegistry {
 
                 if (agents.isEmpty()) {
                     for (String agent : children) {
-                        if (!agents.containsKey(agent)) {
-                            List<Agent> transfers = agentService.transfer(agent);
-                            agents.put(agent,transfers.get(0));
-                            if (logger.isInfoEnabled()) {
-                                logger.info("[JobX] agent connected! info:{}", agent);
-                            }
-                            agentService.doConnect(transfers);
+                        agents.put(agent,agent);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("[JobX] agent connected! info:{}", agent);
                         }
+                        agentService.doConnect(agent);
                     }
                 } else {
-                    Map<String, Agent> unAgents = new ConcurrentHashMap<String, Agent>(agents);
+                    Map<String, String> unAgents = new ConcurrentHashMap<String, String>(agents);
                     for (String agent : children) {
                         unAgents.remove(agent);
                         if (!agents.containsKey(agent)) {
                             //新增...
-                            List<Agent> transfers = agentService.transfer(agent);
                             logger.info("[JobX] agent connected! info:{}", agent);
-                            agents.put(agent,transfers.get(0));
-                            agentService.doConnect(transfers);
+                            agents.put(agent,agent);
+                            agentService.doConnect(agent);
                         }
                     }
                     if (CommonUtils.notEmpty(unAgents)) {
@@ -208,7 +203,6 @@ public class JobXRegistry {
             public void childChanged(String path, List<String> children) {
 
                 try {
-
                     lock.lock();
 
                     preServerSize = serverSize;
@@ -327,19 +321,22 @@ public class JobXRegistry {
 
     public void agentUnRegister(Agent agent) {
         //mac_password
-        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, agent.getMachineId(), agent.getPassword());
-        registryService.unRegister(registryPath);
-        agents.remove(registryPath);
+        String registryData = String.format("%s_%s",agent.getMachineId(), agent.getPassword());
+        String registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData;
 
-        registryPath = String.format("%s/%s_%s_%s_%s",
-                Constants.ZK_REGISTRY_AGENT_PATH,
+        agents.remove(registryData);
+        registryService.unRegister(registryPath);
+
+        registryData = String.format("%s_%s_%s_%s",
                 agent.getMachineId(),
                 agent.getPassword(),
                 agent.getHost(),
                 agent.getPort());
 
+        registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData;
+
+        agents.remove(registryData);
         registryService.unRegister(registryPath);
-        agents.remove(registryPath);
     }
 
     public void agentRegister(Agent agent) {
@@ -429,20 +426,6 @@ public class JobXRegistry {
                 jobId,
                 StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
-    }
-
-
-    public Agent exists(Agent agent) {
-        if (this.agents.isEmpty()) {
-            return null;
-        }
-       // this.agents.containsKey()
-        for (Map.Entry<String,Agent> info:this.agents.entrySet()) {
-            if (info.getKey().contains(agent.getMachineId())) {
-                return info.getValue();
-            }
-        }
-        return  null;
     }
 
 }
