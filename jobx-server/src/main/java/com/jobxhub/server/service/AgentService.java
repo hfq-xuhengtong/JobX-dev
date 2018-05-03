@@ -143,7 +143,7 @@ public class AgentService {
      *
      * @param agent
      */
-    public void pong(Agent agent, Boolean pong, Boolean update) {
+    public void pong(Agent agent, Boolean pong) {
         if (agent == null || agent.getAgentId() == null) return;
         //卸载zookeeper里的agent
         if (!pong) {
@@ -152,9 +152,7 @@ public class AgentService {
             jobxRegistry.agentRegister(agent);
         }
         agent.setStatus(pong);
-        if (update) {
-            queryDao.merge(agent);
-        }
+        queryDao.merge(agent);
     }
 
     public Agent merge(Agent agent) {
@@ -204,7 +202,7 @@ public class AgentService {
         boolean verify;
         if (type) {//直接输入的密钥
             agent.setPassword(pwd0);
-            verify = executeService.ping(agent, false);
+            verify = executeService.ping(agent,false);
         } else {//密码...
             verify = DigestUtils.md5Hex(pwd0).equals(agent.getPassword());
         }
@@ -216,7 +214,7 @@ public class AgentService {
                     //将老密码的agent实例从zookeeper中移除
                     jobxRegistry.agentUnRegister(agent);
                     agent.setPassword(pwd1);
-                    executeService.ping(agent, true);
+                    executeService.pingWithPong(agent);
                     return "true";
                 } else {
                     return "false";
@@ -233,7 +231,9 @@ public class AgentService {
         String hql = "from Agent ";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            hql += " where agentId in (" + user.getAgentIds() + ")";
+            if (user.getAgentIds()!=null) {
+                hql += " where agentId in (" + user.getAgentIds() + ")";
+            }
         }
         return queryDao.hqlQuery(hql);
     }
@@ -258,11 +258,7 @@ public class AgentService {
             //记录本次任务失败的时间
             agent.setNotifyTime(new Date());
         }
-        this.pong(agent, false, true);
-    }
-
-    public void doConnect(Agent agent) {
-        this.pong(agent, true, true);
+        this.pong(agent, false);
     }
 
     public void doDisconnect(String info) {
@@ -296,12 +292,7 @@ public class AgentService {
             agent.setPort(Integer.valueOf(port));
         }
         Agent agent1 = this.getAgentByMachineId(macId);
-        //index 0 registryAgent
-        //index 1 dbAgent
-        if (agent1 != null) {
-            return Arrays.asList(agent, agent1);
-        }
-        return Arrays.asList(agent, null);
+        return Arrays.asList(agent, agent1);
     }
 
     /**
@@ -317,7 +308,7 @@ public class AgentService {
         if (registryAgent.getHost() == null) {
             //密码一致
             if (agent != null && registryAgent.getPassword().equals(agent.getPassword())) {
-                doConnect(agent);
+                executeService.ping(agent,true);
             }
             return;
         }
@@ -326,7 +317,7 @@ public class AgentService {
         if (agent != null) {
             //密码一致
             if (agent.getPassword().equals(registryAgent.getPassword())) {
-                doConnect(agent);
+                executeService.ping(agent,true);
             }
             return;
         }
@@ -338,7 +329,7 @@ public class AgentService {
         registryAgent.setEmailAddress(null);
         registryAgent.setProxy(Constants.ConnType.CONN.getType());
         registryAgent.setProxyAgent(null);
-        if (executeService.ping(registryAgent, false)) {
+        if (executeService.ping(registryAgent,false)) {
             registryAgent.setStatus(true);
             merge(registryAgent);
         }

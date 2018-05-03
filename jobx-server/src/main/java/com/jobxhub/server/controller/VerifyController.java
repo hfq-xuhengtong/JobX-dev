@@ -64,6 +64,15 @@ public class VerifyController extends BaseController {
         return Status.create(pass);
     }
 
+    /**
+     * 仅检查是否可以连接
+     * @param proxy
+     * @param proxyId
+     * @param host
+     * @param port
+     * @param password
+     * @return
+     */
     @RequestMapping(value = "ping.do", method = RequestMethod.POST)
     @ResponseBody
     public Status validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
@@ -72,7 +81,6 @@ public class VerifyController extends BaseController {
         agent.setHost(host);
         agent.setPort(port);
         agent.setPassword(password);
-
         if (proxy == Constants.ConnType.PROXY.getType()) {
             agent.setProxy(Constants.ConnType.CONN.getType());
             if (proxyId != null) {
@@ -93,6 +101,11 @@ public class VerifyController extends BaseController {
         return Status.TRUE;
     }
 
+    /**
+     * 检查连接之后会立即更改最新的连接状态,并且注册到zk中
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "ping2.do", method = RequestMethod.POST)
     @ResponseBody
     public Status ping(Long id) {
@@ -103,7 +116,7 @@ public class VerifyController extends BaseController {
         if (agent == null) {
             return Status.FALSE;
         }
-        boolean pong = executeService.ping(agent,false);
+        boolean pong = executeService.pingWithPong(agent);
         if (!pong) {
             logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), agent.getPort()));
             return Status.FALSE;
@@ -139,7 +152,3 @@ public class VerifyController extends BaseController {
         return ParamsMap.map().set("status", true).set("macId", macId);
     }
 }
-
-
-//49|27|41|62|42|47|61|46|8|45|58|52|59
-//
