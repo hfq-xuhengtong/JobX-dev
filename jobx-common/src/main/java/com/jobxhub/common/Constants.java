@@ -160,7 +160,7 @@ public class Constants {
 
     public static final String JOBX_USER_HOME = SystemPropertyUtils.get("user.home") + File.separator + ".jobx";
 
-    public static final File JOBX_UID_FILE = new File(JOBX_USER_HOME,"ID");
+    public static final File JOBX_UID_FILE = new File(JOBX_USER_HOME,"id");
 
     /**
      * password file
