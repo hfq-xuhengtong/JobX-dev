@@ -259,26 +259,23 @@ public class JobXRegistry {
             this.zookeeperClient.addChildListener(Constants.ZK_REGISTRY_JOB_PATH, new ChildListener() {
                 @Override
                 public void childChanged(String path, List<String> children) {
+
                     try {
-
                         lock.lock();
-
                         if (destroy) {
                             return;
                         }
 
-                        Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
+                        Map<Long, Long> unJobs = new ConcurrentHashMap<Long, Long>(jobs);
 
                         ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
                         for (String job : children) {
-
                             Long jobId = toLong(job);
                             unJobs.remove(jobId);
                             if (!jobs.containsKey(jobId) && hash.get(jobId).equals(JobXTools.SERVER_ID)) {
                                 jobDispatch(jobId);
                             }
-
                         }
 
                         for (Long job : unJobs.keySet()) {

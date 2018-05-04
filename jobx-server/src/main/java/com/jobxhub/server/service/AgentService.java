@@ -137,13 +137,13 @@ public class AgentService {
         return isEmpty(users) ? Collections.<User>emptyList() : users;
     }
 
+    @Transactional(readOnly = false)
     public Agent merge(Agent agent) {
         agent = (Agent) queryDao.merge(agent);
         flushLocalAgent();
         return agent;
     }
 
-    @Transactional
     public boolean existsName(Long id, String name) {
         String hql = "select count(1) from Agent where name=? ";
         if (notEmpty(id)) {
@@ -162,7 +162,7 @@ public class AgentService {
         return queryDao.hqlCount(hql, id) > 0;
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class,readOnly = false)
     public void delete(Long id) {
         Agent agent = getAgent(id);
         queryDao.getSession().clear();
@@ -179,7 +179,7 @@ public class AgentService {
         return queryDao.hqlCount(hql, host) > 0;
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
     public String editPassword(Long id, Boolean type, String pwd0, String pwd1, String pwd2) {
         Agent agent = this.getAgent(id);
         boolean verify;
