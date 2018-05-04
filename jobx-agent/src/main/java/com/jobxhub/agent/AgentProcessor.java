@@ -76,8 +76,8 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                 return password(request);
             case KILL:
                 return kill(request);
-            case GUID:
-                return guid(request);
+            case MACID:
+                return macId(request);
             case PROXY:
                 return proxy(request);
             case MONITOR:
@@ -411,8 +411,8 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     }
 
     @Override
-    public Response guid(Request request) {
-        String guid = MacUtils.getMachineId();
+    public Response macId(Request request) {
+        String guid = AgentProperties.getMacId();
         Response response = Response.response(request).end();
         if (notEmpty(guid)) {
             return response.setMessage(guid).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue());

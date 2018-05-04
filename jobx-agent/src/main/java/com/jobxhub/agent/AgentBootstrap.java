@@ -451,7 +451,7 @@ public class AgentBootstrap implements Serializable {
 
     private String getRegistryPath() {
         //mac_password
-        String machineId = getMachineId();
+        String machineId = AgentProperties.getMacId();
         if (machineId == null) {
             throw new IllegalArgumentException("[JobX] getUniqueId error.");
         }
@@ -480,38 +480,7 @@ public class AgentBootstrap implements Serializable {
         return SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
     }
 
-    /**
-     * 从用户的home/.jobx下读取UID文件
-     * @return
-     */
-    private String getMachineId() {
-        String macId = null;
-        if (Constants.JOBX_UID_FILE.exists()) {
-            if (Constants.JOBX_UID_FILE.isDirectory()) {
-                Constants.JOBX_UID_FILE.delete();
-            } else {
-                macId = IOUtils.readText(Constants.JOBX_UID_FILE, Constants.CHARSET_UTF8);
-                if (CommonUtils.notEmpty(macId)) {
-                    macId = StringUtils.clearLine(macId);
-                    if (macId.length() != 32) {
-                        Constants.JOBX_UID_FILE.delete();
-                        macId = null;
-                    }
-                }
-            }
-        } else {
-            Constants.JOBX_UID_FILE.getParentFile().mkdirs();
-        }
 
-        if (macId == null) {
-            macId = MacUtils.getMachineId();
-            IOUtils.writeText(Constants.JOBX_UID_FILE, macId, Constants.CHARSET_UTF8);
-            Constants.JOBX_UID_FILE.setReadable(true,false);
-            Constants.JOBX_UID_FILE.setWritable(false,false);
-        }
-
-        return macId;
-    }
 
 }
 

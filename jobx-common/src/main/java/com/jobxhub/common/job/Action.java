@@ -31,7 +31,7 @@ public enum Action {
     PASSWORD(5),
     KILL(6),
     PROXY(7),
-    GUID(8),
+    MACID(8),
     RESTART(9),
     UPLOAD(10);
 

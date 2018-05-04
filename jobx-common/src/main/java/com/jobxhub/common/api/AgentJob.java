@@ -21,7 +21,7 @@ public interface AgentJob {
 
     Response proxy(Request request);
 
-    Response guid(Request request);
+    Response macId(Request request);
 
     void restart(Request request);
 

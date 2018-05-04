@@ -688,12 +688,12 @@ public class ExecuteService implements Job {
         return pong;
     }
 
-    public String guid(Agent agent) {
+    public String getMacId(Agent agent) {
         try {
             Response response = caller.sentSync(Request.request(
                     agent.getHost(),
                     agent.getPort(),
-                    Action.GUID,
+                    Action.MACID,
                     agent.getPassword(),
                     Constants.RPC_TIMEOUT,
                     agent.getProxyAgent())

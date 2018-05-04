@@ -124,9 +124,9 @@ public class VerifyController extends BaseController {
         return Status.TRUE;
     }
 
-    @RequestMapping(value = "guid.do", method = RequestMethod.POST)
+    @RequestMapping(value = "macid.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map getGuid(int proxy, Long proxyId, String host, Integer port, String password, HttpServletResponse response) {
+    public Map macid(int proxy, Long proxyId, String host, Integer port, String password, HttpServletResponse response) {
         Agent agent = new Agent();
         agent.setProxy(proxy);
         agent.setHost(host);
@@ -145,7 +145,7 @@ public class VerifyController extends BaseController {
                 agent.setProxy(Constants.ConnType.PROXY.getType());
             }
         }
-        String macId = executeService.guid(agent);
+        String macId = executeService.getMacId(agent);
         if (macId == null) {
             return ParamsMap.map().set("status", false);
         }

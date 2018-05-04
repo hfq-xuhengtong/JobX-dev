@@ -156,7 +156,7 @@
                     if (data.status) {
                         jobx.tipOk("#port");
                         ajax({
-                            url: "${contextPath}/verify/guid.do",
+                            url: "${contextPath}/verify/macid.do",
                             type: "post",
                             data: {
                                 "proxy": _ping || 0,
