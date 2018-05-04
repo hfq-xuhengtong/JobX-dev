@@ -466,14 +466,14 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
     }
 
-    public static void unRegister(final String host,final Integer port) {
+    protected static void unRegister(final String host,final Integer port) {
         registry.unRegister(getRegistryPath(host,port));
         if (logger.isInfoEnabled()) {
             logger.info("[JobX] agent unRegister to zookeeper done");
         }
     }
 
-    public static void buildUnRegister(final String host,final Integer port) {
+    protected static void bindShutdownHook(final String host,final Integer port) {
         //register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {

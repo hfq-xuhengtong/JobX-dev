@@ -240,7 +240,7 @@ public class AgentBootstrap implements Serializable {
 
             AgentProcessor.register(this.host,this.port);
 
-            AgentProcessor.buildUnRegister(this.host,this.port);
+            AgentProcessor.bindShutdownHook(this.host,this.port);
 
         } catch (Exception e) {
             e.printStackTrace();

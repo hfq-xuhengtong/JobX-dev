@@ -171,7 +171,7 @@ public class AgentService {
         flushLocalAgent();
     }
 
-    public boolean existshost(Long id, String host) {
+    public boolean existsHost(Long id, String host) {
         String hql = "select count(1) from Agent where host=? ";
         if (notEmpty(id)) {
             hql += " and agentId != " + id;

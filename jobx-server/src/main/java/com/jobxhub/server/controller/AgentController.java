@@ -98,7 +98,7 @@ public class AgentController extends BaseController {
     @RequestMapping(value = "checkhost.do", method = RequestMethod.POST)
     @ResponseBody
     public Status checkhost(Long id, String host) {
-        return Status.create(!agentService.existshost(id, host));
+        return Status.create(!agentService.existsHost(id, host));
     }
 
     @RequestMapping("add.htm")
