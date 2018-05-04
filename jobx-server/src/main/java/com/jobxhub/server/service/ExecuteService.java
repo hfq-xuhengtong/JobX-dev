@@ -627,7 +627,7 @@ public class ExecuteService implements Job {
      * 任务执行前 检测通信
      */
     private void checkPing(JobInfo job, Record record) throws PingException {
-        boolean ping = pingWithPong(job.getAgent());
+        boolean ping = ping(job.getAgent(),true);
         if (!ping) {
             //已完成
             record.setStatus(RunStatus.DONE.getStatus());
@@ -642,29 +642,6 @@ public class ExecuteService implements Job {
             recordService.merge(record);
             throw new PingException(content);
         }
-    }
-
-    /**
-     *
-     * @param agent
-     * @return
-     */
-    public boolean pingWithPong(Agent agent) {
-        boolean pong = false;
-        try {
-            Response response = caller.sentSync(Request.request(
-                    agent.getHost(),
-                    agent.getPort(),
-                    Action.PING,
-                    agent.getPassword(),
-                    Constants.RPC_TIMEOUT,
-                    agent.getProxyAgent()));
-            pong = response!=null && response.isSuccess();
-        } catch (Exception e) {
-            logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
-        }
-        agentService.pong(agent,pong);
-        return pong;
     }
 
     public boolean ping(Agent agent,boolean update) {

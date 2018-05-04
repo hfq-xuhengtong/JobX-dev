@@ -238,30 +238,9 @@ public class AgentBootstrap implements Serializable {
                 }
             }
 
-            /**
-             * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
-             * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
-             */
-            String registryAddress = AgentProperties.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);
-            final URL url = URL.valueOf(registryAddress);
+            AgentProcessor.register(this.host,this.port);
 
-            ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
-            final ZookeeperRegistry registry = new ZookeeperRegistry(url,transporter);
-            registry.register(getRegistryPath(), true);
-
-            if (logger.isInfoEnabled()) {
-                logger.info("[JobX] agent register to zookeeper done");
-            }
-
-            //register shutdown hook
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                public void run() {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[JobX] run shutdown hook now...");
-                    }
-                    registry.unRegister(getRegistryPath());
-                }
-            }, "JobXShutdownHook"));
+            AgentProcessor.buildUnRegister(this.host,this.port);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -385,6 +364,8 @@ public class AgentBootstrap implements Serializable {
             // Close the server socket and return
             if (serverSocket != null) {
                 try {
+                    //unzookeeper before stop...
+                    AgentProcessor.unRegister(this.host,this.port);
                     serverSocket.close();
                 } catch (IOException e) {
                     // Ignore
@@ -448,33 +429,6 @@ public class AgentBootstrap implements Serializable {
         }
         return -1;
     }
-
-    private String getRegistryPath() {
-        //mac_password
-        String machineId = AgentProperties.getMacId();
-        if (machineId == null) {
-            throw new IllegalArgumentException("[JobX] getUniqueId error.");
-        }
-
-        String password = SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
-
-        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,password);
-        if (CommonUtils.isEmpty(this.host)) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
-            }
-        } else {
-            //mac_password_host_port
-            registryPath = String.format("%s/%s_%s_%s_%s",
-                    Constants.ZK_REGISTRY_AGENT_PATH,
-                    machineId,
-                    password,
-                    this.host,
-                    this.port);
-        }
-        return registryPath;
-    }
-
 
 }
 

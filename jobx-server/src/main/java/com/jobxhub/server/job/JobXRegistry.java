@@ -107,7 +107,7 @@ public class JobXRegistry {
         List<Agent> agentList = this.agentService.getAll();
         if (CommonUtils.notEmpty(agentList)) {
             for (Agent agent : agentList) {
-                executeService.pingWithPong(agent);
+                executeService.ping(agent,true);
             }
         }
 
@@ -337,16 +337,6 @@ public class JobXRegistry {
 
         agents.remove(registryData);
         registryService.unRegister(registryPath);
-    }
-
-    public void agentRegister(Agent agent) {
-        String registryPath = String.format("%s/%s_%s_%s_%s",
-                Constants.ZK_REGISTRY_AGENT_PATH,
-                agent.getMachineId(),
-                agent.getPassword(),
-                agent.getHost(),
-                agent.getPort());
-        registryService.register(registryPath, true);
     }
 
     /**

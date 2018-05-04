@@ -101,29 +101,6 @@ public class VerifyController extends BaseController {
         return Status.TRUE;
     }
 
-    /**
-     * 检查连接之后会立即更改最新的连接状态,并且注册到zk中
-     * @param id
-     * @return
-     */
-    @RequestMapping(value = "ping2.do", method = RequestMethod.POST)
-    @ResponseBody
-    public Status ping(Long id) {
-        if (id == null) {
-            return Status.FALSE;
-        }
-        Agent agent = agentService.getAgent(id);
-        if (agent == null) {
-            return Status.FALSE;
-        }
-        boolean pong = executeService.pingWithPong(agent);
-        if (!pong) {
-            logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), agent.getPort()));
-            return Status.FALSE;
-        }
-        return Status.TRUE;
-    }
-
     @RequestMapping(value = "macid.do", method = RequestMethod.POST)
     @ResponseBody
     public Map macid(int proxy, Long proxyId, String host, Integer port, String password, HttpServletResponse response) {

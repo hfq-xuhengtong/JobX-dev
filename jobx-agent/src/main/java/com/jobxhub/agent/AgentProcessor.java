@@ -21,6 +21,9 @@
 package com.jobxhub.agent;
 
 import com.alibaba.fastjson.JSON;
+import com.jobxhub.registry.URL;
+import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
+import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
 import org.apache.commons.exec.*;
 import org.hyperic.sigar.SigarException;
 import com.jobxhub.common.Constants;
@@ -42,11 +45,17 @@ import static com.jobxhub.common.util.CommonUtils.*;
 
 public class AgentProcessor implements ServerHandler, AgentJob {
 
-    private Logger logger = LoggerFactory.getLogger(AgentProcessor.class);
+    private static Logger logger = LoggerFactory.getLogger(AgentProcessor.class);
 
     private Client client = null;
 
     private AgentMonitor agentMonitor = new AgentMonitor();
+
+    private static String registryAddress = AgentProperties.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);
+    private static final URL url = URL.valueOf(registryAddress);
+
+    private static ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
+    private static final ZookeeperRegistry registry = new ZookeeperRegistry(url,transporter);
 
     @Override
     public Response handle(Request request) {
@@ -327,8 +336,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         return response;
     }
 
-
-
     @Override
     public Response password(Request request) {
         String newPassword = request.getParams().get(Constants.PARAM_NEWPASSWORD_KEY);
@@ -336,8 +343,16 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         if (isEmpty(newPassword)) {
             return response.setSuccess(false).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setMessage("密码不能为空").end();
         }
+
+        //把老的注册删除
+        unRegister(request.getHost(),request.getPort());
+
         SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY, newPassword);
         IOUtils.writeText(Constants.JOBX_PASSWORD_FILE, newPassword, "UTF-8");
+
+        //最新密码信息注册进来
+        register(request.getHost(),request.getPort());
+
         return response.setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
     }
 
@@ -412,7 +427,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response macId(Request request) {
-        String guid = AgentProperties.getMacId();
+        String guid = getMacId();
         Response response = Response.response(request).end();
         if (notEmpty(guid)) {
             return response.setMessage(guid).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue());
@@ -439,5 +454,94 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     private String getUnixExecuteMessage(String text) {
         return text.substring(0, text.lastIndexOf(Constants.JOBX_UNIX_EXITCODE_SCRIPT));
     }
+
+    public static void register(final String host,final Integer port) {
+        /**
+         * agent如果未设置host参数,则只往注册中心加入macId和password,server只能根据这个信息改过是否连接的状态
+         * 如果设置了host,则会一并设置port,server端不但可以更新连接状态还可以实现agent自动注册(agent未注册的情况下)
+         */
+        registry.register(getRegistryPath(host,port), true);
+        if (logger.isInfoEnabled()) {
+            logger.info("[JobX] agent register to zookeeper done");
+        }
+    }
+
+    public static void unRegister(final String host,final Integer port) {
+        registry.unRegister(getRegistryPath(host,port));
+        if (logger.isInfoEnabled()) {
+            logger.info("[JobX] agent unRegister to zookeeper done");
+        }
+    }
+
+    public static void buildUnRegister(final String host,final Integer port) {
+        //register shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                if (logger.isInfoEnabled()) {
+                    logger.info("[JobX] run shutdown hook now...");
+                }
+                registry.unRegister(getRegistryPath(host,port));
+            }
+        }, "JobXShutdownHook"));
+    }
+
+    private static String getRegistryPath(String host,Integer port) {
+        //mac_password
+        String machineId = getMacId();
+        if (machineId == null) {
+            throw new IllegalArgumentException("[JobX] getUniqueId error.");
+        }
+
+        String password = SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
+
+        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,password);
+        if (CommonUtils.isEmpty(host)) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
+            }
+        } else {
+            //mac_password_host_port
+            registryPath = String.format("%s/%s_%s_%s_%s",
+                    Constants.ZK_REGISTRY_AGENT_PATH,
+                    machineId,
+                    password,
+                    host,
+                    port);
+        }
+        return registryPath;
+    }
+
+    /**
+     * 从用户的home/.jobx下读取UID文件
+     * @return
+     */
+    private static String getMacId() {
+        String macId = null;
+        if (Constants.JOBX_UID_FILE.exists()) {
+            if (Constants.JOBX_UID_FILE.isDirectory()) {
+                Constants.JOBX_UID_FILE.delete();
+            } else {
+                macId = IOUtils.readText(Constants.JOBX_UID_FILE, Constants.CHARSET_UTF8);
+                if (CommonUtils.notEmpty(macId)) {
+                    macId = StringUtils.clearLine(macId);
+                    if (macId.length() != 32) {
+                        Constants.JOBX_UID_FILE.delete();
+                        macId = null;
+                    }
+                }
+            }
+        } else {
+            Constants.JOBX_UID_FILE.getParentFile().mkdirs();
+        }
+
+        if (macId == null) {
+            macId = MacUtils.getMachineId();
+            IOUtils.writeText(Constants.JOBX_UID_FILE, macId, Constants.CHARSET_UTF8);
+            Constants.JOBX_UID_FILE.setReadable(true,false);
+            Constants.JOBX_UID_FILE.setWritable(false,false);
+        }
+        return macId;
+    }
+
 
 }

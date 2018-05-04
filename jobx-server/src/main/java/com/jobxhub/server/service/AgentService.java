@@ -137,23 +137,6 @@ public class AgentService {
         return isEmpty(users) ? Collections.<User>emptyList() : users;
     }
 
-    /**
-     * agent 连接状态修改
-     *
-     * @param agent
-     */
-    public void pong(Agent agent, Boolean pong) {
-        if (agent == null || agent.getAgentId() == null) return;
-        //卸载zookeeper里的agent
-        if (!pong) {
-            jobxRegistry.agentUnRegister(agent);
-        }else {
-            jobxRegistry.agentRegister(agent);
-        }
-        agent.setStatus(pong);
-        queryDao.merge(agent);
-    }
-
     public Agent merge(Agent agent) {
         agent = (Agent) queryDao.merge(agent);
         flushLocalAgent();
@@ -210,10 +193,8 @@ public class AgentService {
                 pwd1 = DigestUtils.md5Hex(pwd1);
                 Boolean flag = executeService.password(agent, pwd1);
                 if (flag) {
-                    //将老密码的agent实例从zookeeper中移除
-                    jobxRegistry.agentUnRegister(agent);
                     agent.setPassword(pwd1);
-                    executeService.pingWithPong(agent);
+                    merge(agent);
                     return "true";
                 } else {
                     return "false";
@@ -257,7 +238,8 @@ public class AgentService {
             //记录本次任务失败的时间
             agent.setNotifyTime(new Date());
         }
-        this.pong(agent, false);
+        agent.setStatus(false);
+        merge(agent);
     }
 
     public void doDisconnect(String info) {
@@ -265,6 +247,7 @@ public class AgentService {
             String macId = info.split("_")[0];
             Agent agent = getAgentByMachineId(macId);
             if (agent != null) {
+
                 doDisconnect(agent);
             }
         }

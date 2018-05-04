@@ -23,10 +23,7 @@ package com.jobxhub.agent;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.logging.LoggerFactory;
-import com.jobxhub.common.util.CommonUtils;
-import com.jobxhub.common.util.IOUtils;
-import com.jobxhub.common.util.MacUtils;
-import com.jobxhub.common.util.StringUtils;
+import com.jobxhub.common.util.*;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -119,37 +116,6 @@ public class AgentProperties {
         // All other instances of Throwable will be silently swallowed
     }
 
-    /**
-     * 从用户的home/.jobx下读取UID文件
-     * @return
-     */
-    public static String getMacId() {
-        String macId = null;
-        if (Constants.JOBX_UID_FILE.exists()) {
-            if (Constants.JOBX_UID_FILE.isDirectory()) {
-                Constants.JOBX_UID_FILE.delete();
-            } else {
-                macId = IOUtils.readText(Constants.JOBX_UID_FILE, Constants.CHARSET_UTF8);
-                if (CommonUtils.notEmpty(macId)) {
-                    macId = StringUtils.clearLine(macId);
-                    if (macId.length() != 32) {
-                        Constants.JOBX_UID_FILE.delete();
-                        macId = null;
-                    }
-                }
-            }
-        } else {
-            Constants.JOBX_UID_FILE.getParentFile().mkdirs();
-        }
-
-        if (macId == null) {
-            macId = MacUtils.getMachineId();
-            IOUtils.writeText(Constants.JOBX_UID_FILE, macId, Constants.CHARSET_UTF8);
-            Constants.JOBX_UID_FILE.setReadable(true,false);
-            Constants.JOBX_UID_FILE.setWritable(false,false);
-        }
-        return macId;
-    }
 
 
 }
