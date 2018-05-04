@@ -321,24 +321,29 @@ public class JobXRegistry {
 
     public void agentUnRegister(Agent agent) {
         //mac_password
-        String registryData = String.format("%s_%s",agent.getMachineId(), agent.getPassword());
-        String registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData;
+        List<String> registryData = getRegistryData(agent);
 
-        agents.remove(registryData);
+        agents.remove(registryData.get(0));
+        String registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData.get(0);
         registryService.unRegister(registryPath);
 
-        registryData = String.format("%s_%s_%s_%s",
+        agents.remove(registryData.get(1));
+        registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData.get(1);
+        registryService.unRegister(registryPath);
+    }
+
+    private List<String> getRegistryData(Agent agent) {
+        List<String> list = new ArrayList<String>();
+        list.add(String.format("%s_%s",agent.getMachineId(), agent.getPassword()));
+        String registryData = String.format("%s_%s_%s_%s",
                 agent.getMachineId(),
                 agent.getPassword(),
                 agent.getHost(),
                 agent.getPort());
 
-        registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData;
-
-        agents.remove(registryData);
-        registryService.unRegister(registryPath);
+        list.add(registryData);
+        return list;
     }
-
     /**
      * 作业的分发一定要经过一致性哈希算法,计算是否落在该server上....
      *
@@ -417,6 +422,7 @@ public class JobXRegistry {
                 StringUtils.join(this.jobs.keySet().toArray(new Long[0]), "|")
         );
     }
+
 
 }
     

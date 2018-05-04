@@ -179,6 +179,7 @@ public class AgentService {
     }
 
 
+    @Transactional(readOnly = false)
     public String editPassword(Long id, Boolean type, String pwd0, String pwd1, String pwd2) {
         Agent agent = this.getAgent(id);
         boolean verify;
@@ -245,9 +246,9 @@ public class AgentService {
     public void doDisconnect(String info) {
         if (CommonUtils.notEmpty(info)) {
             String macId = info.split("_")[0];
+            String password =  info.split("_")[1];
             Agent agent = getAgentByMachineId(macId);
-            if (agent != null) {
-
+            if ( CommonUtils.notEmpty(agent,password) && password.equals(agent.getPassword()) ) {
                 doDisconnect(agent);
             }
         }
