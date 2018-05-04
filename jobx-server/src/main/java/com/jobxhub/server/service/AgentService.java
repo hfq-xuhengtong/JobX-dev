@@ -44,7 +44,7 @@ import static com.jobxhub.common.util.CommonUtils.isEmpty;
 import static com.jobxhub.common.util.CommonUtils.notEmpty;
 
 @Service
-@Transactional
+@Transactional(readOnly = false)
 public class AgentService {
 
     @Autowired
@@ -143,6 +143,7 @@ public class AgentService {
         return agent;
     }
 
+    @Transactional
     public boolean existsName(Long id, String name) {
         String hql = "select count(1) from Agent where name=? ";
         if (notEmpty(id)) {
@@ -178,8 +179,7 @@ public class AgentService {
         return queryDao.hqlCount(hql, host) > 0;
     }
 
-
-    @Transactional(readOnly = false)
+    @Transactional
     public String editPassword(Long id, Boolean type, String pwd0, String pwd1, String pwd2) {
         Agent agent = this.getAgent(id);
         boolean verify;
