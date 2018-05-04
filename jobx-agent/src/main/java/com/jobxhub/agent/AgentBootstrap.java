@@ -455,7 +455,10 @@ public class AgentBootstrap implements Serializable {
         if (machineId == null) {
             throw new IllegalArgumentException("[JobX] getUniqueId error.");
         }
-        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,getPassword());
+
+        String password = SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
+
+        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,password);
         if (CommonUtils.isEmpty(this.host)) {
             if (logger.isWarnEnabled()) {
                 logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
@@ -465,21 +468,12 @@ public class AgentBootstrap implements Serializable {
             registryPath = String.format("%s/%s_%s_%s_%s",
                     Constants.ZK_REGISTRY_AGENT_PATH,
                     machineId,
-                    getPassword(),
+                    password,
                     this.host,
                     this.port);
         }
         return registryPath;
     }
-
-    /**
-     * password可能是动态的,比如,启动时是123,然后通过server改了密码了.
-     * @return
-     */
-    private String getPassword() {
-        return SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
-    }
-
 
 
 }
