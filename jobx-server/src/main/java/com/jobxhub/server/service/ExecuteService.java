@@ -659,11 +659,9 @@ public class ExecuteService implements Job {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
         }
 
-        ConnStatus status;
+        ConnStatus status = ConnStatus.DISCONNECTED;
 
-        if (response == null) {
-            status = ConnStatus.DISCONNECTED;
-        }else {
+        if (response != null) {
             if (response.isSuccess()) {
                 status = ConnStatus.CONNECTED;
             }else {

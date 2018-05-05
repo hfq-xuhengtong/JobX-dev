@@ -22,14 +22,12 @@
 package com.jobxhub.server.controller;
 
 import com.jobxhub.common.Constants;
-import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.server.domain.Agent;
 import it.sauronsoftware.cron4j.SchedulingPattern;
 import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.ExecuteService;
 import com.jobxhub.server.vo.Status;
-import org.apache.zookeeper.data.Stat;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
