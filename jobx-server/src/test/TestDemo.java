@@ -1,7 +1,5 @@
 import com.jobxhub.server.domain.Agent;
 import org.junit.Test;
-import com.jobxhub.common.ext.ExtensionLoader;
-import com.jobxhub.common.serialize.Serializer;
 
 
 public class TestDemo {

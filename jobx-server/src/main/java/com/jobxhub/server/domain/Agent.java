@@ -43,9 +43,6 @@ public class Agent implements Serializable {
     //代理执行器的Id
     private Long proxyAgent;
 
-    @Deprecated
-    @Transient
-    private String ip;
     private String host;
     private Integer port;
     private String name;
@@ -56,6 +53,7 @@ public class Agent implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String emailAddress;
     private String mobiles;
+
     private Integer status;//1通讯成功,0:失败失联,2:密码错误
     private Date notifyTime;//失败后发送通知告警的时间
     private String comment;
@@ -63,7 +61,8 @@ public class Agent implements Serializable {
 
     private Integer proxy;//是否需要代理
 
-    @ManyToMany(mappedBy = "agents")
+    //@ManyToMany(mappedBy = "agents")
+    @Transient
     private Set<Group> groups;//对应的agentGroup
 
     /**
@@ -219,16 +218,6 @@ public class Agent implements Serializable {
         this.users = users;
     }
 
-    @Deprecated
-    public String getIp() {
-        return ip;
-    }
-
-    @Deprecated
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -250,7 +239,6 @@ public class Agent implements Serializable {
                 "agentId=" + agentId +
                 ", machineId='" + machineId + '\'' +
                 ", proxyAgent=" + proxyAgent +
-                ", ip='" + ip + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", name='" + name + '\'' +

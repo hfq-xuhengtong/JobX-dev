@@ -21,6 +21,8 @@
 
 package com.jobxhub.server.service;
 
+import com.jobxhub.common.util.PropertyPlaceholder;
+import com.jobxhub.common.util.ReflectUtils;
 import org.hibernate.Query;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DigestUtils;
@@ -31,6 +33,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Table;
+import java.lang.annotation.Annotation;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -57,16 +65,30 @@ public class ConfigService {
         queryDao.save(config);
     }
 
-    public void initDB() {
+    public void initDB() throws SQLException {
 
         /**
          * for version 1.1.0 update to version 1.2.0(ip rename to host)
+         * alter status boolean to int
          */
         try {
-            Query query = queryDao.createQuery("update Agent set host=ip where host=null and ip!=null");
-            query.executeUpdate();
-        } catch (Exception e) {
-            //skip
+            String url = PropertyPlaceholder.get("jdbc.url");
+            String userName = PropertyPlaceholder.get("jdbc.username");
+            String password =  PropertyPlaceholder.get("jdbc.password");
+            String tableName = getTableName(Agent.class);
+
+            Connection connection = DriverManager.getConnection(url,userName,password);
+            connection.setAutoCommit(true);
+            String sql = String.format("alter table %s modify `status` int",tableName);
+            connection.prepareStatement(sql).execute();
+
+            sql = String.format("update %s set `host`=ip where `host` is null and ip is not null",tableName);
+            connection.prepareStatement(sql).execute();
+
+            sql = String.format("alter table %s drop `ip`",tableName);
+            connection.prepareStatement(sql).execute();
+        }catch (Exception e) {
+            //skip.....
         }
 
         /**
@@ -128,6 +150,14 @@ public class ConfigService {
             userService.addUser(user);
         }
 
+    }
+
+    private String getTableName(Class<?> clazz) {
+        Table table = clazz.getAnnotation(Table.class);
+        if (table == null||table.name()==null) {
+            return "t_".concat(clazz.getSimpleName());
+        }
+        return table.name();
     }
 
 
