@@ -195,6 +195,7 @@ public class AgentService {
                 Boolean flag = executeService.password(agent, pwd1);
                 if (flag) {
                     agent.setPassword(pwd1);
+                    agent.setStatus(Constants.ConnStatus.CONNECTED.getValue());
                     merge(agent);
                     return "true";
                 } else {
