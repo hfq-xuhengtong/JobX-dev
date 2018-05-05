@@ -179,7 +179,6 @@ public class AgentService {
         return queryDao.hqlCount(hql, host) > 0;
     }
 
-    @Transactional(readOnly = false)
     public String editPassword(Long id, Boolean type, String pwd0, String pwd1, String pwd2) {
         Agent agent = this.getAgent(id);
         boolean verify;
@@ -195,8 +194,7 @@ public class AgentService {
                 Boolean flag = executeService.password(agent, pwd1);
                 if (flag) {
                     agent.setPassword(pwd1);
-                    agent.setStatus(Constants.ConnStatus.CONNECTED.getValue());
-                    merge(agent);
+                    executeService.ping(agent,true);
                     return "true";
                 } else {
                     return "false";
@@ -262,32 +260,34 @@ public class AgentService {
     public void doConnect(String agentInfo) {
         List<Agent> transfers = transfer(agentInfo);
         if (transfers == null) return;
-        Agent registryAgent = transfers.get(0);
+        Agent registry = transfers.get(0);
         Agent agent = transfers.get(1);
-        //两个参数
-        if (registryAgent.getHost() == null) {
-            if (agent != null) {
-                executeService.ping(agent,true);
+
+        //exists in db...
+        if ( agent!=null ) {
+            //agent和server密码一致则连接...
+            if (registry.getPassword().equals(agent.getPassword())) {
+                executeService.ping(agent, true);
             }
             return;
         }
 
-        //4个参数
-        if (agent != null) {
-            executeService.ping(agent,true);
+        //not exists ,host and port null....
+        if (registry.getHost() == null) {
             return;
         }
+
         //新的机器，需要自动注册.
-        registryAgent.setName(registryAgent.getHost());
-        registryAgent.setComment("auto registered.");
-        registryAgent.setWarning(false);
-        registryAgent.setMobiles(null);
-        registryAgent.setEmailAddress(null);
-        registryAgent.setProxy(Constants.ConnType.CONN.getType());
-        registryAgent.setProxyAgent(null);
-        if (executeService.ping(registryAgent,false).equals(Constants.ConnStatus.CONNECTED)) {
-            registryAgent.setStatus(Constants.ConnStatus.CONNECTED.getValue());
-            merge(registryAgent);
+        registry.setName(registry.getHost());
+        registry.setComment("auto registered.");
+        registry.setWarning(false);
+        registry.setMobiles(null);
+        registry.setEmailAddress(null);
+        registry.setProxy(Constants.ConnType.CONN.getType());
+        registry.setProxyAgent(null);
+        if (executeService.ping(registry,false).equals(Constants.ConnStatus.CONNECTED)) {
+            registry.setStatus(Constants.ConnStatus.CONNECTED.getValue());
+            merge(registry);
         }
     }
 
