@@ -63,7 +63,7 @@ public class AgentService {
     private JobXRegistry jobxRegistry;
 
     public List<Agent> getAgentByConnType(Constants.ConnType connType) {
-        return queryDao.hqlQuery("from Agent where status=? and proxy=?", true, connType.getType());
+        return queryDao.hqlQuery("from Agent where status=? and proxy=?", Constants.ConnStatus.CONNECTED.getValue(), connType.getType());
     }
 
     public List<Agent> getAll() {
@@ -89,7 +89,7 @@ public class AgentService {
                 hql += " and agentId in (".concat(user.getAgentIds()).concat(")");
             }
         }
-        return queryDao.hqlQuery(hql, status.isValue());
+        return queryDao.hqlQuery(hql, status.getValue());
     }
 
     public void getOwnerAgent(HttpSession session, PageBean pageBean) {
@@ -185,7 +185,7 @@ public class AgentService {
         boolean verify;
         if (type) {//直接输入的密钥
             agent.setPassword(pwd0);
-            verify = executeService.ping(agent,false);
+            verify = executeService.ping(agent,false).equals(Constants.ConnStatus.CONNECTED);
         } else {//密码...
             verify = DigestUtils.md5Hex(pwd0).equals(agent.getPassword());
         }
@@ -239,7 +239,7 @@ public class AgentService {
             //记录本次任务失败的时间
             agent.setNotifyTime(new Date());
         }
-        agent.setStatus(false);
+        agent.setStatus(Constants.ConnStatus.DISCONNECTED.getValue());
         merge(agent);
     }
 
@@ -288,8 +288,8 @@ public class AgentService {
         registryAgent.setEmailAddress(null);
         registryAgent.setProxy(Constants.ConnType.CONN.getType());
         registryAgent.setProxyAgent(null);
-        if (executeService.ping(registryAgent,false)) {
-            registryAgent.setStatus(true);
+        if (executeService.ping(registryAgent,false).equals(Constants.ConnStatus.CONNECTED)) {
+            registryAgent.setStatus(Constants.ConnStatus.CONNECTED.getValue());
             merge(registryAgent);
         }
     }

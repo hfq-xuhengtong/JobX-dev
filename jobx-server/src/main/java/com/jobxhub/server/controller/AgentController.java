@@ -119,7 +119,7 @@ public class AgentController extends BaseController {
             agent.setProxyAgent(null);
         }
         agent.setPassword(DigestUtils.md5Hex(agent.getPassword()));
-        agent.setStatus(true);
+        agent.setStatus(Constants.ConnStatus.CONNECTED.getValue());
         agentService.merge(agent);
         return "redirect:/agent/view.htm";
     }

@@ -390,11 +390,13 @@
                                 "password": password
                             }
                         },function (data) {
-                            if (data.status) {
+                            if (data.status == 1) {
                                 canSave(proxy, id, name, port, warning, mobiles, email);
                                 return false;
-                            } else {
-                                alert("通信失败!请检查IP和端口号");
+                            } else if(data.status == 0){
+                                alert("通信失败!请检查主机和端口号");
+                            }else {
+                                alert("密码错误!请确保连接执行器的密码正确");
                             }
                         });
                     } else {
@@ -632,10 +634,12 @@
                     "password": password
                 }
             },function (data) {
-                if (data.status) {
+                if (data.status == 1) {
                     $("#pingResult").html("<font color='green'>" + '<i class="glyphicon glyphicon-ok-sign"></i>&nbsp;通信正常' + "</font>");
-                } else {
+                } else if(data.status == 0){
                     $("#pingResult").html("<font color='red'>" + '<i class="glyphicon glyphicon-remove-sign"></i>&nbsp;通信失败' + "</font>");
+                }else {
+                    $("#pingResult").html("<font color='red'>" + '<i class="glyphicon glyphicon-remove-sign"></i>&nbsp;密码错误' + "</font>");
                 }
             });
         }
@@ -830,11 +834,14 @@
                     <td>${w.host}</td>
                     <td id="port_${w.agentId}">${w.port}</td>
                     <td>
-                        <c:if test="${w.status eq false}">
+                        <c:if test="${w.status eq 0}">
                             <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
                         </c:if>
-                        <c:if test="${w.status eq true}">
+                        <c:if test="${w.status eq 1}">
                             <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+                        </c:if>
+                        <c:if test="${w.status eq 2}">
+                            <span class="label label-danger">&nbsp;密码错误&nbsp;</span>
                         </c:if>
                     </td>
                     <td id="warning_${w.agentId}">

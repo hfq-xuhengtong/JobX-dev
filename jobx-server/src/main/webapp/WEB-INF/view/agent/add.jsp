@@ -153,7 +153,7 @@
                         "password": calcMD5($("#password").val())
                     }
                 },function (data) {
-                    if (data.status) {
+                    if (data.status == 1) {
                         jobx.tipOk("#port");
                         ajax({
                             url: "${contextPath}/verify/macid.do",
@@ -173,8 +173,11 @@
                                 callback();
                             }
                         });
-                    } else {
+                    } else if(data.status == 0){
                         jobx.tipError("#port","通信失败");
+                        _this.status=false;
+                    }else {
+                        jobx.tipError("#port","密码错误");
                         _this.status=false;
                     }
                 },function () {

@@ -65,8 +65,11 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
         //verify password...
         if (!SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY).equalsIgnoreCase(request.getPassword())) {
+            Map<String,String> result = new HashMap<String, String>(0);
+            result.put(Action.PING.name(),"0");
             return Response.response(request)
                     .setSuccess(false)
+                    .setResult(result)
                     .setExitCode(Constants.StatusCode.ERROR_PASSWORD.getValue())
                     .setMessage(Constants.StatusCode.ERROR_PASSWORD.getDescription())
                     .end();

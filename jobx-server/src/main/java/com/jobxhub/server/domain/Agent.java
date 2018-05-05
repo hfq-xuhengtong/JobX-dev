@@ -56,7 +56,7 @@ public class Agent implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String emailAddress;
     private String mobiles;
-    private Boolean status;
+    private Integer status;//1通讯成功,0:失败失联,2:密码错误
     private Date notifyTime;//失败后发送通知告警的时间
     private String comment;
     private Date updateTime;
@@ -155,11 +155,11 @@ public class Agent implements Serializable {
         this.mobiles = mobiles;
     }
 
-    public Boolean getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

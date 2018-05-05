@@ -75,30 +75,30 @@ public class VerifyController extends BaseController {
      */
     @RequestMapping(value = "ping.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
+    public Map<String,Integer> validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
         Agent agent = new Agent();
         agent.setProxy(proxy);
         agent.setHost(host);
         agent.setPort(port);
         agent.setPassword(password);
+
+        Map<String,Integer> result = new HashMap<String, Integer>(0);
         if (proxy == Constants.ConnType.PROXY.getType()) {
             agent.setProxy(Constants.ConnType.CONN.getType());
             if (proxyId != null) {
                 Agent proxyAgent = agentService.getAgent(proxyId);
                 if (proxyAgent == null) {
-                    return Status.FALSE;
+                    result.put("status",Constants.ConnStatus.DISCONNECTED.getValue());
+                    return result;
                 }
                 agent.setProxyAgent(proxyId);
                 //需要代理..
                 agent.setProxy(Constants.ConnType.PROXY.getType());
             }
         }
-        boolean pong = executeService.ping(agent,false);
-        if (!pong) {
-            logger.error(String.format("validate host:%s,port:%s cannot ping!", agent.getHost(), port));
-            return Status.FALSE;
-        }
-        return Status.TRUE;
+        Constants.ConnStatus connStatus = executeService.ping(agent,false);
+        result.put("status",connStatus.getValue());
+        return result;
     }
 
     @RequestMapping(value = "macid.do", method = RequestMethod.POST)

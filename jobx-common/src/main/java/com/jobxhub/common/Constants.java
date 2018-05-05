@@ -308,41 +308,32 @@ public class Constants {
     }
 
     public enum ConnStatus implements Serializable {
-        CONNECTED(0x1, true, "通信成功"),
-        DISCONNECTED(0x0, false, "通信失败");
+        CONNECTED(0x1,  "通信成功"),
+        DISCONNECTED(0x0, "通信失败"),
+        UNAUTHORIZED(0x2, "密码错误,认证失败");
 
-        private Integer type;
-        private boolean value;
+        private Integer value;
         private String description;
 
-        ConnStatus(Integer type, boolean value, String description) {
-            this.type = type;
+        ConnStatus(Integer value, String description) {
             this.value = value;
             this.description = description;
         }
 
-        public static ConnStatus getByType(Integer value) {
+        public static ConnStatus getByValue(Integer value) {
             for (ConnStatus connStatus : ConnStatus.values()) {
-                if (connStatus.getType().equals(value)) {
+                if (connStatus.getValue().equals(value)) {
                     return connStatus;
                 }
             }
             return null;
         }
 
-        public Integer getType() {
-            return type;
-        }
-
-        public void setType(Integer type) {
-            this.type = type;
-        }
-
-        public boolean isValue() {
+        public Integer getValue() {
             return value;
         }
 
-        public void setValue(boolean value) {
+        public void setValue(Integer value) {
             this.value = value;
         }
 

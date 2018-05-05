@@ -627,8 +627,8 @@ public class ExecuteService implements Job {
      * 任务执行前 检测通信
      */
     private void checkPing(JobInfo job, Record record) throws PingException {
-        boolean ping = ping(job.getAgent(),true);
-        if (!ping) {
+        ConnStatus connStatus = ping(job.getAgent(),true);
+        if (!connStatus.equals(ConnStatus.CONNECTED)) {
             //已完成
             record.setStatus(RunStatus.DONE.getStatus());
             record.setReturnCode(StatusCode.ERROR_PING.getValue());
@@ -644,25 +644,42 @@ public class ExecuteService implements Job {
         }
     }
 
-    public boolean ping(Agent agent,boolean update) {
-        boolean pong = false;
+    public Constants.ConnStatus ping(Agent agent,boolean update) {
+        Response response = null;
         try {
-            Response response = caller.sentSync(Request.request(
+            response = caller.sentSync(Request.request(
                     agent.getHost(),
                     agent.getPort(),
                     Action.PING,
                     agent.getPassword(),
                     Constants.RPC_TIMEOUT,
                     agent.getProxyAgent()));
-            pong = response!=null && response.isSuccess();
+
         } catch (Exception e) {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
         }
+
+        ConnStatus status;
+
+        if (response == null) {
+            status = ConnStatus.DISCONNECTED;
+        }else {
+            if (response.isSuccess()) {
+                status = ConnStatus.CONNECTED;
+            }else {
+                if (response.getResult().isEmpty()) {
+                    status = ConnStatus.DISCONNECTED;
+                }else {
+                    status = ConnStatus.UNAUTHORIZED;
+                }
+            }
+        }
+
         if (update) {
-            agent.setStatus(pong);
+            agent.setStatus(status.getValue());
             agentService.merge(agent);
         }
-        return pong;
+        return status;
     }
 
     public String getMacId(Agent agent) {

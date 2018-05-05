@@ -15,11 +15,14 @@
         <td>${w.host}</td>
         <td id="port_${w.agentId}">${w.port}</td>
         <td id="agent_${w.agentId}">
-            <c:if test="${w.status eq false}">
+            <c:if test="${w.status eq 0}">
                 <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
             </c:if>
-            <c:if test="${w.status eq true}">
+            <c:if test="${w.status eq 1}">
                 <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+            </c:if>
+            <c:if test="${w.status eq 2}">
+                <span class="label label-danger">&nbsp;密码错误&nbsp;</span>
             </c:if>
         </td>
         <td id="warning_${w.agentId}">
