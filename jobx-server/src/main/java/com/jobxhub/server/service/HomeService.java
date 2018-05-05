@@ -96,7 +96,7 @@ public class HomeService {
     }
 
     public Integer getUnReadCount(HttpSession session) {
-        String hql = "select count(1) from Log where isread=? and type=? and userid = ?";
+        String hql = "from Log where isread=? and type=? and userid = ?";
         return queryDao.hqlCount(hql, false, Constants.MsgType.WEBSITE.getValue(), JobXTools.getUserId(session));
     }
 

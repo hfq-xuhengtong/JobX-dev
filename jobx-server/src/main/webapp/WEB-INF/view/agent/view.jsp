@@ -496,12 +496,9 @@
                 ajax({
                     type: "post",
                     url:"${contextPath}/agent/checkdel.do",
-                    data:{"id":id},
-                    dataType:"html"
+                    data:{"id":id}
                 },function (data) {
                     if (data.status){
-                        alert("删除失败,找到不该执行器或者该执行器上定义了作业")
-                    }else {
                         ajax({
                             type: "post",
                             url:"${contextPath}/agent/delete.do",
@@ -510,6 +507,8 @@
                             alertMsg("删除执行器成功");
                             location.reload();
                         })
+                    }else {
+                        alert("删除失败,该执行器上定义了作业");
                     }
                 })
             });

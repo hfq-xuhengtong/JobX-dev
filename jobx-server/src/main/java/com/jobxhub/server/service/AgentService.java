@@ -152,14 +152,20 @@ public class AgentService {
         return queryDao.hqlCount(hql, name) > 0;
     }
 
+    /**
+     * true can delete
+     * false can't delete
+     * @param id
+     * @return
+     */
     public boolean checkDelete(Long id) {
         Agent agent = getAgent(id);
         if (agent == null) {
-            return false;
+            return true;
         }
         //检查该执行器是否定义的有任务
-        String hql = "select count(1) from Job where agentId=? ";
-        return queryDao.hqlCount(hql, id) > 0;
+        String hql = "from Job where agentId=?";
+        return queryDao.hqlCount(hql, id) == 0;
     }
 
     @Transactional(rollbackFor = Exception.class,readOnly = false)
@@ -172,7 +178,7 @@ public class AgentService {
     }
 
     public boolean existsHost(Long id, String host) {
-        String hql = "select count(1) from Agent where host=? ";
+        String hql = "from Agent where host=? ";
         if (notEmpty(id)) {
             hql += " and agentId != " + id;
         }

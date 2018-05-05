@@ -114,7 +114,7 @@ public class UserService {
      * @return
      */
     public boolean existsName(String name) {
-        return queryDao.hqlCount("select count(1) from User where userName=?",name)>0;
+        return queryDao.hqlCount("from User where userName=?",name)>0;
     }
 
 

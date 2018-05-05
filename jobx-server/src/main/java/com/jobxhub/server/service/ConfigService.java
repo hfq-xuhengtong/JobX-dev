@@ -105,7 +105,7 @@ public class ConfigService {
         }
 
         //init config
-        long count = queryDao.hqlCount("select count(1) from Config");
+        long count = queryDao.hqlCount("from Config");
         if (count == 0) {
             Config config = new Config();
             config.setConfigId(1L);

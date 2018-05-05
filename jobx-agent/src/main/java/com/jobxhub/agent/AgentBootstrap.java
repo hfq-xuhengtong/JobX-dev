@@ -227,6 +227,7 @@ public class AgentBootstrap implements Serializable {
                     server.start(port, handler);
                 }
             });
+
             /**
              * write pid to pidfile...
              */
@@ -238,10 +239,13 @@ public class AgentBootstrap implements Serializable {
                 }
             }
 
+            /**
+             * 往zk里注册这一步一定要放在server(netty|mina)启动之后,不然如果先注册zk后启动server,则jobx-server端收到zk回调
+             * 会发起rpc连接,而这时的jobx-agent里的server可能还未启动,导致连接失败,agent自动注册也会失败....
+             */
+            Thread.sleep(5000);
             AgentProcessor.register(this.host,this.port);
-
             AgentProcessor.bindShutdownHook(this.host,this.port);
-
         } catch (Exception e) {
             e.printStackTrace();
         }

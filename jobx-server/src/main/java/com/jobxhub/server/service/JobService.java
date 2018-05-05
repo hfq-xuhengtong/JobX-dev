@@ -247,21 +247,21 @@ public class JobService {
         Job job = getJob(jobId);
         if (job != null) {
             //单一任务,直接执行删除
-            String sql = "delete T_JOB WHERE ";
+            String sql = "delete Job where 1=1 ";
             if (job.getJobType().equals(JobType.SINGLETON.getCode())) {
-                sql += " jobId=" + jobId;
+                sql += " and jobId=" + jobId;
             }
             if (job.getJobType().equals(JobType.FLOW.getCode())) {
                 if (job.getFlowNum() == 0) {
                     //顶层流程任务,则删除一组
-                    sql += " flowId=" + job.getFlowId();
+                    sql += " and flowId=" + job.getFlowId();
                 } else {
                     //其中一个子流程任务,则删除单个
-                    sql += " jobId=" + jobId;
+                    sql += " and jobId=" + jobId;
                 }
             }
-            queryDao.createSQLQuery(sql).executeUpdate();
-            schedulerService.syncTigger(jobId);
+            queryDao.createQuery(sql).executeUpdate();
+            jobxRegistry.jobUnRegister(jobId);
             flushLocalJob();
         }
     }

@@ -305,7 +305,7 @@ public class RecordService {
     }
 
     public Integer getRecords(HttpSession session, Constants.ResultStatus status, Constants.ExecType execType) {
-        String hql = "select count(1) from Record where success=:success and exectype=:exectype and status in (:status) and (flownum is null or flownum=1)";
+        String hql = "from Record where success=:success and exectype=:exectype and status in (:status) and (flownum is null or flownum=1)";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
             hql += " and userId = " + user.getUserId() + " and agentid IN (" + user.getAgentIds() + ")";
