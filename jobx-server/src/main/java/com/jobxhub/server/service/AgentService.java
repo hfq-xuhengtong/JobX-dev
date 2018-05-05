@@ -266,8 +266,7 @@ public class AgentService {
         Agent agent = transfers.get(1);
         //两个参数
         if (registryAgent.getHost() == null) {
-            //密码一致
-            if (agent != null && registryAgent.getPassword().equals(agent.getPassword())) {
+            if (agent != null) {
                 executeService.ping(agent,true);
             }
             return;
@@ -275,10 +274,7 @@ public class AgentService {
 
         //4个参数
         if (agent != null) {
-            //密码一致
-            if (agent.getPassword().equals(registryAgent.getPassword())) {
-                executeService.ping(agent,true);
-            }
+            executeService.ping(agent,true);
             return;
         }
         //新的机器，需要自动注册.
