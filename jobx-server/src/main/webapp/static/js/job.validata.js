@@ -1,3 +1,7 @@
+Number.prototype.getChar = function(){
+    var arrays = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z".split(",");
+    return arrays[this];
+}
 
 function Validata() {
 
@@ -291,13 +295,23 @@ function Validata() {
 
         remove: function (node) {
             $(node).parent().slideUp(300, function () {
-                this.remove()
+                this.remove();
+                self.subJob.graphH(0);
             });
         },
 
         close: function () {
             $("#subForm")[0].reset();
             $('#jobModal').modal('hide');
+        },
+
+        graphH:function(index) {
+            var children = $("#subJobDiv").find(".jobnum").length;
+            var graphH = (children+index) * 35 + 20;
+            $(".graph").css({
+                "margin-top":"-"+(200+graphH)+ "px",
+                "height":200+graphH+"px"
+            });
         },
 
         verify: function () {
@@ -316,10 +330,26 @@ function Validata() {
                         var _jobName = $("#jobName1").val();
                         if ($("#subTitle").attr("action") === "add") {
                             var timestamp = Date.parse(new Date());
+                            var children = $("#subJobDiv").find(".jobnum").length;
+                            if (children == 0) {
+                                var addHtml = "<li><span><div class='circle'></div><span class='jobnum' num='0' name='当前作业'>A</span>当前作业</span></li>";
+                                $("#subJobDiv").show().append($(addHtml));
+                            }
+
+                            children = $("#subJobDiv").find(".jobnum");
+
+                            self.subJob.graphH(1);
+
+                            var last = children[children.length-1];
+                            var lastNum = $(last).attr("num");
+
+                            var currNum = parseInt(lastNum)+1;
+                            var currJobNum = currNum.getChar();
+
                             var addHtml =
                                 "<li id='" + timestamp + "'>" +
                                 "<input type='hidden' name='child.jobId' value=''>" +
-                                "<input type='hidden' name='child.jobName' value='" + escapeHtml(_jobName) + "'>" +
+                                "<input type='hidden' name='child.jobName' num='"+currNum+"' value='" + escapeHtml(_jobName) + "'>" +
                                 "<input type='hidden' name='child.agentId' value='" + $("#agentId1").val() + "'>" +
                                 "<input type='hidden' name='child.command' value='" + toBase64($("#cmd1").val()) + "'>" +
                                 "<input type='hidden' name='child.redo' value='" + $('#itemRedo').val() + "'>" +
@@ -327,15 +357,25 @@ function Validata() {
                                 "<input type='hidden' name='child.timeout' value='" + $("#timeout1").val() + "'>" +
                                 "<input type='hidden' name='child.successExit' value='" + $("#successExit1").val() + "'>" +
                                 "<input type='hidden' name='child.comment' value='" + escapeHtml($("#comment1").val()) + "'>" +
+                                "<span id='name_" + timestamp + "'><div class='circle'></div><span class='jobnum' num='"+currNum+"' name='"+escapeHtml(_jobName)+"'>"+currJobNum+"</span>"  + escapeHtml(_jobName) + "</span>" +
+                                "<span class='delSubJob' onclick='jobxValidata.subJob.remove(this)' style='float:right; margin-right: 5px;'>" +
+                                "   <i class='glyphicon glyphicon-trash' title='删除'></i>" +
+                                "</span>" +
+                                "<span onclick='jobxValidata.subJob.edit(\"" + timestamp + "\")' style='float:right; margin-right: 5px;'>" +
+                                "   <a data-toggle='modal' href='#jobModal' title='编辑'>" +
+                                "       <i class='glyphicon glyphicon-pencil'></i>&nbsp;&nbsp;" +
+                                "   </a>" +
+                                "</span>" +
                                 "</li>";
-                            $("#subJobDiv").append($(addHtml));
-                            addNode(timestamp,escapeHtml(_jobName));
+                            $("#subJobDiv").show().append($(addHtml));
                         } else if ($("#subTitle").attr("action") == "edit") {//编辑
                             var id = $("#subTitle").attr("tid");
-                            $("#" + id).find("input").each(function (index, element) {
+                            var currNum = 0;
 
+                            $("#" + id).find("input").each(function (index, element) {
                                 if ($(element).attr("name") == "child.jobName") {
                                     $(element).attr("value", _jobName);
+                                    currNum =  parseInt($(element).attr("num"));
                                 }
 
                                 if ($(element).attr("name") == "child.redo") {
@@ -365,7 +405,9 @@ function Validata() {
                                     $(element).attr("value", $("#comment1").val());
                                 }
                             });
-                            $("#name_" + id).html(escapeHtml(_jobName));
+                            var numHtml = "<div class='circle'></div><span class='jobnum' num='"+currNum+"' name='"+_jobName+"'>"+currNum.getChar()+"</span>";
+
+                            $("#name_" + id).html(numHtml+escapeHtml(_jobName));
                         }
                         self.subJob.close();
                     }
@@ -426,9 +468,12 @@ function Validata() {
             if (_toggle == "1") {
                 $("#jobTypeTip").html("流程作业: 有多个作业组成一个作业组");
                 $(".subJob").show();
+                $(".depen").show();
+                $(".depen-input").val('');
             } else {
                 $("#jobTypeTip").html("单一作业: 当前定义作业为要执行的目前作业");
                 $(".subJob").hide();
+                $(".depen").hide();
             }
         }
     };
@@ -516,11 +561,6 @@ Validata.prototype.ready = function () {
     _this.toggle.subJob($('input[type="radio"][name="jobType"]:checked').val());
 
     _this.toggle.cronTip($('input[type="radio"][name="cronType"]:checked').val());
-
-    //子作业拖拽
-    $("#subJobDiv").sortable({
-        delay: 100
-    });
 
     $("#year,#month,#day,#week,#hour,#minutes,#seconds").click(function () {
         var cronExp = "";
@@ -685,4 +725,3 @@ Validata.prototype.ready = function () {
         jobx.tipDefault("#email");
     });
 };
-

@@ -6,100 +6,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.core.min.js?resId=${resourceId}"></script> <!-- jQuery Library -->
-    <link rel="stylesheet" href="${contextPath}/static/js/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
-    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.excheck.min.js"></script>
-    <script type="text/javascript" src="${contextPath}/static/js/ztree/jquery.ztree.exedit.min.js"></script>
-
     <style type="text/css">
-        #sortJob{
+        .subJobUl li {
             background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 13px;
-            width:450px;
-        }
-        .ztree li a {
-            color: #fff;
+            border-radius: 15px;
+            height: 32px;
+            list-style: outside none none;
+            margin-top: -27px;
+            margin-bottom: 30px;
+            margin-left: 140px;
+            padding: 6px 16px;
+            width: 100%;
         }
 
-        .ztree li a.curSelectedNode {
-            background:none;
-            color:white;
-            border:none;
+        .circle {
+            border-radius: 50%;
+            background-color:rgba(0,255,200,0.6);
+            width: 20px;
+            height: 20px;
+            margin: 0 auto;
+            line-height: 20px;
+            color:red;
+            float:left
         }
-        .ztree li span.button.ico_open { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
-        .ztree li span.button.ico_close { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
-        .ztree li span.button.ico_docu { margin-right:2px;background: url('/static/img/folder-close.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
-        /*.ztree li span.switch.root_open {background-image: none}
-        .ztree li span.switch.roots_open {background-image:none}
-        .ztree li span.switch.bottom_open{background-image: none}*/
+
+        .jobnum {
+            color: black;
+            font-weight: bold;
+            margin-left: -14px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .depen {
+            display: none;
+        }
+
+        .depen-input{
+            resize:vertical;
+            border-radius: 5px;
+            line-height:1.5
+        }
+
+        .graph {
+            margin-top: -205px;
+            float: right;
+        }
+
+        .node rect,
+        .node circle,
+        .node ellipse,
+        .node polygon {
+            stroke: rgba(0,255,200,0.6);
+            fill:rgba(235,235,255,.4);
+            stroke-width: 1px;
+            font-size: 14px;
+        }
+
+        .edgePath path {
+            stroke: rgba(0,0,0,.7);
+            fill: rgba(0,0,0,.7);
+            stroke-width: 1px;
+        }
+
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
 
+    <script src="${contextPath}/static/js/dagre-d3/d3.v4.min.js" charset="utf-8"></script>
+    <script src="${contextPath}/static/js/dagre-d3/dagre-d3.min.js"></script>
+
     <script type="text/javascript">
-        var setting = {
-            edit: {
-                enable: true,
-                showRemoveBtn: function(treeId, treeNode) {
-                    return treeNode.id != 0;
-                },
-                showRenameBtn: false,
-                drag:{
-                    inner:true,
-                    prev:true,
-                    next:true,
-                    isMove:true
-                }
-            },
-            data: {
-                simpleData: {
-                    enable: true
-                }
-            },
-            callback: {
-                beforeDrag: beforeDrag,
-                beforeDrop: beforeDrop,
-                beforeRemove:function(treeId, treeNode){
-                    if (treeNode.id == 0 ) {
-                        return false;
-                    }
-                },
-                onClick: onClick,
-                beforeCollapse:function () {
-                    return true;
-                }
-            }
-        };
-
-        function beforeDrag(treeId, treeNodes) {
-            for (var i=0,l=treeNodes.length; i<l; i++) {
-                if (treeNodes[i].drag === false) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        function beforeDrop(treeId, treeNodes, targetNode, moveType) {
-            return targetNode ? targetNode.drop !== false : true;
-        }
-
-        function addNode(id,name) {
-            var zTree = $.fn.zTree.getZTreeObj("sortJob");
-            zTree.addNodes(null, {id:id, pId:0, name:name,drag:true});
-        }
-
-        function onClick(event, treeId, treeNode, clickFlag) {
-            if (treeNode.id != 0) {
-                jobxValidata.subJob.edit(treeNode.id);
-                $('#jobModal').modal('show');
-            }
-        }
 
         $(document).ready(function(){
+
             window.jobxValidata = new Validata('${contextPath}');
-            var currentJob = [{ id:0, pId:0, name:"当前作业", open:true,showRemoveBtn:false}];
-            $.fn.zTree.init($("#sortJob"), setting,currentJob );
+
+            window.lastdeps = "";
+
+            $(".depen-input").change(function () {
+
+                var deps = $(this).val();
+
+                if (deps.length>0) {
+                    deps = deps.replace(/[\r\n]/g, "").replace(/\s+/g, "").toUpperCase();
+                    deps = calcMD5(deps);
+                }
+
+                if (window.lastdeps == deps) {
+                    return;
+                }
+
+                window.lastdeps = deps;
+
+                deps = $(this).val().toUpperCase();
+
+                if (deps.endsWith(">")) {
+                    alert("表达式错误,必须以任务标记结尾");
+                    return;
+                }
+
+                //语法解析....
+                var lineSign = "\n";
+                var toSign = ">";
+                var manySing = ",";
+
+                var lines = deps.split(lineSign);
+                var depArray = {};
+                for(var i=0;i<lines.length;i++) {
+                    var jobs = lines[i].split(toSign);
+                    for (var j = 0;j<jobs.length-1;j++) {
+                        var numArray = jobs[j].split(manySing);
+                        var to = jobs[j+1].split(manySing);
+                        for (var n = 0;n<numArray.length;n++) {
+                            var from = depArray[numArray[n]];
+                            if (from == null) {
+                                from = to;
+                            }else {
+                                from = from.concat(to);
+                            }
+                            depArray[numArray[n]] = from;
+                        }
+                    }
+                }
+
+                    // Create a new directed graph
+                var g = new dagreD3.graphlib.Graph().setGraph({});
+
+                var states = [];
+
+                for(var k in depArray) {
+                    var kName = getJobName(k);
+                    states.push(kName);
+                    var arr = depArray[k];
+                    for (var i=0;i<arr.length;i++) {
+                        var v = arr[i];
+                        var vName = getJobName(v);
+                        states.push(vName);
+                        g.setEdge(kName,vName, { label: ""});
+                        g.setNode(kName,{ shape: "rect","labelStyle":"font: 600 13px 'Helvetica Neue', Helvetica;"});
+                        g.setNode(vName,{ shape: "rect","labelStyle":"font: 600 13px 'Helvetica Neue', Helvetica;"});
+                    }
+                }
+
+                g.nodes().forEach(function(v) {
+                    var node = g.node(v);
+                    node.rx = node.ry = 10;
+                });
+
+                var svg = d3.select("svg"),
+                    inner = svg.select("g");
+
+                var zoom = d3.zoom().on("zoom", function() {
+                    inner.attr("transform", d3.event.transform);
+                });
+                svg.call(zoom);
+
+                // Create the renderer
+                var render = new dagreD3.render();
+
+                // Run the renderer. This is what draws the final graph.
+                render(inner, g);
+
+                // Center the graph
+                var initialScale = 0.95;
+                svg.call(zoom.transform, d3.zoomIdentity.translate((g.graph().width - g.graph().width * initialScale) / 2, 10).scale(initialScale));
+
+                svg.attr('height', g.graph().height * initialScale + 40);
+
+            });
         });
+        
+        function getJobName(char) {
+            var jobs = $(".jobnum");
+            for (var i=0;i<jobs.length;i++) {
+                var node = $(jobs[i]);
+                var num = node.text();
+                var name = node.attr("name");
+                if (char == num) {
+                    return name;
+                }
+            }
+            return null;
+        }
+
+        function unique(arr){
+            let newArr = [];
+            let obj = {};
+            for (let i = 0; i < arr.length; i++) {
+                if (!obj[typeof arr[i] + arr[i]]) {
+                    obj[typeof arr[i] + arr[i]] = 1;
+                    newArr.push(arr[i]);
+                }
+            }
+            return newArr;
+        }
     </script>
 
 </head>
@@ -281,10 +382,25 @@
                         <div class="col-md-10" style="top: -5px;">
                             <a data-toggle="modal" href="#jobModal" onclick="jobxValidata.subJob.add()" class="btn btn-sm m-t-10">添加作业依赖</a>
                         </div>
-                         <div class="col-md-10" style="top:5px;margin-left:150px;">
-                            <ul id="sortJob" class="ztree"></ul>
-                            <ul id="subJobDiv" style="display: none;"></ul>
+
+                        <div class="col-md-10" style="top:33px;margin-left:10px;">
+                            <ul id="subJobDiv" class="subJobUl col-md-4"></ul>
                         </div>
+                    </span>
+                </div>
+
+                <div class="form-group depen">
+                    <label for="cmd" class="col-lab control-label wid150"><i class="glyphicon glyphicon-th-large"></i>&nbsp;&nbsp;编排依赖&nbsp;&nbsp;<b>*&nbsp;</b></label>
+                    <div class="col-md-10">
+                        <div class="col-md-4">
+                            <textarea class="form-control input-sm depen-input" style="height: 200px;width: 100%" placeholder="例如:A>B>C"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <span class="col-md-10">
+                        <svg class="col-md-5 graph"><g/></svg>
                     </span>
                 </div>
 
