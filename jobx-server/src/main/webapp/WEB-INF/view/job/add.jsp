@@ -45,12 +45,14 @@
         .depen-input{
             resize:vertical;
             border-radius: 5px;
-            line-height:1.5
+            line-height:1.5;
+            margin-left: -5px;
         }
 
         .graph {
-            margin-top: -205px;
+            margin-top: -200px;
             float: right;
+            height: 20px;
         }
 
         .node rect,
@@ -72,7 +74,6 @@
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
-
     <script src="${contextPath}/static/js/dagre-d3/d3.v4.min.js" charset="utf-8"></script>
     <script src="${contextPath}/static/js/dagre-d3/dagre-d3.min.js"></script>
 
@@ -122,7 +123,7 @@
                             var from = depArray[numArray[n]];
                             if (from == null) {
                                 from = to;
-                            }else {
+                            } else {
                                 from = from.concat(to);
                             }
                             depArray[numArray[n]] = from;
@@ -130,7 +131,6 @@
                     }
                 }
 
-                    // Create a new directed graph
                 var g = new dagreD3.graphlib.Graph().setGraph({});
 
                 var states = [];
@@ -144,8 +144,8 @@
                         var vName = getJobName(v);
                         states.push(vName);
                         g.setEdge(kName,vName, { label: ""});
-                        g.setNode(kName,{ shape: "rect","labelStyle":"font: 600 13px 'Helvetica Neue', Helvetica;"});
-                        g.setNode(vName,{ shape: "rect","labelStyle":"font: 600 13px 'Helvetica Neue', Helvetica;"});
+                        g.setNode(kName,{ shape: "rect","labelStyle":"font: 600 14px 'Helvetica Neue', Helvetica;"});
+                        g.setNode(vName,{ shape: "rect","labelStyle":"font: 600 14px 'Helvetica Neue', Helvetica;"});
                     }
                 }
 
@@ -162,6 +162,7 @@
                 });
                 svg.call(zoom);
 
+
                 // Create the renderer
                 var render = new dagreD3.render();
 
@@ -169,8 +170,8 @@
                 render(inner, g);
 
                 // Center the graph
-                var initialScale = 0.95;
-                svg.call(zoom.transform, d3.zoomIdentity.translate((g.graph().width - g.graph().width * initialScale) / 2, 10).scale(initialScale));
+                var initialScale = 0.90;
+                svg.call(zoom.transform, d3.zoomIdentity.translate(($(".graph").width() * initialScale - g.graph().width * initialScale) / 2,10).scale(initialScale));
 
                 svg.attr('height', g.graph().height * initialScale + 40);
 
@@ -188,18 +189,6 @@
                 }
             }
             return null;
-        }
-
-        function unique(arr){
-            let newArr = [];
-            let obj = {};
-            for (let i = 0; i < arr.length; i++) {
-                if (!obj[typeof arr[i] + arr[i]]) {
-                    obj[typeof arr[i] + arr[i]] = 1;
-                    newArr.push(arr[i]);
-                }
-            }
-            return newArr;
         }
     </script>
 
