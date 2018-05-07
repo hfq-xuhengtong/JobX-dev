@@ -14,7 +14,7 @@
             list-style: outside none none;
             margin-top: -27px;
             margin-bottom: 30px;
-            margin-left: 140px;
+            margin-left: 135px;
             padding: 6px 16px;
             width: 100%;
         }
@@ -83,101 +83,120 @@
 
             window.jobxValidata = new Validata('${contextPath}');
 
-            window.lastdeps = "";
-
             $(".depen-input").change(function () {
-
-                var deps = $(this).val();
-
-                if (deps.length>0) {
-                    deps = deps.replace(/[\r\n]/g, "").replace(/\s+/g, "").toUpperCase();
-                    deps = calcMD5(deps);
-                }
-
-                if (window.lastdeps == deps) {
-                    return;
-                }
-
-                window.lastdeps = deps;
-
-                deps = $(this).val().toUpperCase();
-
-                if (deps.endsWith(">")) {
-                    alert("表达式错误,必须以任务标记结尾");
-                    return;
-                }
-
-                //语法解析....
-                var lineSign = "\n";
-                var toSign = ">";
-                var manySing = ",";
-
-                var lines = deps.split(lineSign);
-                var depArray = {};
-                for(var i=0;i<lines.length;i++) {
-                    var jobs = lines[i].split(toSign);
-                    for (var j = 0;j<jobs.length-1;j++) {
-                        var numArray = jobs[j].split(manySing);
-                        var to = jobs[j+1].split(manySing);
-                        for (var n = 0;n<numArray.length;n++) {
-                            var from = depArray[numArray[n]];
-                            if (from == null) {
-                                from = to;
-                            } else {
-                                from = from.concat(to);
-                            }
-                            depArray[numArray[n]] = from;
-                        }
-                    }
-                }
-
-                var g = new dagreD3.graphlib.Graph().setGraph({});
-
-                var states = [];
-
-                for(var k in depArray) {
-                    var kName = getJobName(k);
-                    states.push(kName);
-                    var arr = depArray[k];
-                    for (var i=0;i<arr.length;i++) {
-                        var v = arr[i];
-                        var vName = getJobName(v);
-                        states.push(vName);
-                        g.setEdge(kName,vName, { label: ""});
-                        g.setNode(kName,{ shape: "rect","labelStyle":"font: 600 14px 'Helvetica Neue', Helvetica;"});
-                        g.setNode(vName,{ shape: "rect","labelStyle":"font: 600 14px 'Helvetica Neue', Helvetica;"});
-                    }
-                }
-
-                g.nodes().forEach(function(v) {
-                    var node = g.node(v);
-                    node.rx = node.ry = 10;
-                });
-
-                var svg = d3.select("svg"),
-                    inner = svg.select("g");
-
-                var zoom = d3.zoom().on("zoom", function() {
-                    inner.attr("transform", d3.event.transform);
-                });
-                svg.call(zoom);
-
-
-                // Create the renderer
-                var render = new dagreD3.render();
-
-                // Run the renderer. This is what draws the final graph.
-                render(inner, g);
-
-                // Center the graph
-                var initialScale = 0.90;
-                svg.call(zoom.transform, d3.zoomIdentity.translate(($(".graph").width() * initialScale - g.graph().width * initialScale) / 2,10).scale(initialScale));
-
-                svg.attr('height', g.graph().height * initialScale + 40);
-
+                graph(0);
             });
+
         });
-        
+
+        window.lastdeps = "";
+
+        function graph() {
+
+            var deps = $(".depen-input").val();
+
+            if (deps.length>0) {
+                deps = deps.replace(/[\r\n]/g, "").replace(/\s+/g, "").toUpperCase();
+                deps = calcMD5(deps);
+            }else {
+                return;
+            }
+
+            //change...
+            if (arguments[0] == 0  ) {
+                if(window.lastdeps == deps){
+                    return;
+                }
+            }else {
+                var char = parseInt(arguments[1]).getChar();
+                var _deps = $(".depen-input").val().toUpperCase();
+                // input not this job
+                if ( _deps.indexOf(char + ">") == -1 &&
+                    _deps.indexOf(char + ",") > 0 &&
+                    _deps.indexOf(">" + char) > 0 &&
+                    _deps.indexOf(","+char) > 0 ) {
+                    return;
+                }
+            }
+
+            window.lastdeps = deps;
+
+            deps = $(".depen-input").val().toUpperCase();
+
+            if (deps.endsWith(">")) {
+                alert("表达式错误,必须以任务标记结尾");
+                return;
+            }
+
+            //语法解析....
+            var lineSign = "\n";
+            var toSign = ">";
+            var manySing = ",";
+
+            var lines = deps.split(lineSign);
+            var depArray = {};
+            for(var i=0;i<lines.length;i++) {
+                var jobs = lines[i].split(toSign);
+                for (var j = 0;j<jobs.length-1;j++) {
+                    var numArray = jobs[j].split(manySing);
+                    var to = jobs[j+1].split(manySing);
+                    for (var n = 0;n<numArray.length;n++) {
+                        var from = depArray[numArray[n]];
+                        if (from == null) {
+                            from = to;
+                        } else {
+                            from = from.concat(to);
+                        }
+                        depArray[numArray[n]] = from;
+                    }
+                }
+            }
+
+            var g = new dagreD3.graphlib.Graph().setGraph({});
+
+            var states = [];
+
+            for(var k in depArray) {
+                var kName = getJobName(k);
+                states.push(kName);
+                var arr = depArray[k];
+                for (var i=0;i<arr.length;i++) {
+                    var v = arr[i];
+                    var vName = getJobName(v);
+                    states.push(vName);
+                    g.setEdge(kName,vName, { label: ""});
+                    g.setNode(kName,{ shape: "rect","labelStyle":"font: 600 14px 'Helvetica Neue', Helvetica;"});
+                    g.setNode(vName,{ shape: "rect","labelStyle":"font: 600 14px 'Helvetica Neue', Helvetica;"});
+                }
+            }
+
+            g.nodes().forEach(function(v) {
+                var node = g.node(v);
+                node.rx = node.ry = 10;
+            });
+
+            var svg = d3.select("svg"),
+                inner = svg.select("g");
+
+            var zoom = d3.zoom().on("zoom", function() {
+                inner.attr("transform", d3.event.transform);
+            });
+            svg.call(zoom);
+
+            // Create the renderer
+            var render = new dagreD3.render();
+
+            // Run the renderer. This is what draws the final graph.
+            render(inner, g);
+
+            // Center the graph
+            var initialScale = 0.90;
+            svg.call(zoom.transform, d3.zoomIdentity.translate(($(".graph").width() * initialScale - g.graph().width * initialScale) / 2,10).scale(initialScale));
+
+            svg.attr('height', g.graph().height * initialScale + 40);
+
+        }
+
         function getJobName(char) {
             var jobs = $(".jobnum");
             for (var i=0;i<jobs.length;i++) {
@@ -388,7 +407,7 @@
                 </div>
 
                 <div class="form-group">
-                    <span class="col-md-10">
+                    <span class="col-md-10" style="margin-left: -50px;">
                         <svg class="col-md-5 graph"><g/></svg>
                     </span>
                 </div>

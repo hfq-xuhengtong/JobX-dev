@@ -242,12 +242,15 @@ function Validata() {
 
     this.subJob = {
 
+        jobFlagNum:0,
+
         tipDefault: function () {
             jobx.tipDefault("#jobName1");
             jobx.tipDefault("#cmd1");
             jobx.tipDefault("#successExit1");
             jobx.tipDefault("#timeout1");
             jobx.tipDefault("#runCount1");
+            $("#jobModal").find(".ok").remove();
         },
 
         add: function () {
@@ -261,6 +264,7 @@ function Validata() {
             this.tipDefault();
             $("#subTitle").html("编辑作业依赖").attr("action", "edit").attr("tid", id);
             $("#" + id).find("input").each(function (index, element) {
+
                 if ($(element).attr("name") == "child.jobName") {
                     $("#jobName1").val(unEscapeHtml($(element).val()));
                 }
@@ -293,10 +297,37 @@ function Validata() {
             });
         },
 
-        remove: function (node) {
-            $(node).parent().slideUp(300, function () {
-                this.remove();
-                self.subJob.graphH(0);
+        remove: function (node,num) {
+            swal({
+                title: "",
+                text: "您确定要删除该作业吗？",
+                type: "warning",
+                showCancelButton: true,
+                closeOnConfirm: true,
+                confirmButtonText: "删除"
+            },function () {
+                alertMsg("删除作业成功");
+                $(node).parent().slideUp(300, function () {
+                    this.remove();
+                    self.subJob.graphH(0);
+                    var deps = $(".depen-input").val();
+                    if (deps.length == 0) return;
+
+                    var char = num.getChar();
+                    var reg1 = char+">";
+                    var reg2 = char+",";
+                    var reg3 = ","+char;
+                    var reg4 = ">"+char;
+
+                    deps = deps.replace(reg1,"").replace(reg1.toLowerCase(),"")
+                        .replace(reg2,"").replace(reg2.toLowerCase(),"")
+                        .replace(reg3,"").replace(reg3.toLowerCase(),"")
+                        .replace(reg4,"").replace(reg4.toLowerCase(),"")
+
+                    $(".depen-input").val(deps);
+
+                    graph(0);
+                });
             });
         },
 
@@ -336,14 +367,9 @@ function Validata() {
                                 $("#subJobDiv").show().append($(addHtml));
                             }
 
-                            children = $("#subJobDiv").find(".jobnum");
-
                             self.subJob.graphH(1);
 
-                            var last = children[children.length-1];
-                            var lastNum = $(last).attr("num");
-
-                            var currNum = parseInt(lastNum)+1;
+                            var currNum = ++self.subJob.jobFlagNum;
                             var currJobNum = currNum.getChar();
 
                             var addHtml =
@@ -358,7 +384,7 @@ function Validata() {
                                 "<input type='hidden' name='child.successExit' value='" + $("#successExit1").val() + "'>" +
                                 "<input type='hidden' name='child.comment' value='" + escapeHtml($("#comment1").val()) + "'>" +
                                 "<span id='name_" + timestamp + "'><div class='circle'></div><span class='jobnum' num='"+currNum+"' name='"+escapeHtml(_jobName)+"'>"+currJobNum+"</span>"  + escapeHtml(_jobName) + "</span>" +
-                                "<span class='delSubJob' onclick='jobxValidata.subJob.remove(this)' style='float:right; margin-right: 5px;'>" +
+                                "<span class='delSubJob' onclick='jobxValidata.subJob.remove(this,"+currNum+")' style='float:right; margin-right: 5px;'>" +
                                 "   <i class='glyphicon glyphicon-trash' title='删除'></i>" +
                                 "</span>" +
                                 "<span onclick='jobxValidata.subJob.edit(\"" + timestamp + "\")' style='float:right; margin-right: 5px;'>" +
@@ -408,6 +434,9 @@ function Validata() {
                             var numHtml = "<div class='circle'></div><span class='jobnum' num='"+currNum+"' name='"+_jobName+"'>"+currNum.getChar()+"</span>";
 
                             $("#name_" + id).html(numHtml+escapeHtml(_jobName));
+
+                            graph(1,currNum);
+
                         }
                         self.subJob.close();
                     }
