@@ -109,12 +109,12 @@
                 }
             }else {
                 var char = parseInt(arguments[1]).getChar();
-                var _deps = $(".depen-input").val().toUpperCase();
+                var indep = $(".depen-input").val().toUpperCase();
                 // input not this job
-                if ( _deps.indexOf(char + ">") == -1 &&
-                    _deps.indexOf(char + ",") > 0 &&
-                    _deps.indexOf(">" + char) > 0 &&
-                    _deps.indexOf(","+char) > 0 ) {
+                if ( indep.indexOf(char + ">") == -1 &&
+                    indep.indexOf(char + ",") == -1 &&
+                    indep.indexOf(">" + char) == -1 &&
+                    indep.indexOf(","+char) == -1 ) {
                     return;
                 }
             }
@@ -209,6 +209,7 @@
             }
             return null;
         }
+
     </script>
 
 </head>
