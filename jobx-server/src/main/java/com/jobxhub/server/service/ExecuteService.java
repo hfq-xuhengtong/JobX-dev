@@ -227,19 +227,7 @@ public class ExecuteService implements Job {
         final Queue<JobInfo> jobQueue = new LinkedBlockingQueue<JobInfo>();
         jobQueue.add(job);
         jobQueue.addAll(job.getChildren());
-        RunModel runModel = RunModel.getRunModel(job.getRunModel());
-        switch (runModel) {
-            case SEQUENCE:
-                //串行任务
-                executeSequenceJob(groupId, jobQueue, execType);
-                break;
-            case SAMETIME:
-                //并行任务
-                executeSameTimeJob(groupId, jobQueue, execType);
-                break;
-            default:
-                break;
-        }
+        executeSequenceJob(groupId, jobQueue, execType);
     }
 
     /**

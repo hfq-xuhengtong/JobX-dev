@@ -241,6 +241,7 @@ function Validata() {
     };
 
     this.subJob = {
+
         jobFlagNum:0,
 
         tipDefault: function () {
@@ -322,10 +323,8 @@ function Validata() {
                         .replace(reg2,"").replace(reg2.toLowerCase(),"")
                         .replace(reg3,"").replace(reg3.toLowerCase(),"")
                         .replace(reg4,"").replace(reg4.toLowerCase(),"")
-
                     $(".depen-input").val(deps);
-
-                    graph(0);
+                    graph();
                 });
             });
         },
@@ -396,7 +395,6 @@ function Validata() {
                         } else if ($("#subTitle").attr("action") == "edit") {//编辑
                             var id = $("#subTitle").attr("tid");
                             var currNum = 0;
-
                             $("#" + id).find("input").each(function (index, element) {
                                 if ($(element).attr("name") == "child.jobName") {
                                     $(element).attr("value", _jobName);
@@ -431,11 +429,8 @@ function Validata() {
                                 }
                             });
                             var numHtml = "<div class='circle'></div><span class='jobnum' num='"+currNum+"' name='"+_jobName+"'>"+currNum.getChar()+"</span>";
-
                             $("#name_" + id).html(numHtml+escapeHtml(_jobName));
-
-                            graph(1,currNum);
-
+                            graph();
                         }
                         self.subJob.close();
                     }

@@ -137,6 +137,17 @@ public class JobController extends BaseController {
         return "/job/add";
     }
 
+    @RequestMapping("addflow.htm")
+    public String addflow(HttpSession session, Model model, Long id) {
+        if (notEmpty(id)) {
+            Agent agent = agentService.getAgent(id);
+            model.addAttribute("agent", agent);
+        }
+        List<Agent> agents = agentService.getOwnerAgents(session);
+        model.addAttribute("agents", agents);
+        return "/job/addflow";
+    }
+
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
         jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));
@@ -171,7 +182,7 @@ public class JobController extends BaseController {
         //单任务
         if (Constants.JobType.SINGLETON.getCode().equals(jobParam.getJobType())) {
             jobParam.setUserId(JobXTools.getUserId(session));
-            jobParam.setLastChild(false);
+            jobParam.setCreateType(Constants.CreateType.NORMAL.getValue());
             jobParam = jobService.merge(jobParam);
         } else { //流程任务
             Map<String, String[]> map = request.getParameterMap();
@@ -184,6 +195,7 @@ public class JobController extends BaseController {
             Object[] timeout = map.get("child.timeout");
             Object[] comment = map.get("child.comment");
             Object[] successExit = map.get("child.successExit");
+            Object[] sn = map.get("child.sn");
             List<Job> children = new ArrayList<Job>(0);
             for (int i = 0; i < jobName.length; i++) {
                 Job child = new Job();
@@ -192,10 +204,8 @@ public class JobController extends BaseController {
                     Long jobid = Long.parseLong((String) jobId[i]);
                     child = jobService.getJob(jobid);
                 }
-                /**
-                 * 新增并行和串行,子任务和最顶层的父任务一样
-                 */
-                child.setRunModel(jobParam.getRunModel());
+                child.setSn((String) sn[i]);
+                child.setCreateType(Constants.CreateType.FLOW.getValue());
                 child.setJobName(StringUtils.htmlEncode((String) jobName[i]));
                 child.setAgentId(Long.parseLong((String) agentId[i]));
                 child.setCommand(DigestUtils.passBase64((String) command[i]));
@@ -288,7 +298,7 @@ public class JobController extends BaseController {
         if (!jobService.checkJobOwner(session, dbJob.getUserId())) return Status.FALSE;
         dbJob.setCommand(command);
         jobService.merge(dbJob);
-        schedulerService.syncTigger(Constants.JobType.FLOW.getCode().equals(dbJob.getJobType()) ? dbJob.getFlowId() : dbJob.getJobId());
+        schedulerService.syncTigger(dbJob.getJobId());
         return Status.TRUE;
     }
 

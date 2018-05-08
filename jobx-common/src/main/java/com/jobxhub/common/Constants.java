@@ -543,13 +543,13 @@ public class Constants {
         }
     }
 
-    public enum RunModel {
-        SEQUENCE(0x0, "串行"),
-        SAMETIME(0x1, "并行");
+    public enum CreateType {
+        NORMAL(1, "正常定义的"),
+        FLOW(2, "创建工作流时定义的");
         private Integer value;
         private String desc;
 
-        RunModel(Integer value, String desc) {
+        CreateType(Integer value, String desc) {
             this.value = value;
             this.desc = desc;
         }
@@ -570,10 +570,10 @@ public class Constants {
             this.desc = desc;
         }
 
-        public static RunModel getRunModel(Integer value) {
-            for (RunModel model : RunModel.values()) {
-                if (model.getValue().equals(value)) {
-                    return model;
+        public static CreateType getCreateType(Integer value) {
+            for (CreateType type : CreateType.values()) {
+                if (type.getValue().equals(value)) {
+                    return type;
                 }
             }
             return null;

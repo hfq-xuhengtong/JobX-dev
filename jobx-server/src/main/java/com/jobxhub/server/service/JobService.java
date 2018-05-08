@@ -60,9 +60,6 @@ public class JobService {
     private UserService userService;
 
     @Autowired
-    private SchedulerService schedulerService;
-
-    @Autowired
     private JobXRegistry jobxRegistry;
 
     public Job getJob(Long jobId) {
@@ -252,13 +249,8 @@ public class JobService {
                 sql += " and jobId=" + jobId;
             }
             if (job.getJobType().equals(JobType.FLOW.getCode())) {
-                if (job.getFlowNum() == 0) {
-                    //顶层流程任务,则删除一组
-                    sql += " and flowId=" + job.getFlowId();
-                } else {
-                    //其中一个子流程任务,则删除单个
-                    sql += " and jobId=" + jobId;
-                }
+                //其中一个子流程任务,则删除单个
+                sql += " and jobId=" + jobId;
             }
             queryDao.createQuery(sql).executeUpdate();
             jobxRegistry.jobUnRegister(jobId);
@@ -266,11 +258,8 @@ public class JobService {
         }
     }
 
-
     public void saveFlowJob(Job job, List<Job> children) throws Exception {
-        job.setLastChild(false);
         job.setUpdateTime(new Date());
-        job.setFlowNum(0);//顶层sort是0
         /**
          * 保存最顶层的父级任务
          */
@@ -281,7 +270,6 @@ public class JobService {
              */
             JobInfo jobInfo = new JobInfo();
             jobInfo.setJobType(JobType.FLOW.getCode());
-            jobInfo.setFlowId(job.getFlowId());
 
             /**
              * 取差集..
@@ -303,7 +291,6 @@ public class JobService {
             }
         } else {
             Job job1 = merge(job);
-            job1.setFlowId(job1.getJobId());//flowId
             merge(job1);
             job.setJobId(job1.getJobId());
         }
@@ -313,12 +300,9 @@ public class JobService {
             /**
              * 子作业的流程编号都为顶层父任务的jobId
              */
-            child.setFlowId(job.getJobId());
             child.setUserId(job.getUserId());
             child.setUpdateTime(new Date());
             child.setJobType(JobType.FLOW.getCode());
-            child.setFlowNum(i + 1);
-            child.setLastChild(child.getFlowNum() == children.size());
             child.setWarning(job.getWarning());
             child.setMobiles(job.getMobiles());
             child.setEmailAddress(job.getEmailAddress());
