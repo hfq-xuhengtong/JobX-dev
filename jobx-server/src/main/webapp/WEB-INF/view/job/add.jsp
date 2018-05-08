@@ -90,7 +90,6 @@
         });
 
         window.lastdeps = "";
-
         function graph() {
 
             var deps = $(".depen-input").val();
