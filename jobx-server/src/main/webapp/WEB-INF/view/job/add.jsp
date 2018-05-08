@@ -9,13 +9,13 @@
 
     <style type="text/css">
         .block-title {
-            margin-bottom: 1px;
-            margin-right:-2px;
-            background-color: rgba(0,0,0,0.4);
+            margin-bottom: 0px;
+            margin-right:-3px;
+            background-color: rgba(0,0,0,0.5);
             cursor: pointer;
         }
         .title-active {
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.7);
         }
     </style>
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -45,17 +45,19 @@
     </ol>
     <h4 class="page-title"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;添加作业</h4>
 
-    <div style="float: right;margin-top: 5px">
-        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i class="fa fa-mail-reply" aria-hidden="true"></i>&nbsp;返回</a>
-    </div>
-
     <div class="block-area" id="basic">
-        <h3 class="block-title title-active">简单作业</h3>
-        <h3 class="block-title"><a href="${contextPath}/job/addflow.htm?id=${agent.id}">流程作业</a></h3>
+
+        <div class="tab-container tile" style="margin-bottom: 0px">
+            <ul class="nav tab nav-tabs">
+                <li class="active"><a href="javascript:void(0)">简单作业</a></li>
+                <li class="" onclick="javascript:location.href='${contextPath}/job/addflow.htm?id=${agent.id}'"><a href="javascript:void(0)">流程作业</a></li>
+            </ul>
+        </div>
+
         <div class="tile p-15 textured">
             <form class="form-horizontal" role="form" id="jobform" action="${contextPath}/job/save.do" method="post"></br>
                 <input type="hidden" name="command" id="command">
-                <input type="hidden" name="jobType" value="1">
+                <input type="hidden" name="jobType" value="0">
                 <div class="form-group">
                     <label for="agentId" class="col-lab control-label wid150"><i class="glyphicon glyphicon-leaf"></i>&nbsp;&nbsp;执&nbsp;&nbsp;行&nbsp;&nbsp;器&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">

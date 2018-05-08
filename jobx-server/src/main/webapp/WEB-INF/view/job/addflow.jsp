@@ -8,15 +8,15 @@
 <head>
     <style type="text/css">
         .block-title {
-            margin-bottom: 1px;
-            margin-right:-2px;
-            background-color: rgba(0,0,0,0.4);
+            margin-bottom: 0px;
+            margin-right:-3px;
+            background-color: rgba(0,0,0,0.5);
             cursor: pointer;
         }
         .title-active {
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.7);
         }
-        .subJobUl li {
+        .flowJobUl li {
             background-color: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
             height: 32px;
@@ -80,6 +80,17 @@
             stroke-width: 1px;
         }
 
+        .dropdown-menu {
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .dropdown-menu li a{
+            color: rgba(255,255,255,0.8);
+        }
+
+        .dropdown-menu li a:hover{
+            color: rgb(255,255,255);
+        }
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -90,7 +101,7 @@
 
         $(document).ready(function(){
 
-          //  window.jobxValidata = new Validata('${contextPath}');
+            window.jobxValidata = new Validata('${contextPath}');
 
             $(".depen-input").change(function () {
                 graph();
@@ -223,16 +234,17 @@
     </ol>
     <h4 class="page-title"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;添加作业</h4>
 
-    <div style="float: right;margin-top: 5px">
-        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i class="fa fa-mail-reply" aria-hidden="true"></i>&nbsp;返回</a>
-    </div>
-
     <div class="block-area" id="basic">
-        <h3 class="block-title"><a href="${contextPath}/job/add.htm?id=${agent.id}">简单作业</a></h3>
-        <h3 class="block-title title-active">流程作业</h3>
+        <div class="tab-container tile" style="margin-bottom: 0px">
+            <ul class="nav tab nav-tabs">
+                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.id}'"><a href="javascript:void(0)">简单作业</a></li>
+                <li class="active" ><a href="javascript:void(0)">流程作业</a></li>
+            </ul>
+        </div>
+
         <div class="tile p-15 textured">
             <form class="form-horizontal" role="form" id="jobform" action="${contextPath}/job/save.do" method="post"></br>
-                <input type="hidden" name="jobType" value="2">
+                <input type="hidden" name="jobType" value="1">
                 <div class="form-group">
                     <label for="groupName" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tasks"></i>&nbsp;&nbsp;作业流名称&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">
@@ -309,13 +321,22 @@
                 <br>
 
                 <div class="form-group">
-                    <span class="subJob">
-                        <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-sort"></i>&nbsp;&nbsp;作业依赖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                        <div class="col-md-10" style="top: -5px;">
-                            <a data-toggle="modal" href="#jobModal" onclick="jobxValidata.subJob.add()" class="btn btn-sm m-t-10">添加作业依赖</a>
+                    <span class="flowJob">
+                        <label class="col-lab control-label wid150" style="margin-top: -2px;"><i class="glyphicon glyphicon-sort"></i>&nbsp;&nbsp;作业依赖&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                        <div class="col-md-10">
+                            <div class="btn-group">
+                                <button class="btn btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                                   &nbsp;添加作业依赖&nbsp;<span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a data-toggle="modal" href="#jobModal" onclick="jobxValidata.flowJob.add()">新增作业</a></li>
+                                    <li><a href="#">选择已有简单作业</a></li>
+                                    <li><a href="#">选择已有流程作业</a></li>
+                                </ul>
+                            </div>
                         </div>
                         <div class="col-md-10" style="top:33px;margin-left:10px;">
-                            <ul id="subJobDiv" class="subJobUl col-md-4"></ul>
+                            <ul id="flowJobDiv" class="flowJobUl col-md-4"></ul>
                         </div>
                     </span>
                 </div>
@@ -485,7 +506,7 @@
                 </div>
                 <div class="modal-footer">
                     <center>
-                        <button type="button" class="btn btn-sm" id="subjob-btn">保存</button>&nbsp;&nbsp;
+                        <button type="button" class="btn btn-sm" id="flowJob-btn">保存</button>&nbsp;&nbsp;
                         <button type="button" class="btn btn-sm" data-dismiss="modal">关闭</button>
                     </center>
                 </div>
