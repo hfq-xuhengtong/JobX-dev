@@ -241,7 +241,6 @@ function Validata() {
     };
 
     this.subJob = {
-
         jobFlagNum:0,
 
         tipDefault: function () {
