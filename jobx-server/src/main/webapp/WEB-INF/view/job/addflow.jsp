@@ -48,6 +48,12 @@
             font-size: 14px;
         }
 
+        .message-search{
+            height: 26px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
         .depen-input{
             resize:vertical;
             border-radius: 5px;
@@ -88,6 +94,11 @@
         .dropdown-menu li a:hover{
             color: rgb(255,255,255);
         }
+
+        .modal-search {
+            background-color: rgba(222, 222, 244, 0.40);
+        }
+
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -518,29 +529,115 @@
 
     <%--选择已有作业弹窗--%>
     <div class="modal fade" id="existJobModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-search">
             <div class="modal-content">
                 <div class="modal-header">
                     <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i>
                     </button>
-                    <h4>选则已有作业</h4>
+                    <h4>选择已有作业</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="height: 300px;">
+                    <div>
+                        <div style="float:left;margin-top: -5px;margin-bottom: 5px;">
+                            <label for="sagentId">执行器：</label>
+                            <select id="sagentId" name="sagentId" class="select-jobx" style="width: 110px;">
+                                <option value="">全部</option>
+                                <c:forEach var="d" items="${agents}">
+                                    <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
+                                </c:forEach>
+                            </select>
 
+                            &nbsp;&nbsp;&nbsp;
+                            <label for="cronType">规则类型：</label>
+                            <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
+                                <option value="">全部</option>
+                                <option value="0" ${cronType eq 0 ? 'selected' : ''}>crontab</option>
+                                <option value="1" ${cronType eq 1 ? 'selected' : ''}>quartz</option>
+                            </select>
+                            <input class="message-search" placeholder="根据作业名称搜索...." type="text">
+                        </div>
+                    </div>
+
+                    <table class="table table-condensed table-hover" style="font-size: 13px;margin-top: 5px;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td>名称:测试任务</td>
+                                            <td>执行器:192.168.0.1</td>
+                                            <td>作业人:benjobs</td>
+                                        </tr>
+                                        <tr>
+                                            <td>表达式:1 1 * * ?</td>
+                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td>名称:测试任务</td>
+                                            <td>执行器:192.168.0.1</td>
+                                            <td>作业人:benjobs</td>
+                                        </tr>
+                                        <tr>
+                                            <td>表达式:1 1 * * ?</td>
+                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td>名称:测试任务</td>
+                                            <td>执行器:192.168.0.1</td>
+                                            <td>作业人:benjobs</td>
+                                        </tr>
+                                        <tr>
+                                            <td>表达式:1 1 * * ?</td>
+                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td>名称:测试任务</td>
+                                            <td>执行器:192.168.0.1</td>
+                                            <td>作业人:benjobs</td>
+                                        </tr>
+                                        <tr>
+                                            <td>表达式:1 1 * * ?</td>
+                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
 
                 </div>
+
             </div>
         </div>
     </div>
 
     <%--选择已有作业弹窗--%>
-    <div class="modal fade" id="existFlowModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade bs-example-modal-lg" id="existFlowModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i>
                     </button>
-                    <h4>选则已有工作流</h4>
+                    <h4>选择已有工作流</h4>
                 </div>
                 <div class="modal-body">
 

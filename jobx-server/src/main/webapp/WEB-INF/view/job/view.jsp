@@ -631,48 +631,6 @@
                         </div>
                     </td>
                 </tr>
-                <%--子作业--%>
-                <c:if test="${r.jobType eq 1}">
-                    <c:forEach var="c" items="${r.children}" varStatus="index">
-                        <tr class="child${r.jobId} trGroup${r.flowId}" style="display: none;">
-                            <td><a href="${contextPath}/agent/detail/${c.agentId}.htm">${c.agentName}</a></td>
-                            <c:if test="${permission eq true}">
-                                <td>
-                                    <a href="${contextPath}/user/detail/${c.userId}.htm">${c.operateUname}</a>
-                                </td>
-                            </c:if>
-                            <c:if test="${permission eq false}">
-                                <td>${c.operateUname}</td>
-                            </c:if>
-                            <td style="width: 25%">
-                                <div class="jobx_command">
-                                    <a href="#" title="${cron:escapeHtml(c.command)}" class="dot-ellipsis dot-resize-update" onclick="jobObj.editCmd('${c.jobId}')" id="command_${c.jobId}">
-                                            ${cron:escapeHtml(c.command)}
-                                    </a>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                流程作业
-                            </td>
-                            <td>
-                                <div class="none">--</div>
-                            </td>
-                            <td>
-                                <div class="none">--</div>
-                            </td>
-                            <td>
-                                <div class="none">--</div>
-                            </td>
-                            <td class="text-center">
-                                <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                                    <a href="${contextPath}/job/detail/${c.jobId}.htm" title="查看详情">
-                                        <i class="glyphicon glyphicon-eye-open"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                </c:if>
             </c:forEach>
             </tbody>
         </table>
