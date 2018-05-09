@@ -29,9 +29,9 @@ public class JobFlow implements Serializable {
 
     @Id
     @GeneratedValue
-    private Long groupId;
+    private Long flowId;
 
-    private String groupName;//流程任务名字.
+    private String flowName;//流程任务名字.
 
     //表达式类型
     private Integer cronType;
@@ -49,21 +49,20 @@ public class JobFlow implements Serializable {
 
     private Boolean pause = false;//任务是否暂停(true:已经暂停,false:未暂停)
 
-
-    public Long getGroupId() {
-        return groupId;
+    public Long getFlowId() {
+        return flowId;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getFlowName() {
+        return flowName;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setFlowName(String flowName) {
+        this.flowName = flowName;
     }
 
     public Integer getCronType() {

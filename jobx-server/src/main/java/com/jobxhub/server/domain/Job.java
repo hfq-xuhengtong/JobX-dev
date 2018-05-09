@@ -49,8 +49,8 @@ public class Job implements Serializable {
     private Integer runCount;
 
     /**
-     * 0:单一任务
-     * 1:流程任务
+     * 0:作业
+     * 1:工作流
      */
     private Integer jobType;
 

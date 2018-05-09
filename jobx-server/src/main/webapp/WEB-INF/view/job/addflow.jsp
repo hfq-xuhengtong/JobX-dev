@@ -230,15 +230,15 @@
         <li><a href="">jobx</a></li>
         <li><a href="">作业管理</a></li>
         <li><a href="">添加作业</a></li>
-        <li><a href="">流程作业</a></li>
+        <li><a href="">工作流</a></li>
     </ol>
     <h4 class="page-title"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;添加作业</h4>
 
     <div class="block-area" id="basic">
         <div class="tab-container tile" style="margin-bottom: 0px">
             <ul class="nav tab nav-tabs">
-                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.id}'"><a href="javascript:void(0)">简单作业</a></li>
-                <li class="active" ><a href="javascript:void(0)">流程作业</a></li>
+                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.id}'"><a href="javascript:void(0)">作业</a></li>
+                <li class="active" ><a href="javascript:void(0)">工作流</a></li>
             </ul>
         </div>
 
@@ -246,7 +246,7 @@
             <form class="form-horizontal" role="form" id="jobform" action="${contextPath}/job/save.do" method="post"></br>
                 <input type="hidden" name="jobType" value="1">
                 <div class="form-group">
-                    <label for="groupName" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tasks"></i>&nbsp;&nbsp;作业流名称&nbsp;&nbsp;<b>*&nbsp;</b></label>
+                    <label for="groupName" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tasks"></i>&nbsp;&nbsp;工作流名称&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="groupName" name="groupName">
                         <span class="tips" tip="必填项,该作业流的名称">必填项,该作业流的名称</span>
@@ -330,8 +330,8 @@
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
                                     <li><a data-toggle="modal" href="#jobModal" onclick="jobxValidata.flowJob.add()">新增作业</a></li>
-                                    <li><a href="#">选择已有简单作业</a></li>
-                                    <li><a href="#">选择已有流程作业</a></li>
+                                    <li><a href="#">选择已有作业</a></li>
+                                    <li><a href="#">选择已有工作流</a></li>
                                 </ul>
                             </div>
                         </div>

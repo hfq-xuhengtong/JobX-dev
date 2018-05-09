@@ -49,8 +49,8 @@
 
         <div class="tab-container tile" style="margin-bottom: 0px">
             <ul class="nav tab nav-tabs">
-                <li class="active"><a href="javascript:void(0)">简单作业</a></li>
-                <li class="" onclick="javascript:location.href='${contextPath}/job/addflow.htm?id=${agent.id}'"><a href="javascript:void(0)">流程作业</a></li>
+                <li class="active"><a href="javascript:void(0)">作业</a></li>
+                <li class="" onclick="javascript:location.href='${contextPath}/job/addflow.htm?id=${agent.id}'"><a href="javascript:void(0)">工作流</a></li>
             </ul>
         </div>
 

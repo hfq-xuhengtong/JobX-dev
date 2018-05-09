@@ -33,7 +33,7 @@ public class JobDependency implements Serializable {
     private Long dependencyId;
 
     //属于哪个工作流
-    private Long groupId;
+    private Long flowId;
 
     //作业来源(1:来自已有的,2:来自现场定义的)
     private Integer source;
@@ -59,12 +59,12 @@ public class JobDependency implements Serializable {
         this.dependencyId = dependencyId;
     }
 
-    public Long getGroupId() {
-        return groupId;
+    public Long getFlowId() {
+        return flowId;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
     }
 
     public Integer getSource() {
