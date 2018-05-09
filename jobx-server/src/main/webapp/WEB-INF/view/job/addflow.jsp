@@ -16,14 +16,15 @@
         .title-active {
             background-color: rgba(0,0,0,0.7);
         }
+
         .flowJobUl li {
             background-color: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
-            height: 32px;
+            height: 33px;
             list-style: outside none none;
-            margin-top: -27px;
-            margin-bottom: 30px;
-            margin-left: 135px;
+            margin-top: -24px;
+            margin-bottom: 29px;
+            margin-left: 136px;
             padding: 6px 16px;
             width: 100%;
         }
@@ -47,10 +48,6 @@
             font-size: 14px;
         }
 
-        .depen {
-            display: none;
-        }
-
         .depen-input{
             resize:vertical;
             border-radius: 5px;
@@ -59,9 +56,9 @@
         }
 
         .graph {
-            margin-top: -200px;
+            margin-top: -205px;
             float: right;
-            height: 20px;
+            height: 200px;
         }
 
         .node rect,
@@ -193,9 +190,9 @@
 
             // Center the graph
             var initialScale = 0.90;
-            svg.call(zoom.transform, d3.zoomIdentity.translate(($(".graph").width() * initialScale - g.graph().width * initialScale) / 2,10).scale(initialScale));
+            svg.call(zoom.transform, d3.zoomIdentity.translate(($(".graph").width() * initialScale - g.graph().width * initialScale) / 2,20).scale(initialScale));
 
-            svg.attr('height', g.graph().height * initialScale + 40);
+            svg.attr('height', g.graph().height * initialScale + 50);
 
         }
 
@@ -234,10 +231,14 @@
     </ol>
     <h4 class="page-title"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;添加作业</h4>
 
+    <div style="float: right;margin-top: 5px">
+        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i class="fa fa-mail-reply" aria-hidden="true"></i>&nbsp;返回</a>
+    </div>
+
     <div class="block-area" id="basic">
         <div class="tab-container tile" style="margin-bottom: 0px">
             <ul class="nav tab nav-tabs">
-                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.id}'"><a href="javascript:void(0)">作业</a></li>
+                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.id}'"><a href="javascript:void(0)">单一作业</a></li>
                 <li class="active" ><a href="javascript:void(0)">工作流</a></li>
             </ul>
         </div>
@@ -330,8 +331,8 @@
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
                                     <li><a data-toggle="modal" href="#jobModal" onclick="jobxValidata.flowJob.add()">新增作业</a></li>
-                                    <li><a href="#">选择已有作业</a></li>
-                                    <li><a href="#">选择已有工作流</a></li>
+                                    <li><a data-toggle="modal" href="#existJobModal">选择已有作业</a></li>
+                                    <li><a data-toggle="modal" href="#existFlowModal">选择已有工作流</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -341,7 +342,7 @@
                     </span>
                 </div>
 
-                <div class="form-group depen">
+                <div class="form-group">
                     <label for="deps" class="col-lab control-label wid150"><i class="glyphicon glyphicon-th-large"></i>&nbsp;&nbsp;编排依赖&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">
                         <div class="col-md-4">
@@ -509,6 +510,41 @@
                         <button type="button" class="btn btn-sm" id="flowJob-btn">保存</button>&nbsp;&nbsp;
                         <button type="button" class="btn btn-sm" data-dismiss="modal">关闭</button>
                     </center>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <%--选择已有作业弹窗--%>
+    <div class="modal fade" id="existJobModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i>
+                    </button>
+                    <h4>选则已有作业</h4>
+                </div>
+                <div class="modal-body">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%--选择已有作业弹窗--%>
+    <div class="modal fade" id="existFlowModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i>
+                    </button>
+                    <h4>选则已有工作流</h4>
+                </div>
+                <div class="modal-body">
+
+
                 </div>
             </div>
         </div>

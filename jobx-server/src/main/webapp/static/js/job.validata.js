@@ -300,7 +300,7 @@ function Validata() {
                 alertMsg("删除作业成功");
                 $(node).parent().slideUp(300, function () {
                     this.remove();
-                    self.flowJob.graphH(0);
+                    self.flowJob.graphH();
                     var deps = $(".depen-input").val();
                     if (deps.length == 0) return;
 
@@ -325,12 +325,12 @@ function Validata() {
             $('#jobModal').modal('hide');
         },
 
-        graphH:function(index) {
+        graphH:function() {
             var children = $("#flowJobDiv").find(".jobnum").length;
-            var graphH = (children+index) * 35 + 20;
+            var graphH = children * 35;
             $(".graph").css({
-                "margin-top":"-"+(200+graphH)+ "px",
-                "height":200+graphH+"px"
+                "margin-top":"-"+(230+graphH+children)+ "px",
+                "height":240+graphH+"px"
             });
         },
 
@@ -350,19 +350,11 @@ function Validata() {
                         var _jobName = $("#jobName1").val();
                         if ($("#subTitle").attr("action") === "add") {
                             var timestamp = Date.parse(new Date());
-                            var children = $("#flowJobDiv").find(".jobnum").length;
-                            if (children == 0) {
-                                var addHtml = "<li><span><div class='circle'></div><span class='jobnum' num='0' name='当前作业'>A</span>当前作业</span></li>";
-                                $("#flowJobDiv").show().append($(addHtml));
-                            }
-
-                            self.flowJob.graphH(1);
-
-                            var currNum = ++self.flowJob.jobFlagNum;
+                            var currNum = self.flowJob.jobFlagNum++;
                             var currJobNum = currNum.getChar();
-
                             var addHtml =
                                 "<li id='" + timestamp + "'>" +
+                                "<input type='hidden' name='child.createType' value='2'>" +
                                 "<input type='hidden' name='child.jobId' value=''>" +
                                 "<input type='hidden' name='child.jobName' num='"+currNum+"' value='" + escapeHtml(_jobName) + "'>" +
                                 "<input type='hidden' name='child.agentId' value='" + $("#agentId1").val() + "'>" +
@@ -383,6 +375,7 @@ function Validata() {
                                 "</span>" +
                                 "</li>";
                             $("#flowJobDiv").show().append($(addHtml));
+                            self.flowJob.graphH();
                         } else if ($("#subTitle").attr("action") == "edit") {//编辑
                             var id = $("#subTitle").attr("tid");
                             var currNum = 0;

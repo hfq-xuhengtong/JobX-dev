@@ -45,11 +45,16 @@
     </ol>
     <h4 class="page-title"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;添加作业</h4>
 
+    <div style="float: right;margin-top: 5px">
+        <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i
+                class="fa fa-mail-reply" aria-hidden="true"></i>&nbsp;返回</a>
+    </div>
+
     <div class="block-area" id="basic">
 
         <div class="tab-container tile" style="margin-bottom: 0px">
             <ul class="nav tab nav-tabs">
-                <li class="active"><a href="javascript:void(0)">作业</a></li>
+                <li class="active"><a href="javascript:void(0)">单一作业</a></li>
                 <li class="" onclick="javascript:location.href='${contextPath}/job/addflow.htm?id=${agent.id}'"><a href="javascript:void(0)">工作流</a></li>
             </ul>
         </div>

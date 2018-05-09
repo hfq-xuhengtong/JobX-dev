@@ -473,7 +473,7 @@ public class Constants {
     }
 
     public enum JobType implements Serializable {
-        SINGLETON(0x0, "作业"),
+        SINGLETON(0x0, "单一作业"),
         FLOW(0x1, "工作流");
 
         private Integer code;
