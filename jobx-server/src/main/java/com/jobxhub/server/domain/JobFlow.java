@@ -31,7 +31,7 @@ public class JobFlow implements Serializable {
     @GeneratedValue
     private Long flowId;
 
-    private String flowName;//流程任务名字.
+    private String flowName;//工作流名称.
 
     //表达式类型
     private Integer cronType;
