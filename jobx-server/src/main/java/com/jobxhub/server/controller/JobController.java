@@ -148,6 +148,17 @@ public class JobController extends BaseController {
         return "/job/addflow";
     }
 
+    @RequestMapping(value = "search.do", method = RequestMethod.POST)
+    @ResponseBody
+    public PageBean<Job> search(Long agentId,Integer  cronType, String jobName,Integer pageNo) {
+        PageBean pageBean = new PageBean<Job>(6);
+        pageBean.setPageNo(pageNo == null?1:pageNo);
+        if (agentId == null && cronType == null && CommonUtils.isEmpty(jobName)) {
+            return pageBean;
+        }
+        return jobService.search(pageBean,agentId,cronType,jobName);
+    }
+
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
         jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));

@@ -99,6 +99,27 @@
             background-color: rgba(222, 222, 244, 0.40);
         }
 
+        #existJobModal table tr {
+            cursor: pointer;
+        }
+
+        .select-tr {
+            background-color:rgba(255,255,255,0.1);
+        }
+
+        .search{
+            border: 0;
+            font-size: 16px;
+            background-color: transparent;
+            background-image: url(/static/img/search.png);
+            background-repeat: no-repeat;
+            padding-left: 34px;
+        }
+
+        .message-search{
+            margin-right:0px;
+        }
+
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -113,6 +134,18 @@
 
             $(".depen-input").change(function () {
                 graph();
+            });
+
+            $("#sagentId").change(function () {
+                changeUrl();
+            });
+
+            $("#cronType").change(function () {
+                changeUrl();
+            });
+
+            $("#searchJobName").blur(function () {
+                changeUrl();
             });
 
         });
@@ -219,7 +252,65 @@
             }
             return null;
         }
+        
+        function changeUrl() {
+            var agentId = $("#sagentId").val();
+            var cronType = $("#cronType").val();
+            var searchJobName = $("#searchJobName").val();
+            ajax({
+                url:"${contextPath}/job/search.do",
+                type: "post",
+                data: {
+                    "agentId":agentId,
+                    "cronType":cronType,
+                    "jobName":searchJobName
+                }
+            },function (pageBean) {
+                var data = pageBean.result;
+                if (data.length>0) {
+                    var html = "";
+                    for (var i=0;i<data.length;i++) {
+                        var job = data[i];
+                        var template = $("#jobTemplate").html();
 
+                        var jobName = job.jobName;
+                        if (jobName.length>20) {
+                            jobName = jobName.substr(0,15) + "...";
+                        }
+
+                        var command = job.command;
+                        if (command.length>30) {
+                            command = command.substr(0,30) + "...";
+                        }
+
+                        html += template
+                            .replace(/#title_jobName#/g,job.jobName)
+                            .replace(/#jobName#/g,jobName)
+                            .replace(/#cronExp#/g,job.cronExp)
+                            .replace(/#command#/g,command)
+                            .replace(/#title_command#/g,job.command);
+
+                    }
+                    $("#jobBody").html(html);
+                    $("#existJobModal").find("tr").click(function () {
+                        $("#existJobModal").find("tr").removeClass("select-tr")
+                        $(this).addClass("select-tr");
+                    });
+                }else {
+                    $("#jobBody").html("");
+                }
+
+            });
+        }
+
+    </script>
+
+    <script type="text/html" id="jobTemplate">
+        <tr>
+            <td title="#title_jobName#">#jobName#</td>
+            <td >#cronExp#</td>
+            <td title="#title_command#">#command#</td>
+        </tr>
     </script>
 
 </head>
@@ -526,14 +617,12 @@
         </div>
     </div>
 
-
     <%--选择已有作业弹窗--%>
     <div class="modal fade" id="existJobModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-search">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i>
-                    </button>
+                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
                     <h4>选择已有作业</h4>
                 </div>
                 <div class="modal-body" style="height: 300px;">
@@ -546,7 +635,6 @@
                                     <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
                                 </c:forEach>
                             </select>
-
                             &nbsp;&nbsp;&nbsp;
                             <label for="cronType">规则类型：</label>
                             <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
@@ -554,76 +642,19 @@
                                 <option value="0" ${cronType eq 0 ? 'selected' : ''}>crontab</option>
                                 <option value="1" ${cronType eq 1 ? 'selected' : ''}>quartz</option>
                             </select>
-                            <input class="message-search" placeholder="根据作业名称搜索...." type="text">
+                            <input class="pull-right message-search" placeholder="根据作业名称搜索...." type="text" id="searchJobName">
                         </div>
                     </div>
-
                     <table class="table table-condensed table-hover" style="font-size: 13px;margin-top: 5px;">
-                        <tbody>
+                        <thead>
                             <tr>
-                                <td>
-                                    <table style="width:100%">
-                                        <tr>
-                                            <td>名称:测试任务</td>
-                                            <td>执行器:192.168.0.1</td>
-                                            <td>作业人:benjobs</td>
-                                        </tr>
-                                        <tr>
-                                            <td>表达式:1 1 * * ?</td>
-                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
-                                        </tr>
-                                    </table>
-                                </td>
+                                <th>名称</th>
+                                <th>表达式</th>
+                                <th>执行命令</th>
                             </tr>
-                            <tr>
-                                <td>
-                                    <table style="width:100%">
-                                        <tr>
-                                            <td>名称:测试任务</td>
-                                            <td>执行器:192.168.0.1</td>
-                                            <td>作业人:benjobs</td>
-                                        </tr>
-                                        <tr>
-                                            <td>表达式:1 1 * * ?</td>
-                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <table style="width:100%">
-                                        <tr>
-                                            <td>名称:测试任务</td>
-                                            <td>执行器:192.168.0.1</td>
-                                            <td>作业人:benjobs</td>
-                                        </tr>
-                                        <tr>
-                                            <td>表达式:1 1 * * ?</td>
-                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <table style="width:100%">
-                                        <tr>
-                                            <td>名称:测试任务</td>
-                                            <td>执行器:192.168.0.1</td>
-                                            <td>作业人:benjobs</td>
-                                        </tr>
-                                        <tr>
-                                            <td>表达式:1 1 * * ?</td>
-                                            <td colspan="2">命令:/bin/bash +x startup.sh</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-
+                        </thead>
+                        <tbody id="jobBody"></tbody>
                     </table>
-
                 </div>
 
             </div>

@@ -22,6 +22,7 @@
 
 package com.jobxhub.server.service;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static com.jobxhub.common.Constants.*;
@@ -348,5 +349,24 @@ public class JobService {
         Map params = ParamsMap.map().set("cronType", cronTypes).set("pause", false);
         String hql = "from Job where cronType in (:cronType) and pause=:pause";
         return queryDao.hqlQuery(hql, params);
+    }
+
+    public PageBean<Job> search(PageBean pageBean,Long agentId, Integer cronType, String jobName) {
+        String hql = "from Job where createType=:createType ";
+        Map<String,Serializable> params = new HashMap<String, Serializable>(0);
+        params.put("createType",CreateType.NORMAL.getValue());
+        if (agentId!=null) {
+            hql+=" and agentId=:agentId";
+            params.put("agentId",agentId);
+        }
+        if (cronType!=null) {
+            hql+=" and cronType=:cronType";
+            params.put("cronType",cronType);
+        }
+        if (CommonUtils.notEmpty(jobName)) {
+            hql+=" and jobName like :jobName ";
+            params.put("jobName","%" + jobName + "%");
+        }
+        return queryDao.hqlPageQuery(hql,pageBean,params);
     }
 }

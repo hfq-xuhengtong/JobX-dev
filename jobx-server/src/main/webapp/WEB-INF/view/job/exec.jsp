@@ -142,24 +142,22 @@
             <table class="table table-bordered tile textured" style="font-size: 12px;margin-bottom: 0;">
                 <tbody>
                 <c:forEach var="w" items="${agents}" varStatus="index">
-                    <c:if test="${w.status eq true}">
-                        <tr>
-                            <td width="10%">
-                                <input type="checkbox" name="agent" value="${w.agentId}" class="each-box">
-                            </td>
-                            <td width="25%" id="name_${w.agentId}">${w.name}</td>
-                            <td width="25%">${w.host}</td>
-                            <td width="20%" id="port_${w.agentId}">${w.port}</td>
-                            <td width="20%" id="agent_${w.agentId}">
-                                <c:if test="${w.status eq false}">
-                                    <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
-                                </c:if>
-                                <c:if test="${w.status eq true}">
-                                    <span class="label label-success">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
-                                </c:if>
-                            </td>
-                        </tr>
-                    </c:if>
+                    <tr>
+                        <td width="10%">
+                            <input type="checkbox" name="agent" value="${w.agentId}" class="each-box">
+                        </td>
+                        <td width="25%" id="name_${w.agentId}">${w.name}</td>
+                        <td width="25%">${w.host}</td>
+                        <td width="20%" id="port_${w.agentId}">${w.port}</td>
+                        <td width="20%" id="agent_${w.agentId}">
+                            <c:if test="${w.status eq 0}">
+                                <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
+                            </c:if>
+                            <c:if test="${w.status eq 1}">
+                                <span class="label label-success">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+                            </c:if>
+                        </td>
+                    </tr>
                 </c:forEach>
                 </tbody>
             </table>
