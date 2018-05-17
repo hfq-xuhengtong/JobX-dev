@@ -567,17 +567,6 @@ public abstract class DateUtils {
         return preMonday;
     }
 
-
-    public static void main(String[] args) {
-//        System.out.println(getPrevWeekSunday(-7));
-
-        for (int i = 0; i < 20; i++) {
-            System.out.println(getPrevWeekSunday(-7 * (i + 1)) + "<<--->>" + getPrevWeekSunday(-7 * i));
-        }
-
-    }
-
-
     public static int compare_date(String DATE1, String DATE2) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");
         try {
@@ -616,6 +605,12 @@ public abstract class DateUtils {
             exception.printStackTrace();
         }
         return 0;
+    }
+
+    public static int ofMinutes(Date date){
+        int h = date.getHours() * 60;
+        int m = date.getMinutes();
+        return h+m;
     }
 
 }

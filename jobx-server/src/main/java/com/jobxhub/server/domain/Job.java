@@ -54,8 +54,14 @@ public class Job implements Serializable {
      */
     private Integer jobType;
 
-    //创建类型(1:正常简单任务创建,2:工作流子任务创建)
-    private Integer createType;
+    private Long flowId;
+
+    private Integer flowNum;
+
+    private Integer runModel;//0:串行|1:并行
+
+    //是否为流程任务的最后一个子任务
+    private Boolean lastChild;
 
     private Boolean warning;
 
@@ -71,9 +77,6 @@ public class Job implements Serializable {
     private Integer timeout;
 
     private String token;//api调用的认证token
-
-    @Transient
-    private String sn;
 
     public Long getJobId() {
         return jobId;
@@ -179,12 +182,36 @@ public class Job implements Serializable {
         this.jobType = jobType;
     }
 
-    public Integer getCreateType() {
-        return createType;
+    public Long getFlowId() {
+        return flowId;
     }
 
-    public void setCreateType(Integer createType) {
-        this.createType = createType;
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
+
+    public Integer getFlowNum() {
+        return flowNum;
+    }
+
+    public void setFlowNum(Integer flowNum) {
+        this.flowNum = flowNum;
+    }
+
+    public Integer getRunModel() {
+        return runModel;
+    }
+
+    public void setRunModel(Integer runModel) {
+        this.runModel = runModel;
+    }
+
+    public Boolean getLastChild() {
+        return lastChild;
+    }
+
+    public void setLastChild(Boolean lastChild) {
+        this.lastChild = lastChild;
     }
 
     public Boolean getWarning() {
@@ -233,38 +260,5 @@ public class Job implements Serializable {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public String getSn() {
-        return sn;
-    }
-
-    public void setSn(String sn) {
-        this.sn = sn;
-    }
-
-    @Override
-    public String toString() {
-        return "Job{" +
-                "jobId=" + jobId +
-                ", agentId=" + agentId +
-                ", jobName='" + jobName + '\'' +
-                ", cronType=" + cronType +
-                ", cronExp='" + cronExp + '\'' +
-                ", command='" + command + '\'' +
-                ", comment='" + comment + '\'' +
-                ", successExit='" + successExit + '\'' +
-                ", userId=" + userId +
-                ", updateTime=" + updateTime +
-                ", redo=" + redo +
-                ", runCount=" + runCount +
-                ", jobType=" + jobType +
-                ", warning=" + warning +
-                ", mobiles='" + mobiles + '\'' +
-                ", pause=" + pause +
-                ", emailAddress='" + emailAddress + '\'' +
-                ", timeout=" + timeout +
-                ", token='" + token + '\'' +
-                '}';
     }
 }
