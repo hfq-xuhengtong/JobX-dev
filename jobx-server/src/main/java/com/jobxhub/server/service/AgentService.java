@@ -92,12 +92,20 @@ public class AgentService {
         return queryDao.hqlQuery(hql, status.getValue());
     }
 
-    public void getOwnerAgent(HttpSession session, PageBean pageBean) {
-        String hql = "from Agent  ";
+    public void getOwnerAgent(HttpSession session, PageBean pageBean, Agent agent) {
+        String hql = "from Agent where 1=1 ";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
             if (user.getAgentIds() != null) {
-                hql += " where agentId in (".concat(user.getAgentIds()).concat(")");
+                hql += " AND agentId in (".concat(user.getAgentIds()).concat(")");
+            }
+        }
+        if (agent != null) {
+            if (notEmpty(agent.getName())) {
+                hql += " AND name like '%" + agent.getName() + "%' ";
+            }
+            if (notEmpty(agent.getStatus())) {
+                hql += " AND status = " + agent.getStatus();
             }
         }
         pageBean.verifyOrderBy("name", "name", "host", "port");
@@ -155,6 +163,7 @@ public class AgentService {
     /**
      * true can delete
      * false can't delete
+     *
      * @param id
      * @return
      */
@@ -168,11 +177,11 @@ public class AgentService {
         return queryDao.hqlCount(hql, id) == 0;
     }
 
-    @Transactional(rollbackFor = Exception.class,readOnly = false)
+    @Transactional(rollbackFor = Exception.class, readOnly = false)
     public void delete(Long id) {
         Agent agent = getAgent(id);
         queryDao.getSession().clear();
-        queryDao.delete(Agent.class,id);
+        queryDao.delete(Agent.class, id);
         jobxRegistry.agentUnRegister(agent);
         flushLocalAgent();
     }
@@ -190,7 +199,7 @@ public class AgentService {
         boolean verify;
         if (type) {//直接输入的密钥
             agent.setPassword(pwd0);
-            verify = executeService.ping(agent,false).equals(Constants.ConnStatus.CONNECTED);
+            verify = executeService.ping(agent, false).equals(Constants.ConnStatus.CONNECTED);
         } else {//密码...
             verify = DigestUtils.md5Hex(pwd0).equals(agent.getPassword());
         }
@@ -200,7 +209,7 @@ public class AgentService {
                 Boolean flag = executeService.password(agent, pwd1);
                 if (flag) {
                     agent.setPassword(pwd1);
-                    executeService.ping(agent,true);
+                    executeService.ping(agent, true);
                     return "true";
                 } else {
                     return "false";
@@ -217,7 +226,7 @@ public class AgentService {
         String hql = "from Agent ";
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            if (user.getAgentIds()!=null) {
+            if (user.getAgentIds() != null) {
                 hql += " where agentId in (" + user.getAgentIds() + ")";
             }
         }
@@ -251,9 +260,9 @@ public class AgentService {
     public void doDisconnect(String info) {
         if (CommonUtils.notEmpty(info)) {
             String macId = info.split("_")[0];
-            String password =  info.split("_")[1];
+            String password = info.split("_")[1];
             Agent agent = getAgentByMachineId(macId);
-            if ( CommonUtils.notEmpty(agent,password) && password.equals(agent.getPassword()) ) {
+            if (CommonUtils.notEmpty(agent, password) && password.equals(agent.getPassword())) {
                 doDisconnect(agent);
             }
         }
@@ -270,7 +279,7 @@ public class AgentService {
         Agent agent = transfers.get(1);
 
         //exists in db...
-        if ( agent!=null ) {
+        if (agent != null) {
             //agent和server密码一致则连接...
             if (registry.getPassword().equals(agent.getPassword())) {
                 executeService.ping(agent, true);
@@ -291,7 +300,7 @@ public class AgentService {
         registry.setEmailAddress(null);
         registry.setProxy(Constants.ConnType.CONN.getType());
         registry.setProxyAgent(null);
-        if (executeService.ping(registry,false).equals(Constants.ConnStatus.CONNECTED)) {
+        if (executeService.ping(registry, false).equals(Constants.ConnStatus.CONNECTED)) {
             registry.setStatus(Constants.ConnStatus.CONNECTED.getValue());
             merge(registry);
         }

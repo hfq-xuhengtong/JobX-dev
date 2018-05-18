@@ -114,6 +114,9 @@ public class JobService {
             if (notEmpty(job.getAgentId())) {
                 sql += " AND T.agentId=" + job.getAgentId();
             }
+            if (notEmpty(job.getJobName())) {
+                sql += " AND T.jobName like '%" + job.getJobName() + "%' ";
+            }
             if (notEmpty(job.getCronType())) {
                 sql += " AND T.cronType=" + job.getCronType();
             }

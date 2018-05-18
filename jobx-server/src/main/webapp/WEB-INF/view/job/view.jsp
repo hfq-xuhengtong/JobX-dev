@@ -61,6 +61,9 @@
             $("#sagentId").change(function () {
                 jobObj.changeUrl();
             });
+            $("#keyWord").change(function () {
+                jobObj.changeUrl();
+            });
             $("#cronType").change(function () {
                 jobObj.changeUrl();
             });
@@ -244,10 +247,11 @@
             changeUrl:function () {
                 var pageSize = $("#size").val();
                 var agentId = $("#sagentId").val();
+                var keyWord = $("#keyWord").val();
                 var cronType = $("#cronType").val();
                 var jobType = $("#jobType").val();
                 var redo = $("#sredo").val();
-                window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize ;
+                window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&jobName=" + keyWord + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize ;
             },
             copyURL:function (jobId,token) {
                 var clipboard =  new Clipboard('.fa-copy',{
@@ -477,6 +481,10 @@
                 </select>
 
                 &nbsp;&nbsp;&nbsp;
+                <label for="keyWord">作业名称：</label>
+                <input id="keyWord" name="keyWord" type="text" value="${jobName}" style="width: 110px;"></input>
+
+                &nbsp;&nbsp;&nbsp;
                 <label for="cronType">规则类型：</label>
                 <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
                     <option value="">全部</option>
@@ -486,14 +494,15 @@
 
                 &nbsp;&nbsp;&nbsp;
                 <label for="jobType">作业类型：</label>
-                <select id="jobType" name="jobType" class="select-jobx" style="width: 90px;">
+                <select id="jobType" name="jobType" class="select-jobx" style="width: 70px;">
                     <option value="">全部</option>
-                    <option value="0" ${jobType eq 0 ? 'selected' : ''}>单一作业</option>
-                    <option value="1" ${jobType eq 1 ? 'selected' : ''}>流程作业</option>
+                    <option value="0" ${jobType eq 0 ? 'selected' : ''}>单一</option>
+                    <option value="1" ${jobType eq 1 ? 'selected' : ''}>流程</option>
                 </select>
 
+                &nbsp;&nbsp;&nbsp;
                 <label for="sredo">重跑：</label>
-                <select id="sredo" name="sredo" class="select-jobx" style="width: 80px;">
+                <select id="sredo" name="sredo" class="select-jobx" style="width: 60px;">
                     <option value="">全部</option>
                     <option value="1" ${redo eq 1 ? 'selected' : ''}>是</option>
                     <option value="0" ${redo eq 0 ? 'selected' : ''}>否</option>
@@ -635,7 +644,7 @@
             </tbody>
         </table>
 
-        <cron:pager href="${contextPath}/job/view.htm?agentId=${agentId}&redo=${redo}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/job/view.htm?agentId=${agentId}&jobName=${jobName}&redo=${redo}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
 
     </div>
 

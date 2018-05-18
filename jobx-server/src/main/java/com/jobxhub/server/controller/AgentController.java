@@ -64,15 +64,21 @@ public class AgentController extends BaseController {
     private ExecuteService executeService;
 
     @RequestMapping("view.htm")
-    public String queryAllAgent(HttpSession session, HttpServletRequest request, Model model, PageBean pageBean) {
-        agentService.getOwnerAgent(session, pageBean);
+    public String queryAllAgent(HttpSession session, Agent agent, Model model, PageBean pageBean) {
+        agentService.getOwnerAgent(session, pageBean, agent);
         model.addAttribute("connAgents", agentService.getAgentByConnType(Constants.ConnType.CONN));
+        if (CommonUtils.notEmpty(agent.getName())) {
+            model.addAttribute("agentName", agent.getName());
+        }
+        if (CommonUtils.notEmpty(agent.getStatus())) {
+            model.addAttribute("agentStatus", agent.getStatus());
+        }
         return "/agent/view";
     }
 
     @RequestMapping("refresh.htm")
-    public String refreshAgent(HttpSession session, PageBean pageBean) {
-        agentService.getOwnerAgent(session, pageBean);
+    public String refreshAgent(HttpSession session, Agent agent, PageBean pageBean) {
+        agentService.getOwnerAgent(session, pageBean, agent);
         return "/agent/refresh";
     }
 
@@ -185,23 +191,23 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "listpath.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map getPath(Long agentId,String path) {
+    public Map getPath(Long agentId, String path) {
         if (CommonUtils.isEmpty(path)) {
             path = "/";
         }
         Agent agent = agentService.getAgent(agentId);
-        Map<String,Object> map = new HashMap<String, Object>(0);
-        Response response = executeService.listPath(agent,path);
-        map.put("status",response.isSuccess());
+        Map<String, Object> map = new HashMap<String, Object>(0);
+        Response response = executeService.listPath(agent, path);
+        map.put("status", response.isSuccess());
         if (response.isSuccess()) {
-            map.put("path",response.getResult().get(Constants.PARAM_LISTPATH_PATH_KEY));
+            map.put("path", response.getResult().get(Constants.PARAM_LISTPATH_PATH_KEY));
         }
         return map;
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status upload(HttpSession httpSession,Long agentId,@RequestParam(value = "file", required = false) MultipartFile file,String savePath,String postcmd) throws IOException {
+    public Status upload(HttpSession httpSession, Long agentId, @RequestParam(value = "file", required = false) MultipartFile file, String savePath, String postcmd) throws IOException {
         Agent agent = agentService.getAgent(agentId);
 
         String rootPath = httpSession.getServletContext().getRealPath("/");
@@ -211,7 +217,7 @@ public class AgentController extends BaseController {
         if (!upFile.exists()) {
             upFile.mkdirs();
             file.transferTo(upFile);
-        }else {
+        } else {
             String existMD5 = DigestUtils.md5Hex(file.getBytes());
             String thisMD5 = IOUtils.getFileMD5(upFile);
             //server端已经存在该文件
@@ -223,7 +229,7 @@ public class AgentController extends BaseController {
         RequestFile requestFile = new RequestFile(upFile);
         requestFile.setSavePath(savePath);
         requestFile.setPostCmd(postcmd);
-        Response response = executeService.upload(agent,requestFile);
+        Response response = executeService.upload(agent, requestFile);
         return Status.create(response.isSuccess());
     }
 

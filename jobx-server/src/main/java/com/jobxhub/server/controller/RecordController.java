@@ -74,14 +74,9 @@ public class RecordController extends BaseController {
         if (notEmpty(recordInfo.getAgentId())) {
             model.addAttribute("agentId", recordInfo.getAgentId());
         }
-
-        if (notEmpty(recordInfo.getAgentId())) {
-            model.addAttribute("agentId", recordInfo.getAgentId());
-            model.addAttribute("jobs", jobService.getJobByAgentId(recordInfo.getAgentId()));
-        } else {
-            model.addAttribute("jobs", jobService.getAll());
+        if (notEmpty(recordInfo.getJobName())) {
+            model.addAttribute("jobName", recordInfo.getJobName());
         }
-
         if (notEmpty(recordInfo.getJobId())) {
             model.addAttribute("jobId", recordInfo.getJobId());
         }

@@ -75,9 +75,15 @@ public class RecordService {
             if (notEmpty(recordInfo.getAgentId())) {
                 sql += " AND R.agentId = " + recordInfo.getAgentId() + " ";
             }
+            /*
             if (notEmpty(recordInfo.getJobId())) {
                 sql += " AND R.jobId = " + recordInfo.getJobId() + " ";
             }
+            */
+            if (notEmpty(recordInfo.getJobName())) {
+                sql += " AND T.jobName like '%" + recordInfo.getJobName() + "%' ";
+            }
+
             if (notEmpty(queryTime)) {
                 sql += " AND date_format(R.startTime,'%Y-%m-%d')='" + queryTime + "'";
             }

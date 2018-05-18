@@ -75,7 +75,11 @@ public class JobController extends BaseController {
 
         model.addAttribute("agents", agentService.getOwnerAgents(session));
 
-        model.addAttribute("jobs", jobService.getAll());
+        // model.addAttribute("jobs", jobService.getAll());
+
+        if (notEmpty(job.getJobName())) {
+            model.addAttribute("jobName", job.getJobName());
+        }
         if (notEmpty(job.getAgentId())) {
             model.addAttribute("agentId", job.getAgentId());
         }
