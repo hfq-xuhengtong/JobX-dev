@@ -69,7 +69,7 @@ public class RegistryTest {
 
     @Test
     public void backup(){
-        URL url = URL.valueOf("zookeeper://127.0.0.1:2181");
+        URL url = URL.valueOf("jobx.registry=zookeeper://172.17.112.130:2181?backup=172.17.112.129:2181,172.17.112.128:2181,172.17.112.131:2181,172.17.112.127:2181");
         System.out.println(url.getBackupAddress());
     }
 
