@@ -221,7 +221,7 @@
         where agent_id = #{agentId}
 	</update>
 
-    <update id="updateStatus" parameterType="com.jobxhub.server.domain.AgentBean">
+    <update id="updateStatus">
         update t_agent
         set
              status = #{status}
