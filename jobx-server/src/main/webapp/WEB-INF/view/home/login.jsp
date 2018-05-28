@@ -477,10 +477,10 @@
         <h1 style="width: 250px">
             <img src="${contextPath}/static/img/jobx.png">
         </h1>
-        <h4 style="margin-top: 5px;">Welcome to jobx,Let's crontab easy</h4>
+        <h4 style="margin-top: 20px;font-size: 22px;font-weight: 700;margin-bottom: 1px;">Let's scheduling easy</h4>
     </header>
 
-    <div id="box-login" class="box tile animated active" style="margin-top:30px;">
+    <div id="box-login" class="box tile animated active" style="margin-top:25px;">
         <h2 class="m-t-0 m-b-15">登录</h2>
         <input type="text" placeholder="请输入用户名" id="username" class="login-control m-b-10">
         <input type="password" placeholder="请输入密码" id="password" class="login-control">

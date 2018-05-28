@@ -183,6 +183,7 @@
             <img src="${contextPath}/static/img/jobx.png">
         </div>
         </a>
+        <div class="slogan">Let's scheduling easy</div>
         <div class="media-body">
             <div class="media" id="top-menu" style="float:right;margin-right:15px;">
                 <div class="pull-left tm-icon" id="msg-icon" style="display: none;">

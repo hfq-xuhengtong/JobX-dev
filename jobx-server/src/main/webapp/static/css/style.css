@@ -2646,3 +2646,7 @@ a.list-group-item.active > .badge,
 .table-custom > thead > tr > th.sort-desc::after,.table-custom > thead > tr > th.sort-asc::after {
     background-color: rgba(255, 255, 255, 0.6);
 }
+
+.slogan {
+    margin-top: 13px;font-size: 25px;font-weight: 700;float: left;margin-left: 10px;
+}
