@@ -108,7 +108,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">作业管理</a></li>
         <li><a href="">现场执行</a></li>
     </ol>

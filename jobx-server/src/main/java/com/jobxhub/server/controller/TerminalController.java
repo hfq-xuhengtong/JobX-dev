@@ -24,13 +24,13 @@ package com.jobxhub.server.controller;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.collection.ParamsMap;
-import com.jobxhub.server.domain.Terminal;
-import com.jobxhub.server.domain.User;
+import com.jobxhub.server.dto.Terminal;
 
 import com.jobxhub.server.support.*;
 import com.jobxhub.server.service.TerminalService;
 import com.jobxhub.server.tag.PageBean;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Status;
+import com.jobxhub.server.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -118,8 +118,7 @@ public class TerminalController extends BaseController {
 
     @RequestMapping("view.htm")
     public String view(HttpSession session, PageBean pageBean, Model model) {
-        pageBean = terminalService.getPageBeanByUser(pageBean, JobXTools.getUserId(session));
-        model.addAttribute("pageBean", pageBean);
+        terminalService.getPageBean(pageBean, JobXTools.getUserId(session));
         return "/terminal/view";
     }
 
@@ -137,7 +136,7 @@ public class TerminalController extends BaseController {
             model.addAttribute("token", token);
             model.addAttribute("id", terminal.getId());
             model.addAttribute("theme", terminal.getTheme());
-            List<Terminal> terminas = terminalService.getListByUser(terminal.getUser());
+            List<Terminal> terminas = terminalService.getByUser(terminal.getUserId());
             model.addAttribute("terms", terminas);
             //注册实例
             terminalClusterProcessor.registry(token);

@@ -31,9 +31,9 @@ import com.jobxhub.common.job.RequestFile;
 import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.IOUtils;
+import com.jobxhub.server.dto.Agent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -42,9 +42,7 @@ import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.ExecuteService;
 import com.jobxhub.server.tag.PageBean;
 import org.apache.commons.codec.digest.DigestUtils;
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.vo.Status;
-import org.springframework.beans.BeanUtils;
+import com.jobxhub.server.dto.Status;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -64,21 +62,15 @@ public class AgentController extends BaseController {
     private ExecuteService executeService;
 
     @RequestMapping("view.htm")
-    public String queryAllAgent(HttpSession session, Agent agent, Model model, PageBean pageBean) {
-        agentService.getOwnerAgent(session, pageBean, agent);
-        model.addAttribute("connAgents", agentService.getAgentByConnType(Constants.ConnType.CONN));
-        if (CommonUtils.notEmpty(agent.getName())) {
-            model.addAttribute("agentName", agent.getName());
-        }
-        if (CommonUtils.notEmpty(agent.getStatus())) {
-            model.addAttribute("agentStatus", agent.getStatus());
-        }
+    public String queryAllAgent(HttpSession session,Model model, PageBean pageBean) {
+        agentService.getPageBean(session, pageBean);
+        model.addAttribute("connAgents", agentService.getOwnerByConnType(session));
         return "/agent/view";
     }
 
     @RequestMapping("refresh.htm")
-    public String refreshAgent(HttpSession session, Agent agent, PageBean pageBean) {
-        agentService.getOwnerAgent(session, pageBean, agent);
+    public String refreshAgent(HttpSession session, PageBean pageBean) {
+        agentService.getPageBean(session, pageBean);
         return "/agent/refresh";
     }
 
@@ -108,21 +100,17 @@ public class AgentController extends BaseController {
     }
 
     @RequestMapping("add.htm")
-    public String addPage(Model model) {
-        List<Agent> agentList = agentService.getAgentByConnType(Constants.ConnType.CONN);
+    public String addPage(HttpSession session,Model model) {
+        List<Agent> agentList = agentService.getOwnerByConnType(session);
         model.addAttribute("connAgents", agentList);
         return "/agent/add";
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
-    public String add(Agent agent) throws Exception {
+    public String add(Agent agent) {
         if (!agent.getWarning()) {
-            agent.setMobiles(null);
-            agent.setEmailAddress(null);
-        }
-        //直联
-        if (Constants.ConnType.CONN.getType().equals(agent.getProxy())) {
-            agent.setProxyAgent(null);
+            agent.setMobile(null);
+            agent.setEmail(null);
         }
         agent.setPassword(DigestUtils.md5Hex(agent.getPassword()));
         agent.setStatus(Constants.ConnStatus.CONNECTED.getValue());
@@ -145,16 +133,22 @@ public class AgentController extends BaseController {
     @ResponseBody
     public Status edit(Agent agentParam) {
         Agent agent = agentService.getAgent(agentParam.getAgentId());
-        BeanUtils.copyProperties(agentParam, agent, "machineId", "host", "password", "status", "proxyAgent", "mobiles", "emailAddress");
-        if (Constants.ConnType.CONN.getType().equals(agentParam.getProxy())) {
-            agent.setProxyAgent(null);
-        } else {
-            agent.setProxyAgent(agentParam.getProxyAgent());
+        if (agent == null) {
+            return Status.FALSE;
         }
-        if (agentParam.getWarning()) {
-            agent.setEmailAddress(agentParam.getEmailAddress());
-            agent.setMobiles(agentParam.getMobiles());
+        agent.setName(agentParam.getName());
+        if (agent.getProxy()) {
+            agent.setProxyId(agentParam.getProxyId());
+        }else {
+            agent.setProxyId(null);
         }
+        agent.setPort(agentParam.getPort());
+        agent.setWarning(agentParam.getWarning());
+        if (agent.getWarning()) {
+            agent.setMobile(agentParam.getMobile());
+            agent.setEmail(agentParam.getEmail());
+        }
+        agent.setComment(agentParam.getComment());
         agentService.merge(agent);
         return Status.TRUE;
     }
@@ -166,7 +160,7 @@ public class AgentController extends BaseController {
     }
 
     @RequestMapping("detail/{id}.htm")
-    public String showDetail(Model model, @PathVariable("id") Long id) {
+    public String detail(Model model, @PathVariable("id") Long id) {
         Agent agent = agentService.getAgent(id);
         if (agent == null) {
             return "/error/404";
@@ -177,8 +171,8 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "getConnAgents.do", method = RequestMethod.POST)
     @ResponseBody
-    public List<Agent> getConnAgents() {
-        return agentService.getAgentByConnType(Constants.ConnType.CONN);
+    public List<Agent> getConnAgents(HttpSession session) {
+        return agentService.getOwnerByConnType(session);
     }
 
     @RequestMapping(value = "path.do", method = RequestMethod.POST)
@@ -191,23 +185,23 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "listpath.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map getPath(Long agentId, String path) {
+    public Map getPath(Long agentId,String path) {
         if (CommonUtils.isEmpty(path)) {
             path = "/";
         }
         Agent agent = agentService.getAgent(agentId);
-        Map<String, Object> map = new HashMap<String, Object>(0);
-        Response response = executeService.listPath(agent, path);
-        map.put("status", response.isSuccess());
+        Map<String,Object> map = new HashMap<String, Object>(0);
+        Response response = executeService.listPath(agent,path);
+        map.put("status",response.isSuccess());
         if (response.isSuccess()) {
-            map.put("path", response.getResult().get(Constants.PARAM_LISTPATH_PATH_KEY));
+            map.put("path",response.getResult().get(Constants.PARAM_LISTPATH_PATH_KEY));
         }
         return map;
     }
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status upload(HttpSession httpSession, Long agentId, @RequestParam(value = "file", required = false) MultipartFile file, String savePath, String postcmd) throws IOException {
+    public Status upload(HttpSession httpSession,Long agentId,@RequestParam(value = "file", required = false) MultipartFile file,String savePath,String postcmd) throws IOException {
         Agent agent = agentService.getAgent(agentId);
 
         String rootPath = httpSession.getServletContext().getRealPath("/");
@@ -217,7 +211,7 @@ public class AgentController extends BaseController {
         if (!upFile.exists()) {
             upFile.mkdirs();
             file.transferTo(upFile);
-        } else {
+        }else {
             String existMD5 = DigestUtils.md5Hex(file.getBytes());
             String thisMD5 = IOUtils.getFileMD5(upFile);
             //server端已经存在该文件
@@ -229,7 +223,7 @@ public class AgentController extends BaseController {
         RequestFile requestFile = new RequestFile(upFile);
         requestFile.setSavePath(savePath);
         requestFile.setPostCmd(postcmd);
-        Response response = executeService.upload(agent, requestFile);
+        Response response = executeService.upload(agent,requestFile);
         return Status.create(response.isSuccess());
     }
 

@@ -25,7 +25,7 @@ import com.jobxhub.common.util.collection.NonBlockingHashMap;
 import com.jobxhub.common.util.collection.NonBlockingHashMapLong;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.jobxhub.common.util.AssertUtils.checkArgument;
@@ -211,7 +211,7 @@ public final class ContainerUtils {
         if (useNonBlocking) {
             return new NonBlockingHashMap();
         }
-        return new ConcurrentHashMap<K, V>();
+        return new HashMap<K, V>();
     }
 
     /**
@@ -222,7 +222,7 @@ public final class ContainerUtils {
         if (useNonBlocking) {
             return new NonBlockingHashMap<K, V>(initialCapacity);
         }
-        return new ConcurrentHashMap<K, V>(initialCapacity);
+        return new HashMap<K, V>(initialCapacity);
     }
 
     /**

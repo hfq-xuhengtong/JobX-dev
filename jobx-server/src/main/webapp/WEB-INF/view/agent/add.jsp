@@ -102,21 +102,21 @@
             warning:function () {
                 var _warning = $('input[type="radio"][name="warning"]:checked').val();
                 if ( _warning == "1" ) {
-                    this.mobiles();
+                    this.mobile();
                     this.email();
                 }
             },
 
-            mobiles:function () {
-                var _mobiles = $("#mobiles").val();
-                if (!_mobiles) {
-                    jobx.tipError("#mobiles","手机号不能为空!");
+            mobile:function () {
+                var _mobile = $("#mobile").val();
+                if (!_mobile) {
+                    jobx.tipError("#mobile","手机号不能为空!");
                     this.status = false;
-                }else if(!jobx.testMobile(_mobiles)) {
-                    jobx.tipError("#mobiles","手机号码格式错误!");
+                }else if(!jobx.testMobile(_mobile)) {
+                    jobx.tipError("#mobile","手机号码格式错误!");
                     this.status = false;
                 }else{
-                    jobx.tipOk("#mobiles");
+                    jobx.tipOk("#mobile");
                 }
             },
 
@@ -135,18 +135,16 @@
 
             ping:function(callback) {
                 $("#pingResult").html("<img src='${contextPath}/static/img/icon-loader.gif'> <font color='#2fa4e7'>检测中...</font>");
-                var _ping = $('input[type="radio"][name="proxy"]:checked').val();
-                var proxyId = null;
-                if (_ping == 1) {
-                    proxyId = $("#proxyAgent").val();
-                }
+                var proxy = $('input[type="radio"][name="proxy"]:checked').val();
+                var proxyId = $("#proxyId").val();
+
                 var _this = this;
                 ajax({
                     url: "${contextPath}/verify/ping.do",
                     type: "post",
                     dataType:"json",
                     data: {
-                        "proxy": _ping || 0,
+                        "proxy":proxy,
                         "proxyId": proxyId,
                         "host":$("#host").val(),
                         "port": $("#port").val(),
@@ -159,8 +157,8 @@
                             url: "${contextPath}/verify/macid.do",
                             type: "post",
                             data: {
-                                "proxy": _ping || 0,
-                                "proxyId": proxyId,
+                                "proxy":proxy,
+                                "proxyId":proxyId,
                                 "host":$("#host").val(),
                                 "port": $("#port").val(),
                                 "password": calcMD5($("#password").val())
@@ -271,10 +269,10 @@
                 jobx.tipDefault("#port");
             });
 
-            $("#mobiles").blur(function () {
-                validata.mobiles();
+            $("#mobile").blur(function () {
+                validata.mobile();
             }).focus(function () {
-                jobx.tipDefault("#mobiles");
+                jobx.tipDefault("#mobile");
             });
 
             $("#email").blur(function () {
@@ -300,7 +298,7 @@
         <ol class="breadcrumb hidden-xs">
             <li class="icon">&#61753;</li>
             当前位置：
-            <li><a href="">jobx</a></li>
+            <li><a href="">JobX</a></li>
             <li><a href="">执行器管理</a></li>
             <li><a href="">添加执行器</a></li>
         </ol>
@@ -341,9 +339,9 @@
                         <br>
 
                         <div class="form-group proxy">
-                            <label for="proxyAgent" class="col-lab control-label wid150"><i class="glyphicon glyphicon-leaf"></i>&nbsp;&nbsp;代&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;理&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <label for="proxyId" class="col-lab control-label wid150"><i class="glyphicon glyphicon-leaf"></i>&nbsp;&nbsp;代&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;理&nbsp;&nbsp;&nbsp;&nbsp;</label>
                             <div class="col-md-10">
-                                <select id="proxyAgent" name="proxyAgent" class="form-control input-sm">
+                                <select id="proxyId" name="proxyId" class="form-control input-sm">
                                     <c:forEach var="d" items="${connAgents}">
                                         <option value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
                                     </c:forEach>
@@ -392,9 +390,9 @@
                     <br>
 
                     <div class="form-group contact">
-                        <label for="mobiles" class="col-lab control-label wid150"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                        <label for="mobile" class="col-lab control-label wid150"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;&nbsp;</label>
                         <div class="col-md-10">
-                            <input type="text" class="form-control input-sm" id="mobiles" name="mobiles">
+                            <input type="text" class="form-control input-sm" id="mobile" name="mobile">
                             <span class="tips" tip="执行器通信不正常时将发送短信给此手机">执行器通信不正常时将发送短信给此手机</span>
                         </div>
                     </div>
@@ -403,7 +401,7 @@
                     <div class="form-group contact">
                         <label for="email" class="col-lab control-label wid150"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;报警邮箱&nbsp;&nbsp;&nbsp;&nbsp;</label>
                         <div class="col-md-10">
-                            <input type="text" class="form-control input-sm" id="email" name="emailAddress">
+                            <input type="text" class="form-control input-sm" id="email" name="email">
                             <span class="tips" tip="执行器通信不正常时将发送报告给此邮箱">执行器通信不正常时将发送报告给此邮箱</span>
                         </div>
                     </div>

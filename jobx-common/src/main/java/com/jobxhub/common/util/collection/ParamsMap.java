@@ -33,7 +33,7 @@ import java.util.*;
 @SuppressWarnings({"serial", "rawtypes", "unchecked"})
 public class ParamsMap<K, V> extends HashMap<K, V> implements Map<K, V> {
 
-    private Map<K, V> map = new HashMap<K, V>(0);
+    private HashMap<K, V> map = new HashMap<K, V>(0);
 
     public static ParamsMap map() {
         return new ParamsMap();
@@ -117,7 +117,7 @@ public class ParamsMap<K, V> extends HashMap<K, V> implements Map<K, V> {
         Set<K> keySet = new TreeSet(comparator);
         keySet.addAll(this.map.keySet());
 
-        Map<K, V> tempMap = new HashMap<K, V>();
+        HashMap<K, V> tempMap = new HashMap<K, V>();
 
         int tempIndex = 0;
         for (K k : keySet) {
@@ -139,7 +139,7 @@ public class ParamsMap<K, V> extends HashMap<K, V> implements Map<K, V> {
         Set<K> keySet = new TreeSet(comparator);
         keySet.addAll(this.map.keySet());
 
-        Map<K, V> tempMap = new HashMap<K, V>();
+        HashMap<K, V> tempMap = new HashMap<K, V>();
 
         int tempIndex = 1;
         for (K k : keySet) {
@@ -162,7 +162,7 @@ public class ParamsMap<K, V> extends HashMap<K, V> implements Map<K, V> {
         Set<K> keySet = new TreeSet(comparator);
         keySet.addAll(this.map.keySet());
 
-        Map<K, V> tempMap = new HashMap<K, V>();
+        HashMap<K, V> tempMap = new HashMap<K, V>();
 
         int tempIndex = 0;
         for (K k : keySet) {
@@ -184,7 +184,7 @@ public class ParamsMap<K, V> extends HashMap<K, V> implements Map<K, V> {
             throw new IndexOutOfBoundsException();
         }
 
-        Map<K, V> tempMap = new HashMap<K, V>();
+        HashMap<K, V> tempMap = new HashMap<K, V>();
         int tempIndex = 1;
 
         Set<K> keySet = new TreeSet(comparator);
@@ -213,10 +213,6 @@ public class ParamsMap<K, V> extends HashMap<K, V> implements Map<K, V> {
         return this.map.values();
     }
 
-    @Override
-    public Set keySet() {
-        return this.map.keySet();
-    }
 
     @Override
     public boolean containsValue(Object value) {

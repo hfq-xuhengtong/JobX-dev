@@ -16,10 +16,10 @@
         <td id="port_${w.agentId}">${w.port}</td>
         <td id="agent_${w.agentId}">
             <c:if test="${w.status eq 0}">
-                <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
+                <span class="label label-danger">&nbsp;&nbsp;失&nbsp;联&nbsp;&nbsp;</span>
             </c:if>
             <c:if test="${w.status eq 1}">
-                <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+                <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;正&nbsp;常&nbsp;&nbsp;</span>
             </c:if>
             <c:if test="${w.status eq 2}">
                 <span class="label label-danger">&nbsp;密码错误&nbsp;</span>
@@ -30,8 +30,8 @@
             <c:if test="${w.warning eq true}"><span class="label label-warning" style="color: white;font-weight:bold">&nbsp;&nbsp;是&nbsp;&nbsp;</span> </c:if>
         </td>
         <td id="connType_${w.agentId}">
-            <c:if test="${w.proxy eq 0}">直连</c:if>
-            <c:if test="${w.proxy eq 1}">代理</c:if>
+            <c:if test="${w.proxyId eq null}">直连</c:if>
+            <c:if test="${w.proxyId ne null}">代理</c:if>
         </td>
         <td class="text-center">
             <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">

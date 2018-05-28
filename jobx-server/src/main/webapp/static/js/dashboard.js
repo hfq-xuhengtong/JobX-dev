@@ -7,10 +7,12 @@ function JobXChart() {
     this.data = null;
     this.socket = null;
     this.resizeChartData = {};
+    this.chartItem = {};
     this.diskLoad = false;
     this.cpuLoad = false;
     this.configLoad = false;
     this.cpuChartObj = {};
+    this.chartWidth = 0;
     this.cpuX = [];
     this.cpuY = [];
     this.config = [];
@@ -32,7 +34,19 @@ function JobXChart() {
         this.screen = 3;
     }
 
-}
+    var _this = this;
+    $(window).resize(function () {
+        window.setTimeout(function () {
+            if ( _this.chartWidth == 0 || $(window).width()!= _this.chartWidth ) {
+                _this.chartWidth = $(window).width();
+                _this.resize();
+                //$("#cpu-chart").find("div").first().css("width","100%").find("canvas").first().css("width","100%");
+            }
+        },500);
+
+    });
+
+};
 
 ;JobXChart.prototype.query = function () {
     var self = this;
@@ -49,12 +63,14 @@ function JobXChart() {
             $("#overview_loader").hide();
             $("#record-report-havedata").show();
             $("#record-report-nodata").hide();
-
             //折线图
-            var dataArea = [];
+            var lineArray = [];
+            var donutMap = new Map();
             var successSum = 0;
-            var failureSum = 0;
+            var failedSum = 0;
             var killedSum = 0;
+            var timeoutSum = 0;
+            var lostSum = 0;
             var singleton = 0;
             var flow = 0;
             var crontab = 0;
@@ -63,16 +79,20 @@ function JobXChart() {
             var auto = 0;
             var operator = 0;
 
-            for (var i in data) {
-                dataArea.push({
+            for (var i=0;i<data.length;i++) {
+                lineArray.push({
                     date: data[i].date,
                     success: data[i].success,
-                    failure: data[i].failure,
-                    killed: data[i].killed
+                    failed: data[i].failed,
+                    killed: data[i].killed,
+                    timeout: data[i].timeout,
+                    lost: data[i].lost
                 });
                 successSum += parseInt(data[i].success);
-                failureSum += parseInt(data[i].failure);
+                failedSum += parseInt(data[i].failed);
                 killedSum += parseInt(data[i].killed);
+                timeoutSum += parseInt(data[i].timeout);
+                lostSum += parseInt(data[i].lost);
                 singleton += parseInt(data[i].singleton);
                 flow += parseInt(data[i].flow);
                 crontab += parseInt(data[i].crontab);
@@ -82,11 +102,15 @@ function JobXChart() {
                 operator += parseInt(data[i].operator);
             }
 
+            donutMap.put("success",successSum);
+            donutMap.put("failed",failedSum);
+            donutMap.put("killed",killedSum);
+            donutMap.put("timeout",timeoutSum);
+            donutMap.put("lost",lostSum);
+
             self.resizeChartData = {
-                "dataArea": dataArea,
-                "success": successSum,
-                "failure": failureSum,
-                "killed": killedSum,
+                "lineArray": lineArray,
+                "donutMap": donutMap,
                 "singleton": singleton,
                 "flow": flow,
                 "crontab": crontab,
@@ -95,7 +119,8 @@ function JobXChart() {
                 "auto": auto,
                 "operator": operator
             };
-            self.resize();
+            self.changeChar(null);
+            self.createChart();
         } else {
             window.setTimeout(function () {
                 $("#overview_loader").hide();
@@ -188,7 +213,7 @@ function JobXChart() {
             });
         }
     });
-};
+}
 
 ;JobXChart.prototype.clear = function () {
     if (this.socket != null) {
@@ -687,90 +712,153 @@ function JobXChart() {
             $("#topbody").html(lhtml+text);
             break
     }
-};
+}
 
 ;JobXChart.prototype.resize = function () {
-
-    if ($.isMobile()) {
-        $("#overview_pie_div").remove();
-        $("#overview_report_div").removeClass("col-xs-9").addClass("col-xs-12")
-    } else {
-        console.log($(window).width())
-        if ($(window).width() < 1280) {
-            $("#overview_pie_div").hide();
+    if ( this.resizeChartData.lineArray == undefined || this.resizeChartData.lineArray.length == 0) {
+        $("#overview_report").html("");
+        $("#overview_pie").html('');
+        $("#overview_loader").hide();
+        $("#record-report-havedata").hide();
+        $("#record-report-nodata").show();
+    }else {
+        if ($.isMobile()) {
+            $("#overview_pie_div").remove();
             $("#overview_report_div").removeClass("col-xs-9").addClass("col-xs-12")
         } else {
-            $("#overview_report_div").removeClass("col-xs-12").addClass("col-xs-9");
-            $("#overview_pie_div").show();
+            if ($(window).width() < 1280) {
+                $("#overview_pie_div").hide();
+                $("#overview_report_div").removeClass("col-xs-9").addClass("col-xs-12")
+            } else {
+                $("#overview_report_div").removeClass("col-xs-12").addClass("col-xs-9");
+                $("#overview_pie_div").show();
+            }
         }
+        this.createChart();
     }
+}
+
+;JobXChart.prototype.changeChar = function (map) {
+    if ( map == null ) {
+        if ( this.chartItem.item == null ) {
+            map = new Map();
+            map.put("success","success");
+            map.put("failed","failed");
+            map.put("killed","killed");
+            this.chartItem.item = map;
+        } else {
+            map = this.chartItem.item;
+        }
+    }else {
+        this.chartItem.item = map;
+    }
+
+    var json = [
+        {
+            key:"success",
+            color:"rgba(32,192,92,0.7)"
+        },
+        {
+            key:"failed",
+            color:"rgba(237,73,73,0.7)"
+        },
+        {
+            key:"timeout",
+            color:"rgba(254,212,42,0.7)"
+        },
+        {
+            key:"killed",
+            color:"rgba(11,98,164,0.7)"
+        },
+        {
+            key:"lost",
+            color:"rgba(222,220,219,0.7)"
+        }
+    ];
+
+    var titleColor = '#afd7ff';
+    var labels = [];
+    var colors = [];
+    var line = [];
+    var donut = [];
+    var donutSum = 0;
+    var entry = map.entrys();
+
+    for (var i=0;i<entry.length;i++) {
+        var key = entry[i].key;
+        for (var j=0;j<json.length;j++) {
+            if (json[j].key == key) {
+                labels.push(key);
+                colors.push(json[j].color);
+            }
+        }
+        donut.push({
+            label:key,
+            value:this.resizeChartData.donutMap.get(key)
+        });
+        donutSum += this.resizeChartData.donutMap.get(key);
+    }
+    colors.push(titleColor);
+
+    for ( var d = 0;d<this.resizeChartData.lineArray.length;d++ ) {
+        var obj = this.resizeChartData.lineArray[d];
+        var objData = {
+            "date":obj["date"]
+        }
+        for (var k in obj) {
+            if( map.get(k)!=null ) {
+                objData[k] = obj[k];
+            }
+        }
+        line.push(objData);
+    }
+    this.chartItem.line = line;
+    this.chartItem.donut = donut;
+    this.chartItem.labels = labels;
+    this.chartItem.colors = colors;
+    this.chartItem.titleColor = titleColor;
+    this.chartItem.donutSum = donutSum;
+}
+
+;JobXChart.prototype.createChart = function () {
+    var _this = this;
+    //线型报表
+    $("#overview_report_div").show();
+    $("#overview_report_bar").show();
+    $("#overview_report").html("");
+    Morris.Line({
+        element: $('#overview_report'),
+        data:this.chartItem.line,
+        xkey: 'date',
+        ykeys: this.chartItem.labels,
+        labels: this.chartItem.labels,
+        lineColors: this.chartItem.colors,
+        pointSize: 0,
+        pointStrokeColors: this.chartItem.colors,
+        gridTextColor:'rgba(225,225,225,0.8)',
+        lineWidth: 3,
+        resize: false
+    });
 
     //屏幕大于1024显示饼状图
     if ($(window).width() >= 1280) {
         $("#overview_pie").html('');
         $("#overview_pie_div").show();
-        $('#overview_pie').highcharts({
-            chart: {
-                backgroundColor: 'rgba(0,0,0,0)',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: true,
-                options3d: {
-                    enabled: true,
-                    alpha: 20,
-                    beta: 0
+        Morris.Donut({
+            element: $('#overview_pie'),
+            data: _this.chartItem.donut,
+            colors:_this.chartItem.colors,
+            formatter:function(y) {
+                if (y ==0) {
+                    return "0 (0%)";
                 }
+                var val = (y/_this.chartItem.donutSum) * 100;
+                return  y + " (" + val.toFixed(0) + "%)"
             },
-            colors: ['rgba(110,186,249,0.45)', 'rgba(252,80,76,0.45)', 'rgba(222,222,222,0.45)'],
-            title: {text: ''},
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: false
-                    },
-                    showInLegend: true,
-                    depth: 25
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: '占比',
-
-                data: [
-                    ['成功', this.resizeChartData.success],
-                    ['失败', this.resizeChartData.failure],
-                    ['被杀', this.resizeChartData.killed]
-                ]
-
-            }]
+            backgroundColor:'none',
+            labelColor: _this.chartItem.titleColor,
+            resize: false
         });
     }
-
-    //线型报表
-    $("#overview_report_div").show();
-    $("#overview_report").html('');
-    Morris.Line({
-        element: 'overview_report',
-        data: this.resizeChartData.dataArea,
-        grid: true,
-        axes: true,
-        xkey: 'date',
-        ykeys: ['success', 'failure', 'killed'],
-        labels: ['成功', '失败', '被杀'],
-        lineColors: ['rgba(205,224,255,0.5)', 'rgba(237,26,26,0.5)', 'rgba(0,0,0,0.5)'],
-        gridTextColor:'rgba(225,225,225,0.8)',
-        lineWidth: 4,
-        pointSize: 5,
-        hideHover: 'auto',
-        smooth: false,
-        resize: true
-    });
-
-
 }
 

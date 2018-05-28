@@ -21,12 +21,10 @@
 
 package com.jobxhub.common.util;
 
-import com.jobxhub.common.Constants;
+import com.jobxhub.common.util.collection.HashMap;
 
 import java.io.File;
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 
 

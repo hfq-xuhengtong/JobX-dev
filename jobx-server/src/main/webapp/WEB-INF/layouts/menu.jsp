@@ -16,7 +16,7 @@
 			<!-- Profile Menu -->
 			<div class="text-center s-widget m-b-25 dropdown" id="profile-menu">
 				<a href="" id="header-img" data-toggle="dropdown" class="animated a-hover">
-					<img class="profile-pic" onerror="userImg(this);" id="profile-pic" width="140px;" height="140px;"
+					<img class="profile-pic" id="profile-pic" width="140px;" height="140px;"
 					<c:if test="${jobx_user.headerPath != null}">
 						 src="${jobx_user.headerPath}?<%=System.currentTimeMillis()%>">
 					</c:if>

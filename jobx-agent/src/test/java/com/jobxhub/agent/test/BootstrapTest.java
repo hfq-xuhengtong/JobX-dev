@@ -1,5 +1,6 @@
 package com.jobxhub.agent.test;
 
+import com.jobxhub.common.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
 import com.jobxhub.agent.AgentProcessor;
 import com.jobxhub.common.ext.ExtensionLoader;
@@ -37,7 +38,7 @@ public class BootstrapTest implements Serializable {
 
         try {
             daemon.start();
-            Thread.sleep(50000);
+            Thread.sleep(Integer.MAX_VALUE);
         } catch (Throwable t) {
             if (t instanceof InvocationTargetException && t.getCause() != null) {
                 t = t.getCause();
@@ -50,15 +51,12 @@ public class BootstrapTest implements Serializable {
 
     private void start() throws Exception {
         try {
-
             final int port = 1577;
-
             String password = DigestUtils.md5Hex("jobx").toLowerCase();
-            SystemPropertyUtils.setProperty("jobx.port", port + "");
-            SystemPropertyUtils.setProperty("jobx.password", password);
-            SystemPropertyUtils.setProperty("jobx.host", "10.211.55.5");
-            SystemPropertyUtils.setProperty("jobx.registry", "zookeeper://10.211.55.2:2181");
-            SystemPropertyUtils.setProperty("java.io.tmpdir", "Y:\\GitHub\\JobX\\jobx-agent\\src\\test\\java\\com\\jobxhub\\agent\\test");
+            System.setProperty(Constants.PARAM_JOBX_PORT_KEY, port + "");
+            System.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY, password);
+            System.setProperty(Constants.PARAM_JOBX_HOST_KEY, "127.0.0.1");
+            System.setProperty(Constants.PARAM_JOBX_REGISTRY_KEY, "zookeeper://127.0.0.1:2181");
 
             this.server = ExtensionLoader.load(Server.class);
             //new thread to start for netty server
@@ -70,6 +68,9 @@ public class BootstrapTest implements Serializable {
             }).start();
 
             logger.info("[JobX]agent started @ port:{},pid:{}", port, getPid());
+            Thread.sleep(5000);
+            AgentProcessor.register(System.getProperty(Constants.PARAM_JOBX_HOST_KEY),port);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

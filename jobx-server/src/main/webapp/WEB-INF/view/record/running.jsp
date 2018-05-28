@@ -116,7 +116,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="#">jobx</a></li>
+        <li><a href="#">JobX</a></li>
         <li><a href="#">调度记录</a></li>
         <li><a href="#">正在运行</a></li>
     </ol>

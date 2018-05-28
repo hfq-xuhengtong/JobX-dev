@@ -30,7 +30,7 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 public final class URL {
 
@@ -379,14 +379,14 @@ public final class URL {
 
     private Map<String, Number> getNumbers() {
         if (numbers == null) { // 允许并发重复创建
-            numbers = new ConcurrentHashMap<String, Number>();
+            numbers = new HashMap<String, Number>();
         }
         return numbers;
     }
 
     private Map<String, URL> getUrls() {
         if (urls == null) { // 允许并发重复创建
-            urls = new ConcurrentHashMap<String, URL>();
+            urls = new HashMap<String, URL>();
         }
         return urls;
     }

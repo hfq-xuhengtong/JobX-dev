@@ -57,9 +57,6 @@
                 return false;
             }
 
-            $("#sendUrl").val(toBase64(sendUrl));
-            $("#template").val(toBase64($("#template").val()));
-
             $("#config").submit();
         }
 
@@ -78,10 +75,10 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">系统设置</a></li>
     </ol>
-    <h4 class="page-title"><i class="fa fa-edit" aria-hidden="true" style="font-style: 30px;"></i>&nbsp;修改设置</h4>
+    <h4 class="page-title"><i class="fa fa-edit" aria-hidden="true" style="font-style:30px;"></i>&nbsp;修改设置</h4>
 
     <div style="float: right;margin-top: 5px">
         <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i class="fa fa-mail-reply" aria-hidden="true"></i>&nbsp;返回</a>
@@ -121,7 +118,7 @@
                 <div class="form-group">
                     <label for="password" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;邮箱密码：</label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control input-sm" id="password" name="password" value="${config.password}">
+                        <input type="text" class="form-control input-sm" id="password" name="emailPassword" value="${config.emailPassword}">
                         <span class="tips"><b>*&nbsp;</b>发件邮箱账号的密码</span>
                     </div>
                 </div><br>

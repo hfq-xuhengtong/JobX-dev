@@ -7,6 +7,8 @@ import com.jobxhub.registry.zookeeper.ZookeeperClient;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import com.jobxhub.common.util.collection.HashMap;
 
 public class RegistryTest {
 
@@ -61,15 +63,13 @@ public class RegistryTest {
 
     @Test
     public void get(){
-        List<String> paths = zookeeperClient.getChildren("/jobx/agent");
-
-        for (String path:paths)
-            System.out.println(path);
+        Map<String,String> map = new HashMap<String, String>();
+        map.putAll(null);
     }
 
     @Test
     public void backup(){
-        URL url = URL.valueOf("jobx.registry=zookeeper://172.17.112.130:2181?backup=172.17.112.129:2181,172.17.112.128:2181,172.17.112.131:2181,172.17.112.127:2181");
+        URL url = URL.valueOf("zookeeper://127.0.0.1:2181");
         System.out.println(url.getBackupAddress());
     }
 

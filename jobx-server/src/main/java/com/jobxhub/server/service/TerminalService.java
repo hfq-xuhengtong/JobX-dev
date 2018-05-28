@@ -21,21 +21,23 @@
 
 package com.jobxhub.server.service;
 
+import com.google.common.collect.Lists;
 import com.jcraft.jsch.*;
 import com.jobxhub.common.Constants;
+import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.IOUtils;
-import com.jobxhub.server.dao.QueryDao;
-import com.jobxhub.server.domain.Terminal;
-import com.jobxhub.server.domain.User;
+import com.jobxhub.server.domain.TerminalBean;
+import com.jobxhub.server.dao.TerminalDao;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.support.SshUserInfo;
 import com.jobxhub.server.support.TerminalClient;
 import com.jobxhub.server.tag.PageBean;
+import com.jobxhub.server.dto.Terminal;
+import com.jobxhub.server.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.BadPaddingException;
 import javax.servlet.http.HttpSession;
@@ -75,27 +77,29 @@ import static com.jobxhub.common.util.CommonUtils.notEmpty;
  */
 
 @Service
-@Transactional
 public class TerminalService {
 
     private static Logger logger = LoggerFactory.getLogger(TerminalService.class);
 
     @Autowired
-    private QueryDao queryDao;
+    private TerminalDao terminalDao;
 
     public boolean exists(String userName, String host) throws Exception {
-        Integer count = queryDao.hqlIntUniqueResult("select count(1) from Terminal where userName=? and host=?", userName, host);
+        Map<String, Object> map = new HashMap<String, Object>(0);
+        map.put("user_name", userName);
+        map.put("host", host);
+        int count = terminalDao.getCount(map);
         return count > 0;
     }
 
-    public boolean merge(Terminal term) throws Exception {
+    public boolean merge(Terminal terminal) throws Exception {
         try {
-            if (term.getId() == null) {
-                queryDao.save(term);
+            TerminalBean terminalBean = TerminalBean.transfer.apply(terminal);
+            if (terminalBean.getId() == null) {
+                terminalDao.save(terminalBean);
+                terminal.setId(terminalBean.getId());
             } else {
-                Terminal terminal = queryDao.get(Terminal.class, term.getId());
-                term.setId(terminal.getId());
-                queryDao.merge(term);
+                terminalDao.update(terminalBean);
             }
             return true;
         } catch (Exception e) {
@@ -165,15 +169,21 @@ public class TerminalService {
         }
     }
 
-    public PageBean<Terminal> getPageBeanByUser(PageBean pageBean, Long userId) {
-        String hql = "from  Terminal where userId = ? order by ";
-        pageBean.verifyOrderBy("name", "name", "host", "port", "sshType", "logintime");
-        hql += pageBean.getOrderBy() + " " + pageBean.getOrder();
-        return queryDao.hqlPageQuery(hql, pageBean, userId);
+    public void getPageBean(PageBean pageBean, Long userId) {
+        pageBean.verifyOrderBy("name", "name", "host", "port", "ssh_type", "login_time");
+        pageBean.put("user_id", userId);
+
+        List<TerminalBean> beanList = terminalDao.getByPageBean(pageBean);
+        if (CommonUtils.notEmpty(beanList)) {
+            int count = terminalDao.getCount(pageBean.getFilter());
+            pageBean.setResult(beanList);
+            pageBean.setTotalCount(count);
+        }
     }
 
     public Terminal getById(Long id) {
-        return queryDao.get(Terminal.class, id);
+        TerminalBean terminalBean = terminalDao.getById(id);
+        return Terminal.transfer.apply(terminalBean);
     }
 
     public String delete(HttpSession session, Long id) {
@@ -186,24 +196,23 @@ public class TerminalService {
         if (!JobXTools.isPermission(session) && !user.getUserId().equals(term.getUserId())) {
             return "error";
         }
-
-        int count = queryDao.createQuery("delete from Terminal where id=?", term.getId()).executeUpdate();
-        return String.valueOf(count > 0);
+        terminalDao.delete(id);
+        return "true";
     }
 
-    public void login(Terminal terminal) {
-        terminal = getById(terminal.getId());
-        terminal.setLogintime(new Date());
-        queryDao.merge(terminal);
+    public void login(Long id) {
+        terminalDao.updateLoginTime(id);
     }
 
-    public List<Terminal> getListByUser(User user) {
-        return queryDao.hqlQuery("from  Terminal where userId =?", user.getUserId());
+    public List<Terminal> getByUser(Long userId) {
+        List<TerminalBean> list = terminalDao.getByUser(userId);
+        return Lists.transform(list, Terminal.transfer);
     }
 
     public void theme(Terminal terminal, String theme) throws Exception {
-        terminal.setTheme(theme);
-        merge(terminal);
+        if (terminal != null) {
+            terminalDao.updateTheme(terminal.getId(), theme);
+        }
     }
 
 

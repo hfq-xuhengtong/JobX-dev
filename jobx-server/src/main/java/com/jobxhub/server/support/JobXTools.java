@@ -24,8 +24,8 @@ package com.jobxhub.server.support;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.*;
-import com.jobxhub.server.domain.User;
 import com.jobxhub.server.session.cached.CachedManager;
+import com.jobxhub.server.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 import static com.jobxhub.common.util.CommonUtils.uuid;
 
@@ -137,7 +137,7 @@ public final class JobXTools {
 
     public static class CACHE {
 
-        private static Map<String, Object> cache = new ConcurrentHashMap<String, Object>(0);
+        private static Map<String, Object> cache = new HashMap<String, Object>();
 
         public static Object get(String key) {
             return cache.get(key);

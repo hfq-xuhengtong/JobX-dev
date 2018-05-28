@@ -61,9 +61,6 @@
             $("#sagentId").change(function () {
                 jobObj.changeUrl();
             });
-            $("#keyWord").change(function () {
-                jobObj.changeUrl();
-            });
             $("#cronType").change(function () {
                 jobObj.changeUrl();
             });
@@ -138,8 +135,8 @@
                                 "redo": redo,
                                 "runCount": runCount,
                                 "warning": warning,
-                                "mobiles": $("#mobiles").val(),
-                                "emailAddress": $("#email").val(),
+                                "mobile": $("#mobile").val(),
+                                "email": $("#email").val(),
                                 "comment": $("#comment").val()
                             };
                             ajax({
@@ -151,16 +148,16 @@
                                     if (data.status) {
                                         $('#jobModal').modal('hide');
                                         alertMsg("修改成功");
-                                        $("#jobName_" + job.jobId).html(escapeHtml(job.jobName));
-                                        $("#command_" + job.jobId).html(escapeHtml(passBase64(job.command)));
-                                        $("#cronType_" + job.jobId).html(job.cronType == "0" ? '<img class="text-center" width="70px" src="${contextPath}/static/img/crontab_ico.png">' : '<img  class="text-center" width="70px" src="${contextPath}/static/img/quartz_ico.png">');
-                                        $("#cronExp_" + job.jobId).html(escapeHtml(job.cronExp));
-                                        if (job.redo == "0") {
-                                            $("#redo_" + job.jobId).html('<span color="green">否</span>');
+                                        $("#jobName_" + jobId).html(jobName);
+                                        $("#command_" + jobId).html(command);
+                                        $("#cronType_" + jobId).html(cronType == "0" ? '<img class="text-center" width="70px" src="${contextPath}/static/img/crontab_ico.png">' : '<img  class="text-center" width="70px" src="${contextPath}/static/img/quartz_ico.png">');
+                                        $("#cronExp_" + jobId).html(cronExp);
+                                        if (redo == "0") {
+                                            $("#redo_" + jobId).html('<span color="green">否</span>');
                                         } else {
-                                            $("#redo_" + job.jobId).html('<span color="red">是</span>');
+                                            $("#redo_" + jobId).html('<span color="red">是</span>');
                                         }
-                                        $("#runCount_" + job.jobId).html(job.runCount);
+                                        $("#runCount_" + jobId).html(runCount);
                                     } else {
                                         alert("修改失败");
                                     }
@@ -180,11 +177,12 @@
                 },function (obj) {
                     $("#jobform")[0].reset();
                     $("#jobModal").find(".ok").remove();
+                    $("#jobModal").find(".tips").css("visibility","hidden");
                     if (obj != null) {
                         $("#id").val(obj.jobId);
                         $("#agentId").val(obj.agentId);
                         $("#jobName").val(unEscapeHtml(obj.jobName));
-                        $("#agent").val(obj.agentName + "   " + obj.host);
+                        $("#agent").val(obj.agentName);
                         $("#cronExp").val(obj.cronExp);
                         $("#cmd").val(obj.command);
                         $(".cronExpDiv").find(".tips").css("visibility","hidden");
@@ -201,7 +199,6 @@
                             $("#cronType1").parent().removeClass("checked");
                             $("#cronType1").parent().attr("aria-checked", false);
                         }
-                        console.log(obj.redo);
                         if (obj.redo == 1) {
                             toggle.count.show();
                             $("#redo1").prop("checked", true);
@@ -234,8 +231,8 @@
                             $("#warning1").parent().removeClass("checked");
                             $("#warning1").parent().attr("aria-checked", false);
                         }
-                        $("#mobiles").val(obj.mobiles);
-                        $("#email").val(obj.emailAddress);
+                        $("#mobile").val(obj.mobile);
+                        $("#email").val(obj.email);
                         $("#comment").val(unEscapeHtml(obj.comment));
                         $("#successExit").val(obj.successExit);
                         $("#timeout").val(obj.timeout);
@@ -247,11 +244,10 @@
             changeUrl:function () {
                 var pageSize = $("#size").val();
                 var agentId = $("#sagentId").val();
-                var keyWord = $("#keyWord").val();
                 var cronType = $("#cronType").val();
                 var jobType = $("#jobType").val();
                 var redo = $("#sredo").val();
-                window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&jobName=" + keyWord + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize ;
+                window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize ;
             },
             copyURL:function (jobId,token) {
                 var clipboard =  new Clipboard('.fa-copy',{
@@ -265,6 +261,7 @@
                 });
             },
             pauseJob:function (id,status) {
+                var _this = this;
                 var msg = status?"暂停":"恢复";
                 swal({
                     title: "",
@@ -287,13 +284,13 @@
                             if (status){
                                 pauseElem.attr("title","恢复");
                                 pauseElem.click(function () {
-                                    pauseJob(id,false);
+                                    _this.pauseJob(id,false);
                                 });
                                 pauseElem.find("i").removeClass("fa-pause-circle-o").addClass("fa-history");
                             }else {
                                 pauseElem.attr("title","暂停");
                                 pauseElem.click(function () {
-                                    pauseJob(id,true);
+                                    _this.pauseJob(id,true);
                                 });
                                 pauseElem.find("i").addClass("fa-pause-circle-o").removeClass("fa-history");
                             }
@@ -330,24 +327,6 @@
 
                     });
                 });
-            },
-            showChild:function (id, flowId) {
-                var open = $("#job_" + id).attr("childOpen");
-                if (open == "off") {
-                    $("#icon" + id).removeClass("fa-angle-double-down").addClass("fa-angle-double-up");
-                    $(".child" + id).show();
-                    $(".trGroup" + flowId).css("background-color", "rgba(0,0,0,0.1)");
-                    $("#job_" + id).attr("childOpen", "on");
-                    $(".name_" + id + "_1").hide();
-                    $(".name_" + id + "_2").show();
-                } else {
-                    $(".trGroup" + flowId).css("background-color", "");
-                    $("#icon" + id).removeClass("fa-angle-double-up").addClass("fa-angle-double-down");
-                    $(".child" + id).hide();
-                    $("#job_" + id).attr("childOpen", "off");
-                    $(".name_" + id + "_2").hide();
-                    $(".name_" + id + "_1").show();
-                }
             },
             editCmd:function (id) {
                 $("#command").parent().find(".tips").css("visibility","hidden");
@@ -414,9 +393,7 @@
                         data: {"id": id},
                         dataType:"html"
                     },function (data) {
-                        if (data == "error") {
-                            alert("该作业不存在,删除失败!")
-                        } else if (data == "false") {
+                        if (!data.status) {
                             alert("该作业正在运行中,删除失败!")
                         } else {
                             ajax({
@@ -451,7 +428,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">作业管理</a></li>
         <li><a href="">作业列表</a></li>
     </ol>
@@ -476,36 +453,31 @@
                 <select id="sagentId" name="sagentId" class="select-jobx" style="width: 110px;">
                     <option value="">全部</option>
                     <c:forEach var="d" items="${agents}">
-                        <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
+                        <option value="${d.agentId}" ${d.agentId eq job.agentId ? 'selected' : ''}>${d.name}</option>
                     </c:forEach>
                 </select>
-
-                &nbsp;&nbsp;&nbsp;
-                <label for="keyWord">作业名称：</label>
-                <input id="keyWord" name="keyWord" type="text" value="${jobName}" style="width: 110px;"></input>
 
                 &nbsp;&nbsp;&nbsp;
                 <label for="cronType">规则类型：</label>
                 <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
                     <option value="">全部</option>
-                    <option value="0" ${cronType eq 0 ? 'selected' : ''}>crontab</option>
-                    <option value="1" ${cronType eq 1 ? 'selected' : ''}>quartz</option>
+                    <option value="0" ${job.cronType eq 0 ? 'selected' : ''}>crontab</option>
+                    <option value="1" ${job.cronType eq 1 ? 'selected' : ''}>quartz</option>
                 </select>
 
                 &nbsp;&nbsp;&nbsp;
                 <label for="jobType">作业类型：</label>
-                <select id="jobType" name="jobType" class="select-jobx" style="width: 70px;">
+                <select id="jobType" name="jobType" class="select-jobx" style="width: 90px;">
                     <option value="">全部</option>
-                    <option value="0" ${jobType eq 0 ? 'selected' : ''}>单一</option>
-                    <option value="1" ${jobType eq 1 ? 'selected' : ''}>流程</option>
+                    <option value="0" ${job.jobType eq 0 ? 'selected' : ''}>单一作业</option>
+                    <option value="1" ${job.jobType eq 1 ? 'selected' : ''}>流程作业</option>
                 </select>
 
-                &nbsp;&nbsp;&nbsp;
                 <label for="sredo">重跑：</label>
-                <select id="sredo" name="sredo" class="select-jobx" style="width: 60px;">
+                <select id="sredo" name="sredo" class="select-jobx" style="width: 80px;">
                     <option value="">全部</option>
-                    <option value="1" ${redo eq 1 ? 'selected' : ''}>是</option>
-                    <option value="0" ${redo eq 0 ? 'selected' : ''}>否</option>
+                    <option value="1" ${job.redo eq 1 ? 'selected' : ''}>是</option>
+                    <option value="0" ${job.redo eq 0 ? 'selected' : ''}>否</option>
                 </select>
 
                 <a href="${contextPath}/job/add.htm" class="btn btn-sm m-t-10"
@@ -529,28 +501,10 @@
             </tr>
             </thead>
             <tbody>
-            <%--父作业--%>
+
             <c:forEach var="r" items="${pageBean.result}" varStatus="index">
-                <tr class="trGroup${r.flowId}">
-                    <c:if test="${r.jobType eq 0}">
-                        <td id="jobName_${r.jobId}" title="${r.jobName}">${cron:substr(r.jobName, 0,20 ,"..." )}</td>
-                    </c:if>
-                    <c:if test="${r.jobType eq 1}">
-                        <td class="name_${r.flowId}_1" title="${r.jobName}">${cron:substr(r.jobName, 0,20 ,"..." )}</td>
-                        <td style="display: none;"
-                            class="name_${r.flowId}_2"
-                            rowspan="${fn:length(r.children)+1}"
-                            title="${r.jobName}">${cron:substr(r.jobName, 0,20 ,"..." )}
-
-                            <c:forEach var="c" items="${r.children}" varStatus="index">
-                                <div class="down">
-                                    <i aria-hidden="true" style="font-size:14px" class="fa fa-arrow-down"></i>
-                                </div>
-                                <span title="${c.jobName}">${cron:substr(c.jobName, 0,20 ,"..." )}</span>
-                            </c:forEach>
-
-                        </td>
-                    </c:if>
+                <tr>
+                    <td id="jobName_${r.jobId}" title="${r.jobName}">${cron:substr(r.jobName, 0,20 ,"..." )}</td>
                     <td><a href="${contextPath}/agent/detail/${r.agentId}.htm">${r.agentName}</a></td>
                     <c:if test="${permission eq true}">
                         <td><a href="${contextPath}/user/detail/${r.userId}.htm">${r.operateUname}</a>
@@ -586,7 +540,7 @@
                     <td class="text-center">
                         <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
                             <c:if test="${r.jobType eq 1}">
-                                <a href="#" title="流程作业" id="job_${r.jobId}" childOpen="off" onclick="jobObj.showChild('${r.jobId}','${r.flowId}')"> <i style="font-size:14px;" class="fa fa-angle-double-down" id="icon${r.jobId}"></i></a>&nbsp;&nbsp;
+                                <a href="#" title="流程作业" id="job_${r.jobId}"> <i style="font-size:14px;" class="fa fa-angle-double-down" id="icon${r.jobId}"></i></a>&nbsp;&nbsp;
                             </c:if>
                             <c:if test="${r.jobType eq 0}">
                                 <a href="#" title="编辑" onclick="jobObj.edit('${r.jobId}')">
@@ -644,7 +598,7 @@
             </tbody>
         </table>
 
-        <cron:pager href="${contextPath}/job/view.htm?agentId=${agentId}&jobName=${jobName}&redo=${redo}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/job/view.htm?agentId=${agentId}&redo=${redo}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
 
     </div>
 
@@ -721,9 +675,9 @@
                             <label onclick="toggle.contact.hide()" for="warning0" class="radio-label"><input type="radio" name="warning" value="0" id="warning0">否</label>
                         </div>
                         <div class="form-group contact">
-                            <label for="mobiles" class="col-lab control-label" title="任务执行失败时将发送短信给此手机">&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;</label>
+                            <label for="mobile" class="col-lab control-label" title="任务执行失败时将发送短信给此手机">&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;</label>
                             <div class="col-md-9">
-                                <input type="text" class="form-control" id="mobiles"/>&nbsp;
+                                <input type="text" class="form-control" id="mobile"/>&nbsp;
                                 <span class="tips none" tip="任务执行失败时将发送短信给此手机,多个请以逗号(英文)隔开">任务执行失败时将发送短信给此手机,多个请以逗号(英文)隔开</span>
                             </div>
                         </div>

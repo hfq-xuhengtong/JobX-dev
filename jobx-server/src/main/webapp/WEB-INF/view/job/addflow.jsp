@@ -326,7 +326,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">作业管理</a></li>
         <li><a href="">添加作业</a></li>
         <li><a href="">工作流</a></li>
@@ -340,7 +340,7 @@
     <div class="block-area" id="basic">
         <div class="tab-container tile" style="margin-bottom: 0px">
             <ul class="nav tab nav-tabs">
-                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.id}'"><a href="javascript:void(0)">单一作业</a></li>
+                <li onclick="javascript:location.href='${contextPath}/job/add.htm?id=${agent.agentId}'"><a href="javascript:void(0)">单一作业</a></li>
                 <li class="active" ><a href="javascript:void(0)">工作流</a></li>
             </ul>
         </div>
@@ -494,9 +494,9 @@
                 </div>
 
                 <div class="form-group contact">
-                    <label for="mobiles" class="col-lab control-label wid150"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <label for="mobile" class="col-lab control-label wid150"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control input-sm" id="mobiles" name="mobiles">
+                        <input type="text" class="form-control input-sm" id="mobile" name="mobile">
                         <span class="tips" tip="任务执行失败时将发送短信给此手机,多个请以逗号(英文)隔开">任务执行失败时将发送短信给此手机,多个请以逗号(英文)隔开</span>
                     </div>
                 </div>
@@ -504,7 +504,7 @@
                 <div class="form-group contact">
                     <label for="email" class="col-lab control-label wid150"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;报警邮箱&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control input-sm" id="email" name="emailAddress">
+                        <input type="text" class="form-control input-sm" id="email" name="email">
                         <span class="tips" tip="任务执行失败时将发送报告给此邮箱,多个请以逗号(英文)隔开">任务执行失败时将发送报告给此邮箱,多个请以逗号(英文)隔开</span>
                     </div>
                 </div>

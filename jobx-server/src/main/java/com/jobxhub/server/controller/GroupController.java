@@ -21,13 +21,11 @@
 
 package com.jobxhub.server.controller;
 
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.domain.Group;
 import com.jobxhub.server.support.JobXTools;
-import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.GroupService;
 import com.jobxhub.server.tag.PageBean;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Group;
+import com.jobxhub.server.dto.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,6 +38,11 @@ import javax.servlet.http.HttpSession;
 import java.util.*;
 
 
+/**
+ * 1)只有超级管理员才可以创建分组
+ * 2)一个执行器可以在多个组
+ * 3)执行器组的名字唯一
+ */
 @Controller
 @RequestMapping("group")
 public class GroupController extends BaseController {
@@ -47,18 +50,15 @@ public class GroupController extends BaseController {
     @Autowired
     private GroupService groupService;
 
-    @Autowired
-    private AgentService agentService;
-
     @RequestMapping("view.htm")
     public String view(PageBean pageBean) {
-        groupService.getGroupPage(pageBean);
+        groupService.getByPageBean(pageBean);
         return "/group/view";
     }
 
     @RequestMapping("add.htm")
     public String add(Model model) {
-        List<Group> groups = groupService.getGroupforAgent();
+        List<Group> groups = groupService.getForAgent();
         model.addAttribute("groups", groups);
         return "/group/add";
     }
@@ -66,7 +66,7 @@ public class GroupController extends BaseController {
     @RequestMapping("edit/{groupId}.htm")
     public String edit(@PathVariable("groupId") Long groupId, Model model) {
         Group group = groupService.getById(groupId);
-        List<Group> groups = groupService.getGroupforAgent();
+        List<Group> groups = groupService.getForAgent();
         model.addAttribute("group", group);
         model.addAttribute("groups", groups);
         return "/group/edit";
@@ -82,9 +82,7 @@ public class GroupController extends BaseController {
     public String save(HttpSession session, Group group, String agentIds) {
         group.setCreateTime(new Date());
         group.setUserId(JobXTools.getUserId(session));
-
-        List<Agent> agents = agentService.getAgentByIds(agentIds);
-        group.getAgents().addAll(agents);
+        group.setAgentIds(agentIds.split(","));
         groupService.merge(group);
         return "redirect:/group/view.htm";
     }

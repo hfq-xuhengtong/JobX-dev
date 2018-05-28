@@ -913,7 +913,8 @@ hr {
 
 /* Pagination */
 .pagination {
-    margin: 0;
+    margin-top: 5px;
+    margin-bottom: 10px;
     float: right;
 }
 
@@ -2009,23 +2010,14 @@ a.list-group-item.active > .badge,
         background-attachment: fixed;
     }
 
-    #skin-violate {
-        background-image: url(/static/img/body/violate.jpg);
-    }
-
-    #skin-lights {
-        background-image: url(/static/img/body/lights.jpg);
-    }
-
-    #skin-orange {
-        background-image: url(/static/img/body/orange.jpg);
+    #skin-1 {
+        background-image: url(/static/img/body/1.jpg);
     }
 
 
     #skin-2 {
         background-image: url(/static/img/body/2.jpg);
     }
-
 
     #skin-3 {
         background-image: url(/static/img/body/3.jpg);
@@ -2037,29 +2029,12 @@ a.list-group-item.active > .badge,
     }
 
 
-    #skin-5 {
-        background-image: url(/static/img/body/5.jpg);
-    }
-
-
-    #skin-6 {
-        background-image: url(/static/img/body/6.jpg);
-    }
-
-    #skin-city {
-        background-image: url(/static/img/body/city.jpg);
-    }
-
     #skin-greenish {
         background-image: url(/static/img/body/greenish.jpg);
     }
 
     #skin-night {
         background-image: url(/static/img/body/night.jpg);
-    }
-
-    #skin-sunny {
-        background-image: url(/static/img/body/sunny.jpg);
     }
 
     #skin-blue {
@@ -2070,20 +2045,20 @@ a.list-group-item.active > .badge,
         background-image: url(/static/img/body/chrome.jpg);
     }
 
-    #skin-ocean {
-        background-image: url(/static/img/body/ocean.jpg);
+    #skin-sky {
+        background-image: url(/static/img/body/sky.jpg);
     }
 
-    #skin-sunset {
-        background-image: url(/static/img/body/sunset.jpg);
-    }
-
-    #skin-yellow {
-        background-image: url(/static/img/body/yellow.jpg);
-    }
-
-    #skin-kiwi {
+   #skin-kiwi {
         background-image: url(/static/img/body/kiwi.jpg);
+    }
+
+   #skin-violate {
+        background-image: url(/static/img/body/violate.jpg);
+    }
+
+    #skin-orange {
+        background-image: url(/static/img/body/orange.jpg);
     }
 
     /* Sidebar */
@@ -2494,10 +2469,10 @@ a.list-group-item.active > .badge,
 }
 
 .card-container {
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     min-height: 80px;
     position: relative;
-    padding: 0 10px;
+    padding: 0 7px;
 }
 .card-container .card {
     cursor: pointer;

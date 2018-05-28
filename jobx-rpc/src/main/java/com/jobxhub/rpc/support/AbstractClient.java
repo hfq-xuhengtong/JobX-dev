@@ -40,7 +40,8 @@ import com.jobxhub.rpc.netty.ChannelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import com.jobxhub.common.util.collection.HashMap;
 
 /**
  * @author benjobs
@@ -53,27 +54,29 @@ public abstract class AbstractClient implements Client {
 
     protected Bootstrap bootstrap;
 
-    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
+    protected final Map<String, ConnectWrapper> connectTable = new HashMap<String, ConnectWrapper>();
 
-    protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
+    protected final Map<String, ChannelWrapper> channelTable = new HashMap<String, ChannelWrapper>();
 
-    public final ConcurrentHashMap<Long, RpcFuture> futureTable = new ConcurrentHashMap<Long, RpcFuture>(256);
+    public final Map<Long, RpcFuture> futureTable = new HashMap<Long, RpcFuture>(256);
+
+    private final Map<String,Long> clientMap = new HashMap<String, Long>(0);
 
     @Override
     public Response sentSync(Request request) throws Exception {
-        this.connect(request);
+        this.doConnect(request);
         return invokeSync(request);
     }
 
     @Override
     public void sentOneWay(Request request) throws Exception {
-        this.connect(request);
+        this.doConnect(request);
         invokeOneWay(request);
     }
 
     @Override
     public void sentAsync(Request request, InvokeCallback callback) throws Exception {
-        this.connect(request);
+        this.doConnect(request);
         invokeAsync(request,callback);
     }
 
@@ -187,6 +190,13 @@ public abstract class AbstractClient implements Client {
             futureTable.remove(rpcFuture.getRequest().getId());
         }
 
+    }
+
+    private void doConnect(Request request) {
+        if (!clientMap.containsKey(request.getAddress())) {
+            this.connect(request);
+            clientMap.put(request.getAddress(),request.getId());
+        }
     }
 
     @Override

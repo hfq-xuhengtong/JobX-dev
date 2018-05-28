@@ -27,14 +27,14 @@ import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.DigestUtils;
 import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.common.util.collection.ParamsMap;
-import com.jobxhub.server.domain.Job;
+import com.jobxhub.server.domain.JobBean;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.tag.PageBean;
 import com.jobxhub.common.util.CommonUtils;
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.vo.JobInfo;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Agent;
+import com.jobxhub.server.dto.Job;
+import com.jobxhub.server.dto.Status;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -71,28 +71,11 @@ public class JobController extends BaseController {
     private SchedulerService schedulerService;
 
     @RequestMapping("view.htm")
-    public String view(HttpSession session, HttpServletRequest request, PageBean pageBean, JobInfo job, Model model) {
-
+    public String view(HttpSession session, HttpServletRequest request, PageBean pageBean, Job job, Model model) {
+        jobService.getPageBean(session, pageBean, job);
+        model.addAttribute("job", job);
         model.addAttribute("agents", agentService.getOwnerAgents(session));
-
-        // model.addAttribute("jobs", jobService.getAll());
-
-        if (notEmpty(job.getJobName())) {
-            model.addAttribute("jobName", job.getJobName());
-        }
-        if (notEmpty(job.getAgentId())) {
-            model.addAttribute("agentId", job.getAgentId());
-        }
-        if (notEmpty(job.getCronType())) {
-            model.addAttribute("cronType", job.getCronType());
-        }
-        if (notEmpty(job.getJobType())) {
-            model.addAttribute("jobType", job.getJobType());
-        }
-        if (notEmpty(job.getRedo())) {
-            model.addAttribute("redo", job.getRedo());
-        }
-        jobService.getJobInfoPage(session, pageBean, job);
+        model.addAttribute("jobs", jobService.getAll());
         if (request.getParameter("refresh") != null) {
             return "/job/refresh";
         }
@@ -114,8 +97,9 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "checkdel.do", method = RequestMethod.POST)
     @ResponseBody
-    public String checkDelete(Long id) {
-        return jobService.checkDelete(id);
+    public Status checkDelete(Long id) {
+        boolean status = jobService.checkDelete(id);
+        return  Status.create(status);
     }
 
     @RequestMapping(value = "delete.do", method = RequestMethod.POST)
@@ -154,20 +138,20 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "search.do", method = RequestMethod.POST)
     @ResponseBody
-    public PageBean<Job> search(Long agentId,Integer  cronType, String jobName,Integer pageNo) {
-        PageBean pageBean = new PageBean<Job>(6);
+    public PageBean<Job> search(HttpSession session, Long agentId, Integer  cronType, String jobName, Integer pageNo) {
+        PageBean pageBean = new PageBean<JobBean>(6);
         pageBean.setPageNo(pageNo == null?1:pageNo);
         if (agentId == null && cronType == null && CommonUtils.isEmpty(jobName)) {
             return pageBean;
         }
-        return jobService.search(pageBean,agentId,cronType,jobName);
+        return jobService.search(session,pageBean,agentId,cronType,jobName);
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
         jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));
         if (jobParam.getJobId() != null) {
-            Job job = jobService.getJob(jobParam.getJobId());
+            Job job = jobService.getById(jobParam.getJobId());
 
             if (!jobService.checkJobOwner(session, job.getUserId()))
                 return "redirect:/job/view.htm";
@@ -188,17 +172,19 @@ public class JobController extends BaseController {
                     "jobType",
                     "runModel",
                     "warning",
-                    "mobiles",
-                    "emailAddress",
+                    "mobile",
+                    "email",
                     "timeout"
             );
         }
 
         //单任务
-        if (Constants.JobType.SINGLETON.getCode().equals(jobParam.getJobType())) {
+        if (Constants.JobType.SIMPLE.getCode().equals(jobParam.getJobType())) {
             jobParam.setUserId(JobXTools.getUserId(session));
-            jobParam.setLastChild(false);
-            jobParam = jobService.merge(jobParam);
+            jobParam.setCreateType(Constants.CreateType.NORMAL.getValue());
+            jobParam.setToken(CommonUtils.uuid());
+            jobParam.setPause(false);
+            jobService.merge(jobParam);
         } else { //流程任务
             Map<String, String[]> map = request.getParameterMap();
             Object[] jobName = map.get("child.jobName");
@@ -210,18 +196,17 @@ public class JobController extends BaseController {
             Object[] timeout = map.get("child.timeout");
             Object[] comment = map.get("child.comment");
             Object[] successExit = map.get("child.successExit");
+            Object[] sn = map.get("child.sn");
             List<Job> children = new ArrayList<Job>(0);
             for (int i = 0; i < jobName.length; i++) {
                 Job child = new Job();
                 if (CommonUtils.notEmpty(jobId[i])) {
                     //子任务修改的..
                     Long jobid = Long.parseLong((String) jobId[i]);
-                    child = jobService.getJob(jobid);
+                    child = jobService.getById(jobid);
                 }
-                /**
-                 * 新增并行和串行,子任务和最顶层的父任务一样
-                 */
-                child.setRunModel(jobParam.getRunModel());
+                child.setSn((String) sn[i]);
+                child.setCreateType(Constants.CreateType.FLOW.getValue());
                 child.setJobName(StringUtils.htmlEncode((String) jobName[i]));
                 child.setAgentId(Long.parseLong((String) agentId[i]));
                 child.setCommand(DigestUtils.passBase64((String) command[i]));
@@ -257,8 +242,8 @@ public class JobController extends BaseController {
 
     @RequestMapping("editsingle.do")
     @ResponseBody
-    public JobInfo editSingleJob(HttpSession session, HttpServletResponse response, Long id) {
-        JobInfo job = jobService.getJobInfoById(id);
+    public Job editSingleJob(HttpSession session, HttpServletResponse response, Long id) {
+        Job job = jobService.getById(id);
         if (job == null) {
             write404(response);
             return null;
@@ -269,7 +254,7 @@ public class JobController extends BaseController {
 
     @RequestMapping("editflow.htm")
     public String editFlowJob(HttpSession session, Model model, Long id) {
-        JobInfo job = jobService.getJobInfoById(id);
+        Job job = jobService.getById(id);
         if (job == null) {
             return "/error/404";
         }
@@ -281,11 +266,10 @@ public class JobController extends BaseController {
         return "/job/edit";
     }
 
-
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
     @ResponseBody
     public Status edit(HttpSession session, Job job) throws Exception {
-        Job dbJob = jobService.getJob(job.getJobId());
+        Job dbJob = jobService.getById(job.getJobId());
         if (!jobService.checkJobOwner(session, dbJob.getUserId())) return Status.FALSE;
         dbJob.setCronType(job.getCronType());
         dbJob.setCronExp(job.getCronExp());
@@ -297,12 +281,14 @@ public class JobController extends BaseController {
         dbJob.setWarning(job.getWarning());
         dbJob.setTimeout(job.getTimeout());
         if (dbJob.getWarning()) {
-            dbJob.setMobiles(job.getMobiles());
-            dbJob.setEmailAddress(job.getEmailAddress());
+            dbJob.setMobile(job.getMobile());
+            dbJob.setEmail(job.getEmail());
         }
         dbJob.setComment(job.getComment());
         jobService.merge(dbJob);
-        schedulerService.syncTigger(dbJob.getJobId());
+        if (!dbJob.getPause()) {
+            schedulerService.syncTigger(dbJob.getJobId());
+        }
         return Status.TRUE;
     }
 
@@ -310,30 +296,30 @@ public class JobController extends BaseController {
     @ResponseBody
     public Status editCmd(HttpSession session, Long jobId, String command) throws Exception {
         command = DigestUtils.passBase64(command);
-        Job dbJob = jobService.getJob(jobId);
+        Job dbJob = jobService.getById(jobId);
         if (!jobService.checkJobOwner(session, dbJob.getUserId())) return Status.FALSE;
         dbJob.setCommand(command);
         jobService.merge(dbJob);
-        schedulerService.syncTigger(Constants.JobType.FLOW.getCode().equals(dbJob.getJobType()) ? dbJob.getFlowId() : dbJob.getJobId());
+        schedulerService.syncTigger(dbJob.getJobId());
         return Status.TRUE;
     }
 
     /**
      * 检测当前的job是否正在运行中,运行中true,未运行false
      *
-     * @param id
+     * @param jobId
      * @return
      */
     @RequestMapping(value = "running.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status jobisRunning(Long id) {
-        return Status.create(recordService.isRunning(id));
+    public Status jobIsRunning(Long jobId) {
+        return Status.create(recordService.isRunning(jobId));
     }
 
     @RequestMapping(value = "execute.do", method = RequestMethod.POST)
     @ResponseBody
     public Status remoteExecute(HttpSession session, Long id) {
-        final JobInfo job = jobService.getJobInfoById(id);//找到要执行的任务
+        final Job job = jobService.getById(id);//找到要执行的任务
         if (!jobService.checkJobOwner(session, job.getUserId())) return Status.FALSE;
         //手动执行
         Long userId = JobXTools.getUserId(session);
@@ -344,7 +330,7 @@ public class JobController extends BaseController {
             @Override
             public void run() {
                 try {
-                    executeService.execute(job, Constants.ExecType.OPERATOR);
+                    executeService.executeJob(job, Constants.ExecType.OPERATOR);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -361,8 +347,8 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "pause.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status pause(Job jobBean) {
-        return Status.create(jobService.pauseJob(jobBean));
+    public Status pause(Job job) {
+        return Status.create(jobService.pauseJob(job));
     }
 
     /**
@@ -374,12 +360,13 @@ public class JobController extends BaseController {
     @RequestMapping(value = "token.do", method = RequestMethod.POST)
     @ResponseBody
     public ParamsMap token(Long jobId) {
-        Job job = jobService.getJob(jobId);
+        Job job = jobService.getById(jobId);
+        String token = CommonUtils.uuid();
         if (job != null) {
             job.setToken(CommonUtils.uuid());
-            job = jobService.merge(job);
+            jobService.updateToken(jobId,token);
         }
-        return ParamsMap.map().set("token", job.getToken());
+        return ParamsMap.map().set("token", token);
     }
 
     @RequestMapping(value = "batchexec.do", method = RequestMethod.POST)
@@ -389,7 +376,7 @@ public class JobController extends BaseController {
             command = DigestUtils.passBase64(command);
             Long userId = JobXTools.getUserId(session);
             try {
-                this.executeService.batchExecuteJob(userId, command, agentIds);
+                this.executeService.executeBatchJob(userId, command, agentIds);
             } catch (Exception e) {
                 e.printStackTrace();
                 return Status.FALSE;
@@ -400,14 +387,14 @@ public class JobController extends BaseController {
 
     @RequestMapping("detail/{id}.htm")
     public String showDetail(HttpSession session, Model model, @PathVariable("id") Long id) {
-        JobInfo jobInfo = jobService.getJobInfoById(id);
-        if (jobInfo == null) {
+        Job job = jobService.getById(id);
+        if (job == null) {
             return "/error/404";
         }
-        if (!jobService.checkJobOwner(session, jobInfo.getUserId())) {
+        if (!jobService.checkJobOwner(session, job.getUserId())) {
             return "redirect:/job/view.htm";
         }
-        model.addAttribute("job", jobInfo);
+        model.addAttribute("job", job);
         return "/job/detail";
     }
 

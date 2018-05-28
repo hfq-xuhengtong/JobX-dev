@@ -53,7 +53,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">系统设置</a></li>
     </ol>
     <h4 class="page-title"><i class="glyphicon glyphicon-cog"></i>&nbsp;设置详情</h4>
@@ -90,12 +90,6 @@
             </tr>
             <tr>
                 <td class="item"><i class="glyphicon glyphicon-time"></i>&nbsp;发送间隔：</td>
-                <td>
-                    ${config.spaceTime} 分钟<span class="tips">（同一执行器失联后告警邮件和短信发送后到下一次发送的时间间隔）</span>
-                </td>
-            </tr>
-            <tr>
-                <td class="item"><i class="glyphicon glyphicon-time"></i>&nbsp;server url：</td>
                 <td>
                     ${config.spaceTime} 分钟<span class="tips">（同一执行器失联后告警邮件和短信发送后到下一次发送的时间间隔）</span>
                 </td>

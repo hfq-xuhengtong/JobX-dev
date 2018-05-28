@@ -168,21 +168,7 @@
                 }
             });
         });
-        
-        function userImg(img) {
-            $.ajax({
-                type: "POST",
-                url: "${contextPath}/user/header.do",
-                dataType: "json",
-                success: function (data) {
-                    if (data.status) {
-                        $(img).attr("src","${jobx_user.headerPath}?"+new Date().getTime());
-                    }else {
-                        $(img).attr("src","${contextPath}/static/img/profile-pic.jpg");
-                    }
-                }
-            });
-        }
+
     </script>
 
 </head>
@@ -193,7 +179,7 @@
 
     <header id="header">
         <a href="" id="menu-toggle" style="background-image: none"><i class="icon">&#61773;</i></a>
-        <a id="log1" href="${contextPath}/dashboard.htm" class="logo pull-left"><div style="float: left; width: 165px; margin-top: 5px; margin-left: 14px">
+        <a id="log1" href="${contextPath}/dashboard.htm" class="logo pull-left"><div style="float: left; width: 110px; margin-top: -10px; margin-left: 40px;">
             <img src="${contextPath}/static/img/jobx.png">
         </div>
         </a>

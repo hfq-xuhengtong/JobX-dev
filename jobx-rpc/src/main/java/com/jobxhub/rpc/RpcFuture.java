@@ -48,7 +48,7 @@ public class RpcFuture {
     private volatile Request request;
     private volatile Response response;
     private volatile Long startTime;
-    private volatile Long timeout;
+    private volatile Integer timeout;
     private volatile InvokeCallback invokeCallback;
 
     private final String scanKey = "scanRpc";
@@ -218,11 +218,11 @@ public class RpcFuture {
         this.startTime = startTime;
     }
 
-    public Long getTimeout() {
+    public Integer getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(Long timeout) {
+    public void setTimeout(Integer timeout) {
         this.timeout = timeout;
     }
 }

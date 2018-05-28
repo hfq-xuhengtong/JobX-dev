@@ -1,4 +1,5 @@
-import com.jobxhub.server.domain.Agent;
+
+import com.jobxhub.common.util.collection.HashMap;
 import org.junit.Test;
 
 
@@ -7,16 +8,10 @@ public class TestDemo {
     @Test
     public void test1() throws Exception {
 
-        Agent agent = new Agent();
-
-        Boolean flag = true;
-
-        System.out.println(flag.equals(agent.getStatus()));
-
-        String str = "tar -xzvf $1 /$1>> ff.log";
-        //(?is)(?!true|false).
-        System.out.println(str.replaceAll("[^\\s+]+\\$1|\\$1"," agent "));
-
+        HashMap<String,Object> map = new HashMap<String, Object>(0);
+        map.put("a",null);
+        Integer a = map.getInt("a");
+        System.out.println(a);
     }
 
 }

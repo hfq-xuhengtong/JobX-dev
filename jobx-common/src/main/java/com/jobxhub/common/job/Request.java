@@ -21,11 +21,10 @@
 package com.jobxhub.common.job;
 
 import com.jobxhub.common.util.CommonUtils;
+import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.common.util.IdGenerator;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Request implements Serializable  {
 
@@ -34,31 +33,31 @@ public class Request implements Serializable  {
     private Long id;
     private Integer port;
     private String address;
-    private Long timeOut;//调用超时时间限制(分钟)
+    private Integer timeOut;//调用超时时间限制(分钟)
     private Action action;
     private String password;
-    private Long proxyAgent;
+    private Long proxyId;
     private RequestFile uploadFile;
-    private Map<String, String> params;
+    private HashMap<String, Object> params;
 
     public Request() {
 
     }
 
-    public static Request request(String host, Integer port, Action action, String password, Long timeOut, Long proxyAgent) {
+    public static Request request(String host, Integer port, Action action, String password, Integer timeOut, Long proxyId) {
         return new Request()
                 .setHost(host)
                 .setPort(port)
                 .setAction(action)
                 .setPassword(password)
                 .setTimeOut(timeOut)
-                .setProxyAgent(proxyAgent)
+                .setProxyId(proxyId)
                 .setId(IdGenerator.getId());
     }
 
-    public Request putParam(String key, String value) {
+    public Request putParam(String key, Object value) {
         if (this.params == null) {
-            this.params = new HashMap<String, String>(0);
+            this.params = new HashMap<String, Object>(0);
         }
         this.params.put(key, value);
         return this;
@@ -91,19 +90,19 @@ public class Request implements Serializable  {
         return this;
     }
 
-    public Long getTimeOut() {
+    public Integer getTimeOut() {
         //如果timeOut为设置,则返回24小时(1440分钟)
         if ( timeOut == null || timeOut<=0 ) {
-            return 60 * 24L;
+            return 60 * 24;
         }
         return timeOut;
     }
 
-    public Long getMillisTimeOut() {
+    public Integer getMillisTimeOut() {
        return getTimeOut() * 60 * 1000;
     }
 
-    public Request setTimeOut(Long timeOut) {
+    public Request setTimeOut(Integer timeOut) {
         this.timeOut = timeOut;
         return this;
     }
@@ -117,11 +116,11 @@ public class Request implements Serializable  {
         return this;
     }
 
-    public Map<String, String> getParams() {
+    public HashMap<String, Object> getParams() {
         return params;
     }
 
-    public Request setParams(Map<String, String> params) {
+    public Request setParams(HashMap<String, Object> params) {
         this.params = params;
         return this;
     }
@@ -155,12 +154,12 @@ public class Request implements Serializable  {
         return this;
     }
 
-    public Long getProxyAgent() {
-        return proxyAgent;
+    public Long getProxyId() {
+        return proxyId;
     }
 
-    public Request setProxyAgent(Long proxyAgent) {
-        this.proxyAgent = proxyAgent;
+    public Request setProxyId(Long proxyId) {
+        this.proxyId = proxyId;
         return this;
     }
 

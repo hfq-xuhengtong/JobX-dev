@@ -51,13 +51,6 @@
             $("#checkAllInput").next().attr("id","checkAll");
             $(".each-box").next().addClass("each-btn");
 
-            var array = "${u.agentIds}".split(",");
-            for(var i in array) {
-                $("#agent_"+array[i]).prop("checked",true)
-                $("#agent_"+array[i]).parent().addClass("checked");
-                $("#agent_"+array[i]).parent().attr("aria-checked",true);
-            }
-
             $("#role").change(function () {
                 if ($("#role").val() == 999){
                     $("#agentsDiv").hide();
@@ -123,7 +116,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">用户管理</a></li>
         <li><a href="">修改信息</a></li>
     </ol>
@@ -166,7 +159,14 @@
                         <input type="checkbox" id="checkAllInput">全选<span class="tips">&nbsp;&nbsp;&nbsp;<b>*&nbsp;</b>此管理员可操作的执行器操组</span></br>
                         <div class="form-control m-b-10 input-sm" id="agent-content" style="height: 150px;overflow: hidden;">
                             <c:forEach var="w" items="${agents}" varStatus="index">
-                                <input type="checkbox" name="agentIds" value="${w.agentId}" id="agent_${w.agentId}" class="each-box form-control input-sm">${w.name}&nbsp;&nbsp;${w.host}<br>
+                                <c:forEach var="a" items="${userAgent}" varStatus="aIndex">
+                                        <input type="checkbox"
+                                               name="agentIds"
+                                               value="${w.agentId}"
+                                               id="agent_${w.agentId}"
+                                               class="each-box form-control input-sm"
+                                               <c:if test="${a.agentId eq w.agentId}">checked</c:if>>${w.name}&nbsp;&nbsp;${w.host}<br>
+                                </c:forEach>
                             </c:forEach>
                         </div>
                     </div>

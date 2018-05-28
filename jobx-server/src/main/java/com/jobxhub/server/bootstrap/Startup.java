@@ -51,7 +51,7 @@ public class Startup {
 
     private static boolean devMode = true;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         String portParam = System.getProperty("server.port");
 

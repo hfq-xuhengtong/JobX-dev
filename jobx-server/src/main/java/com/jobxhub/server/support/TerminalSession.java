@@ -22,7 +22,7 @@
 package com.jobxhub.server.support;
 
 import com.jobxhub.common.util.DigestUtils;
-import com.jobxhub.server.domain.Terminal;
+import com.jobxhub.server.dto.Terminal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -33,14 +33,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 import static com.jobxhub.common.util.CommonUtils.notEmpty;
 
 public class TerminalSession implements Serializable {
 
     //key--->WebSocketSession value--->TerminalClient
-    public static Map<WebSocketSession, TerminalClient> terminalSession = new ConcurrentHashMap<WebSocketSession, TerminalClient>(0);
+    public static Map<WebSocketSession, TerminalClient> terminalSession = new HashMap<WebSocketSession, TerminalClient>();
 
     public static TerminalClient get(WebSocketSession key) {
         return terminalSession.get(key);

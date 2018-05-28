@@ -21,7 +21,7 @@
         <ol class="breadcrumb hidden-xs">
             <li class="icon">&#61753;</li>
             当前位置：
-            <li><a href="">jobx</a></li>
+            <li><a href="">JobX</a></li>
             <li><a href="">执行器管理</a></li>
             <li><a href="">执行器详情</a></li>
         </ol>
@@ -68,12 +68,12 @@
 
                 <tr>
                     <td class="item"><i class="glyphicon glyphicon-comment"></i>&nbsp;报警手机：</td>
-                    <td>${agent.mobiles}</td>
+                    <td>${agent.mobile}</td>
                 </tr>
 
                 <tr>
                     <td class="item"><i class="glyphicon glyphicon-envelope"></i>&nbsp;报警邮箱：</td>
-                    <td>${agent.emailAddress}</td>
+                    <td>${agent.email}</td>
                 </tr>
 
                 <tr>

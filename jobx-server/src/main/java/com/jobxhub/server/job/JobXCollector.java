@@ -24,12 +24,12 @@ package com.jobxhub.server.job;
 import it.sauronsoftware.cron4j.*;
 import com.jobxhub.common.Constants;
 import com.jobxhub.server.service.ExecuteService;
-import com.jobxhub.server.vo.JobInfo;
+import com.jobxhub.server.dto.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 /**
  * Created by benjobs on 16/3/28.
@@ -42,20 +42,20 @@ public class JobXCollector implements TaskCollector {
 
     private TaskTable taskTable;
 
-    private Map<Long, Integer> jobIndex = new ConcurrentHashMap<Long, Integer>(0);
+    private Map<Long, Integer> jobIndex = new HashMap<Long, Integer>(0);
 
     @Override
     public synchronized TaskTable getTasks() {
         return taskTable = (taskTable == null ? new TaskTable() : taskTable);
     }
 
-    public synchronized void add(final JobInfo job) {
+    public synchronized void add(final Job job) {
         if (job != null && !exists(job.getJobId())) {
             jobIndex.put(job.getJobId(), jobIndex.size());
             this.getTasks().add(new SchedulingPattern(job.getCronExp()), new Task() {
                 @Override
                 public void execute(TaskExecutionContext context) throws RuntimeException {
-                    executeService.execute(job, Constants.ExecType.AUTO);
+                    executeService.executeJob(job, Constants.ExecType.AUTO);
                 }
             });
         }

@@ -28,32 +28,23 @@ import com.jobxhub.common.job.Action;
 import com.jobxhub.common.job.Request;
 import com.jobxhub.common.job.RequestFile;
 import com.jobxhub.common.job.Response;
-import com.jobxhub.common.util.CommonUtils;
-import com.jobxhub.common.util.HttpClientUtils;
-import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.rpc.InvokeCallback;
-import com.jobxhub.server.domain.Record;
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.domain.User;
-import com.jobxhub.server.job.JobXCaller;
-import com.jobxhub.server.vo.JobInfo;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
+import com.jobxhub.server.job.JobXInvoker;
+import com.jobxhub.server.dto.Agent;
+import com.jobxhub.server.dto.Job;
+import com.jobxhub.server.dto.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.*;
 
 import static com.jobxhub.common.Constants.*;
 
-/**
- * 这段调度核心代码得彻底重构,太臭了...实在有失水准...
- */
-@Service
-public class ExecuteService implements Job {
+@Component
+public class ExecuteService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -67,310 +58,89 @@ public class ExecuteService implements Job {
     private NoticeService noticeService;
 
     @Autowired
-    private JobXCaller caller;
+    private JobXInvoker caller;
 
     @Autowired
     private AgentService agentService;
-
-    @Autowired
-    private UserService userService;
-
-    private Map<Long, Integer> reExecuteThreadMap = new HashMap<Long, Integer>(0);
 
     private static final String PACKETTOOBIG_ERROR = "在向MySQL数据库插入数据量过多,需要设定max_allowed_packet";
 
     private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(16, 16, 600L, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(65536));
 
-    @Override
-    public void execute(JobExecutionContext jobExecutionContext) {
-        String key = jobExecutionContext.getJobDetail().getKey().getName();
-        JobInfo jobInfo = (JobInfo) jobExecutionContext.getJobDetail().getJobDataMap().get(key);
-        Agent agent = agentService.getAgent(jobInfo.getAgentId());
-        jobInfo.setAgent(agent);
-        try {
-            ExecuteService executeService = (ExecuteService) jobExecutionContext.getJobDetail().getJobDataMap().get("jobBean");
-            executeService.execute(jobInfo, ExecType.AUTO);
-            this.printLog("[JobX] job:{} at {}:{}", jobInfo, null);
-        } catch (Exception e) {
-            if (logger.isErrorEnabled()) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        }
-    }
-
     /**
      * 基本方式执行任务，按任务类型区分
      */
-    public void execute(JobInfo job, Constants.ExecType execType) {
+    public void executeJob(Job job, Constants.ExecType execType) {
+        if (!checkJobPermission(job.getAgentId(), job.getUserId())) {
+            return;
+        }
+        Agent agent = agentService.getAgent(job.getAgentId());
+        job.setAgent(agent);
         JobType jobType = JobType.getJobType(job.getJobType());
-        switch (jobType) {
-            case SINGLETON:
-                executeSingleJob(job, execType);//单一任务
-                break;
-            case FLOW:
-                executeFlowJob(job, execType);//流程任务
-                break;
-            default:
-                break;
+        if (jobType.equals(JobType.SIMPLE)) {
+            executeSimpleJob(job, execType);//单一任务
+        }
+        if (jobType.equals(JobType.FLOW)) {
+            executeFlowJob(job, execType);//流程任务
         }
     }
 
     /**
      * 单一任务执行过程
      */
-    private void executeSingleJob(final JobInfo job, final ExecType execType) {
-
-        if (!checkJobPermission(job.getAgentId(), job.getUserId())) {
-            return;
-        }
-
+    private void executeSimpleJob(final Job job, final ExecType execType) {
         threadPoolExecutor.submit(new Runnable() {
             @Override
             public void run() {
-                final Record record = new Record(job, execType);
-                record.setStartTime(new Date());
-                record.setJobType(JobType.SINGLETON.getCode());//单一任务
-
-                InvokeCallback callback = new InvokeCallback() {
-
-                    @Override
-                    public void done(Response response) {
-
-                        logger.info("[JobX]:execute response:{}", response.toString());
-
-                        setRecordDone(record, response);
-
-                        try {
-                            //api方式调度,回调结果数据给调用方
-                            if (execType.getStatus().equals(ExecType.API.getStatus()) && CommonUtils.notEmpty(job.getCallbackURL())) {
-                                try {
-                                    ParamsMap params = ParamsMap.map().put(
-                                            "jobId", job.getJobId(),
-                                            "startTime", response.getStartTime(),
-                                            "endTime", response.getEndTime(),
-                                            "success", response.isSuccess(),
-                                            "message", response.getMessage()
-                                    );
-                                    HttpClientUtils.httpPostRequest(job.getCallbackURL(), params);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            //防止返回的信息太大,往数据库存，有保存失败的情况发送
-                            recordService.merge(record);
-
-                            if (!response.isSuccess()) {
-                                noticeService.notice(job, null);
-                                printLog("execute failed:jobName:{} at host:{},port:{},info:{}", job, record.getMessage());
-                            } else {
-                                printLog("execute successful:jobName:{} at host:{},port:{}", job, null);
-                            }
-
-                        } catch (Exception e) {
-                            //信息丢失,继续保存记录
-                            printLostJobInfo(job, record.getMessage());
-                            record.setMessage(null);
-                            recordService.merge(record);
-                            //发送警告信息
-                            noticeService.notice(job, PACKETTOOBIG_ERROR);
-                            loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
-                        }
-                    }
-
-                    @Override
-                    public void caught(Throwable err) {
-                        //方法失联
-                        setRecordLost(record);
-                        noticeService.notice(job, "调用失败,获取不到返回结果集");
-                    }
-                };
-
+                final Record record = new Record(job, execType,JobType.SIMPLE);
+                InvokeCallback invokeCallback = new JobXCallback(job,execType,record);
                 try {
-                    //执行前先保存
-                    Record record1 = recordService.merge(record);
-                    record.setRecordId(record1.getRecordId());
-                    //执行前先检测一次通信是否正常
                     checkPing(job, record);
-                    Request request = Request.request(
-                            job.getAgent().getHost(),
-                            job.getAgent().getPort(),
+                    Agent agent = job.getAgent();
+                    Request request = Request.request(agent.getHost(),
+                            agent.getPort(),
                             Action.EXECUTE,
-                            job.getAgent().getPassword(),
+                            agent.getPassword(),
                             job.getTimeout(),
-                            job.getAgent().getProxyAgent())
-                            .putParam(Constants.PARAM_COMMAND_KEY, job.getCommand())
-                            .putParam(Constants.PARAM_PID_KEY, record.getPid())
-                            .putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout().toString())
-                            .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
-
-                    caller.sentAsync(request,callback);
-
+                            agent.getProxyId());
+                    request.putParam(Constants.PARAM_COMMAND_KEY, job.getCommand());
+                    request.putParam(Constants.PARAM_PID_KEY, record.getPid());
+                    request.putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
+                    request.putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout());
+                    caller.sentAsync(request,invokeCallback);
                 } catch (Exception e) {
-                    callback.caught(e);
+                    if ( !(e instanceof PingException) ) {
+                        invokeCallback.caught(e);
+                    }
                 }
             }
         });
-
     }
 
     /**
      * 流程任务 按流程任务处理方式区分
      */
-    private void executeFlowJob(JobInfo job, ExecType execType) {
-        if (!checkJobPermission(job.getAgentId(), job.getUserId())) {
-            return;
-        }
-
-        //分配一个流程组Id
-        final long groupId = System.nanoTime() + Math.abs(new Random().nextInt());
-        final Queue<JobInfo> jobQueue = new LinkedBlockingQueue<JobInfo>();
-        jobQueue.add(job);
-        jobQueue.addAll(job.getChildren());
-        executeSequenceJob(groupId, jobQueue, execType);
-    }
-
-    /**
-     * 串行任务处理方式
-     */
-    private void executeSequenceJob(long groupId, Queue<JobInfo> jobQueue, ExecType execType) {
-        for (JobInfo jobInfo : jobQueue) {
-            doFlowJob(jobInfo, groupId, execType);
-        }
-    }
-
-    /**
-     * 并行任务处理方式
-     */
-    private void executeSameTimeJob(final long groupId, final Queue<JobInfo> jobQueue, final ExecType execType) {
-        final List<Boolean> result = new ArrayList<Boolean>(0);
-
-        final Semaphore semaphore = new Semaphore(jobQueue.size());
-        ExecutorService exec = Executors.newCachedThreadPool();
-
-        for (final JobInfo jobInfo : jobQueue) {
-            Runnable task = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        semaphore.acquire();
-                        result.add(doFlowJob(jobInfo, groupId, execType));
-                        semaphore.release();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            exec.submit(task);
-        }
-        exec.shutdown();
-        while (true) {
-            if (exec.isTerminated()) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("[JobX]SameTimeJob,All doned!");
-                }
-            }
-        }
-    }
-
-    /**
-     * 流程任务（通用）执行过程
-     */
-    private boolean doFlowJob(JobInfo job, long groupId, ExecType execType) {
-        Record record = new Record(job, execType);
-        //组Id
-        record.setGroupId(groupId);
-        //流程任务
-        record.setJobType(JobType.FLOW.getCode());
-        record.setFlowNum(job.getFlowNum());
-
-        boolean success = true;
-
-        try {
-            //执行前先保存
-            record = recordService.merge(record);
-            //执行前先检测一次通信是否正常
-            checkPing(job, record);
-
-            Response result = responseToRecord(job, record);
-
-            if (!result.isSuccess()) {
-                recordService.merge(record);
-                //被kill,直接退出
-                if (StatusCode.KILL.getValue().equals(result.getExitCode())) {
-                    recordService.flowJobDone(record);
-                } else {
-                    success = false;
-                }
-                return false;
-            } else {
-                //当前任务是流程任务的最后一个任务,则整个任务运行完毕
-                if (job.getLastChild()) {
-                    recordService.merge(record);
-                    recordService.flowJobDone(record);
-                } else {
-                    //当前任务非流程任务最后一个子任务,全部流程任务为运行中...
-                    record.setStatus(RunStatus.RUNNING.getStatus());
-                    recordService.merge(record);
-                }
-                return true;
-            }
-        } catch (PingException e) {
-            //通信失败,流程任务挂起.
-            recordService.flowJobDone(record);
-            return false;
-        } catch (Exception e) {
-            record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
-            //程序调用失败
-            record.setSuccess(ResultStatus.FAILED.getStatus());
-            record.setReturnCode(StatusCode.ERROR_EXEC.getValue());
-            record.setEndTime(new Date());
-            recordService.merge(record);
-            success = false;
-            return false;
-        } finally {
-            //流程任务的重跑靠自身维护...
-            if (!success) {
-                Record red = recordService.get(record.getRecordId());
-                if (job.getRedo() == 1 && job.getRunCount() > 0) {
-                    int index = 0;
-                    boolean flag;
-                    do {
-                        flag = reExecuteJob(red, job, JobType.FLOW);
-                        ++index;
-                    } while (!flag && index < job.getRunCount());
-
-                    //重跑到截止次数还是失败,则发送通知,记录最终运行结果
-                    if (!flag) {
-                        noticeService.notice(job, null);
-                        recordService.flowJobDone(record);
-                    }
-                } else {
-                    noticeService.notice(job, null);
-                    recordService.flowJobDone(record);
-                }
-            }
-        }
-
+    private void executeFlowJob(Job job, ExecType execType) {
+        //todo....
     }
 
     /**
      * 多执行器同时 现场执行过程
      */
-    public void batchExecuteJob(final Long userId, String command, String agentIds) {
+    public void executeBatchJob(final Long userId, String command, String agentIds) {
         String[] arrayIds = agentIds.split(";");
         final Semaphore semaphore = new Semaphore(arrayIds.length);
         ExecutorService exec = Executors.newCachedThreadPool();
         for (String agentId : arrayIds) {
             Agent agent = agentService.getAgent(Long.parseLong(agentId));
-            final JobInfo jobInfo = new JobInfo(userId, command, agent);
-            jobInfo.setSuccessExit("0");
+            final Job job = new Job(userId, command, agent);
+            job.setSuccessExit(StatusCode.SUCCESS_EXIT.getValue().toString());
             exec.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         semaphore.acquire();
-                        executeSingleJob(jobInfo, ExecType.BATCH);
+                        executeSimpleJob(job, ExecType.BATCH);
                         semaphore.release();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -382,77 +152,11 @@ public class ExecuteService implements Job {
         while (true) {
             if (exec.isTerminated()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JobX]batchExecuteJob doned!");
+                    logger.info("[JobX]executeBatchJob done!");
                 }
                 break;
             }
         }
-    }
-
-    /**
-     * 失败任务的重执行过程
-     */
-    public boolean reExecuteJob(final Record parentRecord, JobInfo job, JobType jobType) {
-
-        if (parentRecord.getRedoCount().equals(reExecuteThreadMap.get(parentRecord.getRecordId()))) {
-            return false;
-        } else {
-            reExecuteThreadMap.put(parentRecord.getRecordId(), parentRecord.getRedoCount());
-        }
-
-        parentRecord.setStatus(RunStatus.RERUNNING.getStatus());
-        Record record = new Record(job, ExecType.RERUN);
-
-        try {
-            recordService.merge(parentRecord);
-            /**
-             * 当前重新执行的新纪录
-             */
-            record.setParentId(parentRecord.getRecordId());
-            record.setGroupId(parentRecord.getGroupId());
-            record.setJobType(jobType.getCode());
-            //运行次数
-            parentRecord.setRedoCount(parentRecord.getRedoCount() + 1);
-            record.setRedoCount(parentRecord.getRedoCount());
-            record = recordService.merge(record);
-
-            //执行前先检测一次通信是否正常
-            checkPing(job, record);
-
-            Response result = responseToRecord(job, record);
-
-            //当前重跑任务成功,则父记录执行完毕
-            if (result.isSuccess()) {
-                parentRecord.setStatus(RunStatus.RERUNDONE.getStatus());
-                //重跑的某一个子任务被Kill,则整个重跑计划结束
-            } else if (StatusCode.KILL.getValue().equals(result.getExitCode())) {
-                parentRecord.setStatus(RunStatus.RERUNDONE.getStatus());
-            } else {
-                //已经重跑到最后一次了,还是失败了,则认为整个重跑任务失败,发送通知
-                if (parentRecord.getRunCount().equals(parentRecord.getRedoCount())) {
-                    noticeService.notice(job, null);
-                }
-                parentRecord.setStatus(RunStatus.RERUNUNDONE.getStatus());
-            }
-            this.printLog("execute successful:jobName:{} at host:{},port:{}", job, null);
-        } catch (Exception e) {
-            noticeService.notice(job, e.getMessage());
-            errorExec(record, this.loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
-
-        } finally {
-            //如果已经到了任务重跑的截至次数直接更新为已重跑完成
-            if (parentRecord.getRunCount().equals(parentRecord.getRedoCount())) {
-                parentRecord.setStatus(RunStatus.RERUNDONE.getStatus());
-            }
-            try {
-                recordService.merge(record);
-                recordService.merge(parentRecord);
-            } catch (Exception e) {
-                record.setMessage(this.loggerError("execute failed(flow job):jobName:%s at host:%s,port:%d,info:%s", job, e.getMessage(), e));
-            }
-
-        }
-        return record.getSuccess().equals(ResultStatus.SUCCESSFUL.getStatus());
     }
 
     /**
@@ -463,7 +167,7 @@ public class ExecuteService implements Job {
         final Queue<Record> recordQueue = new LinkedBlockingQueue<Record>();
 
         //单一任务
-        if (JobType.SINGLETON.getCode().equals(record.getJobType())) {
+        if (JobType.SIMPLE.getCode().equals(record.getJobType())) {
             recordQueue.add(record);
         } else if (JobType.FLOW.getCode().equals(record.getJobType())) {
             //流程任务
@@ -480,13 +184,13 @@ public class ExecuteService implements Job {
                 @Override
                 public void run() {
 
-                    JobInfo job = jobService.getJobInfoById(cord.getJobId());
+                    Job job = jobService.getById(cord.getJobId());
 
-                    final  Agent agent = agentService.getAgent(cord.getAgentId());
+                    final Agent agent = agentService.getAgent(cord.getAgentId());
 
                     //现场执行的job
                     if (cord.getExecType() == ExecType.BATCH.getStatus()) {
-                        job = new JobInfo(cord.getUserId(),cord.getCommand(),agent);
+                        job = new Job(cord.getUserId(),cord.getCommand(),agent);
                     }
 
                     try {
@@ -498,7 +202,7 @@ public class ExecuteService implements Job {
                         recordService.merge(cord);
                         //向远程机器发送kill指令
 
-                        final JobInfo finalJob = job;
+                        final Job finalJob = job;
                         caller.sentAsync(
                                 Request.request(
                                         agent.getHost(),
@@ -506,7 +210,7 @@ public class ExecuteService implements Job {
                                         Action.KILL,
                                         agent.getPassword(),
                                         Constants.RPC_TIMEOUT,
-                                        agent.getProxyAgent()
+                                        agent.getProxyId()
                                 ).putParam(
                                         Constants.PARAM_PID_KEY,
                                         cord.getPid())
@@ -548,91 +252,57 @@ public class ExecuteService implements Job {
         }
     }
 
-    /**
-     * 向执行器发送请求，并封装响应结果
-     */
-    private Response responseToRecord(final JobInfo job, final Record record) throws Exception {
-        Response response = caller.sentSync(Request.request(
-                job.getAgent().getHost(),
-                job.getAgent().getPort(),
-                Action.EXECUTE,
-                job.getAgent().getPassword(),
-                job.getTimeout(),
-                job.getAgent().getProxyAgent())
-                .putParam(Constants.PARAM_COMMAND_KEY, job.getCommand())
-                .putParam(Constants.PARAM_PID_KEY, record.getPid())
-                .putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout() + "")
-                .putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit())
-        );
-        logger.info("[JobX]:execute response:{}", response.toString());
-        setRecordDone(record, response);
-        return response;
-    }
-
-    private void setRecordDone(Record record, Response response) {
+    private void responseToRecord(Response response, Record record) {
         record.setEndTime(new Date());
         record.setReturnCode(response.getExitCode());
         record.setMessage(response.getMessage());
-        record.setSuccess(response.isSuccess() ? ResultStatus.SUCCESSFUL.getStatus() : ResultStatus.FAILED.getStatus());
-
+        if (response.isSuccess()) {
+            record.setSuccess(ResultStatus.SUCCESSFUL.getStatus());
+        }else {
+            record.setSuccess(ResultStatus.FAILED.getStatus());
+        }
         if (StatusCode.KILL.getValue().equals(response.getExitCode())) {
             record.setStatus(RunStatus.STOPED.getStatus());
-            //被kill任务失败
             record.setSuccess(ResultStatus.KILLED.getStatus());
         } else if (StatusCode.TIME_OUT.getValue().equals(response.getExitCode())) {
             record.setStatus(RunStatus.STOPED.getStatus());
-            //超时...
             record.setSuccess(ResultStatus.TIMEOUT.getStatus());
         } else {
             record.setStatus(RunStatus.DONE.getStatus());
         }
     }
 
-    public void setRecordLost(Record record) {
+    public void lostToRecord(Record record) {
         record.setStatus(RunStatus.STOPED.getStatus());
         record.setSuccess(ResultStatus.LOST.getStatus());
         record.setEndTime(new Date());
         recordService.merge(record);
     }
 
-
-    /**
-     * 调用失败后的处理
-     */
-    private void errorExec(Record record, String errorInfo) {
-        //程序调用失败
-        record.setSuccess(ResultStatus.FAILED.getStatus());
-        //已完成
-        record.setStatus(RunStatus.DONE.getStatus());
-        record.setReturnCode(StatusCode.ERROR_EXEC.getValue());
-        record.setEndTime(new Date());
-        record.setMessage(errorInfo);
-        recordService.merge(record);
-    }
-
-
     /**
      * 任务执行前 检测通信
      */
-    private void checkPing(JobInfo job, Record record) throws PingException {
+    private void checkPing(Job job, Record record) throws PingException {
         ConnStatus connStatus = ping(job.getAgent(),true);
         if (!connStatus.equals(ConnStatus.CONNECTED)) {
             //已完成
             record.setStatus(RunStatus.DONE.getStatus());
             record.setReturnCode(StatusCode.ERROR_PING.getValue());
-
             String format = "can't to communicate with agent:%s(%s:%d),execute job:%s failed";
-            String content = String.format(format, job.getAgentName(), job.getAgent().getHost(), job.getAgent().getPort(), job.getJobName());
-
+            String content = String.format(format,
+                    job.getAgent().getName(),
+                    job.getAgent().getHost(),
+                    job.getAgent().getPort(),
+                    job.getJobName());
             record.setMessage(content);
-            record.setSuccess(ResultStatus.FAILED.getStatus());
+            record.setSuccess(ResultStatus.LOST.getStatus());
             record.setEndTime(new Date());
             recordService.merge(record);
             throw new PingException(content);
         }
     }
 
-    public Constants.ConnStatus ping(Agent agent,boolean update) {
+    public Constants.ConnStatus ping(Agent agent, boolean update) {
         Response response = null;
         try {
             response = caller.sentSync(Request.request(
@@ -641,7 +311,7 @@ public class ExecuteService implements Job {
                     Action.PING,
                     agent.getPassword(),
                     Constants.RPC_TIMEOUT,
-                    agent.getProxyAgent()));
+                    agent.getProxyId()));
 
         } catch (Exception e) {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
@@ -676,7 +346,7 @@ public class ExecuteService implements Job {
                     Action.MACID,
                     agent.getPassword(),
                     Constants.RPC_TIMEOUT,
-                    agent.getProxyAgent())
+                    agent.getProxyId())
             );
             return response.getMessage();
         } catch (Exception e) {
@@ -694,7 +364,7 @@ public class ExecuteService implements Job {
                     Action.PATH,
                     null,
                     Constants.RPC_TIMEOUT,
-                    agent.getProxyAgent())
+                    agent.getProxyId())
            ).getMessage();
         } catch (Exception e) {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
@@ -709,7 +379,7 @@ public class ExecuteService implements Job {
                 Action.LISTPATH,
                 agent.getPassword(),
                 Constants.RPC_TIMEOUT,
-                agent.getProxyAgent()).putParam(Constants.PARAM_LISTPATH_PATH_KEY,path));
+                agent.getProxyId()).putParam(Constants.PARAM_LISTPATH_PATH_KEY,path));
     }
 
     /**
@@ -724,7 +394,7 @@ public class ExecuteService implements Job {
                     Action.PASSWORD,
                     agent.getPassword(),
                     Constants.RPC_TIMEOUT,
-                    agent.getProxyAgent()
+                    agent.getProxyId()
                     ).putParam(
                     Constants.PARAM_NEWPASSWORD_KEY,
                     newPassword)
@@ -747,8 +417,8 @@ public class ExecuteService implements Job {
                         Action.MONITOR,
                         agent.getPassword(),
                         Constants.RPC_TIMEOUT,
-                        agent.getProxyAgent()
-                ).setParams(ParamsMap.map().set("connType", ConnType.getByType(agent.getProxy()).getName())));
+                        agent.getProxyId()
+                ));
     }
 
 
@@ -759,7 +429,7 @@ public class ExecuteService implements Job {
                 Action.UPLOAD,
                 agent.getPassword(),
                 null,
-                agent.getProxyAgent());
+                agent.getProxyId());
 
         request.setUploadFile(requestFile);
         Response response = caller.sentSync(request);
@@ -773,7 +443,7 @@ public class ExecuteService implements Job {
      * 校验任务执行权限
      */
     private boolean checkJobPermission(Long jobAgentId, Long userId) {
-        if (userId == null) {
+       /* if (userId == null) {
             return false;
         }
         User user = userService.getUserById(userId);
@@ -784,10 +454,11 @@ public class ExecuteService implements Job {
         String agentIds = userService.getUserById(userId).getAgentIds();
         agentIds = "," + agentIds + ",";
         String thisAgentId = "," + jobAgentId + ",";
-        return agentIds.contains(thisAgentId);
+        return agentIds.contains(thisAgentId);*/
+       return true;
     }
 
-    private void printLog(String str, JobInfo job, String message) {
+    private void printLog(String str, Job job, String message) {
         if (message != null) {
             if (logger.isInfoEnabled()) {
                 logger.info(str, job.getJobName(), job.getAgent().getHost(), job.getAgent().getPort(), message);
@@ -799,7 +470,7 @@ public class ExecuteService implements Job {
         }
     }
 
-    private String loggerError(String str, JobInfo job, String message, Exception e) {
+    private String loggerError(String str, Job job, String message, Exception e) {
         String errorInfo = String.format(str, job.getJobName(), job.getAgent().getHost(), job.getAgent().getPort(), message);
         if (logger.isErrorEnabled()) {
             logger.error(errorInfo, e);
@@ -807,10 +478,55 @@ public class ExecuteService implements Job {
         return errorInfo;
     }
 
-    private void printLostJobInfo(JobInfo jobInfo, String message) {
+    private void printLostJobInfo(Job job, String message) {
 
     }
 
 
+    class JobXCallback implements InvokeCallback {
+        private Record record;
+        private ExecType execType;
+        private Job job;
+
+        public JobXCallback(Job job,ExecType execType,Record record) {
+            this.job = job;
+            this.record = record;
+            this.execType = execType;
+            //执行前先保存
+            recordService.merge(record);
+        }
+        @Override
+        public void done(Response response) {
+            logger.info("[JobX]:execute response:{}", response.toString());
+            try {
+                responseToRecord(response,record);
+                //api方式调度,回调结果数据给调用方
+                job.callBack(response,execType);
+                //防止返回的信息太大,往数据库存，有保存失败的情况发生
+                recordService.merge(record);
+                if (!response.isSuccess()) {
+                    noticeService.notice(job, null);
+                    printLog("execute failed:jobName:{} at host:{},port:{},info:{}", job, record.getMessage());
+                } else {
+                    printLog("execute successful:jobName:{} at host:{},port:{}", job, null);
+                }
+
+            } catch (Exception e) {
+                //信息丢失,继续保存记录
+                printLostJobInfo(job, record.getMessage());
+                record.setMessage(null);
+                recordService.merge(record);
+                //发送警告信息
+                noticeService.notice(job, PACKETTOOBIG_ERROR);
+                loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
+            }
+        }
+        @Override
+        public void caught(Throwable err) {
+            //方法失联
+            lostToRecord(record);
+            noticeService.notice(job, "调用失败,获取不到返回结果集");
+        }
+    }
 
 }

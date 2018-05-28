@@ -22,6 +22,7 @@
 package com.jobxhub.common.util;
 
 import com.jobxhub.common.io.UnsafeStringWriter;
+import com.jobxhub.common.util.collection.HashMap;
 
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -853,7 +854,7 @@ public abstract class StringUtils {
      */
     private static Map<String, String> parseKeyValuePair(String str, String itemSeparator) {
         String[] tmp = str.split(itemSeparator);
-        Map<String, String> map = new HashMap<String, String>(tmp.length);
+        Map<String, String> map = new com.jobxhub.common.util.collection.HashMap<String, String>(tmp.length);
         for (int i = 0; i < tmp.length; i++) {
             Matcher matcher = KVP_PATTERN.matcher(tmp[i]);
             if (matcher.matches() == false)
@@ -964,6 +965,18 @@ public abstract class StringUtils {
         return str;
     }
 
+    public static String line(String separator,int count) {
+        String str = "";
+        int index = 0;
+        while (true) {
+            if (index == count)break;
+            str+=separator;
+            ++index;
+        }
+        return str;
+    }
+
+
     public static String tab(int count) {
         String str = "";
         int index = 0;
@@ -976,7 +989,7 @@ public abstract class StringUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(line(1));
+        System.out.println(camelToSplitName("getName","_"));
     }
 
 }
