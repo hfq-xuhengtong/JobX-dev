@@ -221,6 +221,13 @@
         where agent_id = #{agentId}
 	</update>
 
+    <update id="updateStatus" parameterType="com.jobxhub.server.domain.AgentBean">
+        update t_agent
+        set
+             status = #{status}
+        where agent_id = #{agentId}
+	</update>
+
     <delete id="delete" parameterType="java.lang.Long">
         delete from  t_agent where agent_id=#{id}
     </delete>

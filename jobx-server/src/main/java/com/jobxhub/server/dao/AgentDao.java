@@ -50,4 +50,6 @@ public interface AgentDao {
     int existsCount(@Param("id") Long id, @Param("key") String key, @Param("val") Object val);
 
     List<AgentBean> getByGroup(Long groupId);
+
+    void updateStatus(@Param("agentId") Long agentId,@Param("status") Integer status);
 }

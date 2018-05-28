@@ -300,4 +300,12 @@ public class AgentService {
         List<AgentBean> list = agentDao.getByGroup(groupId);
         return Lists.transform(list,Agent.transfer);
     }
+
+    public void updateStatus(Agent agent) {
+        if (agent!=null) {
+            if (agent.getAgentId()!=null&&agent.getStatus()!=null) {
+                agentDao.updateStatus(agent.getAgentId(),agent.getStatus());
+            }
+        }
+    }
 }

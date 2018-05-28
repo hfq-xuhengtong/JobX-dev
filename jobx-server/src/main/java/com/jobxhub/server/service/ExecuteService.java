@@ -312,7 +312,6 @@ public class ExecuteService {
                     agent.getPassword(),
                     Constants.RPC_TIMEOUT,
                     agent.getProxyId()));
-
         } catch (Exception e) {
             logger.error("[JobX]ping failed,host:{},port:{}", agent.getHost(), agent.getPort());
         }
@@ -333,7 +332,7 @@ public class ExecuteService {
 
         if (update) {
             agent.setStatus(status.getValue());
-            agentService.merge(agent);
+            agentService.updateStatus(agent);
         }
         return status;
     }
