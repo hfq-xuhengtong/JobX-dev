@@ -89,7 +89,7 @@
                     url:"${contextPath}/record/kill.do",
                     data:{"recordId":id}
                 },function (result) {
-                    if (result){
+                    if (result.status){
                         ajax({
                             type: "post",
                             url:"${contextPath}/job/execute.do",

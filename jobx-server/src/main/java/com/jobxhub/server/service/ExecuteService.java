@@ -63,8 +63,6 @@ public class ExecuteService {
     @Autowired
     private AgentService agentService;
 
-    private static final String PACKETTOOBIG_ERROR = "在向MySQL数据库插入数据量过多,需要设定max_allowed_packet";
-
     private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(16, 16, 600L, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(65536));
 
     /**
@@ -93,7 +91,7 @@ public class ExecuteService {
             @Override
             public void run() {
                 final Record record = new Record(job, execType,JobType.SIMPLE);
-                InvokeCallback invokeCallback = new JobXCallback(job,execType,record);
+                InvokeCallback invokeCallback = new ExecuteCallback(job,execType,record);
                 try {
                     checkPing(job, record);
                     Agent agent = job.getAgent();
@@ -162,94 +160,32 @@ public class ExecuteService {
     /**
      * 终止任务过程
      */
-    public boolean killJob(Record record) {
-
-        final Queue<Record> recordQueue = new LinkedBlockingQueue<Record>();
-
-        //单一任务
-        if (JobType.SIMPLE.getCode().equals(record.getJobType())) {
-            recordQueue.add(record);
-        } else if (JobType.FLOW.getCode().equals(record.getJobType())) {
-            //流程任务
-            recordQueue.addAll(recordService.getRunningFlowJob(record.getRecordId()));
+    public boolean killJob(final Record record) {
+        if (record == null) return false;
+        Job job = jobService.getById(record.getJobId());
+        final Agent agent = agentService.getAgent(record.getAgentId());
+        //现场执行的job
+        if (record.getExecType().equals(ExecType.BATCH.getStatus())) {
+            job = new Job(record.getUserId(),record.getCommand(),agent);
         }
-
-        final List<Boolean> result = new ArrayList<Boolean>(0);
-
-        final Semaphore semaphore = new Semaphore(recordQueue.size());
-        ExecutorService exec = Executors.newCachedThreadPool();
-
-        for (final Record cord : recordQueue) {
-            exec.submit(new Runnable() {
-                @Override
-                public void run() {
-
-                    Job job = jobService.getById(cord.getJobId());
-
-                    final Agent agent = agentService.getAgent(cord.getAgentId());
-
-                    //现场执行的job
-                    if (cord.getExecType() == ExecType.BATCH.getStatus()) {
-                        job = new Job(cord.getUserId(),cord.getCommand(),agent);
-                    }
-
-                    try {
-                        semaphore.acquire();
-                        //临时的改成停止中...
-                        cord.setStatus(RunStatus.STOPPING.getStatus());
-                        //被杀.
-                        cord.setSuccess(ResultStatus.KILLED.getStatus());
-                        recordService.merge(cord);
-                        //向远程机器发送kill指令
-
-                        final Job finalJob = job;
-                        caller.sentAsync(
-                                Request.request(
-                                        agent.getHost(),
-                                        agent.getPort(),
-                                        Action.KILL,
-                                        agent.getPassword(),
-                                        Constants.RPC_TIMEOUT,
-                                        agent.getProxyId()
-                                ).putParam(
-                                        Constants.PARAM_PID_KEY,
-                                        cord.getPid())
-                                , new InvokeCallback() {
-                                    @Override
-                                    public void done(Response response) {
-                                        cord.setStatus(RunStatus.STOPED.getStatus());
-                                        cord.setEndTime(new Date());
-                                        recordService.merge(cord);
-                                        printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", finalJob, cord.getPid());
-                                    }
-
-                                    @Override
-                                    public void caught(Throwable err) {
-                                        cord.setStatus(RunStatus.STOPED.getStatus());
-                                        cord.setEndTime(new Date());
-                                        recordService.merge(cord);
-                                        printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", finalJob, cord.getPid());
-                                    }
-                                });
-                    } catch (Exception e) {
-                        noticeService.notice(job, null);
-                        loggerError("killed error:jobName:%s at host:%s,port:%d,pid:%s", job, cord.getPid() + " failed info: " + e.getMessage(), e);
-
-                        logger.error("[JobX] job rumModel with SAMETIME error:{}", e.getMessage());
-
-                        result.add(false);
-                    }
-                    semaphore.release();
-                }
-            });
-        }
-        exec.shutdown();
-        while (true) {
-            if (exec.isTerminated()) {
-                logger.info("[JobX] SAMETIMEjob done!");
-                return !result.contains(false);
+        KillCallback killCallback = new KillCallback(job,record);
+        try {
+            Request request = Request.request(agent.getHost(),
+                    agent.getPort(),
+                    Action.KILL,
+                    agent.getPassword(),
+                    Constants.RPC_TIMEOUT,
+                    agent.getProxyId());
+            request.putParam(Constants.PARAM_PID_KEY, record.getPid());
+            caller.sentAsync(request,killCallback);
+            return true;
+        } catch (Exception e) {
+            if ( !(e instanceof PingException) ) {
+                killCallback.caught(e);
+                return false;
             }
         }
+        return false;
     }
 
     private void responseToRecord(Response response, Record record) {
@@ -482,12 +418,12 @@ public class ExecuteService {
     }
 
 
-    class JobXCallback implements InvokeCallback {
+    class ExecuteCallback implements InvokeCallback {
         private Record record;
         private ExecType execType;
         private Job job;
 
-        public JobXCallback(Job job,ExecType execType,Record record) {
+        public ExecuteCallback(Job job, ExecType execType, Record record) {
             this.job = job;
             this.record = record;
             this.execType = execType;
@@ -516,8 +452,8 @@ public class ExecuteService {
                 record.setMessage(null);
                 recordService.merge(record);
                 //发送警告信息
-                noticeService.notice(job, PACKETTOOBIG_ERROR);
-                loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, PACKETTOOBIG_ERROR, e);
+                noticeService.notice(job, e.getLocalizedMessage());
+                loggerError("execute failed:jobName:%s at host:%s,port:%d,info:%s", job, e.getLocalizedMessage(), e);
             }
         }
         @Override
@@ -528,4 +464,31 @@ public class ExecuteService {
         }
     }
 
+    class KillCallback implements InvokeCallback {
+        private Record record;
+        private Job job;
+        public KillCallback(Job job,Record record) {
+            this.job = job;
+            this.record = record;
+            record.setStatus(RunStatus.STOPPING.getStatus());
+            record.setSuccess(ResultStatus.KILLED.getStatus());
+            recordService.merge(record);
+        }
+
+        @Override
+        public void done(Response response) {
+            record.setStatus(RunStatus.STOPED.getStatus());
+            record.setEndTime(new Date());
+            recordService.merge(record);
+            printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", job, record.getPid());
+        }
+
+        @Override
+        public void caught(Throwable err) {
+            record.setStatus(RunStatus.STOPED.getStatus());
+            record.setEndTime(new Date());
+            recordService.merge(record);
+            printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", job, record.getPid());
+        }
+    }
 }

@@ -22,6 +22,7 @@
 package com.jobxhub.server.controller;
 
 import com.jobxhub.server.dto.Record;
+import com.jobxhub.server.dto.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpSession;
@@ -137,7 +138,7 @@ public class RecordController extends BaseController {
 
     @RequestMapping(value = "kill.do", method = RequestMethod.POST)
     @ResponseBody
-    public boolean kill(HttpSession session, Long recordId) {
+    public Status kill(HttpSession session, Long recordId) {
         Record record = recordService.getById(recordId);
         if (Constants.RunStatus.RERUNNING.getStatus().equals(record.getStatus())) {
             //父记录临时改为停止中
@@ -146,8 +147,9 @@ public class RecordController extends BaseController {
             //得到当前正在重跑的子记录
             record = recordService.getReRunningSubJob(recordId);
         }
-        if (!jobService.checkJobOwner(session, record.getUserId())) return false;
-        return executeService.killJob(record);
+        if (!jobService.checkJobOwner(session, record.getUserId())) return Status.FALSE;
+        executeService.killJob(record);
+        return Status.TRUE;
     }
 
 }
