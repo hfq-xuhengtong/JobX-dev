@@ -87,6 +87,11 @@ public class DashboardController extends BaseController {
         return "/home/login";
     }
 
+    @RequestMapping("repeat")
+    public String repeat(){
+        return "/error/repeat";
+    }
+
     @RequestMapping("dashboard.htm")
     public String dashboard(HttpSession session, Model model) {
         /**

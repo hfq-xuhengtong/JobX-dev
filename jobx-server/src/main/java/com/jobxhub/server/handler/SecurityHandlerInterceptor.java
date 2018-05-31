@@ -23,6 +23,7 @@
 package com.jobxhub.server.handler;
 
 
+import com.alibaba.fastjson.JSON;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.CookieUtils;
@@ -31,10 +32,13 @@ import com.jobxhub.server.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 登陆权限拦截器
@@ -132,9 +136,43 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                 JobXTools.invalidSession(request);
                 return false;
             }
+            if (verifyRepeat(request)) {
+                response.sendRedirect("/repeat");
+                return false;
+            }
         }
 
         return super.preHandle(request, response, handler);
+    }
+
+    /**
+     *
+     * @param httpServletRequest
+     * @return repeat true
+     *         noRepeat false
+     */
+    private boolean verifyRepeat(HttpServletRequest httpServletRequest) {
+        //针对post请求
+        if (httpServletRequest.getMethod().equals(RequestMethod.POST.name())) {
+            String params = JSON.toJSONString(httpServletRequest.getParameterMap());
+            String url = httpServletRequest.getRequestURI();
+            Map<String, String> map = new HashMap<String, String>();
+            map.put(url, params);
+            String nowUrlParams = map.toString();
+            Object preUrlParams = httpServletRequest.getSession().getAttribute("repeatData");
+            if (preUrlParams == null) {
+                httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
+                return false;
+            } else {
+                if (preUrlParams.toString().equals(nowUrlParams)) {
+                    return true;
+                } else {
+                    httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean verifyCSRF(HttpServletRequest request) {
