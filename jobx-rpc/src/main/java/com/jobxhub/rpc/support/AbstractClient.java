@@ -35,12 +35,12 @@ import com.jobxhub.common.util.HttpUtils;
 import com.jobxhub.rpc.Client;
 import com.jobxhub.rpc.InvokeCallback;
 import com.jobxhub.rpc.RpcFuture;
-import com.jobxhub.rpc.mina.ConnectWrapper;
-import com.jobxhub.rpc.netty.ChannelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import com.jobxhub.common.util.collection.HashMap;
 
 /**
@@ -53,10 +53,6 @@ public abstract class AbstractClient implements Client {
     protected NioSocketConnector connector;
 
     protected Bootstrap bootstrap;
-
-    protected final Map<String, ConnectWrapper> connectTable = new HashMap<String, ConnectWrapper>();
-
-    protected final Map<String, ChannelWrapper> channelTable = new HashMap<String, ChannelWrapper>();
 
     public final Map<Long, RpcFuture> futureTable = new HashMap<Long, RpcFuture>(256);
 
@@ -80,67 +76,22 @@ public abstract class AbstractClient implements Client {
         invokeAsync(request,callback);
     }
 
-    public ConnectFuture getConnect(Request request) {
-
-        ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
-
-        if (connectWrapper != null && connectWrapper.isActive()) {
-            return connectWrapper.getConnectFuture();
-        }
-
+    public ConnectFuture getConnect(final Request request) {
         synchronized (this) {
-            ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
-            connectWrapper = new ConnectWrapper(connectFuture);
-            if (connectFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
-                if (connectWrapper.isActive()) {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[JobX] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
-                    }
-                    this.connectTable.put(request.getAddress(), connectWrapper);
-                    return connectFuture;
-                } else {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("[JobX] MinaRPC getConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
-                    }
-                }
-            } else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("[JobX] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, connectFuture);
-                }
-            }
+            return connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
         }
-        return null;
     }
 
     public Channel getChannel(Request request) {
-
-        ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
-        if (channelWrapper != null && channelWrapper.isActive()) {
-            return channelWrapper.getChannel();
-        }
         synchronized (this) {
             // 发起异步连接操作
             ChannelFuture channelFuture = this.bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
-            channelWrapper = new ChannelWrapper(channelFuture);
-            if (channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
-                if (channelWrapper.isActive()) {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[JobX] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
-                    }
-                    this.channelTable.put(request.getAddress(), channelWrapper);
-                    return channelWrapper.getChannel();
-                } else {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("[JobX] NettyRPC getChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
-                    }
-                }
-            } else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("[JobX] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, channelFuture);
-                }
+            boolean ret = channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT, TimeUnit.MILLISECONDS);
+            if (ret && channelFuture.isSuccess()) {
+                return channelFuture.channel();
             }
+            return null;
         }
-        return null;
     }
 
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
@@ -214,8 +165,6 @@ public abstract class AbstractClient implements Client {
             this.connector.dispose();
             this.connector = null;
         }
-        this.futureTable.clear();
-        this.channelTable.clear();
     }
 
     public synchronized RpcFuture getRpcFuture(Long id) {

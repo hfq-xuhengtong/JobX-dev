@@ -40,10 +40,10 @@ public class RpcFuture {
     
     private static final Logger logger = LoggerFactory.getLogger(RpcFuture.class);
 
-    private static final Map<Long, RpcFuture> FUTURES = new ConcurrentHashMap<Long, RpcFuture>();
+    private static final Map<Long, RpcFuture> futures = new ConcurrentHashMap<Long, RpcFuture>();
 
-    private  final Lock lock = new ReentrantLock();
-    private final Condition done = lock.newCondition();
+    private final Lock lock;
+    private final Condition done;
     private final Long futureId;
     private volatile Request request;
     private volatile Response response;
@@ -54,12 +54,14 @@ public class RpcFuture {
     private final String scanKey = "scanRpc";
 
     public RpcFuture(Request request) {
+        this.lock = new ReentrantLock();
+        this.done = lock.newCondition();
         this.scanAndCleanTimeOut();
         this.request = request;
         this.timeout = this.request.getMillisTimeOut();
         this.startTime = System.currentTimeMillis();
         this.futureId = request.getId();
-        FUTURES.put(this.futureId, this);
+        futures.put(this.futureId, this);
     }
 
     public RpcFuture(Request request, InvokeCallback invokeCallback) {
@@ -90,7 +92,6 @@ public class RpcFuture {
             } finally {
                 lock.unlock();
             }
-
             if (!isDone()) {
                 throw getTimeoutException();
             }
@@ -109,12 +110,8 @@ public class RpcFuture {
             if (done != null) {
                 done.signal();
             }
-            if (this.invokeCallback != null ) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("[JobX] async callback invoke");
-                }
-                this.invokeCallback();
-            }
+            this.invokeCallback();
+
         } finally {
             lock.unlock();
         }
@@ -131,18 +128,25 @@ public class RpcFuture {
             this.response.setStartTime(this.startTime);
             this.response.setSuccess(false);
             this.response.setExitCode(Constants.StatusCode.ERROR_EXEC.getValue());
-            if (this.invokeCallback != null ) {
-                invokeCallback();
-            }
+            invokeCallback();
         }finally {
             lock.unlock();
         }
     }
 
     private void invokeCallback() {
+        if (this.invokeCallback == null) {
+            return;
+        }
+
+        if (logger.isInfoEnabled()) {
+            logger.info("[JobX] async callback invoke");
+        }
+
         if (this.response == null) {
             throw new IllegalStateException("[JobX]response cannot be null. host:"+this.request.getAddress() + ",action: "+ this.request.getAction());
         }
+
         if ( this.response.getThrowable() == null ) {
             try {
                 invokeCallback.done(this.response);
@@ -165,12 +169,12 @@ public class RpcFuture {
     private void scanAndCleanTimeOut() {
         if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {
             SystemPropertyUtils.setProperty(this.scanKey,Boolean.TRUE.toString());
-            Thread th = new Thread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (true) {
                         try {
-                            for (RpcFuture future : FUTURES.values()) {
+                            for (RpcFuture future : futures.values()) {
                                 if (future == null || future.isDone()) {
                                     continue;
                                 }
@@ -185,8 +189,8 @@ public class RpcFuture {
                     }
                 }
             }, "JobXRpcTimeoutScanTimer");
-            th.setDaemon(true);
-            th.start();
+            thread.setDaemon(true);
+            thread.start();
         }
     }
 
