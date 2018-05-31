@@ -31,6 +31,7 @@ import com.jobxhub.common.job.RequestFile;
 import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.IOUtils;
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.dto.Agent;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -88,6 +89,7 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "delete.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Status delete(Long id) {
         agentService.delete(id);
         return Status.TRUE;
@@ -107,6 +109,7 @@ public class AgentController extends BaseController {
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
+    @RequestRepeat(view = true)
     public String add(Agent agent) {
         if (!agent.getWarning()) {
             agent.setMobile(null);
@@ -131,6 +134,7 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat(view = true)
     public Status edit(Agent agentParam) {
         Agent agent = agentService.getAgent(agentParam.getAgentId());
         if (agent == null) {
@@ -155,6 +159,7 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "pwd.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public String pwd(Boolean type, Long id, String pwd0, String pwd1, String pwd2) {
         return agentService.editPassword(id, type, pwd0, pwd1, pwd2);
     }
@@ -201,6 +206,7 @@ public class AgentController extends BaseController {
 
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Status upload(HttpSession httpSession,Long agentId,@RequestParam(value = "file", required = false) MultipartFile file,String savePath,String postcmd) throws IOException {
         Agent agent = agentService.getAgent(agentId);
 

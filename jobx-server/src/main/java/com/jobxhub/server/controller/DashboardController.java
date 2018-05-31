@@ -27,6 +27,7 @@ import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.*;
 import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.common.util.collection.ParamsMap;
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.tag.PageBean;
@@ -195,6 +196,7 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Map login(HttpSession session, HttpServletRequest request, HttpServletResponse response, @RequestParam String username, @RequestParam String password) throws Exception {
 
         //用户信息验证
@@ -240,6 +242,7 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "headpic/upload.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Map upload(@RequestParam(value = "file", required = false) MultipartFile file, Long userId, String data, HttpServletRequest request, HttpSession httpSession) throws Exception {
 
         String extensionName = null;
@@ -327,6 +330,7 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "notice/uncount.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Integer uncount(HttpSession session) {
         Long userId = JobXTools.getUserId(session);
         return logService.getUnReadCount(userId);

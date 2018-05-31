@@ -22,6 +22,7 @@
 package com.jobxhub.server.controller;
 
 import com.jobxhub.common.Constants;
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.dto.Config;
 import com.jobxhub.server.service.ConfigService;
 import com.jobxhub.server.service.RecordService;
@@ -61,6 +62,7 @@ public class ConfigController extends BaseController {
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
+    @RequestRepeat(view = true)
     public String edit(Config config) {
         configService.update(config);
         return "redirect:/config/view.htm";

@@ -27,6 +27,7 @@ import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.DigestUtils;
 import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.common.util.collection.ParamsMap;
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.domain.JobBean;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.*;
@@ -104,6 +105,7 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "delete.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Status delete(Long id) {
         try {
             jobService.delete(id);
@@ -148,6 +150,7 @@ public class JobController extends BaseController {
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
+    @RequestRepeat
     public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
         jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));
         if (jobParam.getJobId() != null) {
@@ -242,6 +245,7 @@ public class JobController extends BaseController {
 
     @RequestMapping("editsingle.do")
     @ResponseBody
+    @RequestRepeat
     public Job editSingleJob(HttpSession session, HttpServletResponse response, Long id) {
         Job job = jobService.getById(id);
         if (job == null) {
@@ -268,6 +272,7 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat(view = true)
     public Status edit(HttpSession session, Job job) throws Exception {
         Job dbJob = jobService.getById(job.getJobId());
         if (!jobService.checkJobOwner(session, dbJob.getUserId())) return Status.FALSE;
@@ -294,6 +299,7 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "editcmd.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Status editCmd(HttpSession session, Long jobId, String command) throws Exception {
         command = DigestUtils.passBase64(command);
         Job dbJob = jobService.getById(jobId);

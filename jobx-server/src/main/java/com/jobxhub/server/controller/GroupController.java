@@ -21,6 +21,7 @@
 
 package com.jobxhub.server.controller;
 
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.GroupService;
 import com.jobxhub.server.tag.PageBean;
@@ -79,6 +80,7 @@ public class GroupController extends BaseController {
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
+    @RequestRepeat(view = true)
     public String save(HttpSession session, Group group, String agentIds) {
         group.setCreateTime(new Date());
         group.setUserId(JobXTools.getUserId(session));

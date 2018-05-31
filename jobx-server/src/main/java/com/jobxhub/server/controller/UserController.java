@@ -21,6 +21,7 @@
 
 package com.jobxhub.server.controller;
 
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.service.RoleService;
 import com.jobxhub.server.service.UserAgentService;
 import com.jobxhub.server.support.JobXTools;
@@ -88,6 +89,7 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
+    @RequestRepeat
     public String add(User user) {
         userService.addUser(user);
         return "redirect:/user/view.htm";
@@ -115,6 +117,7 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
+    @RequestRepeat
     public String edit(HttpSession session, User user) {
         User user1 = userService.getUserById(user.getUserId());
         user1.setRoleId(user.getRoleId());
@@ -135,6 +138,7 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "pwd.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public String pwd(Long id, String pwd0, String pwd1, String pwd2) {
         return userService.editPassword(id, pwd0, pwd1, pwd2);
     }

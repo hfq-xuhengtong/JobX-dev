@@ -24,6 +24,7 @@ package com.jobxhub.server.controller;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.collection.ParamsMap;
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.dto.Terminal;
 
 import com.jobxhub.server.support.*;
@@ -226,6 +227,7 @@ public class TerminalController extends BaseController {
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public String save(HttpSession session, Terminal term, @RequestParam(value = "sshkey", required = false) MultipartFile sshkey) throws Exception {
         term.setSshKeyFile(sshkey);
         Terminal.AuthStatus authStatus = terminalService.auth(term);
