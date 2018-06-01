@@ -24,7 +24,6 @@ package com.jobxhub.rpc;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.Request;
 import com.jobxhub.common.job.Response;
-import com.jobxhub.common.util.SystemPropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
