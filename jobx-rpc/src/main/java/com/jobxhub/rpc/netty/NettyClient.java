@@ -76,11 +76,9 @@ public class  NettyClient extends AbstractClient {
     public Response invokeSync(final Request request) throws TimeoutException {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request);
+            final RpcFuture rpcFuture = new RpcFuture(request,channel);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
-            Response response = rpcFuture.get();
-            channel.closeFuture();
-            return response;
+            return rpcFuture.get();
         } else {
             throw new IllegalArgumentException("[JobX] NettyRPC invokeSync channel not active. request id:" + request.getId());
         }
@@ -90,9 +88,8 @@ public class  NettyClient extends AbstractClient {
     public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
         Channel channel = super.getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request, callback);
+            final RpcFuture rpcFuture = new RpcFuture(request,channel,callback);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
-            channel.closeFuture();
         } else {
             throw new IllegalArgumentException("[JobX] NettyRPC invokeAsync channel not active. request id:" + request.getId());
         }
@@ -104,7 +101,6 @@ public class  NettyClient extends AbstractClient {
         if (channel != null && channel.isActive()) {
             final RpcFuture rpcFuture = new RpcFuture(request);
             channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
-            channel.closeFuture();
         } else {
             throw new IllegalArgumentException("[JobX] NettyRPC invokeAsync invokeOneway channel not active. request id:" + request.getId());
         }

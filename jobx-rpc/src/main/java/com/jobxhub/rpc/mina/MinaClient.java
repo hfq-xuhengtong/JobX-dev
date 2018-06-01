@@ -21,6 +21,7 @@
 package com.jobxhub.rpc.mina;
 
 import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.DefaultSocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
@@ -54,13 +55,26 @@ public class MinaClient extends AbstractClient {
     public Response invokeSync(final Request request) throws Exception {
         final ConnectFuture connect = super.getConnect(request);
         if (connect != null && connect.isConnected()) {
-            RpcFuture rpcFuture = new RpcFuture(request);
+            RpcFuture rpcFuture = new RpcFuture(request,connect);
             //写数据
             connect.addListener(new AbstractClient.FutureListener(rpcFuture));
-            connect.getSession().write(request);
+            IoSession session = connect.getSession();
+            session.write(request);
             return rpcFuture.get();
         } else {
             throw new IllegalArgumentException("[JobX] MinaRPC channel not active. request id:" + request.getId());
+        }
+    }
+
+    @Override
+    public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
+        final ConnectFuture connect = super.getConnect(request);
+        if (connect != null && connect.isConnected()) {
+            RpcFuture rpcFuture = new RpcFuture(request,connect,callback);
+            connect.addListener(new AbstractClient.FutureListener(rpcFuture));
+            connect.getSession().write(request);
+        } else {
+            throw new IllegalArgumentException("[JobX] MinaRPC invokeAsync channel not active. request id:" + request.getId());
         }
     }
 
@@ -73,18 +87,6 @@ public class MinaClient extends AbstractClient {
             connect.getSession().write(request);
         } else {
             throw new IllegalArgumentException("[JobX] MinaRPC channel not active. request id:" + request.getId());
-        }
-    }
-
-    @Override
-    public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
-        final ConnectFuture connect = super.getConnect(request);
-        if (connect != null && connect.isConnected()) {
-            RpcFuture rpcFuture = new RpcFuture(request, callback);
-            connect.addListener(new AbstractClient.FutureListener(rpcFuture));
-            connect.getSession().write(request);
-        } else {
-            throw new IllegalArgumentException("[JobX] MinaRPC invokeAsync channel not active. request id:" + request.getId());
         }
     }
 

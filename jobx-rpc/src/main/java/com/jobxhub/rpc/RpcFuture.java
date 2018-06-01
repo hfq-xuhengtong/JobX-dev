@@ -24,6 +24,8 @@ package com.jobxhub.rpc;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.Request;
 import com.jobxhub.common.job.Response;
+import io.netty.channel.Channel;
+import org.apache.mina.core.future.ConnectFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +38,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class RpcFuture {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RpcFuture.class);
 
     public static final Map<Long, RpcFuture> futures = new ConcurrentHashMap<Long, RpcFuture>();
 
     public static Boolean scanClean = false;
+
+
+    private Channel channel;
+    private ConnectFuture connect;
 
     private final Lock lock = new ReentrantLock();
     private final Condition done = lock.newCondition();
@@ -64,17 +70,35 @@ public class RpcFuture {
         }
     }
 
-    public RpcFuture(Request request, InvokeCallback invokeCallback) {
+    public RpcFuture(Request request, Channel channel) {
         this(request);
+        this.channel = channel;
+    }
+
+    public RpcFuture(Request request, Channel channel, InvokeCallback invokeCallback) {
+        this(request);
+        this.channel = channel;
         this.invokeCallback = invokeCallback;
     }
+
+    public RpcFuture(Request request, ConnectFuture connect) {
+        this(request);
+        this.connect = connect;
+    }
+
+    public RpcFuture(Request request, ConnectFuture connect, InvokeCallback invokeCallback) {
+        this(request);
+        this.connect = connect;
+        this.invokeCallback = invokeCallback;
+    }
+
 
     public boolean isDone() {
         return response != null;
     }
 
     public Response get() throws TimeoutException {
-        return get(this.timeout,TimeUnit.MILLISECONDS);
+        return get(this.timeout, TimeUnit.MILLISECONDS);
     }
 
     public Response get(long timeout, TimeUnit unit) throws TimeoutException {
@@ -82,7 +106,7 @@ public class RpcFuture {
             lock.lock();
             try {
                 while (!isDone()) {
-                    done.await(timeout,unit);
+                    done.await(timeout, unit);
                     if (isDone() || System.currentTimeMillis() - this.startTime > timeout) {
                         break;
                     }
@@ -105,7 +129,7 @@ public class RpcFuture {
             this.response = response;
             long useTime = System.currentTimeMillis() - startTime;
             if (useTime > this.timeout) {
-                logger.warn("[JobX]Service response time is too slow. Request id:{}. Response Time:{}",this.futureId,useTime);
+                logger.warn("[JobX]Service response time is too slow. Request id:{}. Response Time:{}", this.futureId, useTime);
             }
             if (done != null) {
                 done.signal();
@@ -129,12 +153,21 @@ public class RpcFuture {
             this.response.setSuccess(false);
             this.response.setExitCode(Constants.StatusCode.ERROR_EXEC.getValue());
             invokeCallback();
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
 
     private void invokeCallback() {
+
+        if (this.channel != null && this.channel.isActive()) {
+            this.channel.closeFuture();
+        }
+
+        if (this.connect != null && this.connect.getSession().isActive()) {
+            this.connect.getSession().closeNow();
+        }
+
         if (this.invokeCallback == null) {
             return;
         }
@@ -144,26 +177,26 @@ public class RpcFuture {
         }
 
         if (this.response == null) {
-            throw new IllegalStateException("[JobX]response cannot be null. host:"+this.request.getAddress() + ",action: "+ this.request.getAction());
+            throw new IllegalStateException("[JobX]response cannot be null. host:" + this.request.getAddress() + ",action: " + this.request.getAction());
         }
 
-        if ( this.response.getThrowable() == null ) {
+        if (this.response.getThrowable() == null) {
             try {
                 invokeCallback.done(this.response);
             } catch (Exception e) {
-                logger.error("[JobX]callback done invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
+                logger.error("[JobX]callback done invoke error .host:{},action:{}:,caught:{}", this.request.getAddress(), this.request.getAction(), e);
             }
-        }  else {
+        } else {
             try {
                 invokeCallback.caught(response.getThrowable());
             } catch (Exception e) {
-                logger.error("[JobX]callback caught invoke error .host:{},action:{}:,caught:{}",this.request.getAddress(),this.request.getAction(),e);
+                logger.error("[JobX]callback caught invoke error .host:{},action:{}:,caught:{}", this.request.getAddress(), this.request.getAction(), e);
             }
         }
     }
 
     public TimeoutException getTimeoutException() {
-        return new TimeoutException("[JobX] RPC timeout! host:"+request.getAddress()+",action:"+request.getAction());
+        return new TimeoutException("[JobX] RPC timeout! host:" + request.getAddress() + ",action:" + request.getAction());
     }
 
     private void scanCleanTimeOut() {
