@@ -54,7 +54,7 @@
         from  t_group
         where group_name=#{filter.groupName}
         <if test="filter.groupId != null">
-            and group_id <![CDATA[ <>  ]]>  #{filter.groupId}
+            and group_id <![CDATA[ <> ]]>  #{filter.groupId}
         </if>
     </select>
 

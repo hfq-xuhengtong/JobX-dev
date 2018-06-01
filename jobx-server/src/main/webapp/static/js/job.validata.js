@@ -37,23 +37,23 @@ function Validata() {
                     this.status = false;
                 } else {
                     var _this = this;
-                    $.ajax({
+                    ajax({
                         type: "POST",
                         url: self.contextPath+"/job/checkname.do",
                         data: {
-                            "jobId":self.jobId,
+                        "jobId":self.jobId,
                             "name": _jobName,
                             "agentId": $("#agentId").val()
                         }
-                    }).done(function (data) {
+                    },function (data) {
                         _this.jobNameRemote = true;
-                        if (!data) {
+                        if (!data.status) {
                             jobx.tipError("#jobName" + prefix, "作业名称已存在!");
                             _this.status = false;
                         } else {
                             jobx.tipOk("#jobName" + prefix);
                         }
-                    }).fail(function () {
+                    },function () {
                         _this.jobNameRemote = true;
                         _this.status = false;
                         jobx.tipError("#jobName" + prefix, "网络请求错误,请重试!");

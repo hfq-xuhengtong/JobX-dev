@@ -99,14 +99,10 @@
     </select>
 
     <select id="existsCount" resultType="java.lang.Integer">
-        <![CDATA[
-
-            select count(1)
-            from  t_agent as a
-            where agent_id <> #{id}
-            and #{key} = #{val}
-
-        ]]>
+        select count(1)
+        from  t_agent as a
+        where agent_id <![CDATA[ <> ]]> #{id}
+        and #{key} = #{val}
     </select>
 
     <select id="getByGroup" parameterType="java.lang.Long" resultMap="AgentBean">

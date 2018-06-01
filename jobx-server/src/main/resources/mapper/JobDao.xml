@@ -142,14 +142,12 @@
     </select>
 
     <select id="existsCount" resultType="java.lang.Integer">
-        <![CDATA[
-
-            select count(1) from  t_job as j
-            where j.job_id = #{jobId}
-            and j.agent_id = #{agentId}
-            and j.job_name <> #{name}
-
-        ]]>
+        select count(1) from  t_job as j
+        where j.agent_id = #{agentId}
+        and j.job_name  = #{name}
+        <if test="jobId!=null">
+            and j.job_id <![CDATA[ <>  ]]>#{jobId}
+        </if>
     </select>
 
     <insert id="save" parameterType="com.jobxhub.server.domain.JobBean" useGeneratedKeys="true" keyProperty="jobId">
