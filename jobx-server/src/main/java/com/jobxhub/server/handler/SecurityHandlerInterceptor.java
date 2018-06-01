@@ -166,20 +166,17 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                 String url = httpServletRequest.getRequestURI();
                 Map<String, String> map = new HashMap<String, String>();
                 map.put(url, params);
-
-                RequestMapping requestMapping = handlerMethod.getMethodAnnotation(RequestMapping.class);
-                String mapping =  StringUtils.join(requestMapping.value(),",");
-                String reqInfo = mapping+"@"+map.toString();
+                String nowUrlParams=map.toString();
 
                 Object preUrlParams = httpServletRequest.getSession().getAttribute("repeatData");
                 if (preUrlParams == null) {
-                    httpServletRequest.getSession().setAttribute("repeatData", reqInfo);
+                    httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
                     return false;
                 } else {
-                    if (preUrlParams.toString().equals(reqInfo)) {
+                    if (preUrlParams.toString().equals(nowUrlParams)) {
                         return true;
                     } else {
-                        httpServletRequest.getSession().setAttribute("repeatData", reqInfo);
+                        httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
                         return false;
                     }
                 }

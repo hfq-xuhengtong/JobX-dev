@@ -150,7 +150,7 @@ public class JobController extends BaseController {
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
-    @RequestRepeat
+    @RequestRepeat(view = true)
     public String save(HttpSession session, Job jobParam, HttpServletRequest request) throws Exception {
         jobParam.setCommand(DigestUtils.passBase64(jobParam.getCommand()));
         if (jobParam.getJobId() != null) {

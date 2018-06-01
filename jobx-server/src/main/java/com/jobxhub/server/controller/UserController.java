@@ -89,7 +89,7 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
-    @RequestRepeat
+    @RequestRepeat(view = true)
     public String add(User user) {
         userService.addUser(user);
         return "redirect:/user/view.htm";
@@ -117,7 +117,7 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
-    @RequestRepeat
+    @RequestRepeat(view = true)
     public String edit(HttpSession session, User user) {
         User user1 = userService.getUserById(user.getUserId());
         user1.setRoleId(user.getRoleId());

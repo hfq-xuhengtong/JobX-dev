@@ -227,7 +227,7 @@ public class TerminalController extends BaseController {
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
     @ResponseBody
-    @RequestRepeat
+    @RequestRepeat(view = true)
     public String save(HttpSession session, Terminal term, @RequestParam(value = "sshkey", required = false) MultipartFile sshkey) throws Exception {
         term.setSshKeyFile(sshkey);
         Terminal.AuthStatus authStatus = terminalService.auth(term);

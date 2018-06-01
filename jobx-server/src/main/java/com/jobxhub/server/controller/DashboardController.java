@@ -330,7 +330,6 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "notice/uncount.do", method = RequestMethod.POST)
     @ResponseBody
-    @RequestRepeat
     public Integer uncount(HttpSession session) {
         Long userId = JobXTools.getUserId(session);
         return logService.getUnReadCount(userId);
