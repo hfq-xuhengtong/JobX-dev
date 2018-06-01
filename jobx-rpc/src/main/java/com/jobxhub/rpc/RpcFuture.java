@@ -40,10 +40,12 @@ public class RpcFuture {
     
     private static final Logger logger = LoggerFactory.getLogger(RpcFuture.class);
 
-    private static final Map<Long, RpcFuture> futures = new ConcurrentHashMap<Long, RpcFuture>();
+    public static final Map<Long, RpcFuture> futures = new ConcurrentHashMap<Long, RpcFuture>();
 
-    private final Lock lock;
-    private final Condition done;
+    public static Boolean scanClean = false;
+
+    private final Lock lock = new ReentrantLock();
+    private final Condition done = lock.newCondition();
     private final Long futureId;
     private volatile Request request;
     private volatile Response response;
@@ -51,17 +53,16 @@ public class RpcFuture {
     private volatile Integer timeout;
     private volatile InvokeCallback invokeCallback;
 
-    private final String scanKey = "scanRpc";
-
     public RpcFuture(Request request) {
-        this.lock = new ReentrantLock();
-        this.done = lock.newCondition();
-        this.scanAndCleanTimeOut();
         this.request = request;
         this.timeout = this.request.getMillisTimeOut();
         this.startTime = System.currentTimeMillis();
         this.futureId = request.getId();
         futures.put(this.futureId, this);
+        if (!scanClean) {
+            scanClean = true;
+            this.scanCleanTimeOut();
+        }
     }
 
     public RpcFuture(Request request, InvokeCallback invokeCallback) {
@@ -166,32 +167,29 @@ public class RpcFuture {
         return new TimeoutException("[JobX] RPC timeout! host:"+request.getAddress()+",action:"+request.getAction());
     }
 
-    private void scanAndCleanTimeOut() {
-        if (!SystemPropertyUtils.getBoolean(this.scanKey,Boolean.FALSE)) {
-            SystemPropertyUtils.setProperty(this.scanKey,Boolean.TRUE.toString());
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        try {
-                            for (RpcFuture future : futures.values()) {
-                                if (future == null || future.isDone()) {
-                                    continue;
-                                }
-                                if (System.currentTimeMillis() - future.getStartTime() > future.getTimeout()) {
-                                    RpcFuture.this.caught(getTimeoutException());
-                                }
+    private void scanCleanTimeOut() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        for (RpcFuture future : futures.values()) {
+                            if (future == null || future.isDone()) {
+                                continue;
                             }
-                            Thread.sleep(30);
-                        } catch (Throwable e) {
-                            logger.error("Exception when scan the timeout invocation of remoting.", e);
+                            if (System.currentTimeMillis() - future.getStartTime() > future.getTimeout()) {
+                                RpcFuture.this.caught(getTimeoutException());
+                            }
                         }
+                        Thread.sleep(30);
+                    } catch (Throwable e) {
+                        logger.error("Exception when scan the timeout invocation of remoting.", e);
                     }
                 }
-            }, "JobXRpcTimeoutScanTimer");
-            thread.setDaemon(true);
-            thread.start();
-        }
+            }
+        }, "JobXRpcTimeoutScanTimer");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public Long getFutureId() {
