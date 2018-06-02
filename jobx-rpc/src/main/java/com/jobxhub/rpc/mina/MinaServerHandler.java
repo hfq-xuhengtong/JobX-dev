@@ -54,6 +54,6 @@ public class MinaServerHandler extends IoHandlerAdapter {
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         cause.printStackTrace();
-        session.close(true);
+        session.closeNow();
     }
 }
