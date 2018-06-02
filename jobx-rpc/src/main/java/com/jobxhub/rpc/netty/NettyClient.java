@@ -38,8 +38,6 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import java.util.concurrent.TimeoutException;
 
 /**
- * agent JobXCaller
- *
  * @author <a href="mailto:benjobs@qq.com">B e n</a>
  * @version 1.0
  * @date 2016-03-27
