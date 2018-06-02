@@ -110,7 +110,7 @@
                 and j.redo = #{pager.filter.job.redo}
             </if>
             <if test="pager.filter.job.jobName != null">
-                and j.job_name like '%${pager.filter.job.jobName}%'
+                and j.job_name like concat('%',#{pager.filter.job.jobName},'%')
             </if>
         </if>
         limit #{pager.offset}, #{pager.pageSize}
@@ -136,7 +136,7 @@
                 and j.redo = #{filter.job.redo}
             </if>
             <if test="filter.job.jobName != null">
-                and j.job_name like '%${filter.job.jobName}%'
+                and j.job_name like concat('%',#{filter.job.jobName},'%')
             </if>
         </if>
     </select>

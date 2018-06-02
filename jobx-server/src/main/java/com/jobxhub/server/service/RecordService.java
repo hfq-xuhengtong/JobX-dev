@@ -89,25 +89,19 @@ public class RecordService {
 
     public void merge(Record record) {
         RecordBean recordBean = RecordBean.transfer.apply(record);
+
         if (record.getRecordId() == null) {
-            //save record...
             recordDao.save(recordBean);
             record.setRecordId(recordBean.getRecordId());
-            if (CommonUtils.notEmpty(record.getMessage())) {
-                //save message
-                RecordMessageBean messageBean = new RecordMessageBean(record);
-                recordDao.saveMessage(messageBean);
-            }
-        }else {
+        } else {
             recordDao.update(recordBean);
-            if (CommonUtils.notEmpty(record.getMessage())) {
-                RecordMessageBean recordMessageBean = recordDao.getMessage(record.getRecordId());
-                if (recordMessageBean==null) {
-                    //save message
-                    RecordMessageBean messageBean = new RecordMessageBean(record);
-                    recordDao.saveMessage(messageBean);
-                }
-            }
+        }
+
+        //save message
+        if (CommonUtils.notEmpty(record.getMessage())) {
+            RecordMessageBean messageBean = new RecordMessageBean(record);
+            messageBean.setRecordId(recordBean.getRecordId());
+            recordDao.saveMessage(messageBean);
         }
     }
 

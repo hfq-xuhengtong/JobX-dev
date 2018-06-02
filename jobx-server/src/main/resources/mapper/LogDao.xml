@@ -54,13 +54,13 @@
 
     <select id="getCount" resultType="java.lang.Integer">
         select count(1)
-        from  t_log as l
-        where l.user_id = #{pager.filter.userId}
-        <if test="pager.filter.agentId != null">
-            and l.agent_id = #{pager.filter.agentId}
+        from t_log as l
+        where l.user_id = #{filter.userId}
+        <if test="filter.agentId != null">
+            and l.agent_id = #{filter.agentId}
         </if>
-        <if test="pager.filter.sendTime != null">
-            and date_format(l.send_time,'%Y-%m-%d')=#{pager.filter.sendTime }
+        <if test="filter.sendTime != null">
+            and date_format(l.send_time,'%Y-%m-%d')=#{filter.sendTime }
         </if>
     </select>
 
