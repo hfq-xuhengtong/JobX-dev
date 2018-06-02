@@ -47,7 +47,6 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
 
     private RequestFile requestFile;
 
-
     public NettyClientHandler(NettyClient nettyClient, Request request) {
         this.nettyClient = nettyClient;
         this.request = request;
@@ -86,7 +85,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
             if (logger.isInfoEnabled()) {
                 logger.info("[JobX] nettyRPC client receive response id:{}", response.getId());
             }
-            nettyClient.getRpcFuture(response.getId()).done(response);
+            nettyClient.getRpcFuture(response.getId()).received(response);
             return;
         }
         ResponseFile responseFile = response.getUploadFile();
@@ -109,7 +108,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Response> {
                         .putParam(Constants.PARAM_SUCCESSEXIT_KEY, "1");
                 handlerContext.writeAndFlush(request);
             } else {
-                nettyClient.getRpcFuture(response.getId()).done(response);
+                nettyClient.getRpcFuture(response.getId()).received(response);
             }
         } else {
             long start = responseFile.getStart();

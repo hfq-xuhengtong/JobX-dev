@@ -20,6 +20,8 @@
  */
 package com.jobxhub.rpc.support;
 
+import com.jobxhub.rpc.mina.ConnectWrapper;
+import com.jobxhub.rpc.netty.ChannelWrapper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -30,16 +32,14 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.Request;
-import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.HttpUtils;
 import com.jobxhub.rpc.Client;
-import com.jobxhub.rpc.InvokeCallback;
 import com.jobxhub.rpc.RpcFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.jobxhub.common.util.collection.HashMap;
 
@@ -54,44 +54,98 @@ public abstract class AbstractClient implements Client {
 
     protected Bootstrap bootstrap;
 
+    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
+
+    protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
+
     public final Map<Long, RpcFuture> futureTable = new HashMap<Long, RpcFuture>(256);
 
-    private final Map<String,Long> clientMap = new HashMap<String, Long>(0);
+    public ConnectFuture getConnect(Request request) {
 
-    @Override
-    public Response sentSync(Request request) throws Exception {
-        this.doConnect(request);
-        return invokeSync(request);
-    }
+        ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
 
-    @Override
-    public void sentOneWay(Request request) throws Exception {
-        this.doConnect(request);
-        invokeOneWay(request);
-    }
-
-    @Override
-    public void sentAsync(Request request, InvokeCallback callback) throws Exception {
-        this.doConnect(request);
-        invokeAsync(request,callback);
-    }
-
-    public ConnectFuture getConnect(final Request request) {
-        synchronized (this) {
-            return connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
+        if (connectWrapper != null && connectWrapper.isActive()) {
+            return connectWrapper.getConnectFuture();
         }
+
+        synchronized (this) {
+            this.doConnect(request);
+            ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
+            connectWrapper = new ConnectWrapper(connectFuture);
+            if (connectFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
+                if (connectWrapper.isActive()) {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("[JOBX] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
+                    }
+                    this.connectTable.put(request.getAddress(), connectWrapper);
+                    return connectFuture;
+                } else {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("[JOBX] MinaRPC getConnect: connect remote host[" + request.getAddress() + "] failed, " + connectFuture.toString(), connectFuture.getException());
+                    }
+                }
+            } else {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("[JOBX] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, connectFuture);
+                }
+            }
+        }
+        return null;
     }
 
     public Channel getChannel(Request request) {
+
+        ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
+        if (channelWrapper != null && channelWrapper.isActive()) {
+            return channelWrapper.getChannel();
+        }
         synchronized (this) {
             // 发起异步连接操作
+            this.doConnect(request);
             ChannelFuture channelFuture = this.bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
-            boolean ret = channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT, TimeUnit.MILLISECONDS);
-            if (ret && channelFuture.isSuccess()) {
-                return channelFuture.channel();
+            channelWrapper = new ChannelWrapper(channelFuture);
+            if (channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
+                if (channelWrapper.isActive()) {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("[JOBX] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
+                    }
+                    this.channelTable.put(request.getAddress(), channelWrapper);
+                    return channelWrapper.getChannel();
+                } else {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("[JOBX] NettyRPC getChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
+                    }
+                }
+            } else {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("[JOBX] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, channelFuture);
+                }
             }
-            return null;
         }
+        return null;
+    }
+
+
+
+    private void doConnect(Request request) {
+        if (this.bootstrap == null) {
+            this.connect(request);
+        }
+    }
+
+    @Override
+    public abstract void connect(Request request);
+
+    @Override
+    public void disconnect() throws Throwable {
+        if (this.connector != null) {
+            this.connector.dispose();
+            this.connector = null;
+        }
+    }
+
+    public synchronized RpcFuture getRpcFuture(Long id) {
+        return this.futureTable.get(id);
     }
 
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
@@ -143,32 +197,5 @@ public abstract class AbstractClient implements Client {
 
     }
 
-    private void doConnect(Request request) {
-        if (!clientMap.containsKey(request.getAddress())) {
-            this.connect(request);
-            clientMap.put(request.getAddress(),request.getId());
-        }
-    }
-
-    @Override
-    public abstract void connect(Request request);
-
-    public abstract Response invokeSync(Request request) throws Exception;
-
-    public abstract void invokeOneWay(Request request) throws Exception;
-
-    public abstract void invokeAsync(Request request, InvokeCallback callback) throws Exception;
-
-    @Override
-    public void disconnect() throws Throwable {
-        if (this.connector != null) {
-            this.connector.dispose();
-            this.connector = null;
-        }
-    }
-
-    public synchronized RpcFuture getRpcFuture(Long id) {
-        return this.futureTable.get(id);
-    }
 
 }

@@ -39,10 +39,16 @@ public class MinaServerHandler extends IoHandlerAdapter {
     }
 
     @Override
-    public void messageReceived(IoSession session, Object message) throws Exception {
-        Request request = (Request) message;
-        Response response = handler.handle(request);
-        session.write(response);
+    public void messageReceived(final IoSession session,final Object message) throws Exception {
+        MinaServer.threadPoolExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                Request request = (Request) message;
+                Response response = handler.handle(request);
+                session.write(response);
+            }
+        });
+
     }
 
     @Override

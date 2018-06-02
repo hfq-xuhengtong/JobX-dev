@@ -51,8 +51,8 @@ public class MinaClient extends AbstractClient {
     }
 
     @Override
-    public Response invokeSync(final Request request) throws Exception {
-        final ConnectFuture connect = super.getConnect(request);
+    public Response sentSync(final Request request) throws Exception {
+        final ConnectFuture connect = getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request);
             //写数据
@@ -65,8 +65,8 @@ public class MinaClient extends AbstractClient {
     }
 
     @Override
-    public void invokeOneWay(final Request request) throws Exception {
-        ConnectFuture connect = super.getConnect(request);
+    public void sentOneWay(final Request request) throws Exception {
+        ConnectFuture connect = getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request);
             connect.addListener(new AbstractClient.FutureListener(rpcFuture));
@@ -77,8 +77,8 @@ public class MinaClient extends AbstractClient {
     }
 
     @Override
-    public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
-        final ConnectFuture connect = super.getConnect(request);
+    public void sentAsync(final Request request, final InvokeCallback callback) throws Exception {
+        final ConnectFuture connect = getConnect(request);
         if (connect != null && connect.isConnected()) {
             RpcFuture rpcFuture = new RpcFuture(request, callback);
             connect.addListener(new AbstractClient.FutureListener(rpcFuture));

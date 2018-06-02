@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
@@ -42,8 +44,8 @@ public class RpcFuture {
 
     private static final Map<Long, RpcFuture> futures = new ConcurrentHashMap<Long, RpcFuture>();
 
-    private final Lock lock;
-    private final Condition done;
+    private final Lock lock = new ReentrantLock();
+    private final Condition done = lock.newCondition();
     private final Long futureId;
     private volatile Request request;
     private volatile Response response;
@@ -54,14 +56,12 @@ public class RpcFuture {
     private final String scanKey = "scanRpc";
 
     public RpcFuture(Request request) {
-        this.lock = new ReentrantLock();
-        this.done = lock.newCondition();
-        this.scanAndCleanTimeOut();
         this.request = request;
         this.timeout = this.request.getMillisTimeOut();
         this.startTime = System.currentTimeMillis();
         this.futureId = request.getId();
         futures.put(this.futureId, this);
+        this.scanAndCleanTimeOut();
     }
 
     public RpcFuture(Request request, InvokeCallback invokeCallback) {
@@ -99,7 +99,22 @@ public class RpcFuture {
         return this.response;
     }
 
-    public void done(Response response) {
+    public static void received(Response response) {
+        try {
+            RpcFuture future = futures.remove(response.getId());
+            if (future != null) {
+                future.doReceived(response);
+            } else {
+                logger.warn("[JobX]The timeout response finally returned at "
+                        + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()))
+                        + ", response " + future.getRequest().getAddress());
+            }
+        } finally {
+            futures.remove(response.getId());
+        }
+    }
+
+    private void doReceived(Response response) {
         lock.lock();
         try {
             this.response = response;

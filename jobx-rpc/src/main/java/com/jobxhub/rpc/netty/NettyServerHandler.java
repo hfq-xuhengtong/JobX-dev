@@ -20,6 +20,7 @@
  */
 package com.jobxhub.rpc.netty;
 
+import com.jobxhub.common.exception.RpcException;
 import io.netty.channel.*;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.*;
@@ -36,6 +37,7 @@ import java.io.RandomAccessFile;
  * @author benjobs
  */
 
+@ChannelHandler.Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
 
     private Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
@@ -59,98 +61,110 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Request> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext handlerContext, final Request request) throws Exception {
+    protected void channelRead0(final ChannelHandlerContext handlerContext, final Request request) throws Exception {
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("[JobX]Receive request {}" + request.getId());
-        }
+        NettyServer.threadPoolExecutor.submit(new Runnable() {
 
-        if (!request.getAction().equals(Action.UPLOAD)) {
-            Response response = handler.handle(request);
-            if (request.getRpcType() != RpcType.ONE_WAY) {
-                handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[JobX] Send response for request id:{},action:{}", request.getId(), request.getAction());
-                        }
-                    }
-                });
-            }
-            return;
-        }
+            @Override
+            public void run() {
 
-        Response response = Response.response(request).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setSuccess(true);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[JobX]Receive request {}" + request.getId());
+                }
 
-        final RequestFile requestFile = request.getUploadFile();
-
-        if (requestFile.getBytes() == null||requestFile.getEndPos() == -1) return;
-
-        //first
-        if (start == 0) {
-            File savePath = new File(requestFile.getSavePath());
-            if (!savePath.exists()) {
-                ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
-                responseFile.setEnd(true);
-                response.setExitCode(Constants.StatusCode.NOTFOUND.getValue()).setSuccess(false).setUploadFile(responseFile).end();
-                handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("[JobX] Netty upload file {} error!savePath is not found MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
-                        }
-                    }
-                });
-                return;
-            }
-            File file = new File(savePath, requestFile.getFile().getName());
-            if (file.exists()) {
-                String existMD5 = IOUtils.getFileMD5(file);
-                if (existMD5.equals(requestFile.getFileMD5())) {
-                    ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
-                    responseFile.setEnd(true);
-                    handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
-                        @Override
-                        public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                            if (logger.isInfoEnabled()) {
-                                logger.info("[JobX] Netty upload file {} exists! MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                if (!request.getAction().equals(Action.UPLOAD)) {
+                    Response response = handler.handle(request);
+                    if (request.getRpcType() != RpcType.ONE_WAY) {
+                        handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
+                            @Override
+                            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                                if (logger.isInfoEnabled()) {
+                                    logger.info("[JobX] Send response for request id:{},action:{}", request.getId(), request.getAction());
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                     return;
                 }
-            }
-            randomAccessFile = new RandomAccessFile(file, "rw");
-        }
-        randomAccessFile.seek(start);
-        randomAccessFile.write(requestFile.getBytes());
-        start = start + requestFile.getEndPos();
 
-        if (requestFile.getEndPos() > 0 && start < requestFile.getFileSize()) {
-            final ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5(), (start * 100) / requestFile.getFileSize());
-            responseFile.setReadBuffer(requestFile.getReadBuffer());
-            handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[JobX] Netty upload progress:{}!for request id:{},action:{}", responseFile.getProgress(), request.getId(), request.getAction());
+                Response response = Response.response(request).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setSuccess(true);
+
+                final RequestFile requestFile = request.getUploadFile();
+
+                if (requestFile.getBytes() == null||requestFile.getEndPos() == -1) return;
+
+                //first
+                if (start == 0) {
+                    File savePath = new File(requestFile.getSavePath());
+                    if (!savePath.exists()) {
+                        ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
+                        responseFile.setEnd(true);
+                        response.setExitCode(Constants.StatusCode.NOTFOUND.getValue()).setSuccess(false).setUploadFile(responseFile).end();
+                        handlerContext.writeAndFlush(response).addListener(new ChannelFutureListener() {
+                            @Override
+                            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                                if (logger.isInfoEnabled()) {
+                                    logger.info("[JobX] Netty upload file {} error!savePath is not found MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                                }
+                            }
+                        });
+                        return;
+                    }
+                    File file = new File(savePath, requestFile.getFile().getName());
+
+                    try {
+                        if (file.exists()) {
+                            String existMD5 = IOUtils.getFileMD5(file);
+                            if (existMD5.equals(requestFile.getFileMD5())) {
+                                ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
+                                responseFile.setEnd(true);
+                                handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
+                                    @Override
+                                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                                        if (logger.isInfoEnabled()) {
+                                            logger.info("[JobX] Netty upload file {} exists! MD5:{}", requestFile.getFile().getName(), requestFile.getFileMD5());
+                                        }
+                                    }
+                                });
+                                return;
+                            }
+                        }
+                        randomAccessFile = new RandomAccessFile(file, "rw");
+                        randomAccessFile.seek(start);
+                        randomAccessFile.write(requestFile.getBytes());
+                        start = start + requestFile.getEndPos();
+
+                        if (requestFile.getEndPos() > 0 && start < requestFile.getFileSize()) {
+                            final ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5(), (start * 100) / requestFile.getFileSize());
+                            responseFile.setReadBuffer(requestFile.getReadBuffer());
+                            handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
+                                @Override
+                                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                                    if (logger.isInfoEnabled()) {
+                                        logger.info("[JobX] Netty upload progress:{}!for request id:{},action:{}", responseFile.getProgress(), request.getId(), request.getAction());
+                                    }
+                                }
+                            });
+                        } else {
+                            ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
+                            responseFile.setEnd(true);
+                            handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
+                                @Override
+                                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                                    if (logger.isInfoEnabled()) {
+                                        logger.info("[JobX] Netty upload file done!for request id:{},action:{}", request.getId(), request.getAction());
+                                    }
+                                }
+                            });
+                            randomAccessFile.close();
+                        }
+                    }catch (Exception e) {
+                        throw new RpcException(e);
                     }
                 }
-            });
-        } else {
-            ResponseFile responseFile = new ResponseFile(start, requestFile.getFileMD5());
-            responseFile.setEnd(true);
-            handlerContext.writeAndFlush(response.setUploadFile(responseFile).end()).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("[JobX] Netty upload file done!for request id:{},action:{}", request.getId(), request.getAction());
-                    }
-                }
-            });
-            randomAccessFile.close();
-            randomAccessFile = null;
-        }
+            }
+        });
+
     }
 
     @Override
