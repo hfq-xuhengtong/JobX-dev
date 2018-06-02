@@ -27,20 +27,19 @@ import com.alibaba.fastjson.JSON;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.CookieUtils;
-import com.jobxhub.common.util.StringUtils;
+import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.*;
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -164,21 +163,28 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
             if (handlerMethod.hasMethodAnnotation(RequestRepeat.class)) {
                 String params = JSON.toJSONString(httpServletRequest.getParameterMap());
                 String url = httpServletRequest.getRequestURI();
-                Map<String, String> map = new HashMap<String, String>();
-                map.put(url, params);
-                String nowUrlParams=map.toString();
+                Long reqTime = System.currentTimeMillis();
 
-                Object preUrlParams = httpServletRequest.getSession().getAttribute("repeatData");
+                HashMap<String, Serializable> nowUrlParams = new HashMap<String, Serializable>(0);
+                nowUrlParams.put("url",url);
+                nowUrlParams.put("params",params);
+                nowUrlParams.put("reqTime",reqTime);
+
+                HashMap preUrlParams = (HashMap) httpServletRequest.getSession().getAttribute("repeatData");
                 if (preUrlParams == null) {
                     httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
                     return false;
                 } else {
-                    if (preUrlParams.toString().equals(nowUrlParams)) {
-                        return true;
-                    } else {
-                        httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
-                        return false;
+                    if ( preUrlParams.getString("url").equals(nowUrlParams.getString("url")) &&
+                        preUrlParams.getString("params").equals(nowUrlParams.getString("params")) ) {
+                        //判断两次提交数据的时长间隔.....
+                        Long diffTime = nowUrlParams.getLong("reqTime") - preUrlParams.getLong("reqTime");
+                        if (diffTime<500) {
+                            return true;
+                        }
                     }
+                    httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
+                    return false;
                 }
             }
         }
