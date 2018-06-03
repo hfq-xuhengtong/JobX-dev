@@ -80,7 +80,6 @@ public class MinaServer implements Server {
             private final AtomicInteger idGenerator = new AtomicInteger(0);
             @Override
             public Thread newThread(Runnable r) {
-
                 return new Thread(r, "MinaServer" + this.idGenerator.incrementAndGet());
             }
         });
