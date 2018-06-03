@@ -1,20 +1,65 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<!DOCTYPE html>
-
 <!--[if IE 9 ]><html class="ie9"><![endif]-->
 <head>
     <meta charset="UTF-8">
     <meta name="keywords" content="jobx,crontab,a better crontab,Let's crontab easy">
     <meta name="author" content="author:benjobs,wechat:wolfboys,Created by  2016" />
-
     <title>jobx</title>
-    <jsp:include page="/WEB-INF/layouts/resource.jsp"/>
-    <script type="text/javascript">
 
+    <!-- jQuery -->
+    <script type="text/javascript" src="${contextPath}/static/js/jquery.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+    <script type="text/javascript" src="${contextPath}/static/js/jquery-ui.min.js?resId=${resourceId}"></script> <!-- jQuery UI -->
+    <link rel="stylesheet" href="${contextPath}/static/css/style.css?resId=${resourceId}" />
+    <link rel="shortcut icon" href="${contextPath}/static/img/favicon.ico?resId=${resourceId}" />
+    <!-- Javascript Libraries -->
+
+    <!-- Bootstrap -->
+    <script type="text/javascript" src="${contextPath}/static/js/bootstrap.js?resId=${resourceId}"></script>
+    <link rel="stylesheet" href="${contextPath}/static/css/bootstrap.css?resId=${resourceId}" />
+
+    <!-- All JS functions -->
+    <script id="themeFunctions" src="${contextPath}/static/js/functions.js?${contextPath}&resId=${resourceId}"></script>
+    <script type="text/javascript" src="${contextPath}/static/js/testdevice.js?resId=${resourceId}"></script>
+
+    <!-- MD5 -->
+    <script type="text/javascript" src="${contextPath}/static/js/md5.js?resId=${resourceId}"></script>
+    <script type="text/javascript" src="${contextPath}/static/js/jquery.base64.js?resId=${resourceId}"></script>
+    <script type="text/javascript" src="${contextPath}/static/js/jquery.cookie.js?resId=${resourceId}"></script>
+    <script type="text/javascript" src="${contextPath}/static/js/jobx.js?resId=${resourceId}"></script>
+
+    <!-- Vendor styles -->
+    <link rel="stylesheet" href="${contextPath}/static/fonts/material-design-iconic-font/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="${contextPath}/static/css/animate.min.css">
+    <!-- App styles -->
+    <link rel="stylesheet" href="${contextPath}/static/css/app.min.css">
+
+    <style type="text/css">
+        .modal-content label {
+            color: rgba(255,255,255,.75);
+        }
+        .usr_label {
+            padding-left: 17px;
+            margin-top: -20px;
+            color: red!important;
+        }
+        .form-control, .form-control:focus {
+            -webkit-box-shadow:none;
+            box-shadow:none;
+        }
+        .modal-footer{
+            margin-top: -20px;
+            z-index: 9999;
+        }
+        .modal-footer .btn:hover{
+            border: 1px solid rgba(255, 255, 255, 0.41);
+            color: rgba(225,225,225,0.8);
+        }
+    </style>
+    <script type="text/javascript">
         <c:if test="${!empty jobx_user}">
-            window.location.href="${contextPath}/dashboard.htm";
+        window.location.href="${contextPath}/dashboard.htm";
         </c:if>
 
         $(document).ready(function() {
@@ -45,37 +90,7 @@
             }
         });
 
-        var sendpwd = "";
-        var flag = false;
-
-        function isremember(){
-            return $("#remember").prop("checked");
-        }
-
         $(document).ready(function(){
-
-            loginCookie.init("#username","#password")
-
-            $("#password").change(function(){
-                sendpwd = calcMD5($(this).val());
-            }).focus(function(){
-                $("#userList").remove();
-                var history = loginCookie.all();
-                var username = $("#username").val();
-                if(history){
-                    for(var i=0;i<history.length;i++){
-                        if(history[i].username==username){
-                            sendpwd = history[i].password;
-                            if(sendpwd) {
-                                flag = true;
-                                $("#password").val("88888888");
-                                login();
-                            }
-                        }
-                    }
-                }
-            });
-
             $("#btnLogin").click(function(){
                 login();
             });
@@ -86,276 +101,7 @@
                     login();
                 }
             }
-
-            var cookie = loginCookie.last();
-            if(cookie){
-                var loginCode = cookie.username;
-                var pwd = cookie.password;
-
-                if (loginCode) {
-                    $("#username").val(loginCode);
-                }
-                if (pwd) {
-                    $("#password").val(pwd.substr(0,12));
-                    sendpwd = pwd;
-                    flag = true;
-                    $("#remember").prop("checked",true);
-                    $("#remember").parent().removeClass("checked").addClass("checked");
-                    $("#remember").parent().attr("aria-checked",true);
-                }
-            }
-
         });
-
-        var loginCookie = {
-            //接收输入框
-            vars : {
-                "nameNode":"",
-                "nameInput":"",
-                "pwdNode":"",
-                "index":-1
-            },
-
-            init:function(name,pwd){
-                this.vars.nameNode = $(name);
-                this.vars.nameInput = $(name).val();
-                this.vars.pwdNode = $(pwd);
-                this.band();
-            },
-
-            get:function(name){
-                var obj = $.cookie(name);
-                if(obj){
-                    try{
-                        return eval("("+obj+")");
-                    }catch(e){
-                        return null;
-                    }
-                }
-                return null;
-            },
-
-            last:function(){
-                return loginCookie.get("login_last");
-            },
-
-            all:function(){
-                return loginCookie.get("login_history");
-            },
-
-            find:function(name){
-
-                var array = new Array();
-
-                var obj = loginCookie.last;
-                if(obj){
-                    if( loginCookie.has(obj.username,name) ) {
-                        if(obj.username && obj.password) {
-                            array.push(obj);
-                        }
-                    }
-                }
-
-                var cookie = loginCookie.all();
-                if(cookie) {
-                    for(var i=0;i<cookie.length;i++){
-                        var obj = cookie[i];
-                        var username = obj.username;
-                        if( loginCookie.has(username,name) && obj.password) {
-                            array.push(obj);
-                        }
-                    }
-                }
-                return array;
-            },
-
-            set:function(name,password) {
-
-                var cookObj = "{'username':'"+name+"','password':'"+password+"'}";
-
-                $.cookie("login_last", cookObj, {
-                    expires : 30,
-                    domain:document.domain,
-                    path:"/"
-                });
-
-                var history = loginCookie.all();
-                if(history){
-                    var json = "[";
-                    var ishas = true;
-                    //循环历史的
-                    for(var i=0;i<history.length;i++){
-                        var obj = history[i];
-                        var username = obj.username;
-                        var pwd = obj.password;
-                        if(username==name) {//发现当前的用户记录在历史里面存在,则拿当前覆盖历史的
-                            ishas = false;
-                            json+="{'username':'"+name+"','password':'"+password+"'},";
-                        }else {//不能存的用户,直接添加
-                            json+="{'username':'"+username+"','password':'"+pwd+"'},";
-                        }
-                    }
-
-                    //把当前的用户名新增的到历史数组里
-                    if(ishas) {
-                        json+="{'username':'"+name+"','password':'"+password+"'},";
-                    }
-
-                    json = json.substring(0,json.length-1)+"]";
-
-                    $.cookie("login_history", json, {
-                        expires : 30,
-                        domain:document.domain,
-                        path:"/"
-                    });
-                }else {
-                    $.cookie("login_history", "["+cookObj+"]", {
-                        expires : 30,
-                        domain:document.domain,
-                        path:"/"
-                    });
-                }
-            },
-
-            clean:function(name) {
-                $.cookie("login_last", null, {
-                    expires : -1,
-                    domain:document.domain,
-                    path:"/"
-                });
-                var history = loginCookie.all();
-                if(history){
-                    var json = "[";
-                    for(var i=0;i<history.length;i++){
-                        var obj = history[i];
-                        var username = obj.username;
-                        var password = obj.password;
-                        if( username!=name ) {
-                            json+="{'username':'"+username+"','password':'"+password+"'},";
-                        }
-                    }
-                    json = json.substring(0,json.length-1)+"]";
-                    $.cookie("login_history", json, {
-                        expires : 30,
-                        domain:document.domain,
-                        path:"/"
-                    });
-                }
-            },
-
-            //模糊查找
-            has:function(text,subtext){
-                if(text==undefined||subtext==undefined||subtext==null||subtext==""||text.length==0||subtext.length>text.length)
-                    return false;
-                if(text.substr(0,subtext.length)==subtext)
-                    return true;
-                else
-                    return false;
-                return true;
-            },
-
-            band:function(){
-
-                loginCookie.vars.nameNode.keyup(function(event){
-
-                    if(event.keyCode==40||event.keyCode==38||event.keyCode==13){
-                        return;
-                    }
-
-                    $("#userList").remove();
-
-                    if(loginCookie.vars.nameNode.val()==''){
-                        loginCookie.vars.pwdNode.val("");
-                        return false;
-                    }
-
-                    var userVal = loginCookie.vars.nameNode.val();
-                    var last = loginCookie.last();
-
-                    if(last&&last.username==userVal){
-                        loginCookie.vars.pwdNode.val("88888888");
-                        sendpwd = last.password;
-                        flag = true;
-                        return;
-                    }
-
-                    loginCookie.vars.pwdNode.val("");
-
-                    flag = false;
-
-                    var obj = loginCookie.find(userVal);
-
-                    if(obj && obj.length>0) {
-                        var oUl = $('<select id="userList" class="form-control" style="border: none; width:'+loginCookie.vars.nameNode.outerWidth()+'px;margin-top:-10px;border-radius: 0px; position: absolute;z-index: 99;background:rgba(30, 30, 40, 0.98) none repeat scroll 0 0" multiple="">');
-                        loginCookie.vars.nameNode.after(oUl);
-
-                        for(var i=0;i<obj.length;i++){
-                            //匹配已存在的用户名
-                            if(loginCookie.has(obj[i].username,userVal)){
-                                var oLi = $("<option id='li_"+i+"' data-id='"+obj[i].password+"'>"+obj[i].username+"</option>");
-                                $("#userList").append(oLi);
-                            }
-                        }
-
-                        //点击LI内
-                        $("#userList").find("option").on("click",function(){
-                            var usertxt =$(this).text();
-                            loginCookie.vars.nameNode.val(usertxt);
-                            for(var i=0;i<obj.length;i++){
-                                if(obj[i].username==usertxt){
-                                    loginCookie.vars.pwdNode.val("88888888");
-                                    sendpwd = obj[i].password;
-                                    flag = true;
-                                    login();
-                                    break;
-                                }
-                            }
-                            $("#userList").remove();
-                        }).hover(function(){
-                            var _this = document.getElementById($(this).attr("id"));
-                            _this.style.background = "rgba(215,215,215,0.45)";
-                        },function(){
-                            var _this = document.getElementById($(this).attr("id"));
-                            _this.style.background = "rgba(30, 30, 30, 0.98)";
-                        });
-                    } else {
-                        sendpwd = "";
-                        loginCookie.vars.pwdNode.val("");
-                        $("#userList").remove();
-                    }
-                });
-
-                loginCookie.vars.nameNode.keydown(function(event) {
-                    if(event.keyCode==9){//tab
-                        $("#userList").remove();
-                        $("#passsword").focus();
-                    } else if(event.keyCode==38){//up
-                        --loginCookie.vars.index;
-                        if(loginCookie.vars.index<0){
-                            loginCookie.vars.index = $("#userList option").length-1;
-                        }
-                        $("#userList option").eq(loginCookie.vars.index).css("background","rgba(215, 215, 215, 0.45)").siblings().css("background","rgba(30, 30, 30, 0.98)");
-                    }else if(event.keyCode==40){//down
-                        ++loginCookie.vars.index;
-                        if( loginCookie.vars.index > $("#userList option").length-1 ){
-                            loginCookie.vars.index = 0;
-                        }
-                        $("#userList option").eq(loginCookie.vars.index).css("background","rgba(215, 215, 215, 0.45)").siblings().css("background","rgba(30, 30, 30, 0.98)");
-                    }else if(event.keyCode==13){ //enter
-                        var name = $("#userList option").eq(loginCookie.vars.index).text();
-                        if(name){
-                            loginCookie.vars.nameNode.val(name);
-                            sendpwd = $("#userList option").eq(loginCookie.vars.index).attr('data-id');
-                            flag = true;
-                        }
-                        loginCookie.vars.pwdNode.val("88888888");
-                        $("#userList").remove();
-                    }
-                });
-
-            }
-
-        }
 
         function login(){
             if($("#username").val().length==0){
@@ -370,12 +116,9 @@
             $("#btnLogin").prop("disabled",true);
 
             var username = $("#username").val();
+            var password = calcMD5($("#password").val());
 
-            if( !flag ) {
-                sendpwd = calcMD5($("#password").val());
-            }
-
-            var data = {username:username,password:sendpwd};
+            var data = {username:username,password:password};
 
             ajax({
                 type: "post",
@@ -387,11 +130,6 @@
                     $("#btnLogin").prop("disabled",false);
                 } else {
                     if (data.status == "success"){
-                        if(isremember()){
-                            loginCookie.set(username,sendpwd);
-                        }else {
-                            loginCookie.clean(username);
-                        }
                         window.location.href = "${contextPath}"+data.url;
                     }else {
                         $("#error_msg").html('<font color="red">请修改初始密码</font>');
@@ -411,30 +149,30 @@
         function savePwd(){
             var id = $("#id").val();
             if (!id){
-                alert("页面异常，请刷新重试!");
+                $(".usr_label").text("页面异常，请刷新重试!");
                 return false;
             }
 
             var pwd1 = $("#pwd1").val();
             if (!pwd1){
-                alert("请填新密码!");
+                $(".usr_label").text("请填新密码!");
                 return false;
             }
             if (pwd1.length < 6 || pwd1.length > 15){
-                alert("密码长度请在6-15位之间!");
+                $(".usr_label").text("密码长度请在6-15位之间!");
                 return false;
             }
             var pwd2 = $("#pwd2").val();
             if (!pwd2){
-                alert("请填写确认密码!");
+                $(".usr_label").text("请填写确认密码!");
                 return false;
             }
             if (pwd2.length < 6 || pwd2.length > 15){
-                alert("密码长度请在6-15位之间!");
+                $(".usr_label").text("密码长度请在6-15位之间!");
                 return false;
             }
             if (pwd1 != pwd2){
-                alert("两密码不一致!");
+                $(".usr_label").text("两密码不一致!");
                 return false;
             }
             ajax({
@@ -449,7 +187,6 @@
             },function (data) {
                 if (data == "true"){
                     $('#pwdModal').modal('hide');
-                    alertMsg("修改成功,请重新登录");
                     $("#btnLogin").prop("disabled",false);
                     $("#password").val("").focus();
                     $("#error_msg").html('<font color="green">请重新登录</font>');
@@ -465,117 +202,105 @@
                 }
             });
         }
-
     </script>
 
 </head>
 
 <body id="${sessionScope.skin}">
-
-<section id="login">
-    <header>
-        <h1 style="width: 250px">
-            <img src="${contextPath}/static/img/jobx.png">
-        </h1>
-        <h4 style="margin-top: 20px;font-size: 22px;font-weight: 700;margin-bottom: 1px;">Let's scheduling easy</h4>
-    </header>
-
-    <div id="box-login" class="box tile animated active" style="margin-top:25px;">
-        <h2 class="m-t-0 m-b-15">登录</h2>
-        <input type="text" placeholder="请输入用户名" id="username" class="login-control m-b-10">
-        <input type="password" placeholder="请输入密码" id="password" class="login-control">
-        <div class="checkbox m-b-20">
-            <label style="color: rgb(192,192,192)">
-                <input type="checkbox" id="remember"> 记住密码
-            </label>
+<div class="login">
+    <!-- Login -->
+    <div class="login__block active" id="l-login">
+        <div class="login__block__header">
+            <h1 style="width: 250px">
+                <img src="${contextPath}/static/img/jobx.png" style="width: 200px;">
+            </h1>
+            Let's scheduling easy
         </div>
+        <div class="login__block__body">
+            <div class="form-group" style="margin-top: -15px;margin-bottom: 8px;">
+                <span id="error_msg" style=" color: rgb(255,0,0)"> ${loginMsg} </span>
+            </div>
 
-        <button id="btnLogin" class="btn btn-sm m-r-5" type="button">登录</button>
-        <c:if test="${empty loginMsg}">
-            <span id="error_msg" style=" color: rgb(192,192,192)">请输入您的用户名和密码进行登陆 </span>
-        </c:if>
-        <c:if test="${!empty loginMsg}">
-            <span id="error_msg" style=" color: rgb(255,0,0)"> ${loginMsg} </span>
-        </c:if>
+            <div class="form-group">
+                <input type="text" class="form-control text-center" placeholder="Account" id="username">
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control text-center" placeholder="Password" id="password">
+            </div>
+            <a href="javascript:void (0)" id="btnLogin" class="btn btn--icon login__block__btn"><i class="zmdi zmdi-long-arrow-right" style="margin-top:10px"></i></a>
+        </div>
     </div>
 
-    <div class="modal fade" id="pwdModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
-                    <h4>修改默认密码</h4>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal" role="form" id="pwdform">
-                        <input type="hidden" id="id">
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <label for="pwd1" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;新&nbsp;&nbsp;密&nbsp;&nbsp;码：</label>
-                            <div class="col-md-9">
-                                <input type="password" class="form-control " id="pwd1" placeholder="请输入新密码">
-                            </div>
+</div>
+
+<div class="modal fade" id="pwdModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
+                <h4>修改默认密码</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form" id="pwdform">
+                    <input type="hidden" id="id">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="pwd1" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;新&nbsp;&nbsp;密&nbsp;&nbsp;码</label>
+                        <div class="col-md-9">
+                            <input type="password" class="form-control " id="pwd1" placeholder="请输入新密码">
                         </div>
-                        <div class="form-group">
-                            <label for="pwd2" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;确认密码：</label>
-                            <div class="col-md-9">
-                                <input type="password" class="form-control " id="pwd2" placeholder="请输入确认密码"/>&nbsp;&nbsp;<label id="checkpwd"></label>
-                            </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd2" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;确认密码</label>
+                        <div class="col-md-9">
+                            <input type="password" class="form-control " id="pwd2" placeholder="请输入确认密码"/>&nbsp;&nbsp;<label id="checkpwd"></label>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <center>
-                        <button type="button" class="btn btn-sm"  onclick="savePwd()">保存</button>&nbsp;&nbsp;
-                        <button type="button" class="btn btn-sm"  data-dismiss="modal">关闭</button>
-                    </center>
-                </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="usr_label"></label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm" style="cursor: pointer" onclick="savePwd()">保存</button>&nbsp;&nbsp;
+                <button type="button" class="btn btn-sm"  style="cursor: pointer" data-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>
+</div>
 
-</section>
+<!-- Older IE warning message -->
+<!--[if IE]>
+<div class="ie-warning">
+    <h1>Warning!!</h1>
+    <p>You are using an outdated version of Internet Explorer, please upgrade to any of the following web browsers to access this website.</p>
 
+    <div class="ie-warning__downloads">
+        <a href="http://www.google.com/chrome">
+            <img src="img/browsers/chrome.png" alt="">
+        </a>
 
-<!-- Older IE Message -->
-<!--[if lt IE 9]>
-<div class="ie-block">
-    <h1 class="Ops">Ooops!</h1>
-    <p> 您正在使用一个过时的互联网浏览器，升级到下列任何一个网络浏览器，以访问该网站的最大功能。 </p>
-    <ul class="browsers">
-        <li>
-            <a href="https://www.google.com/intl/en/chrome/browser/">
-                <img src="${contextPath}/static/img/browsers/chrome.png" alt="">
-                <div>Google Chrome</div>
-            </a>
-        </li>
-        <li>
-            <a href="http://www.mozilla.org/en-US/firefox/new/">
-                <img src="${contextPath}/static/img/browsers/firefox.png" alt="">
-                <div>Mozilla Firefox</div>
-            </a>
-        </li>
-        <li>
-            <a href="http://www.opera.com/computer/windows">
-                <img src="${contextPath}/static/img/browsers/opera.png" alt="">
-                <div>Opera</div>
-            </a>
-        </li>
-        <li>
-            <a href="http://safari.en.softonic.com/">
-                <img src="${contextPath}/static/img/browsers/safari.png" alt="">
-                <div>Safari</div>
-            </a>
-        </li>
-        <li>
-            <a href="http://windows.microsoft.com/en-us/internet-explorer/downloads/ie-10/worldwide-languages">
-                <img src="${contextPath}/static/img/browsers/ie.png" alt="">
-                <div>Internet Explorer(New)</div>
-            </a>
-        </li>
-    </ul>
-    <p>请升级您的浏览器以便带来更好更好的用户体验 <br/>谢谢...</p>
+        <a href="https://www.mozilla.org/en-US/firefox/new">
+            <img src="img/browsers/firefox.png" alt="">
+        </a>
+
+        <a href="http://www.opera.com">
+            <img src="img/browsers/opera.png" alt="">
+        </a>
+
+        <a href="https://support.apple.com/downloads/safari">
+            <img src="img/browsers/safari.png" alt="">
+        </a>
+
+        <a href="https://www.microsoft.com/en-us/windows/microsoft-edge">
+            <img src="img/browsers/edge.png" alt="">
+        </a>
+
+        <a href="http://windows.microsoft.com/en-us/internet-explorer/download-ie">
+            <img src="img/browsers/ie.png" alt="">
+        </a>
+    </div>
+    <p>Sorry for the inconvenience!</p>
 </div>
 <![endif]-->
-
 </body>
 </html>
