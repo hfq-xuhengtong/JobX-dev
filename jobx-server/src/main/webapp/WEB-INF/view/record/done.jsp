@@ -51,7 +51,7 @@
         });
 
         function doUrl() {
-            var pageSize = $("#size").val();
+            var pageSize = $("#size").val()||${pageBean.pageSize};
             var queryDate = $("#queryDate").val();
             var success = $("#success").val();
             var agentId = $("#agentId").val();

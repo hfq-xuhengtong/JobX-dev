@@ -248,7 +248,7 @@
                 });
             },
             changeUrl:function () {
-                var pageSize = $("#size").val();
+                var pageSize = $("#size").val()||${pageBean.pageSize};
                 var agentId = $("#sagentId").val();
                 var cronType = $("#cronType").val();
                 var keyWord = $("#keyWord").val().trim();

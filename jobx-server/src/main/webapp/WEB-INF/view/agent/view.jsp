@@ -148,7 +148,7 @@
         });
 
         function doUrl() {
-            var pageSize = $("#size").val();
+            var pageSize = $("#size").val()||${pageBean.pageSize};
             var agentName = $("#agentName").val().trim();
             var status = $("#agentStatus").val();
             window.location.href = "${contextPath}/agent/view.htm?pageSize=" + pageSize + "&name=" + agentName + "&status=" + status;

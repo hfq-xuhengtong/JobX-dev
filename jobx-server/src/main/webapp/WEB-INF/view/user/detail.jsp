@@ -88,7 +88,7 @@
 
         $(document).ready(function(){
             $("#size").change(function(){
-                var pageSize = $("#size").val();
+                var pageSize = $("#size").val()||${pageBean.pageSize};
                 window.location.href = "${contextPath}/user/view.htm?pageSize="+pageSize;
             });
 

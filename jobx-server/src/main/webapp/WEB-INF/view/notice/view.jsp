@@ -15,7 +15,7 @@
         function doUrl(){
             var agentId = $("#agentId").val();
             var sendTime = $("#sendTime").val();
-            var pageSize = $("#size").val();
+            var pageSize = $("#size").val()||${pageBean.pageSize};
             window.location.href = "${contextPath}/notice/view.htm?agentId="+agentId+"&sendTime="+sendTime+"&pageSize="+pageSize;
         }
 

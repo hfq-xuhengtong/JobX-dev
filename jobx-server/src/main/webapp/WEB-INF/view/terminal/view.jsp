@@ -335,7 +335,7 @@
 
         $(document).ready(function () {
             $("#size").change(function () {
-                var pageSize = $("#size").val();
+                var pageSize = $("#size").val()||${pageBean.pageSize};
                 window.location.href="${contextPath}/terminal/view.htm?pageNo=${pageBean.pageNo}&pageSize="+pageSize+"&orderBy=${pageBean.orderBy}&order=${pageBean.order}";
             });
 
