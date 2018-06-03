@@ -941,7 +941,6 @@ hr {
 .pagination {
     margin-top: 5px;
     margin-bottom: 10px;
-    float: right;
 }
 
 .pagination > li > a, .pagination > li > span {

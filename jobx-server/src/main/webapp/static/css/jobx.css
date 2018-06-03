@@ -381,3 +381,14 @@ a:visited {
     color: rgba(225,225,225,1);
 }
 
+.pagination input {
+    height: 23px;
+    width: 38px;
+    margin: -3px 3px;
+    padding-left: 4px;
+}
+
+.pagination .pagesize {
+    height: 31px;
+    padding-top: 3px;
+}

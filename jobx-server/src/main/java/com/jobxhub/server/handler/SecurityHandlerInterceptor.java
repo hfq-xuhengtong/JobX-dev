@@ -40,7 +40,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.*;
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * 登陆权限拦截器

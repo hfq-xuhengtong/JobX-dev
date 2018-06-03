@@ -41,17 +41,6 @@
     <div class="block-area" id="defaultStyle">
 
         <div>
-            <div style="float: left">
-                <label>
-                    每页 <select size="1" class="select-jobx" id="size" style="width: 50px;">
-                    <option value="15">15</option>
-                    <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                    <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-                </select> 条记录
-                </label>
-            </div>
-
             <div style="float: right;margin-top: -10px">
                 <label for="agentId">执行器：</label>
                 <select id="agentId" name="agentId" class="select-jobx" style="width: 120px;">
