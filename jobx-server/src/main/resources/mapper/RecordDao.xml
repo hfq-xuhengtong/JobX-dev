@@ -94,8 +94,8 @@
 
         </if>
 
-        <if test="pager.filter.queryDate !=null " >
-            and date_format(r.start_time,'%Y-%m-%d') = #{pager.filter.queryDate}
+        <if test="pager.filter.record.queryDate !=null " >
+            and date_format(r.start_time,'%Y-%m-%d') = #{pager.filter.record.queryDate}
         </if>
 
         <if test="pager.filter.userId !=null " >
@@ -140,8 +140,8 @@
             </if>
         </if>
 
-        <if test="filter.queryDate !=null " >
-            and date_format(r.start_time,'%Y-%m-%d') = #{filter.queryDate}
+        <if test="filter.record.queryDate !=null " >
+            and date_format(r.start_time,'%Y-%m-%d') = #{filter.record.queryDate}
         </if>
 
         <if test="filter.userId !=null " >

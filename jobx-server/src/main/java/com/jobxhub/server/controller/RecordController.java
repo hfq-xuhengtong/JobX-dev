@@ -64,66 +64,34 @@ public class RecordController extends BaseController {
      * @return
      */
     @RequestMapping("done.htm")
-    public String queryDone(HttpSession session, PageBean pageBean, Record record, String queryTime, Model model) {
-
+    public String queryDone(HttpSession session, PageBean pageBean, Record record,Model model) {
         model.addAttribute("agents", agentService.getOwnerAgents(session));
-
-        if (notEmpty(record.getSuccess())) {
-            model.addAttribute("success", record.getSuccess());
-        }
         if (notEmpty(record.getAgentId())) {
-            model.addAttribute("agentId", record.getAgentId());
-        }
-
-        if (notEmpty(record.getAgentId())) {
-            model.addAttribute("agentId", record.getAgentId());
             model.addAttribute("jobs", jobService.getByAgent(record.getAgentId()));
         } else {
             model.addAttribute("jobs", jobService.getAll());
         }
-
-        if (notEmpty(record.getJobId())) {
-            model.addAttribute("jobId", record.getJobId());
-        }
-        if (notEmpty(queryTime)) {
-            model.addAttribute("queryTime", queryTime);
-        }
-        if (notEmpty(record.getExecType())) {
-            model.addAttribute("execType", record.getExecType());
-        }
-        recordService.getPageBean(session, pageBean, record, queryTime, true);
-
+        recordService.getPageBean(session, pageBean, record, true);
         return "/record/done";
     }
 
     @RequestMapping("running.htm")
-    public String queryRunning(HttpSession session, PageBean pageBean, Record record, String queryTime, Model model, Boolean refresh) {
+    public String queryRunning(HttpSession session, PageBean pageBean, Record record, Model model, Boolean refresh) {
 
         model.addAttribute("agents", agentService.getOwnerAgents(session));
 
         if (notEmpty(record.getAgentId())) {
-            model.addAttribute("agentId", record.getAgentId());
             model.addAttribute("jobs", jobService.getByAgent(record.getAgentId()));
         } else {
             model.addAttribute("jobs", jobService.getAll());
         }
-
-        if (notEmpty(record.getJobId())) {
-            model.addAttribute("jobId", record.getJobId());
-        }
-        if (notEmpty(queryTime)) {
-            model.addAttribute("queryTime", queryTime);
-        }
-        if (notEmpty(record.getExecType())) {
-            model.addAttribute("execType", record.getExecType());
-        }
-        recordService.getPageBean(session, pageBean, record, queryTime, false);
+        recordService.getPageBean(session, pageBean, record, false);
         return refresh == null ? "/record/running" : "/record/refresh";
     }
 
     @RequestMapping("refresh.htm")
-    public String refresh(HttpSession session, PageBean pageBean, Record record, String queryTime, Model model) {
-        return this.queryRunning(session, pageBean, record, queryTime, model, true);
+    public String refresh(HttpSession session, PageBean pageBean, Record record, Model model) {
+        return this.queryRunning(session, pageBean, record, model, true);
     }
 
     @RequestMapping("detail/{id}.htm")

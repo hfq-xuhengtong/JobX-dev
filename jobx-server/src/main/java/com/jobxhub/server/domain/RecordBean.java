@@ -22,9 +22,11 @@
 package com.jobxhub.server.domain;
 
 import com.google.common.base.Function;
+import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.server.dto.Record;
 import org.springframework.beans.BeanUtils;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 public class RecordBean {

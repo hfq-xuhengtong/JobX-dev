@@ -47,7 +47,7 @@ public class RecordService {
     @Autowired
     private RecordDao recordDao;
 
-    public void getPageBean(HttpSession session, PageBean<Record> pageBean,Record record,String queryDate, boolean status) {
+    public void getPageBean(HttpSession session, PageBean<Record> pageBean,Record record,boolean status) {
         pageBean.put("record",record);
         pageBean.put("running",status);
         if (!JobXTools.isPermission(session)) {

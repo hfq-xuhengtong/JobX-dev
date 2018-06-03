@@ -52,12 +52,12 @@
 
         function doUrl() {
             var pageSize = $("#size").val();
-            var queryTime = $("#queryTime").val();
+            var queryDate = $("#queryDate").val();
             var success = $("#success").val();
             var agentId = $("#agentId").val();
             var jobName = $("#jobName").val().trim();
             var execType = $("#execType").val();
-            window.location.href = "${contextPath}/record/done.htm?queryTime=" + queryTime + "&success=" + success + "&agentId=" + agentId + "&jobName=" + jobName + "&execType=" + execType + "&pageSize=" + pageSize;
+            window.location.href = "${contextPath}/record/done.htm?queryDate=" + queryDate + "&success=" + success + "&agentId=" + agentId + "&jobName=" + jobName + "&execType=" + execType + "&pageSize=" + pageSize;
         }
 
         function showRedo(id,length,groupId,count){
@@ -205,39 +205,39 @@
                 </label>
             </div>
 
-            <div style="float: right;margin-bottom: 10px">
+            <div class="opt-bar" style="margin-bottom: 10px;margin-top: 0px;">
                 <label for="agentId">执行器：</label>
-                <select id="agentId" name="agentId" class="select-jobx" style="width: 110px;">
+                <select id="agentId" name="agentId" class="select-jobx w110">
                     <option value="">全部</option>
                     <c:forEach var="d" items="${agents}">
-                        <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
+                        <option value="${d.agentId}" ${d.agentId eq record.agentId ? 'selected' : ''}>${d.name}</option>
                     </c:forEach>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <label for="jobName">任务名称：</label>
-                <input id="jobName" name="jobName" type="text" value="${jobName}" style="width: 110px;"></input>
+                <input id="jobName" name="jobName" type="text" value="${record.jobName}" class="w110" placeholder="根据名称搜索"/>
                 &nbsp;&nbsp;&nbsp;
                 <label for="success">执行状态：</label>
-                <select id="success" name="success" class="select-jobx" style="width: 80px;">
+                <select id="success" name="success" class="select-jobx w80">
                     <option value="">全部</option>
-                    <option value="1" ${success eq 1 ? 'selected' : ''}>成功</option>
-                    <option value="0" ${success eq 0 ? 'selected' : ''}>失败</option>
-                    <option value="2" ${success eq 2 ? 'selected' : ''}>被杀</option>
-                    <option value="3" ${success eq 3 ? 'selected' : ''}>超时</option>
+                    <option value="1" ${record.success eq 1 ? 'selected' : ''}>成功</option>
+                    <option value="0" ${record.success eq 0 ? 'selected' : ''}>失败</option>
+                    <option value="2" ${record.success eq 2 ? 'selected' : ''}>被杀</option>
+                    <option value="3" ${record.success eq 3 ? 'selected' : ''}>超时</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <label for="execType">执行方式：</label>
-                <select id="execType" name="execType" class="select-jobx" style="width: 80px;">
+                <select id="execType" name="execType" class="select-jobx w80">
                     <option value="">全部</option>
-                    <option value="0" ${execType eq 0 ? 'selected' : ''}>自动</option>
-                    <option value="1" ${execType eq 1 ? 'selected' : ''}>手动</option>
-                    <option value="2" ${execType eq 2 ? 'selected' : ''}>接口</option>
-                    <option value="3" ${execType eq 3 ? 'selected' : ''}>重跑</option>
-                    <option value="4" ${execType eq 4 ? 'selected' : ''}>现场</option>
+                    <option value="0" ${record.execType eq 0 ? 'selected' : ''}>自动</option>
+                    <option value="1" ${record.execType eq 1 ? 'selected' : ''}>手动</option>
+                    <option value="2" ${record.execType eq 2 ? 'selected' : ''}>接口</option>
+                    <option value="3" ${record.execType eq 3 ? 'selected' : ''}>重跑</option>
+                    <option value="4" ${record.execType eq 4 ? 'selected' : ''}>现场</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
-                <label for="queryTime">开始时间：</label>
-                <input type="text" id="queryTime" name="queryTime" value="${queryTime}" onfocus="WdatePicker({onpicked:function(){doUrl(); },dateFmt:'yyyy-MM-dd'})" class="Wdate select-jobx" style="width: 90px"/>
+                <label for="queryDate">开始时间：</label>
+                <input type="text" id="queryDate" name="queryDate" value="${record.queryDate}" onfocus="WdatePicker({onpicked:function(){doUrl(); },dateFmt:'yyyy-MM-dd'})" class="Wdate select-jobx w90"/>
             </div>
         </div>
 
@@ -371,7 +371,7 @@
                 </tbody>
             </c:forEach>
         </table>
-        <cron:pager href="${contextPath}/record/done.htm?queryTime=${queryTime}&success=${success}&agentId=${agentId}&jobName=${jobName}&execType=${execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/record/done.htm?queryDate=${record.queryDate}&success=${record.success}&agentId=${record.agentId}&jobName=${record.jobName}&execType=${record.execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
     </div>
 
 </section>

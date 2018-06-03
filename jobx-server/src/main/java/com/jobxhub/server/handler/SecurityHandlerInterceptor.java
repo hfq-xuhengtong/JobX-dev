@@ -175,6 +175,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                     httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
                     return false;
                 } else {
+                    httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
                     if ( preUrlParams.getString("url").equals(nowUrlParams.getString("url")) &&
                         preUrlParams.getString("params").equals(nowUrlParams.getString("params")) ) {
                         //判断两次提交数据的时长间隔.....
@@ -183,7 +184,6 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                             return true;
                         }
                     }
-                    httpServletRequest.getSession().setAttribute("repeatData", nowUrlParams);
                     return false;
                 }
             }

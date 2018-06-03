@@ -393,7 +393,7 @@ public class JobXRegistry {
         String bodyFormat = line(1) + tab(3);
         String endFormat = line(2);
 
-        String infoFormat = headerFormat + "███████████████ [JOBX] serverChanged,print dispatched info ███████████████" +
+        String infoFormat = headerFormat + "███████████████ [JobX] serverChanged,print dispatched info ███████████████" +
                 bodyFormat + "datetime: \"{}\"" +
                 bodyFormat + "previous serverSize:{}" +
                 bodyFormat + "current serverSize:{}" +

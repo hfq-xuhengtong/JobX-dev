@@ -11,6 +11,9 @@
         .none {
             text-align: center;
         }
+
+
+
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -452,9 +455,9 @@
                 </label>
             </div>
 
-            <div style="float: right;margin-top: -9px">
+            <div class="opt-bar">
                 <label for="sagentId">执行器：</label>
-                <select id="sagentId" name="sagentId" class="select-jobx" style="width: 110px;">
+                <select id="sagentId" name="sagentId" class="select-jobx w110">
                     <option value="">全部</option>
                     <c:forEach var="d" items="${agents}">
                         <option value="${d.agentId}" ${d.agentId eq job.agentId ? 'selected' : ''}>${d.name}</option>
@@ -463,33 +466,33 @@
 
                 &nbsp;&nbsp;&nbsp;
                 <label for="keyWord">作业名称：</label>
-                <input id="keyWord" name="keyWord" type="text" value="${job.jobName}" style="width: 110px;"></input>
+                <input id="keyWord" name="keyWord" type="text" value="${job.jobName}" class="w110" placeholder="根据名称搜索"></input>
+
+                &nbsp;&nbsp;&nbsp;
+                <label for="jobType">作业类型：</label>
+                <select id="jobType" name="jobType" class="select-jobx w70">
+                    <option value="">全部</option>
+                    <option value="0" ${job.jobType eq 0 ? 'selected' : ''}>单一</option>
+                    <option value="1" ${job.jobType eq 1 ? 'selected' : ''}>流程</option>
+                </select>
 
                 &nbsp;&nbsp;&nbsp;
                 <label for="cronType">规则类型：</label>
-                <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
+                <select id="cronType" name="cronType" class="select-jobx w80">
                     <option value="">全部</option>
                     <option value="0" ${job.cronType eq 0 ? 'selected' : ''}>crontab</option>
                     <option value="1" ${job.cronType eq 1 ? 'selected' : ''}>quartz</option>
                 </select>
 
                 &nbsp;&nbsp;&nbsp;
-                <label for="jobType">作业类型：</label>
-                <select id="jobType" name="jobType" class="select-jobx" style="width: 70px;">
-                    <option value="">全部</option>
-                    <option value="0" ${job.jobType eq 0 ? 'selected' : ''}>单一</option>
-                    <option value="1" ${job.jobType eq 1 ? 'selected' : ''}>流程</option>
-                </select>
-
                 <label for="sredo">重跑：</label>
-                <select id="sredo" name="sredo" class="select-jobx" style="width: 60px;">
+                <select id="sredo" name="sredo" class="select-jobx w60">
                     <option value="">全部</option>
                     <option value="1" ${job.redo eq 1 ? 'selected' : ''}>是</option>
                     <option value="0" ${job.redo eq 0 ? 'selected' : ''}>否</option>
                 </select>
 
-                <a href="${contextPath}/job/add.htm" class="btn btn-sm m-t-10"
-                   style="margin-left: 20px;margin-bottom: 8px;margin-top: -3px;"><i class="icon">&#61943;</i>添加</a>
+                <a href="${contextPath}/job/add.htm" class="btn btn-sm m-t-10"><i class="icon">&#61943;</i>添加</a>
             </div>
         </div>
 

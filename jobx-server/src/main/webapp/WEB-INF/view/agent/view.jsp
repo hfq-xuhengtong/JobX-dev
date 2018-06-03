@@ -65,7 +65,7 @@
                 },2000);
             });
 
-            /*var interId = setInterval(function () {
+            var interId = setInterval(function () {
 
                 $("#highlight").fadeOut(8000, function () {
                     $(this).show();
@@ -90,7 +90,7 @@
                         $("#tableContent").html(data);
                     }
                 });
-            }, 1000 * 10);*/
+            }, 1000 * 10);
 
 
             $("#name").focus(function () {
@@ -781,21 +781,20 @@
                 </label>
             </div>
 
-            <div style="float: right;margin-top: -10px">
+            <div class="opt-bar">
                 <label>执行器名：</label>
-                <input type="text" name="agentName" id="agentName" value="${agentName}" style="width: 180px;"></input>
+                <input type="text" name="agentName" id="agentName" value="${agentName}" class="w120" placeholder="根据名称搜索"/>
                 &nbsp;&nbsp;&nbsp;
 
                 <label>通信状态：</label>
-                <select id="agentStatus" name="agentStatus" class="select-jobx" style="width: 80px;">
+                <select id="agentStatus" name="agentStatus" class="select-jobx w80">
                     <option value="">全部</option>
                     <option value="1" ${agentStatus eq 1 ? 'selected' : ''}>成功</option>
                     <option value="0" ${agentStatus eq 0 ? 'selected' : ''}>失联</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <c:if test="${permission eq true}">
-                    <a href="${contextPath}/agent/add.htm" class="btn btn-sm m-t-10"
-                       style="margin-left: 50px;margin-bottom: 8px"><i class="icon">&#61943;</i>添加</a>
+                    <a href="${contextPath}/agent/add.htm" class="btn btn-sm m-t-10"><i class="icon">&#61943;</i>添加</a>
                 </c:if>
             </div>
         </div>

@@ -21,10 +21,10 @@
                     url:"${contextPath}/record/refresh.htm",
                     data:{
                         "size":"${size}",
-                        "queryTime":"${queryTime}",
-                        "agentId":"${agentId}",
-                        "jobId":"${jobId}",
-                        "execType":"${execType}",
+                        "queryDate":"${record.queryDate}",
+                        "agentId":"${record.agentId}",
+                        "jobId":"${record.jobId}",
+                        "execType":"${record.execType}",
                         "pageNo":${pageBean.pageNo},
                         "pageSize":${pageBean.pageSize}
                     },
@@ -47,11 +47,11 @@
         });
         function doUrl() {
             var pageSize = $("#size").val();
-            var queryTime = $("#queryTime").val();
+            var queryDate = $("#queryDate").val();
             var agentId = $("#agentId").val();
             var jobId = $("#jobId").val();
             var execType = $("#execType").val();
-            window.location.href = "${contextPath}/record/running.htm?queryTime=" + queryTime + "&agentId=" + agentId + "&jobId=" + jobId + "&execType=" + execType + "&pageSize=" + pageSize;
+            window.location.href = "${contextPath}/record/running.htm?queryDate=" + queryDate + "&agentId=" + agentId + "&jobId=" + jobId + "&execType=" + execType + "&pageSize=" + pageSize;
         }
 
         function killJob(id){
@@ -135,35 +135,35 @@
                 </label>
             </div>
 
-            <div style="float: right;margin-bottom: 10px">
+            <div class="opt-bar" style="margin-bottom: 10px;margin-top: 0px;">
                 <label for="agentId">执行器：</label>
-                <select id="agentId" name="agentId" class="select-jobx" style="width: 120px;">
+                <select id="agentId" name="agentId" class="select-jobx w120">
                     <option value="">全部</option>
                     <c:forEach var="d" items="${agents}">
-                        <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
+                        <option value="${d.agentId}" ${d.agentId eq record.agentId ? 'selected' : ''}>${d.name}</option>
                     </c:forEach>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <label for="jobId">作业名称：</label>
-                <select id="jobId" name="jobId" class="select-jobx" style="width: 80px;">
+                <select id="jobId" name="jobId" class="select-jobx w80">
                     <option value="">全部</option>
                     <c:forEach var="t" items="${jobs}">
-                        <option value="${t.jobId}" ${t.jobId eq jobId ? 'selected' : ''}>${t.jobName}&nbsp;</option>
+                        <option value="${t.jobId}" ${t.jobId eq record.jobId ? 'selected' : ''}>${t.jobName}&nbsp;</option>
                     </c:forEach>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <label for="execType">执行方式：</label>
-                <select id="execType" name="execType" class="select-jobx" style="width: 80px;">
+                <select id="execType" name="execType" class="select-jobx w80">
                     <option value="">全部</option>
-                    <option value="0" ${execType eq 0 ? 'selected' : ''}>自动</option>
-                    <option value="1" ${execType eq 1 ? 'selected' : ''}>手动</option>
-                    <option value="2" ${execType eq 2 ? 'selected' : ''}>接口</option>
-                    <option value="3" ${execType eq 3 ? 'selected' : ''}>重跑</option>
-                    <option value="4" ${execType eq 4 ? 'selected' : ''}>现场</option>
+                    <option value="0" ${record.execType eq 0 ? 'selected' : ''}>自动</option>
+                    <option value="1" ${record.execType eq 1 ? 'selected' : ''}>手动</option>
+                    <option value="2" ${record.execType eq 2 ? 'selected' : ''}>接口</option>
+                    <option value="3" ${record.execType eq 3 ? 'selected' : ''}>重跑</option>
+                    <option value="4" ${record.execType eq 4 ? 'selected' : ''}>现场</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
-                <label for="queryTime">开始时间：</label>
-                <input type="text" id="queryTime" name="queryTime" value="${queryTime}" onfocus="WdatePicker({onpicked:function(){doUrl(); },dateFmt:'yyyy-MM-dd'})" class="Wdate select-jobx" style="width: 90px"/>
+                <label for="queryDate">开始时间：</label>
+                <input type="text" id="queryDate" name="queryDate" value="${record.queryDate}" onfocus="WdatePicker({onpicked:function(){doUrl(); },dateFmt:'yyyy-MM-dd'})" class="Wdate select-jobx w90"/>
             </div>
         </div>
 
@@ -237,7 +237,7 @@
             </tbody>
         </table>
 
-        <cron:pager href="${contextPath}/record/running.htm?queryTime=${queryTime}&agentId=${agentId}&jobId=${jobId}&execType=${execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/record/running.htm?queryDate=${record.queryDate}&agentId=${record.agentId}&jobId=${record.jobId}&execType=${record.execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
 
     </div>
 

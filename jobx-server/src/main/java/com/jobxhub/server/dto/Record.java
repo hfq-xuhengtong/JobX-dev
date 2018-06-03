@@ -26,6 +26,7 @@ package com.jobxhub.server.dto;
 import com.google.common.base.Function;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
+import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.server.domain.RecordBean;
 import org.springframework.beans.BeanUtils;
 
@@ -65,6 +66,7 @@ public class Record implements Serializable {
     private String host;
     private String cronExp;
     private String operateUname;
+    private String queryDate;
 
     private List<Record> redoList = new ArrayList<Record>(0);
 
@@ -284,5 +286,15 @@ public class Record implements Serializable {
 
     public void setRedoList(List<Record> redoList) {
         this.redoList = redoList;
+    }
+
+    public String getQueryDate() {
+        return queryDate;
+    }
+
+    public void setQueryDate(String queryDate) {
+        if (CommonUtils.notEmpty(queryDate)) {
+            this.queryDate = queryDate;
+        }
     }
 }
