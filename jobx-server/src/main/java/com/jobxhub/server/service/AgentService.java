@@ -103,11 +103,13 @@ public class AgentService {
      * @param session
      * @param pageBean
      */
-    public void getPageBean(HttpSession session, PageBean pageBean) {
+    public void getPageBean(HttpSession session, Agent agent, PageBean pageBean) {
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            pageBean.put("userId",user.getUserId());
+            pageBean.put("userId", user.getUserId());
         }
+        pageBean.put("agentName", agent.getName());
+        pageBean.put("status",agent.getStatus());
         pageBean.verifyOrderBy("name", "name", "host", "port");
         List<AgentBean> agentList = agentDao.getByPageBean(pageBean);
         if (CommonUtils.notEmpty(agentList)) {

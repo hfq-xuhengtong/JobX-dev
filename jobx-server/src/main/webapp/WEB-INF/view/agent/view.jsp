@@ -48,8 +48,13 @@
         $(document).ready(function () {
 
             $("#size").change(function () {
-                var pageSize = $("#size").val();
-                window.location.href = "${contextPath}/agent/view.htm?pageSize=" + pageSize;
+                doUrl()
+            });
+            $("#agentName").change(function () {
+                doUrl()
+            });
+            $("#agentStatus").change(function () {
+                doUrl()
             });
 
             new Clipboard('#copy-btn').on('success', function(e) {
@@ -141,7 +146,14 @@
             $("#proxy0").bind("click",toggle.proxy.hide).next().bind("click",toggle.proxy.hide);
 
         });
-        
+
+        function doUrl() {
+            var pageSize = $("#size").val();
+            var agentName = $("#agentName").val().trim();
+            var status = $("#agentStatus").val();
+            window.location.href = "${contextPath}/agent/view.htm?pageSize=" + pageSize + "&name=" + agentName + "&status=" + status;
+        }
+
         function upload(agentId) {
             if (!$(".pong_"+agentId).length) {
                 alert("执行器失联,请检查执行器连接");
@@ -768,12 +780,24 @@
                 </select> 条记录
                 </label>
             </div>
-            <c:if test="${permission eq true}">
-                <div style="float: right;margin-top: -10px">
+
+            <div style="float: right;margin-top: -10px">
+                <label>执行器名：</label>
+                <input type="text" name="agentName" id="agentName" value="${agentName}" style="width: 180px;"></input>
+                &nbsp;&nbsp;&nbsp;
+
+                <label>通信状态：</label>
+                <select id="agentStatus" name="agentStatus" class="select-jobx" style="width: 80px;">
+                    <option value="">全部</option>
+                    <option value="1" ${agentStatus eq 1 ? 'selected' : ''}>成功</option>
+                    <option value="0" ${agentStatus eq 0 ? 'selected' : ''}>失联</option>
+                </select>
+                &nbsp;&nbsp;&nbsp;
+                <c:if test="${permission eq true}">
                     <a href="${contextPath}/agent/add.htm" class="btn btn-sm m-t-10"
                        style="margin-left: 50px;margin-bottom: 8px"><i class="icon">&#61943;</i>添加</a>
-                </div>
-            </c:if>
+                </c:if>
+            </div>
         </div>
 
         <table class="table tile textured table-custom table-sortable">

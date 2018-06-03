@@ -73,11 +73,18 @@
     <select id="getByPageBean" resultMap="AgentBean">
         select
         <include refid="query_Agent"/>
-        from  t_agent as a
+        from t_agent as a
         <if test="pager.filter !=null and pager.filter.userId != null">
             inner join t_user_agent as u
-            on  a.agent_id = u.agent_id
+            on a.agent_id = u.agent_id
             and u.user_id = #{pager.filter.userId}
+        </if>
+        where 1=1
+        <if test="pager.filter !=null and pager.filter.status != null">
+            and a.status=#{pager.filter.status}
+        </if>
+        <if test="pager.filter !=null and pager.filter.agentName != null">
+            and a.name like concat('%',#{pager.filter.agentName},'%')
         </if>
         <if test="pager.orderBy!=null">
             order by a.${pager.orderBy} ${pager.order}
@@ -87,14 +94,18 @@
 
     <select id="getCount" resultType="java.lang.Integer">
         select count(1)
-        from  t_agent as a
+        from t_agent as a
         <if test="filter !=null and filter.userId != null">
             inner join t_user_agent as u
-            on  a.agent_id = u.agent_id
+            on a.agent_id = u.agent_id
             and u.user_id = #{filter.userId}
         </if>
+        where 1=1
         <if test="filter !=null and filter.status != null">
-            where a.status=#{filter.status}
+            and a.status=#{filter.status}
+        </if>
+        <if test="filter !=null and filter.agentName != null">
+            and a.name like concat('%',#{filter.agentName},'%')
         </if>
     </select>
 

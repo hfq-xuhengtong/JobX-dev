@@ -46,7 +46,7 @@
             $("#size").change(function(){doUrl();});
             $("#success").change(function(){doUrl();});
             $("#agentId").change(function(){doUrl();});
-            $("#jobId").change(function(){doUrl();});
+            $("#jobName").change(function(){doUrl();});
             $("#execType").change(function(){doUrl();});
         });
 
@@ -55,9 +55,9 @@
             var queryTime = $("#queryTime").val();
             var success = $("#success").val();
             var agentId = $("#agentId").val();
-            var jobId = $("#jobId").val();
+            var jobName = $("#jobName").val().trim();
             var execType = $("#execType").val();
-            window.location.href = "${contextPath}/record/done.htm?queryTime=" + queryTime + "&success=" + success + "&agentId=" + agentId + "&jobId=" + jobId + "&execType=" + execType + "&pageSize=" + pageSize;
+            window.location.href = "${contextPath}/record/done.htm?queryTime=" + queryTime + "&success=" + success + "&agentId=" + agentId + "&jobName=" + jobName + "&execType=" + execType + "&pageSize=" + pageSize;
         }
 
         function showRedo(id,length,groupId,count){
@@ -214,13 +214,8 @@
                     </c:forEach>
                 </select>
                 &nbsp;&nbsp;&nbsp;
-                <label for="jobId">任务名称：</label>
-                <select id="jobId" name="jobId" class="select-jobx" style="width: 110px;">
-                    <option value="">全部</option>
-                    <c:forEach var="t" items="${jobs}">
-                        <option value="${t.jobId}" ${t.jobId eq jobId ? 'selected' : ''}>${t.jobName}&nbsp;</option>
-                    </c:forEach>
-                </select>
+                <label for="jobName">任务名称：</label>
+                <input id="jobName" name="jobName" type="text" value="${jobName}" style="width: 110px;"></input>
                 &nbsp;&nbsp;&nbsp;
                 <label for="success">执行状态：</label>
                 <select id="success" name="success" class="select-jobx" style="width: 80px;">
@@ -376,7 +371,7 @@
                 </tbody>
             </c:forEach>
         </table>
-        <cron:pager href="${contextPath}/record/done.htm?queryTime=${queryTime}&success=${success}&agentId=${agentId}&jobId=${jobId}&execType=${execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/record/done.htm?queryTime=${queryTime}&success=${success}&agentId=${agentId}&jobName=${jobName}&execType=${execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
     </div>
 
 </section>
