@@ -20,6 +20,7 @@
  */
 package com.jobxhub.rpc.mina;
 
+import com.jobxhub.rpc.support.ChannelWrapper;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author benjobs
  */
-public class ConnectWrapper {
+public class MinaConnectWrapper implements ChannelWrapper {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -36,7 +37,7 @@ public class ConnectWrapper {
 
     private IoSession ioSession;
 
-    public ConnectWrapper(ConnectFuture connectFuture) {
+    public MinaConnectWrapper(ConnectFuture connectFuture) {
         this.connectFuture = connectFuture;
         this.ioSession = connectFuture.getSession();
     }

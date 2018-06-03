@@ -20,6 +20,7 @@
  */
 package com.jobxhub.rpc.netty;
 
+import com.jobxhub.rpc.support.ChannelWrapper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -29,13 +30,13 @@ import org.slf4j.LoggerFactory;
 /**
  * @author benjobs
  */
-public class ChannelWrapper {
+public class NettyChannelWrapper implements ChannelWrapper {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final ChannelFuture channelFuture;
 
-    public ChannelWrapper(ChannelFuture channelFuture) {
+    public NettyChannelWrapper(ChannelFuture channelFuture) {
         this.channelFuture = channelFuture;
     }
 
