@@ -58,7 +58,7 @@
         on r.agent_id = a.agent_id
         inner join t_user as u
         on r.user_id = u.user_id
-        inner join t_job as t
+        left join t_job as t
         on r.job_id = t.job_id
         where r.parent_id is null
 
@@ -108,7 +108,8 @@
     <select id="getCount" resultType="java.lang.Integer">
         select count(1)
         from t_record as r
-        join t_job as t on r.job_id = t.job_id
+        left join t_job as t
+        on r.job_id = t.job_id
         where r.parent_id is null
         <if test="filter.running == true " >
             and r.status in (1,3,4,5,6)
