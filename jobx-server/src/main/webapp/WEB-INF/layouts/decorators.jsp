@@ -169,11 +169,80 @@
             });
         });
 
+        // fullScreen
+        function launchFullScreen(element) {
+            if (element.requestFullScreen) {
+                element.requestFullScreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullScreen) {
+                element.webkitRequestFullScreen();
+            } else if (element.msRequestFullScreen) {
+                element.msRequestFullScreen();
+            } else {
+                return true;
+            }
+        }
+
+        function cancelFullScreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else {
+                return true;
+            }
+        }
+
+        function escFullScreen() {
+            if (!document.fullscreenElement &&
+                !document.mozFullScreenElement &&
+                !document.webkitFullscreenElement &&
+                !document.msFullscreenElement) {
+                fullScreenObj.setAttribute("open","off");
+                fullScreenObj.innerHTML="&#61831;";
+            }
+        }
+
+        document.addEventListener && (document.addEventListener('webkitfullscreenchange', escFullScreen, false) ||
+            document.addEventListener('mozfullscreenchange', escFullScreen, false) ||
+            document.addEventListener('fullscreenchange', escFullScreen, false) ||
+            document.addEventListener('webkitfullscreenchange', escFullScreen, false));
+
+        document.attachEvent && document.attachEvent('msfullscreenchange', escFullScreen);
+
+        function goF11() {
+            fullScreenObj = document.getElementById("fullscreenbtn");
+            var view = document.getElementsByClassName("bodyall")[0];
+
+            var status = fullScreenObj.getAttribute("open");
+            if (status == "off") {
+                if (launchFullScreen(view)) {
+                    alert("你的浏览器，不支持哦");
+                } else {
+                    fullScreenObj.setAttribute("open","on");
+                    fullScreenObj.innerHTML="&#61834;";
+                    view.setAttribute("id","${sessionScope.skin}");
+                }
+            } else {
+                if (cancelFullScreen()) {
+                    alert("你的浏览器，不支持哦");
+                } else {
+                    fullScreenObj.setAttribute("open", "off");
+                    fullScreenObj.innerHTML="&#61831;";
+                }
+            }
+        }
+
     </script>
 
 </head>
 
-<body id="${sessionScope.skin}">
+<body id="${sessionScope.skin}" class="bodyall">
 
     <div id="mask" class="mask"></div>
 
@@ -186,6 +255,14 @@
         <div class="slogan">Let's scheduling easy</div>
         <div class="media-body">
             <div class="media" id="top-menu" style="float:right;margin-right:15px;">
+
+
+                <div class="pull-left tm-icon" id="full-screen">
+                    <a  class="drawer-toggle" data-drawer="messages" id="toggle_screen" href="#">
+                        <i id="fullscreenbtn" open="off" class="icon" title="全屏/退出全屏" style="background-image:none;font-size: 30px; background-size: 25px;" onclick="goF11();">&#61831;</i>
+                    </a>
+                </div>
+
                 <div class="pull-left tm-icon" id="msg-icon" style="display: none;">
                     <a  class="drawer-toggle" data-drawer="messages" id="toggle_message" href="#">
                         <i class="sa-top-message icon" style="background-image:none;font-size: 30px; background-size: 25px;">&#61710;</i>
