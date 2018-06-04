@@ -17,7 +17,102 @@
 
     <sitemesh:write property='head' />
 
+    <style type="text/css">
+        /* html */
+        :-webkit-full-screen {
+            /* properties */
+        }
+        :-moz-fullscreen {
+            /* properties */
+        }
+
+
+        :fullscreen {
+            /* properties */
+        }
+
+
+        /* deeper elements */
+        :-webkit-full-screen video {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* styling the backdrop */
+        ::backdrop {
+            /* properties */
+        }
+    </style>
     <script type="text/javascript">
+        // fullScreen
+        function launchFullScreen(element) {
+            if (element.requestFullScreen) {
+                element.requestFullScreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullScreen) {
+                element.webkitRequestFullScreen();
+            } else if (element.msRequestFullScreen) {
+                element.msRequestFullScreen();
+            } else {
+                return true;
+            }
+        }
+
+        function cancelFullScreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else {
+                return true;
+            }
+        }
+
+        function escFullScreen() {
+            if (!document.fullscreenElement &&
+                !document.mozFullScreenElement &&
+                !document.webkitFullscreenElement &&
+                !document.msFullscreenElement) {
+                fullScreenObj.setAttribute("open","off");
+                fullScreenObj.innerHTML="&#61831;";
+            }
+        }
+
+        document.addEventListener && (document.addEventListener('webkitfullscreenchange', escFullScreen, false) ||
+            document.addEventListener('mozfullscreenchange', escFullScreen, false) ||
+            document.addEventListener('fullscreenchange', escFullScreen, false) ||
+            document.addEventListener('webkitfullscreenchange', escFullScreen, false));
+
+        document.attachEvent && document.attachEvent('msfullscreenchange', escFullScreen);
+
+        function goF11() {
+            fullScreenObj = document.getElementById("fullscreenbtn");
+            var view = document.documentElement;
+
+            var status = fullScreenObj.getAttribute("open");
+            if (status == "off") {
+                if (launchFullScreen(view)) {
+                    alert("你的浏览器，不支持哦");
+                } else {
+                    fullScreenObj.setAttribute("open","on");
+                    fullScreenObj.innerHTML="&#61834;";
+                    view.setAttribute("id","${sessionScope.skin}");
+                }
+            } else {
+                if (cancelFullScreen()) {
+                    alert("你的浏览器，不支持哦");
+                } else {
+                    fullScreenObj.setAttribute("open", "off");
+                    fullScreenObj.innerHTML="&#61831;";
+                }
+            }
+        }
+
         $(document).ready(function() {
 
             <c:if test="${fn:contains(uri,'/notice/')}">
@@ -138,8 +233,6 @@
                 });
 
             });
-
-
             $.ajax({
                 type:"POST",
                 url: "${contextPath}/notice/uncount.do",
@@ -167,76 +260,8 @@
                     }
                 }
             });
+
         });
-
-        // fullScreen
-        function launchFullScreen(element) {
-            if (element.requestFullScreen) {
-                element.requestFullScreen();
-            } else if (element.mozRequestFullScreen) {
-                element.mozRequestFullScreen();
-            } else if (element.webkitRequestFullScreen) {
-                element.webkitRequestFullScreen();
-            } else if (element.msRequestFullScreen) {
-                element.msRequestFullScreen();
-            } else {
-                return true;
-            }
-        }
-
-        function cancelFullScreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.webkitCancelFullScreen) {
-                document.webkitCancelFullScreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            } else {
-                return true;
-            }
-        }
-
-        function escFullScreen() {
-            if (!document.fullscreenElement &&
-                !document.mozFullScreenElement &&
-                !document.webkitFullscreenElement &&
-                !document.msFullscreenElement) {
-                fullScreenObj.setAttribute("open","off");
-                fullScreenObj.innerHTML="&#61831;";
-            }
-        }
-
-        document.addEventListener && (document.addEventListener('webkitfullscreenchange', escFullScreen, false) ||
-            document.addEventListener('mozfullscreenchange', escFullScreen, false) ||
-            document.addEventListener('fullscreenchange', escFullScreen, false) ||
-            document.addEventListener('webkitfullscreenchange', escFullScreen, false));
-
-        document.attachEvent && document.attachEvent('msfullscreenchange', escFullScreen);
-
-        function goF11() {
-            fullScreenObj = document.getElementById("fullscreenbtn");
-            var view = document.getElementsByClassName("bodyall")[0];
-
-            var status = fullScreenObj.getAttribute("open");
-            if (status == "off") {
-                if (launchFullScreen(view)) {
-                    alert("你的浏览器，不支持哦");
-                } else {
-                    fullScreenObj.setAttribute("open","on");
-                    fullScreenObj.innerHTML="&#61834;";
-                    view.setAttribute("id","${sessionScope.skin}");
-                }
-            } else {
-                if (cancelFullScreen()) {
-                    alert("你的浏览器，不支持哦");
-                } else {
-                    fullScreenObj.setAttribute("open", "off");
-                    fullScreenObj.innerHTML="&#61831;";
-                }
-            }
-        }
 
     </script>
 
