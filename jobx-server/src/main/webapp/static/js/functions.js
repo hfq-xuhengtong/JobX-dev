@@ -34,7 +34,28 @@ $(document).ready(function(){
 					'<a data-skin="skin-greenish" class="col-sm-2 col-xs-4" href="">' +
 						'<img src="'+contextPath+'/static/img/body/skin-greenish.jpg" alt="">' +
 					'</a>' +
-					'<a data-skin="skin-violate" class="col-sm-2 col-xs-4" href="">' +
+
+                    '<a data-skin="skin-5" class="col-sm-2 col-xs-4" href="">' +
+                    '   <img src="'+contextPath+'/static/img/body/skin-5.png" alt="">' +
+                    '</a>' +
+                    '<a data-skin="skin-6" class="col-sm-2 col-xs-4" href="">' +
+                    '   <img src="'+contextPath+'/static/img/body/skin-6.png" alt="">' +
+                    '</a>' +
+                    '<a data-skin="skin-7" class="col-sm-2 col-xs-4" href="">' +
+                    '   <img src="'+contextPath+'/static/img/body/skin-7.png" alt="">' +
+                    '</a>' +
+                    '<a data-skin="skin-8" class="col-sm-2 col-xs-4" href="">' +
+                    '   <img src="'+contextPath+'/static/img/body/skin-8.png" alt="">' +
+                    '</a>' +
+                    '<a data-skin="skin-9" class="col-sm-2 col-xs-4" href="">' +
+                    '   <img src="'+contextPath+'/static/img/body/skin-9.png" alt="">' +
+                    '</a>' +
+                    '<a data-skin="skin-10" class="col-sm-2 col-xs-4" href="">' +
+                    '   <img src="'+contextPath+'/static/img/body/skin-10.png" alt="">' +
+                    '</a>' +
+
+
+                    '<a data-skin="skin-violate" class="col-sm-2 col-xs-4" href="">' +
 						'<img src="'+contextPath+'/static/img/body/skin-violate.jpg" alt="">' +
 					'</a>' +
 					'<a data-skin="skin-chrome" class="col-sm-2 col-xs-4" href="">' +

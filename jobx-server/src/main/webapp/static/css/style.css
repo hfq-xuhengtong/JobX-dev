@@ -2053,6 +2053,33 @@ a.list-group-item.active > .badge,
         background-image: url(/static/img/body/4.jpg);
     }
 
+    #skin-5 {
+        background-image: url(/static/img/body/5.png);
+    }
+
+    #skin-6 {
+        background-image: url(/static/img/body/6.png);
+    }
+
+
+    #skin-7 {
+        background-image: url(/static/img/body/7.png);
+    }
+
+
+    #skin-8 {
+        background-image: url(/static/img/body/8.png);
+    }
+
+
+    #skin-9 {
+        background-image: url(/static/img/body/9.png);
+    }
+
+
+    #skin-10 {
+        background-image: url(/static/img/body/10.png);
+    }
 
     #skin-greenish {
         background-image: url(/static/img/body/greenish.jpg);
