@@ -324,11 +324,14 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "execute.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status remoteExecute(HttpSession session, Long id) {
+    public Status remoteExecute(HttpSession session, Long id,String param) {
         final Job job = jobService.getById(id);//找到要执行的任务
         if (!jobService.checkJobOwner(session, job.getUserId())) return Status.FALSE;
         //手动执行
         Long userId = JobXTools.getUserId(session);
+        if(StringUtils.isNotEmpty(param)){
+            job.setCommand(job.getCommand()+" "+param);
+        }
         job.setUserId(userId);
         job.setAgent(agentService.getAgent(job.getAgentId()));
         //无等待返回前台响应.
