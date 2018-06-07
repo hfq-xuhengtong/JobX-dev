@@ -11,9 +11,6 @@
         .none {
             text-align: center;
         }
-
-
-
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
