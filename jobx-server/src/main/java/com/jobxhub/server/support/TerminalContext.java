@@ -22,19 +22,19 @@
 package com.jobxhub.server.support;
 
 import com.jobxhub.common.Constants;
-import com.jobxhub.server.domain.Terminal;
+import com.jobxhub.server.dto.Terminal;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 
 @Component
 public class TerminalContext implements Serializable {
 
     //key-->token value--->Terminal
-    public static Map<String, Terminal> terminalContext = new ConcurrentHashMap<String, Terminal>(0);
+    public static Map<String, Terminal> terminalContext = new HashMap<String, Terminal>();
 
     private String token;
 

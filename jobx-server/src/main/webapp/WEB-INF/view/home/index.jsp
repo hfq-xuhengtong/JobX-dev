@@ -10,127 +10,38 @@
     <script src="${contextPath}/static/js/highcharts/js/highcharts-more.js?resId=${resourceId}"></script>
     <script src="${contextPath}/static/js/highcharts/js/highcharts-3d.js?resId=${resourceId}"></script>
     <script src="${contextPath}/static/js/highcharts/js/modules/exporting.js?resId=${resourceId}"></script>
-
     <script src="${contextPath}/static/js/socket.io.js?resId=${resourceId}"></script>
     <script src="${contextPath}/static/js/dashboard.js?resId=${resourceId}"></script>
 
-    <style type="text/css">
-
-        #config-view h6 {
-            margin-bottom: 10px;
-            margin-top: 4px;
-            color: rgba(255, 255, 255, 0.85);
-            font-weight: bold;
-        }
-
-        .pie-title {
-            color: rgba(235, 235, 235, 0.85);
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .labact{
-            color:rgb(255,255,255);
-            font-weight: lighter;
-        }
-
-        .block-area{
-            margin-top: -15px;
-        }
-
-        .disk-item{
-            font-weight: lighter;
-        }
-
-        #config-view .counts{
-            font-weight: lighter;
-        }
-
-        #config-view h6{
-            font-weight: lighter;
-        }
-
-        .main-chart {
-            font-weight: lighter;
-        }
-
-        .report_detail {
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-
-
-        .noborder{
-            font-family: "Roboto","Arial",sans-serif;
-            color: rgba(192, 192, 192,0.9);
-            font-weight: lighter;
-        }
-
-        .pull-left i {
-            color: rgba(225,225,225,0.9);
-        }
-
-        .eye-grey{
-            filter:alpha(opacity=20);
-            -moz-opacity:0.2;
-            opacity:0.2;
-        }
-        .record-div-nodata{
-            display: none;
-            height: 235px;
-            position: relative;
-            z-index: -1;
-            margin-bottom: -15px;
-        }
-        .div-nodata{
-            display: none;
-        }
-        .eye-record-nodata{
-            filter:alpha(opacity=40);
-            -moz-opacity:0.4;
-            opacity:0.4;
-        }
-
-        .nodata{
-            font-size: 40px;
-            font-weight: 400;
-        }
-
-        a:visited {
-            color: rgba(225,225,225,1);
-        }
-
-    </style>
-
     <script type="text/javascript">
+
         $(document).ready(function () {
-
             var jobxChart = new JobXChart('${contextPath}');
-
             //跨时段查询任务运行比例
             jobxChart.query();
+
+            $('body').on('click touchstart', '#menu-toggle', function(e){
+                jobxChart.resize();
+            });
 
             <c:if test="${agents ne null and !empty agents}">
                 //系统实时监控
                 //jobxChart.monitor();
             </c:if>
 
-
             $("#queryChart").click(function () {
                 jobxChart.query();
             });
 
-            $("#agentId").change(
-                function () {
-                    //清理上一个轮询...
-                    if (jobxChart.intervalId != null) {
-                        window.clearInterval(jobxChart.intervalId);
-                        jobxChart.intervalId = null;
-                        jobxChart.clear();
-                    }
-                    jobxChart.monitor();
+            $("#agentId").change(function () {
+                //清理上一个轮询...
+                if (jobxChart.intervalId != null) {
+                    window.clearInterval(jobxChart.intervalId);
+                    jobxChart.intervalId = null;
+                    jobxChart.clear();
                 }
-            );
+                jobxChart.monitor();
+            });
 
             var agent_number = (parseFloat("${success}")/parseFloat("${fn:length(agents)}")*100).toFixed(2);
             if( isNaN(agent_number) ){
@@ -173,27 +84,6 @@
                 $("#endTime").css("width","80px").removeClass("Wdate").addClass("mWdate");
             }
 
-            $(window).resize(function () {
-                window.setTimeout(function () {
-                    if (typeof(windowSize) =="undefined" ) {
-                        window.windowSize = {
-                            width:$(window).width(),
-                            height:$(window).height()
-                        }
-                        jobxChart.resize();
-                        $("#cpu-chart").find("div").first().css("width","100%").find("canvas").first().css("width","100%");
-                    }
-                    if($(window).width()!=windowSize.width||$(window).height()!=windowSize.height) {
-                        window.windowSize = {
-                             width:$(window).width(),
-                             height:$(window).height()
-                         }
-                         jobxChart.resize();
-                        $("#cpu-chart").find("div").first().css("width","100%").find("canvas").first().css("width","100%");
-                    }
-                },500);
-            });
-
             $(".count").mouseover(function () {
                 $(this).css({"background-color":"rgba(0,0,0,0.55)"});
                 $(this).parent().prev().find("i:first").removeClass("eye-grey");
@@ -205,6 +95,35 @@
             $(".card-link").mouseover(function (){
                 $(this).find("i:first").removeClass("eye-grey");
                 $(this).next("div").find("div:first").css({"background-color":"rgba(0,0,0,0.55)"});
+            });
+
+            $("#overview_report_bar").find("td").click(function () {
+                var group = $(this).attr("group");
+                $("#overview_report_bar").find("."+group).each(function (i,n) {
+                    var _this = $(n);
+                    if (_this.hasClass("on")) {
+                        _this.removeClass(group+"-color");
+                        _this.find("div").removeClass(group+"-bar");
+                        _this.removeClass("on").addClass("off");
+                    } else {
+                        if (_this.hasClass("legendLabel")) {
+                            _this.addClass(group+"-color");
+                        } else {
+                            _this.find(".legendColorBox").addClass(group+"-bar");
+                        }
+                        _this.removeClass("off").addClass("on");
+                    }
+                });
+                var onNode = $("#overview_report_bar").find(".on");
+                var map = new Map();
+                if (onNode.length>0) {
+                    for (var i = 0; i < onNode.length; i++) {
+                        var group = $(onNode[i]).attr("group");
+                        map.put(group,group);
+                    }
+                }
+                jobxChart.changeChar(map);
+                jobxChart.createChart();
             });
 
         });
@@ -224,7 +143,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">首页</a></li>
     </ol>
 
@@ -363,12 +282,34 @@
 
             <div id="record-report-havedata">
                 <div class="col-xs-9 block-color" id="overview_report_div" style="display: none">
-                   <div id="overview_report" style="height: 300px;" class="main-chart" ></div>
+                    <div id="overview_report" style="height: 300px;" class="main-chart" ></div>
                </div>
                 <div class="col-xs-3 block-color" id="overview_pie_div" style="display: none">
-                     <div id="overview_pie" class="main-chart" style="height: 300px;" ></div>
+                     <div id="overview_pie" class="main-chart" style="height: 280px;margin-top: 20px;" ></div>
                 </div>
-                <div class="col-xs-12 block-color" id="overview_loader" style="height: 300px;">
+                <div class="col-xs-12 block-color" id="overview_report_bar">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td class="on success" group="success"><div class="legendColorBox success-bar"></div></td>
+                                <td class="on success legendLabel success-color" group="success">Successful</td>
+
+                                <td class="on failed" group="failed"><div class="legendColorBox failed-bar"></div></td>
+                                <td class="on failed legendLabel failed-color" group="failed">Failed</td>
+
+                                <td class="on killed" group="killed"><div class="legendColorBox killed-bar"></div></td>
+                                <td class="on killed legendLabel killed-color" group="killed">Killed</td>
+
+                                <td class="off timeout" group="timeout"><div class="legendColorBox"></div></td>
+                                <td class="off timeout legendLabel" group="timeout">Timeout</td>
+
+                                <td class="off lost" group="lost"><div class="legendColorBox"></div></td>
+                                <td class="off lost legendLabel" group="lost">Lost</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-xs-12 block-color" id="overview_loader" style="height:340px;">
                     <figure>
                         <div class='dot white'></div>
                         <div class='dot'></div>
@@ -379,7 +320,7 @@
                 </div>
             </div>
 
-            <div id="record-report-nodata" class="text-center record-div-nodata col-xs-12 block-color" style="height: 300px;margin-bottom: 0px">
+            <div id="record-report-nodata" class="text-center record-div-nodata col-xs-12 block-color" style="height: 340px;margin-bottom: 0px">
                 <div  style="font-size: 110px;margin-top: 60px" class="eye-record-nodata">
                     <i  class="glyphicon glyphicon-eye-close"></i>
                     <span class="nodata">无记录</span>

@@ -79,19 +79,21 @@ public class PagerTag extends SimpleTagSupport {
             return;
         }
         out.append("<ul class='pagination fr mr20'>");
+        out.append(String.format("<li><a href=\"javascript:void(0)\">PAGE %d OF %d</a></li>",this.id,this.total));
+        out.append(getPageSizeSelect());
+
         // 首页
         if (id == 1) {
-            wrapSpan(out, "首页", -1);
+            wrapSpan(out, "FIRST", -1);
         } else {
-            wrapLink(out, href, 1, "首页");
+            wrapLink(out, href, 1, "FIRST");
         }
-
 
         // 上一页
         if (id == 1) {
-            wrapSpan(out, "上一页", -1);
+            wrapSpan(out, "←", -1);
         } else {
-            wrapLink(out, href, id - 1, "上一页");
+            wrapLink(out, href, id - 1, "←");
         }
 
         int offsetNum = 5;
@@ -115,22 +117,44 @@ public class PagerTag extends SimpleTagSupport {
             }
         }
 
-
         // 下一页
         if (id == pageTotal) {
-            wrapSpan(out, "下一页", -1);
+            wrapSpan(out, "→", -1);
         } else {
-            wrapLink(out, href, id + 1, "下一页");
+            wrapLink(out, href, id + 1, "→");
         }
 
         // 末页
         if (id == pageTotal) {
-            wrapSpan(out, "末页", -1);
+            wrapSpan(out, "LAST", -1);
         } else {
-            wrapLink(out, href, pageTotal, "末页");
+            wrapLink(out, href, pageTotal, "LAST");
         }
+
+        out.append("<li><a>GO<input id=\"page-goto\"></a></li>");
         out.append("</ul>");
         super.doTag();
+    }
+
+    private String getPageSizeSelect() {
+        String select =
+                "<li>\n" +
+                "     <a href=\"javascript:void(0)\" class=\"pagesize\">\n" +
+                "     SIZE\n" +
+                "     <select size=\"1\" class=\"select-jobx\" id=\"size\" style=\"width: 50px;height: 23px!important;\">\n" +
+                "             <option value=\"15\">15</option>\n" +
+                "             <option value=\"30\" %s>30</option>\n" +
+                "             <option value=\"50\" %s>50</option>\n" +
+                "             <option value=\"100\" %s>100</option>\n" +
+                "         </select>\n" +
+                "     </a>\n" +
+                " </li>";
+
+        return String.format(select,
+                this.size == 30?"selected":"",
+                this.size == 50?"selected":"",
+                this.size == 100?"selected":""
+        );
     }
 
     private void wrapLink(JspWriter out, String href, int curr, String title) throws IOException {

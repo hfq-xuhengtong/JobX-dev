@@ -107,7 +107,7 @@
         <ol class="breadcrumb hidden-xs">
             <li class="icon">&#61753;</li>
             当前位置：
-            <li><a href="">jobx</a></li>
+            <li><a href="">JobX</a></li>
             <li><a href="">/执器组管理</a></li>
             <li><a href="">编辑/执行器组</a></li>
         </ol>
@@ -140,9 +140,9 @@
                                 <select class="selectpicker" data-width="auto" multiple data-live-search="true" data-live-search-placeholder="根据执行器名字搜索" data-actions-box="true">
                                     <c:forEach var="g" items="${groups}">
                                         <optgroup label="${g.groupName}">
-                                            <c:forEach var="a" items="${g.agents}" >
+                                            <c:forEach var="a" items="${g.agentList}" >
                                                 <option value="${a.agentId}"
-                                                        <c:forEach var="sg" items="${group.agents}">
+                                                        <c:forEach var="sg" items="${group.agentList}">
                                                             <c:if test="${sg.agentId eq a.agentId}">
                                                                 selected
                                                             </c:if>

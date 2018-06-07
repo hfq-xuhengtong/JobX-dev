@@ -15,7 +15,7 @@
         function doUrl(){
             var agentId = $("#agentId").val();
             var sendTime = $("#sendTime").val();
-            var pageSize = $("#size").val();
+            var pageSize = $("#size").val()||${pageBean.pageSize};
             window.location.href = "${contextPath}/notice/view.htm?agentId="+agentId+"&sendTime="+sendTime+"&pageSize="+pageSize;
         }
 
@@ -34,24 +34,13 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">系统设置</a></li>
     </ol>
     <h4 class="page-title">告警日志</h4>
     <div class="block-area" id="defaultStyle">
 
         <div>
-            <div style="float: left">
-                <label>
-                    每页 <select size="1" class="select-jobx" id="size" style="width: 50px;">
-                    <option value="15">15</option>
-                    <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                    <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-                </select> 条记录
-                </label>
-            </div>
-
             <div style="float: right;margin-top: -10px">
                 <label for="agentId">执行器：</label>
                 <select id="agentId" name="agentId" class="select-jobx" style="width: 120px;">

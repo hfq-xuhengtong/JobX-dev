@@ -21,7 +21,8 @@
 
 package com.jobxhub.server.job;
 
-import net.sf.ehcache.store.chm.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
+import com.jobxhub.server.dto.Agent;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.ext.ExtensionLoader;
 import com.jobxhub.common.logging.LoggerFactory;
@@ -32,11 +33,9 @@ import com.jobxhub.registry.zookeeper.ChildListener;
 import com.jobxhub.registry.zookeeper.ZookeeperClient;
 import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.domain.Job;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.support.JobXTools;
-import com.jobxhub.server.vo.JobInfo;
+import com.jobxhub.server.dto.Job;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,9 +82,9 @@ public class JobXRegistry {
 
     private final ZookeeperClient zookeeperClient = registryService.getClient();
 
-    private final Map<String, String> agents = new ConcurrentHashMap<String, String>(0);
+    private final Map<String, String> agents = new HashMap<String, String>(0);
 
-    private final Map<Long, Long> jobs = new ConcurrentHashMap<Long, Long>(0);
+    private final Map<Long, Long> jobs = new HashMap<Long, Long>(0);
 
     private List<String> servers = new ArrayList<String>(0);
 
@@ -168,7 +167,7 @@ public class JobXRegistry {
                         agentService.doConnect(agent);
                     }
                 } else {
-                    Map<String, String> unAgents = new ConcurrentHashMap<String, String>(agents);
+                    Map<String, String> unAgents = new HashMap<String, String>(agents);
                     for (String agent : children) {
                         unAgents.remove(agent);
                         if (!agents.containsKey(agent)) {
@@ -266,7 +265,7 @@ public class JobXRegistry {
                             return;
                         }
 
-                        Map<Long, Long> unJobs = new ConcurrentHashMap<Long, Long>(jobs);
+                        Map<Long, Long> unJobs = new HashMap<Long, Long>(jobs);
 
                         ConsistentHash<String> hash = new ConsistentHash<String>(servers);
 
@@ -349,14 +348,14 @@ public class JobXRegistry {
             } else {
                 this.jobRemove(jobId);
             }
-            JobInfo jobInfo = this.jobService.getJobInfoById(jobId);
-            Constants.CronType cronType = Constants.CronType.getByType(jobInfo.getCronType());
+            Job job = this.jobService.getById(jobId);
+            Constants.CronType cronType = Constants.CronType.getByType(job.getCronType());
             switch (cronType) {
                 case CRONTAB:
-                    this.jobxCollector.add(jobInfo);
+                    this.jobxCollector.add(job);
                     break;
                 case QUARTZ:
-                    this.schedulerService.put(jobInfo);
+                    this.schedulerService.put(job);
                     break;
             }
             dispatchedInfo(1, jobId);
@@ -394,7 +393,7 @@ public class JobXRegistry {
         String bodyFormat = line(1) + tab(3);
         String endFormat = line(2);
 
-        String infoFormat = headerFormat + "███████████████ [JOBX] serverChanged,print dispatched info ███████████████" +
+        String infoFormat = headerFormat + "███████████████ [JobX] serverChanged,print dispatched info ███████████████" +
                 bodyFormat + "datetime: \"{}\"" +
                 bodyFormat + "previous serverSize:{}" +
                 bodyFormat + "current serverSize:{}" +

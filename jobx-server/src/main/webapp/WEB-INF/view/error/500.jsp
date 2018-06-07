@@ -328,7 +328,7 @@
         <ol class="breadcrumb hidden-xs">
             <li class="icon">&#61753;</li>
             当前位置：
-            <li><a href="">jobx</a></li>
+            <li><a href="">JobX</a></li>
             <li><a href="">出错啦</a></li>
         </ol>
         <h4 class="page-title"><i class="glyphicon glyphicon-remove"></i>&nbsp;出错啦</h4>

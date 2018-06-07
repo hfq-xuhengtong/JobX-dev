@@ -30,9 +30,11 @@ import java.util.regex.Pattern;
 
 public class Constants {
 
+    public static final String JOBX_VERSION = "V1.2.0";
+
     public static final int ZK_CONNECTION_TIMEOUT = 2000;
 
-    public static final long RPC_TIMEOUT = 5000;
+    public static final int RPC_TIMEOUT = 5000;
 
     public static final String META_INF_DIR = "META-INF/jobx/";
 
@@ -86,6 +88,8 @@ public class Constants {
     public static final String PARAM_COMMAND_KEY = "command";
 
     public static final String PARAM_TIMEOUT_KEY = "timeout";
+
+    public static final String PARAM_EXECTYPE_KEY = "execType";
 
     public static final String PARAM_BACKUP_KEY = "backup";
 
@@ -182,12 +186,6 @@ public class Constants {
      * kill file
      */
     public static final File JOBX_KILL_SHELL = new File(JOBX_HOME + "/bin/kill.sh");
-
-
-    public static final String JOBX_UNIX_EXITCODE_KEY = "exitCode";
-
-
-    public static final String JOBX_UNIX_EXITCODE_SCRIPT = String.format("\n\necho %s:$?", JOBX_UNIX_EXITCODE_KEY);
 
 
     public enum CachedProvider implements Serializable {
@@ -473,7 +471,7 @@ public class Constants {
     }
 
     public enum JobType implements Serializable {
-        SINGLETON(0x0, "单一作业"),
+        SIMPLE(0x0, "简单作业"),
         FLOW(0x1, "工作流");
 
         private Integer code;

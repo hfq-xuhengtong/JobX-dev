@@ -24,46 +24,54 @@ package com.jobxhub.server.service;
 
 import java.util.*;
 
+import com.google.common.collect.Lists;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
-import com.jobxhub.server.dao.QueryDao;
-import com.jobxhub.server.domain.User;
+import com.jobxhub.server.domain.AgentBean;
 import com.jobxhub.server.job.JobXRegistry;
+import com.jobxhub.server.dao.AgentDao;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.tag.PageBean;
+import com.jobxhub.server.dto.Agent;
+import com.jobxhub.server.dto.Job;
+import com.jobxhub.server.dto.User;
 import org.apache.commons.codec.digest.DigestUtils;
-import com.jobxhub.server.domain.Agent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 
-import static com.jobxhub.common.util.CommonUtils.isEmpty;
-import static com.jobxhub.common.util.CommonUtils.notEmpty;
-
 @Service
-@Transactional(readOnly = false)
 public class AgentService {
-
-    @Autowired
-    private QueryDao queryDao;
 
     @Autowired
     private ExecuteService executeService;
 
     @Autowired
-    private NoticeService noticeService;
+    private ConfigService configService;
 
     @Autowired
-    private ConfigService configService;
+    private AgentDao agentDao;
+
+    @Autowired
+    private JobService jobService;
+
+    @Autowired
+    private UserAgentService userAgentService;
 
     @Autowired
     private JobXRegistry jobxRegistry;
 
-    public List<Agent> getAgentByConnType(Constants.ConnType connType) {
-        return queryDao.hqlQuery("from Agent where status=? and proxy=?", Constants.ConnStatus.CONNECTED.getValue(), connType.getType());
+    public List<Agent> getOwnerByConnType(HttpSession session) {
+        List<AgentBean> list;
+        if (!JobXTools.isPermission(session)) {
+            User user = JobXTools.getUser(session);
+            list = agentDao.getByConnType(user.getUserId(),Constants.ConnStatus.CONNECTED.getValue());
+        }else {
+            list = agentDao.getByConnType(null,Constants.ConnStatus.CONNECTED.getValue());
+        }
+        return Lists.transform(list,Agent.transfer);
     }
 
     public List<Agent> getAll() {
@@ -77,79 +85,58 @@ public class AgentService {
     private synchronized void flushLocalAgent() {
         JobXTools.CACHE.put(
                 Constants.PARAM_CACHED_AGENT_KEY,
-                queryDao.getAll(Agent.class)
+                Lists.transform(agentDao.getAll(),Agent.transfer)
         );
     }
 
-    public List<Agent> getOwnerAgentByConnStatus(HttpSession session, Constants.ConnStatus status) {
-        String hql = "from Agent where status=?";
+    public int getCountByStatus(HttpSession session, Constants.ConnStatus status) {
+        Map<String,Object> map = new HashMap<String, Object>(0);
         if (!JobXTools.isPermission(session)) {
-            User user = JobXTools.getUser(session);
-            if (user.getAgentIds() != null) {
-                hql += " and agentId in (".concat(user.getAgentIds()).concat(")");
-            }
+            map.put("userId",JobXTools.getUserId(session));
         }
-        return queryDao.hqlQuery(hql, status.getValue());
+        map.put("status",status.getValue());
+        return agentDao.getCount(map);
     }
 
-    public void getOwnerAgent(HttpSession session, PageBean pageBean) {
-        String hql = "from Agent  ";
+    /**
+     * 获取所属用户的agent
+     * @param session
+     * @param pageBean
+     */
+    public void getPageBean(HttpSession session, Agent agent, PageBean pageBean) {
         if (!JobXTools.isPermission(session)) {
             User user = JobXTools.getUser(session);
-            if (user.getAgentIds() != null) {
-                hql += " where agentId in (".concat(user.getAgentIds()).concat(")");
-            }
+            pageBean.put("userId", user.getUserId());
         }
+        pageBean.put("agentName", agent.getName());
+        pageBean.put("status",agent.getStatus());
         pageBean.verifyOrderBy("name", "name", "host", "port");
-        hql += " order by " + pageBean.getOrderBy() + " " + pageBean.getOrder();
-        queryDao.hqlPageQuery(hql, pageBean);
+        List<AgentBean> agentList = agentDao.getByPageBean(pageBean);
+        if (CommonUtils.notEmpty(agentList)) {
+            int count = agentDao.getCount(pageBean.getFilter());
+            List<Agent> agents = Lists.transform(agentList,Agent.transfer);
+            pageBean.setResult(agents);
+            pageBean.setTotalCount(count);
+        }
     }
 
     public Agent getAgent(Long id) {
-        Agent agent = queryDao.get(Agent.class, id);
+        AgentBean agent = agentDao.getById(id);
         if (agent != null) {
-            agent.setUsers(getAgentUsers(agent));
+            return Agent.transfer.apply(agent);
         }
-        return agent;
+        return null;
     }
 
-    private List<User> getAgentUsers(Agent agent) {
-        String agentId = agent.getAgentId().toString();
-
-        String hql = "from User where agentIds like ?";
-
-        //1
-        List<User> users = queryDao.hqlQuery(hql, agentId);
-        if (isEmpty(users)) {
-            //1,
-            users = queryDao.hqlQuery(hql, agentId + ",%");
+    public void merge(Agent agent) {
+        AgentBean agentBean = AgentBean.transfer.apply(agent);
+        if (agentBean.getAgentId() == null) {
+            agentDao.save(agentBean);
+            agent.setAgentId(agentBean.getAgentId());
+        }else {
+            agentDao.update(agentBean);
         }
-        if (isEmpty(users)) {
-            //,1
-            users = queryDao.hqlQuery(hql, ",%" + agentId);
-        }
-
-        if (isEmpty(users)) {
-            //,1,
-            users = queryDao.hqlQuery(hql, ",%" + agentId + ",%");
-        }
-
-        return isEmpty(users) ? Collections.<User>emptyList() : users;
-    }
-
-    @Transactional(readOnly = false)
-    public Agent merge(Agent agent) {
-        agent = (Agent) queryDao.merge(agent);
         flushLocalAgent();
-        return agent;
-    }
-
-    public boolean existsName(Long id, String name) {
-        String hql = "select count(1) from Agent where name=? ";
-        if (notEmpty(id)) {
-            hql += " and agentId !=" + id;
-        }
-        return queryDao.hqlCount(hql, name) > 0;
     }
 
     /**
@@ -163,26 +150,23 @@ public class AgentService {
         if (agent == null) {
             return true;
         }
-        //检查该执行器是否定义的有任务
-        String hql = "from Job where agentId=?";
-        return queryDao.hqlCount(hql, id) == 0;
+        List<Job> jobs = jobService.getByAgent(id);
+        return jobs.isEmpty();
     }
 
-    @Transactional(rollbackFor = Exception.class,readOnly = false)
     public void delete(Long id) {
         Agent agent = getAgent(id);
-        queryDao.getSession().clear();
-        queryDao.delete(Agent.class,id);
+        agentDao.delete(id);
         jobxRegistry.agentUnRegister(agent);
         flushLocalAgent();
     }
 
+    public boolean existsName(Long id, String name) {
+        return agentDao.existsCount(id,"name",name) > 0;
+    }
+
     public boolean existsHost(Long id, String host) {
-        String hql = "from Agent where host=? ";
-        if (notEmpty(id)) {
-            hql += " and agentId != " + id;
-        }
-        return queryDao.hqlCount(hql, host) > 0;
+        return agentDao.existsCount(id,"host", host) > 0;
     }
 
     public String editPassword(Long id, Boolean type, String pwd0, String pwd1, String pwd2) {
@@ -214,33 +198,27 @@ public class AgentService {
     }
 
     public List<Agent> getOwnerAgents(HttpSession session) {
-        String hql = "from Agent ";
+        PageBean<Agent> pageBean = new PageBean<Agent>(Integer.MAX_VALUE);
+        pageBean.setPageNo(0);
         if (!JobXTools.isPermission(session)) {
-            User user = JobXTools.getUser(session);
-            if (user.getAgentIds()!=null) {
-                hql += " where agentId in (" + user.getAgentIds() + ")";
-            }
+            User userDto = JobXTools.getUser(session);
+            pageBean.put("user_id",userDto.getUserId());
         }
-        return queryDao.hqlQuery(hql);
+        List<AgentBean> agentList = agentDao.getByPageBean(pageBean);
+        return Lists.transform(agentList,Agent.transfer);
     }
 
-    public Agent getAgentByMachineId(String machineId) {
-        String hql = "from Agent where machineId=?";
-        //不能保证macId的唯一性,可能两台机器存在同样的macId,这种概率可以忽略不计,这里为了程序的健壮性...
-        List<Agent> agents = queryDao.hqlQuery(hql, machineId);
-        if (CommonUtils.notEmpty(agents)) {
-            return agents.get(0);
+    public Agent getByMacId(String machineId) {
+        AgentBean agent = agentDao.getByMacId(machineId);
+        if (agent!=null) {
+            return Agent.transfer.apply(agent);
         }
         return null;
     }
 
-    public List<Agent> getAgentByIds(String agentIds) {
-        return queryDao.hqlQuery(String.format("from Agent where agentId in (%s)", agentIds));
-    }
-
     public void doDisconnect(Agent agent) {
         if (CommonUtils.isEmpty(agent.getNotifyTime()) || new Date().getTime() - agent.getNotifyTime().getTime() >= configService.getSysConfig().getSpaceTime() * 60 * 1000) {
-            noticeService.notice(agent);
+            //noticeService.notice(agent);
             //记录本次任务失败的时间
             agent.setNotifyTime(new Date());
         }
@@ -252,7 +230,7 @@ public class AgentService {
         if (CommonUtils.notEmpty(info)) {
             String macId = info.split("_")[0];
             String password =  info.split("_")[1];
-            Agent agent = getAgentByMachineId(macId);
+            Agent agent = getByMacId(macId);
             if ( CommonUtils.notEmpty(agent,password) && password.equals(agent.getPassword()) ) {
                 doDisconnect(agent);
             }
@@ -287,10 +265,9 @@ public class AgentService {
         registry.setName(registry.getHost());
         registry.setComment("auto registered.");
         registry.setWarning(false);
-        registry.setMobiles(null);
-        registry.setEmailAddress(null);
-        registry.setProxy(Constants.ConnType.CONN.getType());
-        registry.setProxyAgent(null);
+        registry.setMobile(null);
+        registry.setEmail(null);
+        registry.setProxyId(null);
         if (executeService.ping(registry,false).equals(Constants.ConnStatus.CONNECTED)) {
             registry.setStatus(Constants.ConnStatus.CONNECTED.getValue());
             merge(registry);
@@ -317,9 +294,20 @@ public class AgentService {
             agent.setHost(host);
             agent.setPort(Integer.valueOf(port));
         }
-        Agent agent1 = this.getAgentByMachineId(macId);
+        Agent agent1 = this.getByMacId(macId);
         return Arrays.asList(agent, agent1);
     }
 
+    public List<Agent> getByGroup(Long groupId) {
+        List<AgentBean> list = agentDao.getByGroup(groupId);
+        return Lists.transform(list,Agent.transfer);
+    }
 
+    public void updateStatus(Agent agent) {
+        if (agent!=null) {
+            if (agent.getAgentId()!=null&&agent.getStatus()!=null) {
+                agentDao.updateStatus(agent.getAgentId(),agent.getStatus());
+            }
+        }
+    }
 }

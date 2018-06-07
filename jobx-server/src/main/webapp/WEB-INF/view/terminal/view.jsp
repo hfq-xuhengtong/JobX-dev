@@ -78,7 +78,7 @@
                                     data: {"id":id},
                                     dataType: "json"
                                 }).done(function (json) {
-                                    $("#time_"+id).text(json.logintime);
+                                    $("#time_"+id).text(json.loginTime);
                                 })
                             },5000);
 
@@ -335,7 +335,7 @@
 
         $(document).ready(function () {
             $("#size").change(function () {
-                var pageSize = $("#size").val();
+                var pageSize = $("#size").val()||${pageBean.pageSize};
                 window.location.href="${contextPath}/terminal/view.htm?pageNo=${pageBean.pageNo}&pageSize="+pageSize+"&orderBy=${pageBean.orderBy}&order=${pageBean.order}";
             });
 
@@ -377,22 +377,12 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">WEB终端</a></li>
     </ol>
     <h4 class="page-title"><i class="fa fa-terminal" aria-hidden="true"></i>&nbsp;WEB终端&nbsp;&nbsp;</h4>
     <div class="block-area" id="defaultStyle">
         <div>
-            <div style="float: left">
-                <label>
-                    每页 <select size="1" class="select-jobx" id="size" style="width: 50px;margin-bottom: 8px">
-                    <option value="15">15</option>
-                    <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                    <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-                </select> 条记录
-                </label>
-            </div>
             <c:if test="${permission eq true}">
                 <div style="float: right;margin-top: -10px">
                     <a href="javascript:page.add();" class="btn btn-sm m-t-10"
@@ -446,29 +436,29 @@
                    </c:when>
                </c:choose>
                 <c:choose>
-                    <c:when test="${pageBean.orderBy eq 'sshType'}">
+                    <c:when test="${pageBean.orderBy eq 'ssh_type'}">
                         <c:if test="${pageBean.order eq 'asc'}">
-                            <th  class="sortable sort-numeric sort-asc" style="cursor: pointer" onclick="page.sort('sshType')" title="点击排序">登录方式</th>
+                            <th  class="sortable sort-numeric sort-asc" style="cursor: pointer" onclick="page.sort('ssh_type')" title="点击排序">登录方式</th>
                         </c:if>
                         <c:if test="${pageBean.order eq 'desc'}">
-                            <th  class="sortable sort-numeric sort-desc" style="cursor: pointer" onclick="page.sort('sshType')" title="点击排序">登录方式</th>
+                            <th  class="sortable sort-numeric sort-desc" style="cursor: pointer" onclick="page.sort('ssh_type')" title="点击排序">登录方式</th>
                         </c:if>
                     </c:when>
-                    <c:when test="${pageBean.orderBy ne 'port'}">
-                        <th  class="sortable sort-numeric" style="cursor: pointer" onclick="page.sort('sshType')" title="点击排序">登录方式</th>
+                    <c:when test="${pageBean.orderBy ne 'ssh_type'}">
+                        <th  class="sortable sort-numeric" style="cursor: pointer" onclick="page.sort('ssh_type')" title="点击排序">登录方式</th>
                     </c:when>
                 </c:choose>
                <c:choose>
-                   <c:when test="${pageBean.orderBy eq 'logintime'}">
+                   <c:when test="${pageBean.orderBy eq 'login_time'}">
                        <c:if test="${pageBean.order eq 'asc'}">
-                           <th  class="sortable sort-numeric sort-asc" style="cursor: pointer" onclick="page.sort('logintime')" title="点击排序">最后登陆</th>
+                           <th  class="sortable sort-numeric sort-asc" style="cursor: pointer" onclick="page.sort('login_time')" title="点击排序">最后登陆</th>
                        </c:if>
                        <c:if test="${pageBean.order eq 'desc'}">
-                           <th  class="sortable sort-numeric sort-desc" style="cursor: pointer" onclick="page.sort('logintime')" title="点击排序">最后登陆</th>
+                           <th  class="sortable sort-numeric sort-desc" style="cursor: pointer" onclick="page.sort('login_time')" title="点击排序">最后登陆</th>
                        </c:if>
                    </c:when>
-                   <c:when test="${pageBean.orderBy ne 'logintime'}">
-                       <th  class="sortable sort-numeric" style="cursor: pointer" onclick="page.sort('logintime')" title="点击排序">最后登陆</th>
+                   <c:when test="${pageBean.orderBy ne 'login_time'}">
+                       <th  class="sortable sort-numeric" style="cursor: pointer" onclick="page.sort('login_time')" title="点击排序">最后登陆</th>
                    </c:when>
                </c:choose>
                 <th class="text-center">操作</th>
@@ -489,7 +479,7 @@
                             <span class="label label-warning">&nbsp;&nbsp;&nbsp;Private&nbsp;&nbsp;Key&nbsp;&nbsp;&nbsp;</span>
                         </c:if>
                     </td>
-                    <td id="time_${t.id}"><fmt:formatDate value="${t.logintime}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+                    <td id="time_${t.id}"><fmt:formatDate value="${t.loginTime}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
                     <td class="text-center">
                             <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
                                 <a class="sshlink" ssh="${t.id}" href="javascript:void(0);" title="登录">

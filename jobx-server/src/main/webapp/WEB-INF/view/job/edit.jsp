@@ -45,7 +45,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">作业管理</a></li>
     </ol>
     <h4 class="page-title">
@@ -216,9 +216,9 @@
                 <br>
 
                 <div class="form-group contact">
-                    <label for="mobiles" class="col-lab control-label wid150"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <label for="mobile" class="col-lab control-label wid150"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;报警手机&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control input-sm" id="mobiles" name="mobiles" value="${job.mobiles}">
+                        <input type="text" class="form-control input-sm" id="mobile" name="mobile" value="${job.mobile}">
                         <span class="tips" tip="任务执行失败时将发送短信给此手机,多个请以逗号(英文)隔开">任务执行失败时将发送短信给此手机,多个请以逗号(英文)隔开</span>
                     </div>
                 </div>
@@ -227,7 +227,7 @@
                 <div class="form-group contact" style="display: ${job.warning eq true ? 'block' : 'none'}">
                     <label for="email" class="col-lab control-label wid150"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;报警邮箱&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control input-sm" id="email" name="emailAddress" value="${job.emailAddress}">
+                        <input type="text" class="form-control input-sm" id="email" name="email" value="${job.email}">
                         <span class="tips" tip="任务执行失败时将发送报告给此邮箱,多个请以逗号(英文)隔开">任务执行失败时将发送报告给此邮箱,多个请以逗号(英文)隔开</span>
                     </div>
                 </div>

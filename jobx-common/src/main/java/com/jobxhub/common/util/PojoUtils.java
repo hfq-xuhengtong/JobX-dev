@@ -22,6 +22,8 @@
 
 package com.jobxhub.common.util;
 
+import com.jobxhub.common.util.collection.HashMap;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -35,7 +37,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -63,8 +65,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
  */
 public class PojoUtils {
 
-    private static final ConcurrentMap<String, Method> NAME_METHODS_CACHE = new ConcurrentHashMap<String, Method>();
-    private static final ConcurrentMap<Class<?>, ConcurrentMap<String, Field>> CLASS_FIELD_CACHE = new ConcurrentHashMap<Class<?>, ConcurrentMap<String, Field>>();
+    private static final ConcurrentMap<String, Method> NAME_METHODS_CACHE = new HashMap<String, Method>();
+    private static final ConcurrentMap<Class<?>, ConcurrentMap<String, Field>> CLASS_FIELD_CACHE = new HashMap<Class<?>, ConcurrentMap<String, Field>>();
 
     public static Object[] generalize(Object[] objs) {
         Object[] dests = new Object[objs.length];
@@ -267,7 +269,7 @@ public class PojoUtils {
         } else if (WeakHashMap.class == cl) {
             return new WeakHashMap();
         } else if (ConcurrentHashMap.class == cl) {
-            result = new ConcurrentHashMap();
+            result = new HashMap();
         } else if (ConcurrentSkipListMap.class == cl) {
             result = new ConcurrentSkipListMap();
         } else {

@@ -21,14 +21,17 @@
 
 package com.jobxhub.server.controller;
 
-import com.jobxhub.common.util.IOUtils;
+import com.jobxhub.server.annotation.RequestRepeat;
+import com.jobxhub.server.service.RoleService;
+import com.jobxhub.server.service.UserAgentService;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.UserService;
 import com.jobxhub.server.tag.PageBean;
-import com.jobxhub.server.domain.Role;
-import com.jobxhub.server.domain.User;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Role;
+import com.jobxhub.server.dto.Status;
+import com.jobxhub.server.dto.User;
+import com.jobxhub.server.dto.UserAgent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,14 +40,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import static com.jobxhub.common.util.CommonUtils.notEmpty;
-import static com.jobxhub.common.util.WebUtils.getWebUrlPath;
 
 /**
  * Created by ChenHui on 2016/2/18.
@@ -57,17 +56,23 @@ public class UserController extends BaseController {
     private UserService userService;
 
     @Autowired
+    private UserAgentService userAgentService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
     private AgentService agentService;
 
     @RequestMapping("view.htm")
-    public String queryUser(PageBean pageBean) {
-        userService.queryUser(pageBean);
+    public String view(PageBean pageBean) {
+        userService.getPageBean(pageBean);
         return "/user/view";
     }
 
     @RequestMapping("detail/{userId}.htm")
     public String detail(@PathVariable("userId") Long userId, Model model) {
-        User user = userService.queryUserById(userId);
+        User user = userService.getUserById(userId);
         if (user == null) {
             return "/error/404";
         }
@@ -75,30 +80,16 @@ public class UserController extends BaseController {
         return "/user/detail";
     }
 
-
-    @RequestMapping("header.do")
-    @ResponseBody
-    public Status header(HttpServletRequest request) throws Exception {
-        User user = JobXTools.getUser(request.getSession());
-        if (user.getHeaderpic() != null) {
-            String name = user.getUserId() + "_140" + user.getPicExtName();
-            String path = request.getServletContext().getRealPath("/").replaceFirst("/$", "") + "/upload/" + name;
-            IOUtils.writeFile(new File(path), user.getHeaderpic().getBinaryStream());
-            user.setHeaderPath(getWebUrlPath(request) + "/upload/" + name);
-            return Status.TRUE;
-        }
-        return Status.FALSE;
-    }
-
     @RequestMapping("add.htm")
     public String add(Model model) {
-        List<Role> role = userService.getRoleGroup();
+        List<Role> role = roleService.getAll();
         model.addAttribute("role", role);
         model.addAttribute("agents", agentService.getAll());
         return "/user/add";
     }
 
     @RequestMapping(value = "add.do", method = RequestMethod.POST)
+    @RequestRepeat(view = true)
     public String add(User user) {
         userService.addUser(user);
         return "redirect:/user/view.htm";
@@ -112,42 +103,44 @@ public class UserController extends BaseController {
             return String.format("redirect:/user/detail/%d.htm", id);
         }
 
-        User user = userService.queryUserById(id);
+        User user = userService.getUserById(id);
         if (user == null) {
             return "/error/404";
         }
+
+        List<UserAgent> userAgent = userAgentService.getUserAgent(id);
         model.addAttribute("u", user);
-        model.addAttribute("role", userService.getRoleGroup());
+        model.addAttribute("role", roleService.getAll());
         model.addAttribute("agents", agentService.getAll());
+        model.addAttribute("userAgent", userAgent);
         return "/user/edit";
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
+    @RequestRepeat(view = true)
     public String edit(HttpSession session, User user) {
         User user1 = userService.getUserById(user.getUserId());
-        if (notEmpty(user.getRoleId()) && JobXTools.isPermission(session)) {
-            user1.setRoleId(user.getRoleId());
-        }
-        user1.setAgentIds(user.getAgentIds());
+        user1.setRoleId(user.getRoleId());
         user1.setRealName(user.getRealName());
         user1.setContact(user.getContact());
         user1.setEmail(user.getEmail());
         user1.setQq(user.getQq());
         user1.setModifyTime(new Date());
-        userService.updateUser(user1);
+        userService.updateUser(session,user1);
         return "redirect:/user/view.htm";
     }
 
     @RequestMapping(value = "get.do", method = RequestMethod.POST)
     @ResponseBody
     public User get(Long id) {
-        return userService.queryUserById(id);
+        return userService.getUserById(id);
     }
 
     @RequestMapping(value = "pwd.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public String pwd(Long id, String pwd0, String pwd1, String pwd2) {
-        return userService.editPwd(id, pwd0, pwd1, pwd2);
+        return userService.editPassword(id, pwd0, pwd1, pwd2);
     }
 
     @RequestMapping(value = "checkname.do", method = RequestMethod.POST)

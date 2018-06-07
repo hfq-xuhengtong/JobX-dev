@@ -24,7 +24,8 @@ package com.jobxhub.server.service;
 
 import com.jobxhub.server.job.JobXCollector;
 import com.jobxhub.server.job.JobXRegistry;
-import com.jobxhub.server.vo.JobInfo;
+import com.jobxhub.server.dto.Job;
+import com.jobxhub.server.support.JobXTools;
 import org.quartz.*;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
@@ -49,18 +50,15 @@ public final class SchedulerService {
     private JobService jobService;
 
     @Autowired
-    private ExecuteService executeService;
-
-    @Autowired
     private JobXCollector jobxCollector;
 
     @Autowired
     private JobXRegistry jobxRegistry;
 
-    private Scheduler quartzScheduler;
+    @Autowired
+    private ExecuteService executeService;
 
-    public SchedulerService() {
-    }
+    private Scheduler quartzScheduler;
 
     public boolean exists(Serializable jobId) throws SchedulerException {
         if (jobId == null || JobKey.jobKey(jobId.toString()) == null) {
@@ -69,24 +67,23 @@ public final class SchedulerService {
         return quartzScheduler.checkExists(JobKey.jobKey(jobId.toString()));
     }
 
-    public void put(List<JobInfo> jobs) throws SchedulerException {
-        for (JobInfo jobInfo : jobs) {
-            put(jobInfo);
+    public void put(List<Job> jobs) throws SchedulerException {
+        for (Job job : jobs) {
+            put(job);
         }
     }
 
-    public void put(JobInfo job) throws SchedulerException {
+    public void put(Job job) throws SchedulerException {
         TriggerKey triggerKey = TriggerKey.triggerKey(job.getJobId().toString());
         CronTrigger cronTrigger = newTrigger().withIdentity(triggerKey).withSchedule(cronSchedule(job.getCronExp())).build();
-
         //when exists then delete..
         if (exists(job.getJobId())) {
             this.remove(job.getJobId());
         }
         //add new job 。。。
-        JobDetail jobDetail = JobBuilder.newJob(this.executeService.getClass()).withIdentity(JobKey.jobKey(job.getJobId().toString())).build();
+        JobDetail jobDetail = JobBuilder.newJob(QuartzExecutor.class).withIdentity(JobKey.jobKey(job.getJobId().toString())).build();
         jobDetail.getJobDataMap().put(job.getJobId().toString(), job);
-        jobDetail.getJobDataMap().put("jobBean", this.executeService);
+        jobDetail.getJobDataMap().put("executor",executeService);
         Date date = quartzScheduler.scheduleJob(jobDetail, cronTrigger);
         if (logger.isInfoEnabled()) {
             logger.info("jobx: add success,cronTrigger:{}", cronTrigger, date);
@@ -131,14 +128,14 @@ public final class SchedulerService {
         }
     }
 
-    public void syncTigger(JobInfo job) throws Exception {
+    public void syncTigger(Job job) throws Exception {
         //将该作业从zookeeper中移除掉....
         jobxRegistry.jobUnRegister(job.getJobId());
         jobxRegistry.jobRegister(job.getJobId());
     }
 
     public void syncTigger(Long jobId) throws Exception {
-        JobInfo job = jobService.getJobInfoById(jobId);
+        Job job = jobService.getById(jobId);
         this.syncTigger(job);
     }
 

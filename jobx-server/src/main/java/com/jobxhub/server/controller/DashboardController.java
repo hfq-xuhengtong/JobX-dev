@@ -25,16 +25,13 @@ import com.alibaba.fastjson.JSON;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.*;
+import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.common.util.collection.ParamsMap;
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.domain.Job;
-import com.jobxhub.server.domain.Log;
-import com.jobxhub.server.domain.User;
+import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.tag.PageBean;
-import com.jobxhub.server.vo.ChartInfo;
-import com.jobxhub.server.vo.Cropper;
+import com.jobxhub.server.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.Image;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
@@ -63,7 +61,7 @@ import static com.jobxhub.common.util.WebUtils.*;
 public class DashboardController extends BaseController {
 
     @Autowired
-    private HomeService homeService;
+    private LogService logService;
 
     @Autowired
     private RecordService recordService;
@@ -90,35 +88,38 @@ public class DashboardController extends BaseController {
         return "/home/login";
     }
 
+    @RequestMapping("repeat")
+    public String repeat(){
+        return "/error/repeat";
+    }
+
     @RequestMapping("dashboard.htm")
     public String dashboard(HttpSession session, Model model) {
         /**
          * agent...
          */
-        List<Agent> success = agentService.getOwnerAgentByConnStatus(session, Constants.ConnStatus.CONNECTED);
-        List<Agent> failed = agentService.getOwnerAgentByConnStatus(session, Constants.ConnStatus.DISCONNECTED);
-        model.addAttribute("success", success.size());
-        model.addAttribute("failed", failed.size());
+        int success = agentService.getCountByStatus(session, Constants.ConnStatus.CONNECTED);
+        int failed = agentService.getCountByStatus(session, Constants.ConnStatus.DISCONNECTED);
+        model.addAttribute("success", success);
+        model.addAttribute("failed", failed);
 
-        success.addAll(failed);
-        model.addAttribute("agents", success);
-
+        model.addAttribute("agents", agentService.getOwnerAgents(session));
         /**
          * job
          */
-        List<Job> singleton = jobService.getJobsByJobType(session, Constants.JobType.SINGLETON);
-        List<Job> flow = jobService.getJobsByJobType(session, Constants.JobType.FLOW);
+        int singleton = jobService.getCountByType(session, Constants.JobType.SIMPLE);
+        int flow = jobService.getCountByType(session, Constants.JobType.FLOW);
 
-        model.addAttribute("singleton", singleton.size());
-        model.addAttribute("flow", flow.size());
-        model.addAttribute("job", singleton.size() + flow.size());
+        model.addAttribute("singleton", singleton);
+        model.addAttribute("flow", flow);
+        model.addAttribute("job", singleton+failed);
 
         /**
          * 成功作业,自动执行
          */
-        Integer successAutoRecord = recordService.getRecords(session, Constants.ResultStatus.SUCCESSFUL, Constants.ExecType.AUTO);
-        Integer successOperRecord = recordService.getRecords(session, Constants.ResultStatus.SUCCESSFUL, Constants.ExecType.OPERATOR);
-        Integer successBatchRecord = recordService.getRecords(session, Constants.ResultStatus.SUCCESSFUL, Constants.ExecType.BATCH);
+        Integer successAutoRecord = recordService.getRecordCount(session, Constants.ResultStatus.SUCCESSFUL, Constants.ExecType.AUTO);
+        Integer successOperRecord = recordService.getRecordCount(session, Constants.ResultStatus.SUCCESSFUL, Constants.ExecType.OPERATOR);
+        Integer successBatchRecord = recordService.getRecordCount(session, Constants.ResultStatus.SUCCESSFUL, Constants.ExecType.BATCH);
 
         model.addAttribute("successAutoRecord", successAutoRecord);
         model.addAttribute("successOperRecord", successOperRecord + successBatchRecord);
@@ -127,9 +128,9 @@ public class DashboardController extends BaseController {
         /**
          * 失败作业
          */
-        Integer failedAutoRecord = recordService.getRecords(session, Constants.ResultStatus.FAILED, Constants.ExecType.AUTO);
-        Integer failedOperRecord = recordService.getRecords(session, Constants.ResultStatus.FAILED, Constants.ExecType.OPERATOR);
-        Integer failedBatchRecord = recordService.getRecords(session, Constants.ResultStatus.FAILED, Constants.ExecType.BATCH);
+        Integer failedAutoRecord = recordService.getRecordCount(session, Constants.ResultStatus.FAILED, Constants.ExecType.AUTO);
+        Integer failedOperRecord = recordService.getRecordCount(session, Constants.ResultStatus.FAILED, Constants.ExecType.OPERATOR);
+        Integer failedBatchRecord = recordService.getRecordCount(session, Constants.ResultStatus.FAILED, Constants.ExecType.BATCH);
 
         model.addAttribute("failedAutoRecord", failedAutoRecord);
         model.addAttribute("failedOperRecord", failedOperRecord + failedBatchRecord);
@@ -143,7 +144,7 @@ public class DashboardController extends BaseController {
 
     @RequestMapping("record.do")
     @ResponseBody
-    public List<ChartInfo> record(HttpSession session, String startTime, String endTime) {
+    public List<Chart> record(HttpSession session, String startTime, String endTime) {
         if (isEmpty(startTime)) {
             startTime = DateUtils.getCurrDayPrevDay(7);
         }
@@ -151,7 +152,7 @@ public class DashboardController extends BaseController {
             endTime = DateUtils.formatSimpleDate(new Date());
         }
         //成功失败折线图数据
-        List<ChartInfo> infoList = recordService.getRecord(session, startTime, endTime);
+        List<Chart> infoList = recordService.getReportChart(session, startTime, endTime);
         if (isEmpty(infoList)) {
             return Collections.emptyList();
         } else {
@@ -161,34 +162,33 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "progress.do", method = RequestMethod.POST)
     @ResponseBody
-    public ChartInfo progress(HttpSession session) {
+    public Chart progress(HttpSession session) {
         //成功失败折线图数据
-        ChartInfo chartInfo = recordService.getAsProgress(session);
-        if (isEmpty(chartInfo)) {
+        Chart chart = recordService.getTopChart(session);
+        if (isEmpty(chart)) {
             return null;
         }
 
-        return chartInfo;
+        return chart;
     }
 
     @RequestMapping(value = "monitor.do", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Serializable> port(Long agentId) throws Exception {
         final Agent agent = agentService.getAgent(agentId);
-
         /**
          * 直联
          */
-        if (agent.getProxy().equals(Constants.ConnType.CONN.getType())) {
+        if (agent.getProxyId()==null) {
             final String url = String.format("http://%s:%s", agent.getHost(), PropertyPlaceholder.get(Constants.PARAM_MONITORPORT_KEY));
             return new HashMap<String, Serializable>() {{
-                put("connType", agent.getProxy());
+                put("connType", Constants.ConnType.CONN.getType());
                 put("data", url);
             }};
-        } else {//代理
+        }else {
             final Response resp = executeService.monitor(agent);
             return new HashMap<String, Serializable>() {{
-                put("connType", agent.getProxy());
+                put("connType", Constants.ConnType.PROXY.getType());
                 put("data", JSON.toJSONString(resp.getResult()));
             }};
         }
@@ -196,10 +196,11 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Map login(HttpSession session, HttpServletRequest request, HttpServletResponse response, @RequestParam String username, @RequestParam String password) throws Exception {
 
         //用户信息验证
-        int status = homeService.checkLogin(request, username, password);
+        int status = userService.login(request, username, password);
 
         if (status == 500) {
             return ParamsMap.map().set("msg", "用户名密码错误");
@@ -219,10 +220,10 @@ public class DashboardController extends BaseController {
                 return ParamsMap.map().set("status", "edit").set("userId", user.getUserId());
             }
 
-            if (user.getHeaderpic() != null) {
+            if (user.getHeaderPic() != null) {
                 String name = user.getUserId() + "_140" + user.getPicExtName();
                 String path = request.getServletContext().getRealPath("/").replaceFirst("/$", "") + "/upload/" + name;
-                IOUtils.writeFile(new File(path), user.getHeaderpic().getBinaryStream());
+                IOUtils.writeFile(new File(path), new ByteArrayInputStream(user.getHeaderPic()));
                 user.setHeaderPath(getWebUrlPath(request) + "/upload/" + name);
                 session.setAttribute(Constants.PARAM_LOGIN_USER_KEY, user);
             }
@@ -241,6 +242,7 @@ public class DashboardController extends BaseController {
 
     @RequestMapping(value = "headpic/upload.do", method = RequestMethod.POST)
     @ResponseBody
+    @RequestRepeat
     public Map upload(@RequestParam(value = "file", required = false) MultipartFile file, Long userId, String data, HttpServletRequest request, HttpSession httpSession) throws Exception {
 
         String extensionName = null;
@@ -291,13 +293,12 @@ public class DashboardController extends BaseController {
             ImageUtils.getInstance(picFile).rotate(cropper.getRotate()).clip(cropper.getX(), cropper.getY(), cropper.getWidth(), cropper.getHeight()).build();
 
             //保存入库.....
-            userService.uploadimg(picFile, userId);
-            userService.updateUser(user);
+            userService.uploadImg(userId,picFile);
 
             String contextPath = getWebUrlPath(request);
             String imgPath = contextPath + "/upload/" + picName + "?" + System.currentTimeMillis();
             user.setHeaderPath(imgPath);
-            user.setHeaderpic(null);
+            user.setHeaderPic(null);
             httpSession.setAttribute(Constants.PARAM_LOGIN_USER_KEY, user);
 
             logger.info(" upload file successful @ " + picName);
@@ -322,7 +323,7 @@ public class DashboardController extends BaseController {
         if (notEmpty(sendTime)) {
             model.addAttribute("sendTime", sendTime);
         }
-        homeService.getLog(session, pageBean, agentId, sendTime);
+        logService.getByPageBean(session, pageBean, agentId, sendTime);
         return "notice/view";
     }
 
@@ -330,7 +331,8 @@ public class DashboardController extends BaseController {
     @RequestMapping(value = "notice/uncount.do", method = RequestMethod.POST)
     @ResponseBody
     public Integer uncount(HttpSession session) {
-        return homeService.getUnReadCount(session);
+        Long userId = JobXTools.getUserId(session);
+        return logService.getUnReadCount(userId);
     }
 
     /**
@@ -341,19 +343,20 @@ public class DashboardController extends BaseController {
      */
     @RequestMapping("notice/unread.htm")
     public String nuread(HttpSession session, Model model) {
-        model.addAttribute("message", homeService.getUnReadMessage(session));
+        Long userId = JobXTools.getUserId(session);
+        model.addAttribute("message", logService.getUnReadMessage(userId));
         return "notice/info";
     }
 
     @RequestMapping("notice/detail/{logId}.htm")
     public String detail(Model model, @PathVariable("logId") Long logId) {
-        Log log = homeService.getLogDetail(logId);
+        Log log = logService.getById(logId);
         if (log == null) {
             return "/error/404";
         }
         model.addAttribute("sender", configService.getSysConfig().getSenderEmail());
         model.addAttribute("log", log);
-        homeService.updateAfterRead(logId);
+        logService.updateAfterRead(logId);
         return "notice/detail";
     }
 }

@@ -74,4 +74,6 @@
     <!-- 全局异常配置 -->
     <bean id="exceptionHandler" class="com.jobxhub.server.handler.ExceptionHandler"/>
 
+
+
 </beans>

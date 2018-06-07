@@ -88,7 +88,7 @@
 
         $(document).ready(function(){
             $("#size").change(function(){
-                var pageSize = $("#size").val();
+                var pageSize = $("#size").val()||${pageBean.pageSize};
                 window.location.href = "${contextPath}/user/view.htm?pageSize="+pageSize;
             });
 
@@ -136,7 +136,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">用户管理</a></li>
         <li><a href="">用户详情</a></li>
     </ol>

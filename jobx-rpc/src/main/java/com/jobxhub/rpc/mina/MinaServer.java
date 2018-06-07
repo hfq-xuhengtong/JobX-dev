@@ -33,7 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.jobxhub.common.util.ExceptionUtils.stackTrace;
 
@@ -45,23 +46,44 @@ public class MinaServer implements Server {
 
     private InetSocketAddress socketAddress;
 
-    @Override
-    public void start(final int port, ServerHandler handler) {
-        final MinaServerHandler serverHandler = new MinaServerHandler(handler);
-        this.socketAddress = new InetSocketAddress(port);
+    protected static ThreadPoolExecutor threadPoolExecutor;
 
-        acceptor = new NioSocketAcceptor();
-        acceptor.getFilterChain().addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
-        acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Response.class, Request.class)));
-        acceptor.setHandler(serverHandler);
-        try {
-            acceptor.bind(this.socketAddress);
-            if (logger.isInfoEnabled()) {
-                logger.info("[JobX] MinaServer start at address:{} success", port);
+    private Thread serverDaemon = null;
+
+    @Override
+    public void start(final int port,final ServerHandler handler) {
+
+        this.serverDaemon = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final MinaServerHandler serverHandler = new MinaServerHandler(handler);
+                socketAddress = new InetSocketAddress(port);
+
+                acceptor = new NioSocketAcceptor();
+                acceptor.getFilterChain().addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
+                acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(Response.class, Request.class)));
+                acceptor.setHandler(serverHandler);
+                try {
+                    acceptor.bind(socketAddress);
+                    if (logger.isInfoEnabled()) {
+                        logger.info("[JobX] MinaServer start at address:{} success", port);
+                    }
+                } catch (IOException e) {
+                    logger.error("[JobX] MinaServer start failure: {}", stackTrace(e));
+                }
             }
-        } catch (IOException e) {
-            logger.error("[JobX] MinaServer start failure: {}", stackTrace(e));
-        }
+        });
+        this.serverDaemon.setDaemon(true);
+        this.serverDaemon.start();
+
+        threadPoolExecutor = new ThreadPoolExecutor(50, 100, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+            private final AtomicInteger idGenerator = new AtomicInteger(0);
+            @Override
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "MinaServer" + this.idGenerator.incrementAndGet());
+            }
+        });
+
     }
 
     @Override
@@ -70,6 +92,7 @@ public class MinaServer implements Server {
             if (acceptor != null) {
                 acceptor.dispose();
             }
+            this.serverDaemon.interrupt();
             if (logger.isInfoEnabled()) {
                 logger.info("[JobX] MinaServer stoped!");
             }

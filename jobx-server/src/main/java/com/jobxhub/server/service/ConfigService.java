@@ -21,143 +21,223 @@
 
 package com.jobxhub.server.service;
 
-import com.jobxhub.common.util.PropertyPlaceholder;
-import com.jobxhub.common.util.ReflectUtils;
-import org.hibernate.Query;
-import com.jobxhub.common.util.CommonUtils;
-import com.jobxhub.common.util.DigestUtils;
-import com.jobxhub.server.dao.QueryDao;
+import com.jobxhub.common.Constants;
+import com.jobxhub.common.util.*;
+import com.jobxhub.common.util.collection.HashMap;
+import com.jobxhub.server.dao.ConfigDao;
+import com.jobxhub.server.dto.Config;
 import com.jobxhub.server.domain.*;
+import com.jobxhub.server.dto.UserAgent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Table;
-import java.lang.annotation.Annotation;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.sql.DataSource;
+import java.io.File;
+import java.net.URL;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ChenHui on 2016/2/17.
  */
 @Service
-@Transactional
 public class ConfigService {
 
-    @Autowired
-    private QueryDao queryDao;
+    private final Logger logger = LoggerFactory.getLogger(ConfigService.class);
 
     @Autowired
-    private UserService userService;
+    private ConfigDao configDao;
 
     @Autowired
-    private JobService jobService;
+    private DataSource druidDataSource;
+
+    @Autowired
+    private UserAgentService userAgentService;
+
+    private Connection connection;
+
+    private String updateSQLFormat = "sql/%s-%s.sql";
 
     public Config getSysConfig() {
-        return queryDao.hqlUniqueQuery("from Config where configId = 1");
+        List<ConfigBean> configList = configDao.getConfig();
+        if (CommonUtils.notEmpty(configList)) {
+            Config config = new Config();
+            for (ConfigBean configBean:configList) {
+                config.transform(configBean);
+            }
+            return config;
+        }
+        return null;
     }
 
     public void update(Config config) {
-        queryDao.save(config);
+        List<ConfigBean> configBean = ConfigBean.transform(config);
+        for (ConfigBean bean:configBean) {
+            configDao.update(bean);
+        }
     }
 
     public void initDB() throws SQLException {
-
-        /**
-         * for version 1.1.0 update to version 1.2.0(ip rename to host)
-         * alter status boolean to int
-         */
+        connection = druidDataSource.getConnection();
+        Connection connection = druidDataSource.getConnection();
+        connection.setAutoCommit(true);
         try {
-            String url = PropertyPlaceholder.get("jdbc.url");
-            String userName = PropertyPlaceholder.get("jdbc.username");
-            String password =  PropertyPlaceholder.get("jdbc.password");
-            String tableName = getTableName(Agent.class);
-
-            Connection connection = DriverManager.getConnection(url,userName,password);
-            connection.setAutoCommit(true);
-            String sql = String.format("alter table %s modify `status` int",tableName);
-            connection.prepareStatement(sql).execute();
-
-            sql = String.format("update %s set `host`=ip where `host` is null and ip is not null",tableName);
-            connection.prepareStatement(sql).execute();
-
-            sql = String.format("alter table %s drop `ip`",tableName);
-            connection.prepareStatement(sql).execute();
-        }catch (Exception e) {
+            boolean tableExist = validateTableExist(connection);
+            //表存在...
+            if (tableExist) {
+                //检查升级更新...
+                updateTable();
+            } else {
+                //不存在,创建新表,初始化数据...
+                createTable();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             //skip.....
+        } finally {
+            connection.close();
         }
+    }
 
-        /**
-         * for version 1.1.0 update to version 1.2.0(api support,init token)
-         */
-        List<Job> jobs = queryDao.createQuery("from Job where token=null").list();
-        if (CommonUtils.notEmpty(jobs)) {
-            for (Job job : jobs) {
-                if (job.getToken() == null) {
-                    job.setToken(CommonUtils.uuid());
-                }
-                jobService.merge(job);
+    private void updateTable() throws Exception {
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from t_config limit 1");
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        boolean version = false;
+        for (int i = 0; i < metaData.getColumnCount(); i++) {
+            // resultSet数据下标从1开始
+            String columnName = metaData.getColumnName(i + 1);
+            if (columnName.equals("config_key")) {
+                version = true;
+                break;
             }
         }
 
-        //init config
-        long count = queryDao.hqlCount("from Config");
-        if (count == 0) {
-            Config config = new Config();
-            config.setConfigId(1L);
-            config.setSenderEmail("you_mail_name");
-            config.setSmtpHost("smtp.exmail.qq.com");
-            config.setSmtpPort(465);
-            config.setPassword("your_mail_pwd");
-            config.setSendUrl("http://your_url");
-            config.setSpaceTime(30);
-            queryDao.save(config);
+        if (resultSet!=null) {
+            resultSet.close();
         }
 
-        Role admin = queryDao.hqlUniqueQuery("from Role where roleId=1");
-        if (admin == null) {
-            Role role = new Role();
-            role.setRoleId(1L);
-            role.setRoleName("admin");
-            role.setDescription("view privileges");
-            queryDao.save(role);
+        //t_config表中有version字段
+        String oldVersion = "V1.1.0";
+        if (version) {
+            oldVersion = getSysConfig().getVersion();
         }
 
-
-        Role superAdmin = queryDao.hqlUniqueQuery("from Role where roleId=999");
-        if (superAdmin == null) {
-            Role role = new Role();
-            role.setRoleId(999L);
-            role.setRoleName("superAdmin");
-            role.setDescription("view privileges");
-            queryDao.save(role);
+        //无需升级版本
+        if (oldVersion.equalsIgnoreCase(Constants.JOBX_VERSION)) {
+            return;
         }
 
-        User user = queryDao.hqlUniqueQuery("from User where userName=?","jobx");
-        if (user == null) {
-            user = new User();
-            user.setUserName("jobx");
-            user.setPassword(DigestUtils.md5Hex("jobx").toUpperCase());
-            user.setRoleId(999L);
-            user.setRealName("jobx");
-            user.setEmail("benjobs@qq.com");
-            user.setQq("benjobs@qq.com");
-            user.setContact("18500193260");
-            userService.addUser(user);
+        String sqlFile = String.format(updateSQLFormat, oldVersion, Constants.JOBX_VERSION);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(sqlFile);
+        if (url == null) {
+            logger.warn("[JobX] version {} up to {} update'sql not found...", oldVersion, Constants.JOBX_VERSION);
+            return;
         }
 
+        String content = IOUtils.readText(new File(url.getFile()), Constants.CHARSET_UTF8);
+
+        List<Map<String,String>> sqlList = parseSQL(content);
+
+        for (Map<String,String> map:sqlList) {
+            if (CommonUtils.notEmpty(map) && map.size() == 1) {
+                Map.Entry<String, String> entry = map.entrySet().iterator().next();
+                try {
+                    logger.info("[JobX] update sql[{}] Starting...", entry.getValue());
+                    statement.executeUpdate(entry.getKey());
+                } catch (Exception e) {
+                    logger.error("[JobX] update sql[{}] error:{}", entry.getValue(), e.getMessage());
+                }
+            }
+        }
+
+        updateVersionV110ToV120(oldVersion,statement);
+
+        statement.close();
     }
 
-    private String getTableName(Class<?> clazz) {
-        Table table = clazz.getAnnotation(Table.class);
-        if (table == null||table.name()==null) {
-            return "t_".concat(clazz.getSimpleName());
+    //V1.1.0升级V1.2.0特殊操作....
+    private void updateVersionV110ToV120(String oldVersion,Statement statement ) throws SQLException {
+        if ( oldVersion.equalsIgnoreCase("V1.1.0") &&
+                Constants.JOBX_VERSION.equalsIgnoreCase("V1.2.0")) {
+            logger.info("[JobX] V1.1.0 upto V1.2.0  processing the agentIds field in the t_user table...");
+            String sql = "select user_id,agentIds from t_user";
+            ResultSet rs = statement.executeQuery(sql);
+            while (rs.next()) {
+                Long userId = rs.getLong(1);
+                String agentIds = rs.getString(2);
+                if (CommonUtils.notEmpty(agentIds)) {
+                    String[] idArray = agentIds.split(",");
+                    for (String id:idArray) {
+                        Long agentId = Long.parseLong(id);
+                        UserAgent userAgent = new UserAgent(userId,agentId);
+                        userAgentService.save(userAgent);
+                    }
+                }
+            }
+            logger.info("[JobX] V1.1.0 upto V1.2.0  drop column agentIds from t_user...");
+            sql = "alter table t_user drop column agentIds";
+            statement.executeUpdate(sql);
         }
-        return table.name();
+    }
+
+    private void createTable() throws SQLException {
+        String sqlFile = "sql/" + Constants.JOBX_VERSION + ".sql";
+        URL url = Thread.currentThread().getContextClassLoader().getResource(sqlFile);
+        if (url == null) {
+            throw new ExceptionInInitializerError("[JobX] sqlFile:" + sqlFile + " not found...");
+        }
+        String content = IOUtils.readText(new File(url.getFile()), Constants.CHARSET_UTF8);
+        List<Map<String,String>> sqlList = parseSQL(content);
+        String separator = StringUtils.line("-", 100);
+        Statement statement = connection.createStatement();
+        for (Map<String,String> map:sqlList) {
+            if (CommonUtils.notEmpty(map) && map.size() == 1) {
+                Map.Entry<String, String> entry = map.entrySet().iterator().next();
+                try {
+                    logger.info("[JobX] create table Starting...{}\n{}", entry.getValue(), separator);
+                    statement.executeUpdate(entry.getKey());
+                } catch (Exception e) {
+                    logger.error("[JobX] create table Error:sql:{},info:{}", entry.getValue(), e.getMessage());
+                }
+            }
+        }
+        statement.close();
+    }
+
+    private List<Map<String,String>> parseSQL(String content) {
+        String[] sqlArray = content.split("\\;");
+        List<Map<String,String>> sqlList = new ArrayList<Map<String, String>>(0);
+        for (String sql : sqlArray) {
+            if (CommonUtils.notEmpty(sql)) {
+                String script = sql.replaceAll("--(.*)\\n", "").replaceAll("\\n|\\r", " ").trim();
+                Map<String, String> sqlMap = new HashMap<String, String>(0);
+                sqlMap.put(script, sql.replaceAll("^((\\r\\n)|\\n)",""));
+                sqlList.add(sqlMap);
+            }
+        }
+        return sqlList;
+    }
+
+    public boolean validateTableExist(Connection conn) {
+        boolean flag = true;
+        String sql = "select count(1) from t_config";
+        //获取连接
+        try {
+            Statement statement = conn.createStatement();
+            statement.executeQuery(sql);
+            statement.close();
+        } catch (Exception e) {
+            if (e.getLocalizedMessage().contains("doesn't exist")) {
+                flag = false;
+            }
+        }
+        return flag;
     }
 
 

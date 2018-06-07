@@ -16,61 +16,42 @@ $(document).ready(function(){
 				'</div>' +
 				'<div class="modal-body">' +
 				    '<div class="row template-skins">' +
-					'<a data-skin="skin-cloth" class="col-sm-2 col-xs-4" href="">' +
-					'<img src="'+contextPath+'/static/img/skin-cloth.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-violate" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-violate.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-lights" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-lights.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-orange" class="col-sm-2 col-xs-4" href="">' +
-						'<img src="'+contextPath+'/static/img/skin-orange.jpg" alt="">' +
+					'<a data-skin="skin-1" class="col-sm-2 col-xs-4" href="">' +
+						'<img src="'+contextPath+'/static/img/body/skin-1.jpg" alt="">' +
 					'</a>' +
 					'<a data-skin="skin-2" class="col-sm-2 col-xs-4" href="">' +
-						'<img src="'+contextPath+'/static/img/skin-2.jpg" alt="">' +
+					    '<img src="'+contextPath+'/static/img/body/skin-2.jpg" alt="">' +
+					'</a>' +
+					'<a data-skin="skin-3" class="col-sm-2 col-xs-4" href="">' +
+						'<img src="'+contextPath+'/static/img/body/skin-3.jpg" alt="">' +
 					'</a>' +
 					'<a data-skin="skin-4" class="col-sm-2 col-xs-4" href="">' +
-						'<img src="'+contextPath+'/static/img/skin-4.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-5" class="col-sm-2 col-xs-4" href="">' +
-						'<img src="'+contextPath+'/static/img/skin-5.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-6" class="col-sm-2 col-xs-4" href="">' +
-						'<img src="'+contextPath+'/static/img/skin-6.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-city" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-city.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-greenish" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-greenish.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-night" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-night.jpg" alt="">' +
+						'<img src="'+contextPath+'/static/img/body/skin-4.jpg" alt="">' +
 					'</a>' +
 					'<a data-skin="skin-blue" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-blue.jpg" alt="">' +
+					    '<img src="'+contextPath+'/static/img/body/skin-blue.jpg" alt="">' +
 					'</a>' +
-					'<a data-skin="skin-sunny" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-sunny.jpg" alt="">' +
+					'<a data-skin="skin-greenish" class="col-sm-2 col-xs-4" href="">' +
+						'<img src="'+contextPath+'/static/img/body/skin-greenish.jpg" alt="">' +
 					'</a>' +
-
+					'<a data-skin="skin-violate" class="col-sm-2 col-xs-4" href="">' +
+						'<img src="'+contextPath+'/static/img/body/skin-violate.jpg" alt="">' +
+					'</a>' +
 					'<a data-skin="skin-chrome" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-chrome.jpg" alt="">' +
+					    '<img src="'+contextPath+'/static/img/body/skin-chrome.jpg" alt="">' +
 					'</a>' +
-					'<a data-skin="skin-ocean" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-ocean.jpg" alt="">' +
+					'<a  data-skin="skin-kiwi" class="col-sm-2 col-xs-4" href="">' +
+					    '<img src="'+contextPath+'/static/img/body/skin-kiwi.jpg" alt="">' +
 					'</a>' +
-					'<a data-skin="skin-sunset" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-sunset.jpg" alt="">' +
-					'</a>' +
-					'<a data-skin="skin-yellow" class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-yellow.jpg" alt="">' +
-					'</a>' +
-					'<a  data-skin="skin-kiwi"class="col-sm-2 col-xs-4" href="">' +
-					    '<img src="'+contextPath+'/static/img/skin-kiwi.jpg" alt="">' +
-					'</a>' +
+                    '<a  data-skin="skin-night" class="col-sm-2 col-xs-4" href="">' +
+                        '<img src="'+contextPath+'/static/img/body/skin-night.jpg" alt="">' +
+                    '</a>' +
+                    '<a  data-skin="skin-sky" class="col-sm-2 col-xs-4" href="">' +
+                        '<img src="'+contextPath+'/static/img/body/skin-sky.jpg" alt="">' +
+                    '</a>' +
+                    '<a  data-skin="skin-orange" class="col-sm-2 col-xs-4" href="">' +
+                        '<img src="'+contextPath+'/static/img/body/skin-orange.jpg" alt="">' +
+                    '</a>' +
 				    '</div>' +
 				'</div>' +
 			    '</div>' +

@@ -39,6 +39,9 @@
     <script type="text/javascript" src="${contextPath}/static/js/jquery-ui.min.js?resId=${resourceId}"></script> <!-- jQuery UI -->
     <script type="text/javascript" src="${contextPath}/static/js/jquery.easing.1.3.js?resId=${resourceId}"></script> <!-- jQuery Easing - Requirred for Lightbox + Pie Charts-->
 
+
+    <script type="text/javascript" src="${contextPath}/static/js/map.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+
     <!-- Bootstrap -->
     <script type="text/javascript" src="${contextPath}/static/js/bootstrap.js?resId=${resourceId}"></script>
     <script type="text/javascript" src="${contextPath}/static/js/easypiechart.js?resId=${resourceId}"></script> <!-- EasyPieChart - Animated Pie Charts -->
@@ -75,5 +78,9 @@
     <script type="text/javascript" src="${contextPath}/static/js/cropper/cropper.js?resId=${resourceId}" ></script>
     <script type="text/javascript" src="${contextPath}/static/js/jobx.cropper.js?resId=${resourceId}" ></script>
 
-
-
+    <!--flot
+    <script type="text/javascript" src="${contextPath}/static/js/flot/jquery.flot.js?resId=${resourceId}" ></script>
+    <script type="text/javascript" src="${contextPath}/static/js/flot/jquery.flot.pie.js?resId=${resourceId}" ></script>
+    <script type="text/javascript" src="${contextPath}/static/js/flot/jquery.flot.resize.js?resId=${resourceId}" ></script>
+    <script type="text/javascript" src="${contextPath}/static/js/flot/curvedLines.js?resId=${resourceId}" ></script>
+    -->

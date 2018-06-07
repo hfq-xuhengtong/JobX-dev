@@ -44,7 +44,7 @@
     <div class="container">
         <div>
             <ul class="nav navbar-nav">
-                <li><a class="term-logo" href="${contextPath}" target="_blank" title="">jobx</a></li>
+                <li><a class="term-logo" href="${contextPath}" target="_blank" title="">JobX</a></li>
 
                 <li class="dropdown">
                     <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" title="常用操作"><i aria-hidden="true" class="fa fa-server"></i>&nbsp;操作<b class="caret"></b></a>

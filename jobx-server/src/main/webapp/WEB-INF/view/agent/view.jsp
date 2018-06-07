@@ -48,8 +48,13 @@
         $(document).ready(function () {
 
             $("#size").change(function () {
-                var pageSize = $("#size").val();
-                window.location.href = "${contextPath}/agent/view.htm?pageSize=" + pageSize;
+                doUrl()
+            });
+            $("#agentName").change(function () {
+                doUrl()
+            });
+            $("#agentStatus").change(function () {
+                doUrl()
             });
 
             new Clipboard('#copy-btn').on('success', function(e) {
@@ -141,7 +146,14 @@
             $("#proxy0").bind("click",toggle.proxy.hide).next().bind("click",toggle.proxy.hide);
 
         });
-        
+
+        function doUrl() {
+            var pageSize = $("#size").val()||${pageBean.pageSize};
+            var agentName = $("#agentName").val().trim();
+            var status = $("#agentStatus").val();
+            window.location.href = "${contextPath}/agent/view.htm?pageSize=" + pageSize + "&name=" + agentName + "&status=" + status;
+        }
+
         function upload(agentId) {
             if (!$(".pong_"+agentId).length) {
                 alert("执行器失联,请检查执行器连接");
@@ -265,7 +277,7 @@
                     $("#name").val(obj.name);
                     $("#host").val(obj.host);
                     $("#port").val(obj.port);
-                    if (obj.proxy == 1) {
+                    if (obj.proxyId) {
                         toggle.proxy.show();
                         $("#agent_" + obj.agentId).attr("selected", true);
                     } else {
@@ -290,8 +302,8 @@
                         $("#warning1").parent().removeClass("checked");
                         $("#warning1").parent().attr("aria-checked", false);
                     }
-                    $("#mobiles").val(obj.mobiles);
-                    $("#email").val(obj.emailAddress);
+                    $("#mobile").val(obj.mobile);
+                    $("#email").val(obj.email);
                     $("#comment").val(obj.comment);
                     $("#agentModal").modal("show");
 
@@ -320,6 +332,7 @@
                 alert("页面异常，请刷新重试!");
                 return false;
             }
+
             var host = $("#host").val();
             if (!host) {
                 alert("请填写机器Host!");
@@ -344,12 +357,12 @@
                 return false;
             }
             if (warning == 1) {
-                var mobiles = $("#mobiles").val();
-                if (!mobiles) {
+                var mobile = $("#mobile").val();
+                if (!mobile) {
                     alert("请填写手机号码!");
                     return false;
                 }
-                if (!jobx.testMobile(mobiles)) {
+                if (!jobx.testMobile(mobile)) {
                     alert("请填写正确的手机号码!");
                     return false;
                 }
@@ -383,15 +396,15 @@
                             type: "post",
                             url: "${contextPath}/verify/ping.do",
                             data: {
-                                "proxy": proxy,
-                                "proxyId": $("#proxyAgent").val(),
+                                "proxy":proxy,
+                                "proxyId":$("#proxyId").val(),
                                 "host": host,
                                 "port": port,
                                 "password": password
                             }
                         },function (data) {
                             if (data.status == 1) {
-                                canSave(proxy, id, name, port, warning, mobiles, email);
+                                canSave(proxy, id, name, port, warning, mobile, email);
                                 return false;
                             } else if(data.status == 0){
                                 alert("通信失败!请检查主机和端口号");
@@ -400,7 +413,7 @@
                             }
                         });
                     } else {
-                        canSave(proxy, id, name, port, warning, mobiles, email);
+                        canSave(proxy, id, name, port, warning, mobile, email);
                         return false;
                     }
                 } else {
@@ -410,20 +423,20 @@
             })
         }
 
-        function canSave(proxy, id, name, port, warning, mobiles, email) {
+        function canSave(proxy, id, name, port, warning, mobile, email) {
             var loading = new Loading();
             ajax({
                 type: "post",
                 url: "${contextPath}/agent/edit.do",
                 data: {
                     "proxy": proxy,
-                    "proxyAgent": $("#proxyAgent").val(),
+                    "proxyId": $("#proxyId").val(),
                     "agentId": id,
                     "name": name,
                     "port": port,
                     "warning": warning,
-                    "mobiles": mobiles,
-                    "emailAddress": email,
+                    "mobile": mobile,
+                    "email": email,
                     "comment":$("#comment").val()
                 }
             },function (data) {
@@ -454,9 +467,9 @@
                 url: "${contextPath}/agent/getConnAgents.do"
             },function (obj) {
                 if (obj != null) {
-                    $("#proxyAgent").empty();
+                    $("#proxyId").empty();
                     for (var i in obj) {
-                        $("#proxyAgent").append('<option value="' + obj[i].agentId + '" id="agent_' + obj[i].agentId + '">' + obj[i].host + ' (' + obj[i].name + ')</option>');
+                        $("#proxyId").append('<option value="' + obj[i].agentId + '" id="agent_' + obj[i].agentId + '">' + obj[i].host + ' (' + obj[i].name + ')</option>');
                     }
                 }
             })
@@ -626,8 +639,8 @@
                 type: "post",
                 url: "${contextPath}/verify/ping.do",
                 data: {
-                    "proxy": proxy,
-                    "proxyId": $("#proxyAgent").val(),
+                    "proxy":proxy,
+                    "proxyId": $("#proxyId").val(),
                     "host": host,
                     "port": port,
                     "password": password
@@ -749,30 +762,32 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">执行器管理</a></li>
     </ol>
-    <h4 class="page-title"><i class="fa fa-desktop" aria-hidden="true"></i>&nbsp;执行器管理&nbsp;&nbsp;<span id="highlight"
-                                                                                                        style="font-size: 14px"><img
-            src='${contextPath}/static/img/icon-loader.gif' style="width: 14px;height: 14px">&nbsp;通信监测持续进行中...</span></h4>
+    <h4 class="page-title"><i class="fa fa-desktop" aria-hidden="true"></i>&nbsp;执行器管理&nbsp;&nbsp;
+        <span id="highlight" style="font-size: 14px">
+            <img src='${contextPath}/static/img/icon-loader.gif' style="width: 14px;height: 14px">&nbsp;通信监测持续进行中...
+        </span>
+    </h4>
     <div class="block-area" id="defaultStyle">
         <div>
-            <div style="float:left;">
-                <label >
-                    每页 <select size="1" class="select-jobx" id="size" style="width: 50px;">
-                    <option value="15">15</option>
-                    <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                    <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-                </select> 条记录
-                </label>
+            <div class="opt-bar">
+                <label>执行器名：</label>
+                <input type="text" name="agentName" id="agentName" value="${agentName}" class="w120" placeholder="根据名称搜索"/>
+                &nbsp;&nbsp;&nbsp;
+
+                <label>通信状态：</label>
+                <select id="agentStatus" name="agentStatus" class="select-jobx w80">
+                    <option value="">全部</option>
+                    <option value="1" ${agentStatus eq 1 ? 'selected' : ''}>成功</option>
+                    <option value="0" ${agentStatus eq 0 ? 'selected' : ''}>失联</option>
+                </select>
+                &nbsp;&nbsp;&nbsp;
+                <c:if test="${permission eq true}">
+                    <a href="${contextPath}/agent/add.htm" class="btn btn-sm m-t-10"><i class="icon">&#61943;</i>添加</a>
+                </c:if>
             </div>
-            <c:if test="${permission eq true}">
-                <div style="float: right;margin-top: -10px">
-                    <a href="${contextPath}/agent/add.htm" class="btn btn-sm m-t-10"
-                       style="margin-left: 50px;margin-bottom: 8px"><i class="icon">&#61943;</i>添加</a>
-                </div>
-            </c:if>
         </div>
 
         <table class="table tile textured table-custom table-sortable">
@@ -834,10 +849,10 @@
                     <td id="port_${w.agentId}">${w.port}</td>
                     <td>
                         <c:if test="${w.status eq 0}">
-                            <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
+                            <span class="label label-danger">&nbsp;&nbsp;失&nbsp;联&nbsp;&nbsp;</span>
                         </c:if>
                         <c:if test="${w.status eq 1}">
-                            <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
+                            <span class="label label-success pong_${w.agentId}">&nbsp;&nbsp;正&nbsp;常&nbsp;&nbsp;</span>
                         </c:if>
                         <c:if test="${w.status eq 2}">
                             <span class="label label-danger">&nbsp;密码错误&nbsp;</span>
@@ -848,8 +863,8 @@
                         <c:if test="${w.warning eq true}"><span class="label label-warning" style="color: white;font-weight:bold">&nbsp;&nbsp;是&nbsp;&nbsp;</span> </c:if>
                     </td>
                     <td id="connType_${w.agentId}">
-                        <c:if test="${w.proxy eq 0}">直连</c:if>
-                        <c:if test="${w.proxy eq 1}">代理</c:if>
+                        <c:if test="${w.proxyId eq null}">直连</c:if>
+                        <c:if test="${w.proxyId ne null}">代理</c:if>
                     </td>
                     <td class="text-center">
                         <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
@@ -910,9 +925,9 @@
                         </div>
 
                         <div class="form-group proxy" style="display: none;margin-top: 20px;">
-                            <label for="proxyAgent" class="col-lab control-label">代&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;理：</label>
+                            <label for="proxyId" class="col-lab control-label">代&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;理：</label>
                             <div class="col-md-9">
-                                <select id="proxyAgent" name="proxyAgent" class="form-control">
+                                <select id="proxyId" name="proxyId" class="form-control">
                                     <c:forEach var="d" items="${connAgents}">
                                         <option value="${d.agentId}" id="agent_${d.agentId}">${d.host}&nbsp;(${d.name})</option>
                                     </c:forEach>
@@ -934,9 +949,9 @@
                             <label onclick="toggle.contact.hide()" for="warning0" class="radio-label"><input type="radio" name="warning" value="0" id="warning0">否</label>
                         </div>
                         <div class="form-group contact">
-                            <label for="mobiles" class="col-lab control-label" title="执行器通信不正常时将发送短信给此手机">报警手机：</label>
+                            <label for="mobile" class="col-lab control-label" title="执行器通信不正常时将发送短信给此手机">报警手机：</label>
                             <div class="col-md-9">
-                                <input type="text" class="form-control " id="mobiles"/>&nbsp;
+                                <input type="text" class="form-control " id="mobile"/>&nbsp;
                             </div>
                         </div>
                         <div class="form-group contact">

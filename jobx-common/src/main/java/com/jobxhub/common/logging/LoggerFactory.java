@@ -43,7 +43,7 @@ public abstract class LoggerFactory {
             File file = new File(currPath);
             path = file.getParentFile().getParentFile() + "/conf/log4j.properties";
             if (!new File(path).exists()) {
-                throw new ExceptionInInitializerError("[JOBX] error: can not found log4j.properties...");
+                throw new ExceptionInInitializerError("[JobX] error: can not found log4j.properties...");
             }
         } else {
             path = url.getPath();

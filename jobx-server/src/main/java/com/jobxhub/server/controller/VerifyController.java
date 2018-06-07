@@ -23,29 +23,24 @@ package com.jobxhub.server.controller;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.collection.ParamsMap;
-import com.jobxhub.server.domain.Agent;
+import com.jobxhub.server.dto.Agent;
 import it.sauronsoftware.cron4j.SchedulingPattern;
 import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.ExecuteService;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Status;
 import org.quartz.CronExpression;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
 @Controller
 @RequestMapping("verify")
 public class VerifyController extends BaseController {
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private ExecuteService executeService;
@@ -64,36 +59,13 @@ public class VerifyController extends BaseController {
 
     /**
      * 仅检查是否可以连接
-     * @param proxy
-     * @param proxyId
-     * @param host
-     * @param port
-     * @param password
      * @return
      */
     @RequestMapping(value = "ping.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String,Integer> validatePing(int proxy, Long proxyId, String host, Integer port, String password) {
-        Agent agent = new Agent();
-        agent.setProxy(proxy);
-        agent.setHost(host);
-        agent.setPort(port);
-        agent.setPassword(password);
-
+    public Map<String,Integer> validatePing(Agent agent) {
         Map<String,Integer> result = new HashMap<String, Integer>(0);
-        if (proxy == Constants.ConnType.PROXY.getType()) {
-            agent.setProxy(Constants.ConnType.CONN.getType());
-            if (proxyId != null) {
-                Agent proxyAgent = agentService.getAgent(proxyId);
-                if (proxyAgent == null) {
-                    result.put("status",Constants.ConnStatus.DISCONNECTED.getValue());
-                    return result;
-                }
-                agent.setProxyAgent(proxyId);
-                //需要代理..
-                agent.setProxy(Constants.ConnType.PROXY.getType());
-            }
-        }
+        if (hasProxy(agent, result)) return result;
         Constants.ConnStatus connStatus = executeService.ping(agent,false);
         result.put("status",connStatus.getValue());
         return result;
@@ -101,29 +73,26 @@ public class VerifyController extends BaseController {
 
     @RequestMapping(value = "macid.do", method = RequestMethod.POST)
     @ResponseBody
-    public Map macid(int proxy, Long proxyId, String host, Integer port, String password, HttpServletResponse response) {
-        Agent agent = new Agent();
-        agent.setProxy(proxy);
-        agent.setHost(host);
-        agent.setPort(port);
-        agent.setPassword(password);
-
-        if (proxy == Constants.ConnType.PROXY.getType()) {
-            agent.setProxy(Constants.ConnType.CONN.getType());
-            if (proxyId != null) {
-                Agent proxyAgent = agentService.getAgent(proxyId);
-                if (proxyAgent == null) {
-                    return null;
-                }
-                agent.setProxyAgent(proxyId);
-                //需要代理..
-                agent.setProxy(Constants.ConnType.PROXY.getType());
-            }
-        }
+    public Map macid(Agent agent) {
+        Map<String,Integer> result = new HashMap<String, Integer>(0);
+        if (hasProxy(agent, result)) return result;
         String macId = executeService.getMacId(agent);
         if (macId == null) {
             return ParamsMap.map().set("status", false);
         }
         return ParamsMap.map().set("status", true).set("macId", macId);
+    }
+
+    private boolean hasProxy(Agent agent, Map<String, Integer> result) {
+        if (agent.getProxy()) {
+            Agent proxyAgent = agentService.getAgent(agent.getProxyId());
+            if (proxyAgent == null) {
+                result.put("status",Constants.ConnStatus.DISCONNECTED.getValue());
+                return true;
+            }
+        }else {
+            agent.setProxyId(null);
+        }
+        return false;
     }
 }

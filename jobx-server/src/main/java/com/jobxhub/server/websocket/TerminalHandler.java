@@ -24,12 +24,12 @@ package com.jobxhub.server.websocket;
 
 import java.io.IOException;
 
-import com.jobxhub.server.domain.Terminal;
 
 import static com.jobxhub.common.util.CommonUtils.toInt;
 
 import com.jobxhub.server.service.TerminalService;
 import com.jobxhub.server.support.*;
+import com.jobxhub.server.dto.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -67,7 +67,7 @@ public class TerminalHandler extends TextWebSocketHandler {
                     int width = toInt(session.getAttributes().get("width").toString());
                     int height = toInt(session.getAttributes().get("height").toString());
                     terminalClient.openTerminal(cols, rows, width, height);
-                    terminalService.login(terminal);
+                    terminalService.login(terminal.getId());
                 } catch (Exception e) {
                     if (e.getLocalizedMessage().replaceAll("\\s+", "").contentEquals("Operationtimedout")) {
                         session.sendMessage(new TextMessage("Sorry! Connect timed out, please try again. "));

@@ -20,6 +20,8 @@
  */
 package com.jobxhub.rpc.support;
 
+import com.jobxhub.rpc.mina.MinaConnectWrapper;
+import com.jobxhub.rpc.netty.NettyChannelWrapper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -30,17 +32,18 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.Request;
-import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.HttpUtils;
 import com.jobxhub.rpc.Client;
-import com.jobxhub.rpc.InvokeCallback;
 import com.jobxhub.rpc.RpcFuture;
-import com.jobxhub.rpc.mina.ConnectWrapper;
-import com.jobxhub.rpc.netty.ChannelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.jobxhub.common.util.collection.HashMap;
 
 /**
  * @author benjobs
@@ -53,47 +56,28 @@ public abstract class AbstractClient implements Client {
 
     protected Bootstrap bootstrap;
 
-    protected final ConcurrentHashMap<String, ConnectWrapper> connectTable = new ConcurrentHashMap<String, ConnectWrapper>();
+    private final Lock connectLock = new ReentrantLock();
 
     protected final ConcurrentHashMap<String, ChannelWrapper> channelTable = new ConcurrentHashMap<String, ChannelWrapper>();
 
-    public final ConcurrentHashMap<Long, RpcFuture> futureTable = new ConcurrentHashMap<Long, RpcFuture>(256);
-
-    @Override
-    public Response sentSync(Request request) throws Exception {
-        this.connect(request);
-        return invokeSync(request);
-    }
-
-    @Override
-    public void sentOneWay(Request request) throws Exception {
-        this.connect(request);
-        invokeOneWay(request);
-    }
-
-    @Override
-    public void sentAsync(Request request, InvokeCallback callback) throws Exception {
-        this.connect(request);
-        invokeAsync(request,callback);
-    }
+    public final Map<Long, RpcFuture> futureTable = new HashMap<Long, RpcFuture>(256);
 
     public ConnectFuture getConnect(Request request) {
-
-        ConnectWrapper connectWrapper = this.connectTable.get(request.getAddress());
-
-        if (connectWrapper != null && connectWrapper.isActive()) {
-            return connectWrapper.getConnectFuture();
-        }
-
-        synchronized (this) {
+        connectLock.lock();
+        try {
+            MinaConnectWrapper minaConnectWrapper = (MinaConnectWrapper) this.channelTable.get(request.getAddress());
+            if (minaConnectWrapper != null && minaConnectWrapper.isActive()) {
+                return minaConnectWrapper.getConnectFuture();
+            }
+            this.doConnect(request);
             ConnectFuture connectFuture = connector.connect(HttpUtils.parseSocketAddress(request.getAddress()));
-            connectWrapper = new ConnectWrapper(connectFuture);
+            minaConnectWrapper = new MinaConnectWrapper(connectFuture);
             if (connectFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
-                if (connectWrapper.isActive()) {
+                if (minaConnectWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
                         logger.info("[JobX] MinaRPC getConnect: connect remote host[{}] success, {}", request.getAddress(), connectFuture.toString());
                     }
-                    this.connectTable.put(request.getAddress(), connectWrapper);
+                    this.channelTable.put(request.getAddress(), minaConnectWrapper);
                     return connectFuture;
                 } else {
                     if (logger.isWarnEnabled()) {
@@ -105,27 +89,30 @@ public abstract class AbstractClient implements Client {
                     logger.warn("[JobX] MinaRPC getConnect: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, connectFuture);
                 }
             }
+        }finally {
+            connectLock.unlock();
         }
         return null;
     }
 
     public Channel getChannel(Request request) {
-
-        ChannelWrapper channelWrapper = this.channelTable.get(request.getAddress());
-        if (channelWrapper != null && channelWrapper.isActive()) {
-            return channelWrapper.getChannel();
-        }
-        synchronized (this) {
+        connectLock.lock();
+        try {
+            NettyChannelWrapper nettyChannelWrapper = (NettyChannelWrapper) this.channelTable.get(request.getAddress());
+            if (nettyChannelWrapper != null && nettyChannelWrapper.isActive()) {
+                return nettyChannelWrapper.getChannel();
+            }
             // 发起异步连接操作
+            this.doConnect(request);
             ChannelFuture channelFuture = this.bootstrap.connect(HttpUtils.parseSocketAddress(request.getAddress()));
-            channelWrapper = new ChannelWrapper(channelFuture);
+            nettyChannelWrapper = new NettyChannelWrapper(channelFuture);
             if (channelFuture.awaitUninterruptibly(Constants.RPC_TIMEOUT)) {
-                if (channelWrapper.isActive()) {
+                if (nettyChannelWrapper.isActive()) {
                     if (logger.isInfoEnabled()) {
                         logger.info("[JobX] NettyRPC getChannel: connect remote host[{}] success, {}", request.getAddress(), channelFuture.toString());
                     }
-                    this.channelTable.put(request.getAddress(), channelWrapper);
-                    return channelWrapper.getChannel();
+                    this.channelTable.put(request.getAddress(), nettyChannelWrapper);
+                    return nettyChannelWrapper.getChannel();
                 } else {
                     if (logger.isWarnEnabled()) {
                         logger.warn("[JobX] NettyRPC getChannel: connect remote host[" + request.getAddress() + "] failed, " + channelFuture.toString(), channelFuture.cause());
@@ -136,8 +123,38 @@ public abstract class AbstractClient implements Client {
                     logger.warn("[JobX] NettyRPC getChannel: connect remote host[{}] timeout {}ms, {}", request.getAddress(), Constants.RPC_TIMEOUT, channelFuture);
                 }
             }
+        }finally {
+            connectLock.unlock();
         }
         return null;
+    }
+
+    private void doConnect(Request request) {
+        if (this.bootstrap == null) {
+            this.connect(request);
+        }
+    }
+
+    @Override
+    public abstract void connect(Request request);
+
+    @Override
+    public void disconnect() throws Throwable {
+        connectLock.lock();
+        try {
+            for(Map.Entry<String, ChannelWrapper> entry:channelTable.entrySet()) {
+                ChannelWrapper channelWrapper = entry.getValue();
+                if (channelWrapper !=null) {
+                    channelWrapper.close();
+                }
+            }
+        } finally {
+            connectLock.unlock();
+        }
+    }
+
+    public RpcFuture getRpcFuture(Long id) {
+        return this.futureTable.get(id);
     }
 
     public class FutureListener implements ChannelFutureListener, IoFutureListener {
@@ -189,27 +206,5 @@ public abstract class AbstractClient implements Client {
 
     }
 
-    @Override
-    public abstract void connect(Request request);
-
-    public abstract Response invokeSync(Request request) throws Exception;
-
-    public abstract void invokeOneWay(Request request) throws Exception;
-
-    public abstract void invokeAsync(Request request, InvokeCallback callback) throws Exception;
-
-    @Override
-    public void disconnect() throws Throwable {
-        if (this.connector != null) {
-            this.connector.dispose();
-            this.connector = null;
-        }
-        this.futureTable.clear();
-        this.channelTable.clear();
-    }
-
-    public synchronized RpcFuture getRpcFuture(Long id) {
-        return this.futureTable.get(id);
-    }
 
 }

@@ -26,7 +26,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -43,7 +43,7 @@ public class Bytes {
 
     private static final int MASK4 = 0x0f, MASK6 = 0x3f, MASK8 = 0xff;
 
-    private static final Map<Integer, byte[]> DECODE_TABLE_MAP = new ConcurrentHashMap<Integer, byte[]>();
+    private static final Map<Integer, byte[]> DECODE_TABLE_MAP = new HashMap<Integer, byte[]>();
 
     private static ThreadLocal<MessageDigest> MD = new ThreadLocal<MessageDigest>();
 
@@ -743,7 +743,7 @@ public class Bytes {
      *
      * @param bytes source.
      * @return compressed byte array.
-     * @throws IOException.
+     * @throws IOException
      */
     public static byte[] zip(byte[] bytes) throws IOException {
         UnsafeByteArrayOutputStream bos = new UnsafeByteArrayOutputStream();

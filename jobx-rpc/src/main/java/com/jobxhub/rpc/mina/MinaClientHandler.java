@@ -47,7 +47,7 @@ public class MinaClientHandler extends IoHandlerAdapter {
             logger.info("[JobX] minaRPC client receive response id:{}", response.getId());
         }
         RpcFuture rpcFuture = this.minaClient.getRpcFuture(response.getId());
-        rpcFuture.done(response);
+        rpcFuture.received(response);
     }
 
     @Override

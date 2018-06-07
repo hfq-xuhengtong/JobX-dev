@@ -21,6 +21,12 @@
 
 package com.jobxhub.rpc.netty;
 
+import com.jobxhub.common.Constants;
+import com.jobxhub.common.job.Request;
+import com.jobxhub.common.job.Response;
+import com.jobxhub.rpc.InvokeCallback;
+import com.jobxhub.rpc.RpcFuture;
+import com.jobxhub.rpc.support.AbstractClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -28,18 +34,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import com.jobxhub.common.Constants;
-import com.jobxhub.common.job.Request;
-import com.jobxhub.common.job.Response;
-import com.jobxhub.rpc.InvokeCallback;
-import com.jobxhub.rpc.RpcFuture;
-import com.jobxhub.rpc.support.AbstractClient;
 
 import java.util.concurrent.TimeoutException;
 
 /**
- * agent JobXCaller
- *
  * @author <a href="mailto:benjobs@qq.com">B e n</a>
  * @version 1.0
  * @date 2016-03-27
@@ -52,32 +50,30 @@ public class NettyClient extends AbstractClient {
     @Override
     public void connect(final Request request) {
         int timeout = 3000;
-        if (this.bootstrap == null) {
-            this.bootstrap = new Bootstrap().group(NIO_EVENT_LOOP_GROUP)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout < 3000 ? 3000 : timeout)
-                    .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        public void initChannel(SocketChannel channel) throws Exception {
-                            channel.pipeline().addLast(
-                                    NettyCodecAdapter.getCodecAdapter().getDecoder(Response.class),
-                                    NettyCodecAdapter.getCodecAdapter().getEncoder(Request.class),
-                                    new NettyClientHandler(NettyClient.this,request)
-                            );
-                        }
-                    });
-        }
+        this.bootstrap = new Bootstrap().group(NIO_EVENT_LOOP_GROUP)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout < 3000 ? 3000 : timeout)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel channel) throws Exception {
+                        channel.pipeline().addLast(
+                                NettyCodecAdapter.getCodecAdapter().getDecoder(Response.class),
+                                NettyCodecAdapter.getCodecAdapter().getEncoder(Request.class),
+                                new NettyClientHandler(NettyClient.this, request)
+                        );
+                    }
+                });
     }
 
     @Override
-    public Response invokeSync(final Request request) throws TimeoutException {
-        Channel channel = super.getChannel(request);
+    public Response sentSync(Request request) throws TimeoutException {
+        Channel channel = getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request);
-            channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
+            RpcFuture rpcFuture = new RpcFuture(request);
+            channel.writeAndFlush(request).addListener(new FutureListener(rpcFuture));
             return rpcFuture.get();
         } else {
             throw new IllegalArgumentException("[JobX] NettyRPC invokeSync channel not active. request id:" + request.getId());
@@ -85,22 +81,22 @@ public class NettyClient extends AbstractClient {
     }
 
     @Override
-    public void invokeAsync(final Request request, final InvokeCallback callback) throws Exception {
-        Channel channel = super.getChannel(request);
+    public void sentAsync(Request request, final InvokeCallback callback) throws Exception {
+        Channel channel = getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request, callback);
-            channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
+            RpcFuture rpcFuture = new RpcFuture(request, callback);
+            channel.writeAndFlush(request).addListener(new FutureListener(rpcFuture));
         } else {
             throw new IllegalArgumentException("[JobX] NettyRPC invokeAsync channel not active. request id:" + request.getId());
         }
     }
 
     @Override
-    public void invokeOneWay(final Request request) throws Exception {
-        Channel channel = super.getChannel(request);
+    public void sentOneWay(Request request) throws Exception {
+        Channel channel = getChannel(request);
         if (channel != null && channel.isActive()) {
-            final RpcFuture rpcFuture = new RpcFuture(request);
-            channel.writeAndFlush(request).addListener(new AbstractClient.FutureListener(rpcFuture));
+            RpcFuture rpcFuture = new RpcFuture(request);
+            channel.writeAndFlush(request).addListener(new FutureListener(rpcFuture));
         } else {
             throw new IllegalArgumentException("[JobX] NettyRPC invokeAsync invokeOneway channel not active. request id:" + request.getId());
         }

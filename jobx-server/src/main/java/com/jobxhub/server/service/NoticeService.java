@@ -23,17 +23,17 @@
 package com.jobxhub.server.service;
 
 import com.jobxhub.common.Constants;
-import com.jobxhub.server.domain.Config;
-import com.jobxhub.server.domain.Log;
-import com.jobxhub.server.domain.User;
+import com.jobxhub.server.dto.Config;
+import com.jobxhub.server.dto.Log;
+import com.jobxhub.server.domain.UserBean;
+import com.jobxhub.server.dto.Agent;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.HtmlEmail;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.common.util.HttpUtils;
-import com.jobxhub.server.domain.Agent;
-import com.jobxhub.server.vo.JobInfo;
+import com.jobxhub.server.dto.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +53,9 @@ public class NoticeService {
     @Autowired
     private ConfigService configService;
 
+
     @Autowired
-    private HomeService homeService;
+    private LogService logService;
 
     @Autowired
     private ServletContext servletContext;
@@ -79,13 +80,13 @@ public class NoticeService {
             logger.info(content);
         }
         try {
-            sendMessage(agent.getUsers(), agent.getAgentId(), agent.getEmailAddress(), agent.getMobiles(), content);
+            sendMessage(agent.getUsers(), agent.getAgentId(), agent.getEmail(), agent.getMobile(), content);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void notice(JobInfo job, String msg) {
+    public void notice(Job job, String msg) {
         if (!job.getWarning()) return;
 
         //当前的单一任务只运行一次未设置重跑.
@@ -97,12 +98,12 @@ public class NoticeService {
             } else {
                 message = String.format(message, "[" + msg + "]");
             }
-            String content = getMessage(agent, message);
+            String content = null;//getMessage(agent, message);
             if (logger.isInfoEnabled()) {
                 logger.info(content);
             }
             try {
-                sendMessage(Arrays.asList(job.getUser()), agent.getAgentId(), job.getEmailAddress(), job.getMobiles(), content);
+                //sendMessage(Arrays.asList(job.getUser()), agent.getAgentId(), job.getEmail(), job.getMobile(), content);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -114,7 +115,7 @@ public class NoticeService {
         return String.format(msgFormat, agent.getName(), agent.getHost(), agent.getPort(), message, DateUtils.formatFullDate(new Date()));
     }
 
-    public void sendMessage(List<User> users, Long workId, String emailAddress, String mobiles, String content) {
+    public void sendMessage(List<UserBean> users, Long workId, String email, String mobile, String content) {
         Log log = new Log();
         log.setIsread(false);
         log.setAgentId(workId);
@@ -124,21 +125,21 @@ public class NoticeService {
         Config config = configService.getSysConfig();
 
         //发送邮件
-        if (CommonUtils.notEmpty(emailAddress)) {
+        if (CommonUtils.notEmpty(email)) {
             try {
                 log.setType(Constants.MsgType.EMAIL.getValue());
-                HtmlEmail email = new HtmlEmail();
-                email.setCharset("UTF-8");
-                email.setHostName(config.getSmtpHost());
-                email.setSslSmtpPort(config.getSmtpPort().toString());
-                email.setAuthentication(config.getSenderEmail(), config.getPassword());
-                email.setFrom(config.getSenderEmail());
-                email.setSubject("jobx监控告警");
-                email.setHtmlMsg(msgToHtml(content));
-                email.addTo(emailAddress.split(","));
-                email.send();
-                log.setReceiver(emailAddress);
-                homeService.saveLog(log);
+                HtmlEmail htmlEmail = new HtmlEmail();
+                htmlEmail.setCharset("UTF-8");
+                htmlEmail.setHostName(config.getSmtpHost());
+                htmlEmail.setSslSmtpPort(config.getSmtpPort().toString());
+                htmlEmail.setAuthentication(config.getSenderEmail(), config.getEmailPassword());
+                htmlEmail.setFrom(config.getSenderEmail());
+                htmlEmail.setSubject("jobx监控告警");
+                htmlEmail.setHtmlMsg(msgToHtml(content));
+                htmlEmail.addTo(email.split(","));
+                htmlEmail.send();
+                log.setReceiver(email);
+                logService.save(log);
             } catch (Exception e) {
                 e.printStackTrace(System.err);
             }
@@ -146,9 +147,9 @@ public class NoticeService {
 
         //发送短信
         try {
-            for (String mobile : mobiles.split(",")) {
+            for (String _mobile : mobile.split(",")) {
                 //发送POST请求
-                String sendUrl = String.format(config.getSendUrl(), mobile, String.format(config.getTemplate(), content));
+                String sendUrl = String.format(config.getSendUrl(), _mobile, String.format(config.getTemplate(), content));
                 String url = sendUrl.substring(0, sendUrl.indexOf("?"));
                 String postData = sendUrl.substring(sendUrl.indexOf("?") + 1);
                 String message = HttpUtils.doPost(url, postData, "UTF-8");
@@ -156,10 +157,10 @@ public class NoticeService {
                 if (logger.isInfoEnabled()) {
                     logger.info(message);
                 }
-                log.setReceiver(mobiles);
+                log.setReceiver(_mobile);
                 log.setType(Constants.MsgType.SMS.getValue());
                 log.setSendTime(new Date());
-                homeService.saveLog(log);
+                logService.save(log);
             }
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -167,11 +168,11 @@ public class NoticeService {
 
         //发送站内信
         log.setType(Constants.MsgType.WEBSITE.getValue());
-        for (User user : users) {
+        for (UserBean user : users) {
             //一一发送站内信
             log.setUserId(user.getUserId());
             log.setReceiver(user.getUserName());
-            homeService.saveLog(log);
+            logService.save(log);
         }
 
 

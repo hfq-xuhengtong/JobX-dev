@@ -100,7 +100,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">监控中心</a></li>
         <li><a href="">Druid监控</a></li>
     </ol>

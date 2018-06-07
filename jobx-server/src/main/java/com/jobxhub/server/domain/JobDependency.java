@@ -21,15 +21,8 @@
 
 package com.jobxhub.server.domain;
 
-import javax.persistence.*;
-import java.io.Serializable;
+public class JobDependency {
 
-@Entity
-@Table(name = "T_DEPENDENCY")
-public class JobDependency implements Serializable {
-
-    @Id
-    @GeneratedValue
     private Long dependencyId;
 
     //属于哪个工作流

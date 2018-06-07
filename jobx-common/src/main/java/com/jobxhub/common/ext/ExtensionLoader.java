@@ -30,7 +30,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.jobxhub.common.util.AssertUtils.checkNotNull;
@@ -50,7 +50,7 @@ public class ExtensionLoader<T> {
 
     private final Map<String, Class<?>> EXTENSION_SPI = new HashMap<String, Class<?>>();
 
-    private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
+    private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new HashMap<Class<?>, ExtensionLoader<?>>();
 
     public static <T> T load(Class<T> type) {
         return getExtensionLoader(type).getExtension(null);

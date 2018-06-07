@@ -35,7 +35,7 @@ import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
 import com.jobxhub.server.job.JobXRegistry;
 import com.jobxhub.server.service.TerminalService;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Status;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 /**
  * 分布式web终端
@@ -72,12 +72,12 @@ public class TerminalClusterProcessor {
 
     private static ZookeeperClient zookeeperClient;
 
-    private Map<String, Method> methodMap = new ConcurrentHashMap<String, Method>(0);
+    private Map<String, Method> methodMap = new HashMap<String, Method>();
 
-    private Map<String, String> methodLock = new ConcurrentHashMap<String, String>(0);
+    private Map<String, String> methodLock = new HashMap<String, String>();
 
     //key-->token  value--> serverId
-    private Map<String, String> terminalMapping = new ConcurrentHashMap<String, String>();
+    private Map<String, String> terminalMapping = new HashMap<String, String>();
 
     /**
      * 分配分布式任务

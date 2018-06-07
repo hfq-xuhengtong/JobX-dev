@@ -40,13 +40,13 @@
 @REM -----------------------------------------------------------------------------
 
 echo\
-echo                                           ____
-echo     /\      _______         ___  ______  /  /
-echo    (())     /_   _/ ____    / /_   ___ \/  /
-echo     \/   __  / /   / __ \  / __ \   ___   /      
-echo         / /_/ /   / /_/ / / /_/ /   __  . \      
-echo         \____/    \____/ /_.___/   __  / \_\__   
-echo                                  _____/          
+echo                                       _______ 
+echo     /\   _________       ______  _____   /  / 
+echo    (())  ______  / ________   /   ___  \/  /  
+echo     \/   ___ _  / _  __ \_   __ \  ___    /      
+echo          / /_/ /  / /_/ /   /_/ /  __   . \      
+echo          \____/   \____/ /_.___/  __   / \_\__
+echo                                 _____ /          
 echo\                                              
 
 setlocal
@@ -135,7 +135,7 @@ echo Using JOBX_TMPDIR: "%JOBX_TMPDIR%"
 
 if "%TITLE%" == "" set TITLE=JobX
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
-set MAINCLASS=com.jobxhub.agent.AgentBootstrap
+set MAINCLASS=com.jobxhub.agent.JobXAgent
 
 set Action=%1
 if "%Action%" == "start" goto doAction

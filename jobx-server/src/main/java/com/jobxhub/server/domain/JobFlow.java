@@ -20,15 +20,8 @@
  */
 package com.jobxhub.server.domain;
 
-import javax.persistence.*;
-import java.io.Serializable;
+public class JobFlow {
 
-@Entity
-@Table(name = "T_FLOW")
-public class JobFlow implements Serializable {
-
-    @Id
-    @GeneratedValue
     private Long flowId;
 
     private String flowName;//工作流名称.
@@ -41,11 +34,9 @@ public class JobFlow implements Serializable {
 
     private Boolean warning;
 
-    private String mobiles;
+    private String mobile;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String emailAddress;
+    private String email;
 
     private Boolean pause = false;//任务是否暂停(true:已经暂停,false:未暂停)
 
@@ -89,20 +80,20 @@ public class JobFlow implements Serializable {
         this.warning = warning;
     }
 
-    public String getMobiles() {
-        return mobiles;
+    public String getMobile() {
+        return mobile;
     }
 
-    public void setMobiles(String mobiles) {
-        this.mobiles = mobiles;
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Boolean getPause() {

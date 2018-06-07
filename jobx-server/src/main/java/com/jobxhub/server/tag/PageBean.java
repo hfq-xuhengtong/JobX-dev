@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import com.jobxhub.common.util.collection.HashMap;
 
 public class PageBean<T> implements Serializable {
 
@@ -38,8 +40,9 @@ public class PageBean<T> implements Serializable {
     public static final String DESC = "desc";
 
     // -- 分页参数 --//
-    protected Serializable pageNo = 1;
-    protected Serializable pageSize = 15;
+    protected Integer pageNo = 1;
+    protected Integer pageSize = 15;
+    private Integer offset;
     protected String orderBy = null;
     protected String order = null;
     protected boolean autoCount = true;
@@ -47,6 +50,8 @@ public class PageBean<T> implements Serializable {
     // -- 返回结果 --//
     protected List<T> result = Collections.emptyList();
     protected long totalCount = -1;
+
+    private Map<String,Object> filter = new HashMap<String, Object>();
 
     // -- 构造函数 --//
     public PageBean() {
@@ -83,11 +88,19 @@ public class PageBean<T> implements Serializable {
     /**
      * 设置当前页的页号,序号从1开始,低于1时自动调整为1.
      */
-    public void setPageNo(final Serializable pageNo) {
+    public void setPageNo(final Integer pageNo) {
         this.pageNo = pageNo;
         if (CommonUtils.toInt(pageNo, 1) < 1) {
             this.pageNo = 1;
         }
+    }
+
+    public Integer getOffset() {
+        return (this.pageNo-1) * this.pageSize;
+    }
+
+    public void setOffset(Integer offset) {
+        this.offset = offset;
     }
 
     /**
@@ -100,7 +113,7 @@ public class PageBean<T> implements Serializable {
     /**
      * 设置每页的记录数量,低于1时自动调整为1.
      */
-    public void setPageSize(final Serializable pageSize) {
+    public void setPageSize(final Integer pageSize) {
         this.pageSize = pageSize;
 
         if (CommonUtils.toInt(pageSize, 15) < 1) {
@@ -259,4 +272,17 @@ public class PageBean<T> implements Serializable {
         }
     }
 
+    public Map<String, Object> getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Map<String, Object> filter) {
+        this.filter = filter;
+    }
+
+    public void put(String key,Object val){
+        if ( key!=null && val!=null ) {
+            this.filter.put(key, val);
+        }
+    }
 }

@@ -87,7 +87,7 @@
 
         $(document).ready(function(){
             $("#size").change(function(){
-                var pageSize = $("#size").val();
+                var pageSize = $("#size").val()||${pageBean.pageSize};
                 window.location.href = "${contextPath}/user/view.htm?pageSize="+pageSize;
             });
 
@@ -137,22 +137,11 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">用户管理</a></li>
     </ol>
     <h4 class="page-title"><i aria-hidden="true" class="fa fa-user"></i>&nbsp;用户管理</h4>
     <div class="block-area" id="defaultStyle">
-
-        <div style="float: left">
-            <label>
-                每页 <select size="1" class="select-jobx" id="size" style="width: 50px;">
-                <option value="15">15</option>
-                <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-            </select> 条记录
-            </label>
-        </div>
 
         <div style="float: right;margin-top: -10px">
             <a href="${contextPath}/user/add.htm" class="btn btn-sm m-t-10" style="margin-left: 50px;margin-bottom: 8px"><i class="icon">&#61943;</i>添加</a>

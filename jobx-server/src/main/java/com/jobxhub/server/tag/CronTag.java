@@ -74,7 +74,6 @@ public class CronTag {
         return StringUtils.htmlEncode(html);
     }
 
-
     public static String toBase64(String text) {
         return DigestUtils.toBase64(text);
     }

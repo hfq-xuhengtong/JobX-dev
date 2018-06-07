@@ -51,13 +51,13 @@ GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
 RES="\E[0m";
 
-printf "${GREEN_COLOR}                                           ____    ${RES}\n"
-printf "${GREEN_COLOR}     /\      _______         ___  ______  /  /     ${RES}\n"
-printf "${GREEN_COLOR}    (())     /_   _/ ____    / /_   ___ \/  /      ${RES}\n"
-printf "${GREEN_COLOR}     \/   __  / /   / __ \  / __ \   ___   /       ${RES}\n"
-printf "${GREEN_COLOR}         / /_/ /   / /_/ / / /_/ /   __  . \       ${RES}\n"
-printf "${GREEN_COLOR}         \____/    \____/ /_.___/   __  / \_\__    ${RES}\n"
-printf "${GREEN_COLOR}                                  _____/           ${RES}\n\n"
+printf "${GREEN_COLOR}                                       _______     ${RES}\n"
+printf "${GREEN_COLOR}     /\   _________       ______  _____   /  /     ${RES}\n"
+printf "${GREEN_COLOR}    (())  ______  / ________   /   ___  \/  /      ${RES}\n"
+printf "${GREEN_COLOR}     \/   ___ _  / _  __ \_   __ \  ___    /       ${RES}\n"
+printf "${GREEN_COLOR}          / /_/ /  / /_/ /   /_/ /  __   . \       ${RES}\n"
+printf "${GREEN_COLOR}          \____/   \____/ /_.___/  __   / \_\__    ${RES}\n"
+printf "${GREEN_COLOR}                                 _____ /           ${RES}\n\n"
 
 
 echo_r () {
@@ -355,7 +355,7 @@ case "$1" in
         -Djobx.port="$JOBX_PORT" \
         -Djobx.host="$JOBX_HOST" \
         -Djobx.password="$JOBX_PASSWORD" \
-        com.jobxhub.agent.AgentBootstrap start >> $JOBX_OUT 2>&1 "&";
+        com.jobxhub.agent.JobXAgent start >> $JOBX_OUT 2>&1 "&";
 
       if [ ! -z "$JOBX_PID" ]; then
          echo +x $! > "$JOBX_PID"
@@ -406,7 +406,7 @@ case "$1" in
             -classpath "\"$CLASSPATH\"" \
             -Djobx.home="$JOBX_HOME" \
             -Djobx.pid="$JOBX_PID" \
-            com.jobxhub.agent.AgentBootstrap stop >> $JOBX_OUT 2>&1 "&";
+            com.jobxhub.agent.JobXAgent stop >> $JOBX_OUT 2>&1 "&";
 
           # stop failed. Shutdown port disabled? Try a normal kill.
           if [ $? != 0 ]; then

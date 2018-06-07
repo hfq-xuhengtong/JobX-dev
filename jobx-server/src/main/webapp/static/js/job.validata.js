@@ -37,23 +37,23 @@ function Validata() {
                     this.status = false;
                 } else {
                     var _this = this;
-                    $.ajax({
+                    ajax({
                         type: "POST",
                         url: self.contextPath+"/job/checkname.do",
                         data: {
-                            "jobId":self.jobId,
+                        "jobId":self.jobId,
                             "name": _jobName,
                             "agentId": $("#agentId").val()
                         }
-                    }).done(function (data) {
+                    },function (data) {
                         _this.jobNameRemote = true;
-                        if (!data) {
+                        if (!data.status) {
                             jobx.tipError("#jobName" + prefix, "作业名称已存在!");
                             _this.status = false;
                         } else {
                             jobx.tipOk("#jobName" + prefix);
                         }
-                    }).fail(function () {
+                    },function () {
                         _this.jobNameRemote = true;
                         _this.status = false;
                         jobx.tipError("#jobName" + prefix, "网络请求错误,请重试!");
@@ -150,25 +150,25 @@ function Validata() {
             }
         },
 
-        mobiles: function () {
-            var mobiles = $("#mobiles").val();
-            if (!mobiles) {
-                jobx.tipError("#mobiles", "请填写手机号码!");
+        mobile: function () {
+            var mobile = $("#mobile").val();
+            if (!mobile) {
+                jobx.tipError("#mobile", "请填写手机号码!");
                 this.status = false;
                 return;
             }
-            var mobs = mobiles.split(",");
+            var mobs = mobile.split(",");
             var verify = true;
-            for (var i in mobs) {
+            for (var i=0;i<mobs.length;i++) {
                 if (!jobx.testMobile(mobs[i])) {
                     this.status = false;
                     verify = false;
-                    jobx.tipError("#mobiles", "请填写正确的手机号码!");
+                    jobx.tipError("#mobile", "请填写正确的手机号码!");
                     break;
                 }
             }
             if (verify) {
-                jobx.tipOk("#mobiles");
+                jobx.tipOk("#mobile");
             }
         },
 
@@ -181,7 +181,7 @@ function Validata() {
             }
             var emas = emails.split(",");
             var verify = true;
-            for (var i in emas) {
+            for ( var i=0;i<emas.length;i++ ) {
                 if (!jobx.testEmail(emas[i])) {
                     jobx.tipError("#email", "请填写正确的邮箱地址!");
                     this.status = false;
@@ -213,7 +213,7 @@ function Validata() {
         warning: function () {
             var _warning = $('input[type="radio"][name="warning"]:checked').val();
             if (_warning == 1) {
-                this.mobiles();
+                this.mobile();
                 this.email();
             }
         },
@@ -252,10 +252,10 @@ function Validata() {
         },
 
         edit: function (id) {
-            this.tipDefault();
+            $("#jobModal").find(".ok").remove();
+            $("#jobModal").find(".tips").css("visibility","visibility");
             $("#subTitle").html("编辑作业依赖").attr("action", "edit").attr("tid", id);
             $("#" + id).find("input").each(function (index, element) {
-
                 if ($(element).attr("name") == "child.jobName") {
                     $("#jobName1").val(unEscapeHtml($(element).val()));
                 }
@@ -617,10 +617,6 @@ Validata.prototype.ready = function () {
         _this.flowJob.verify();
     });
 
-    $("#remove-cron-btn").click(function () {
-        $('#cronSelector').slideUp()
-    });
-
     $("#jobName").blur(function () {
         _this.validata.jobName();
     }).focus(function () {
@@ -629,14 +625,15 @@ Validata.prototype.ready = function () {
 
     $("#cronExp").blur(function () {
         _this.validata.cronExp();
+        $('#cronSelector').slideUp();
     }).focus(function () {
+        $('#cronSelector').slideDown();
         if ($('#cronType0').prop("checked")) {
             $("#cronTip").css("visibility","visible").html("crontab: unix/linux的时间格式表达式 ");
             $("#expTip").css("visibility","visible").html('crontab: 请采用unix/linux的时间格式表达式,如 00 01 * * *');
         } else {
             $("#cronTip").css("visibility","visible").html('quartz: quartz框架的时间格式表达式');
             $("#expTip").css("visibility","visible").html('quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
-            $('#cronSelector').slideDown()
         }
     });
 
@@ -692,10 +689,10 @@ Validata.prototype.ready = function () {
         jobx.tipDefault("#timeout1");
     });
 
-    $("#mobiles").blur(function () {
-        _this.validata.mobiles();
+    $("#mobile").blur(function () {
+        _this.validata.mobile();
     }).focus(function () {
-        jobx.tipDefault("#mobiles");
+        jobx.tipDefault("#mobile");
     });
 
     $("#email").blur(function () {

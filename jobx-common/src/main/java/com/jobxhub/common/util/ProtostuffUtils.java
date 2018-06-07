@@ -1,7 +1,7 @@
 package com.jobxhub.common.util;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.jobxhub.common.util.collection.HashMap;
 
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtostuffIOUtil;
@@ -10,7 +10,7 @@ import com.dyuproject.protostuff.runtime.RuntimeSchema;
 
 public class ProtostuffUtils {
 
-    private static Map<Class<?>, Schema<?>> cachedSchema = new ConcurrentHashMap<Class<?>, Schema<?>>();
+    private static Map<Class<?>, Schema<?>> cachedSchema = new HashMap<Class<?>, Schema<?>>();
 
     private static <T> Schema<T> getSchema(Class<T> clazz) {
         @SuppressWarnings("unchecked")

@@ -18,21 +18,23 @@
             margin-top: 0;
             width: 30px
         }
-        .div-circle{
-            width:15px;
-            height:15px;
-            background-color:#66c2a5;
-            margin-top: 1px;
-            margin-bottom: 1px;
+
+        .div-circle {
+            width: 15px;
+            height: 15px;
+            background-color: #d9534f;
             -moz-border-radius: 25px !important;
             -webkit-border-radius: 25px !important;
-            border-radius:25px !important;
+            border-radius: 25px !important;
+            position: relative;
+            top: 21px;
         }
+
         .span-circle{
             height:15px;
             line-height:15px;
             display:block;
-            color:#FFF;
+            color:white;
             text-align:center;
             font-size: 10px;
         }
@@ -40,23 +42,22 @@
 
     <script type="text/javascript">
 
-
         $(document).ready(function(){
             $("#size").change(function(){doUrl();});
             $("#success").change(function(){doUrl();});
             $("#agentId").change(function(){doUrl();});
-            $("#jobId").change(function(){doUrl();});
+            $("#jobName").change(function(){doUrl();});
             $("#execType").change(function(){doUrl();});
         });
 
         function doUrl() {
-            var pageSize = $("#size").val();
-            var queryTime = $("#queryTime").val();
+            var pageSize = $("#size").val()||${pageBean.pageSize};
+            var queryDate = $("#queryDate").val();
             var success = $("#success").val();
             var agentId = $("#agentId").val();
-            var jobId = $("#jobId").val();
+            var jobName = $("#jobName").val().trim();
             var execType = $("#execType").val();
-            window.location.href = "${contextPath}/record/done.htm?queryTime=" + queryTime + "&success=" + success + "&agentId=" + agentId + "&jobId=" + jobId + "&execType=" + execType + "&pageSize=" + pageSize;
+            window.location.href = "${contextPath}/record/done.htm?queryDate=" + queryDate + "&success=" + success + "&agentId=" + agentId + "&jobName=" + jobName + "&execType=" + execType + "&pageSize=" + pageSize;
         }
 
         function showRedo(id,length,groupId,count){
@@ -83,7 +84,7 @@
             redoIcon.removeClass("fa-chevron-down").addClass("fa-chevron-up");
             redoIcon.attr("redoOpen","on");
             rowGroup.attr("rowspan",parseInt(row) + parseInt(length));
-            $(".redoIndex_"+id).show();
+            $(".redoNum_"+id).show();
 
             var tbodyObj =  $(".tbody_"+(groupId ? groupId : id));
             if(tbodyObj.attr("index")=="0"){
@@ -126,7 +127,7 @@
                     if (groupId){
                         $(".tr-flow_"+(parseInt(groupId)+count)).removeClass("tr-next");
                     }
-                    $(".redoIndex_"+id).hide();
+                    $(".redoNum_"+id).hide();
                     $(".redoGroup_"+id).hide();
                 }
             }catch(e) {
@@ -185,7 +186,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="#">jobx</a></li>
+        <li><a href="#">JobX</a></li>
         <li><a href="#">调度记录</a></li>
         <li><a href="#">已完成</a></li>
     </ol>
@@ -193,55 +194,41 @@
     <div class="block-area" id="defaultStyle">
 
         <div>
-            <div style="float: left">
-                <label>
-                    每页 <select size="1" class="select-jobx" id="size" style="width: 50px;">
-                    <option value="15">15</option>
-                    <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                    <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-                </select> 条记录
-                </label>
-            </div>
 
-            <div style="float: right;margin-bottom: 10px">
+
+            <div class="opt-bar" style="margin-bottom: 10px;margin-top: 0px;">
                 <label for="agentId">执行器：</label>
-                <select id="agentId" name="agentId" class="select-jobx" style="width: 110px;">
+                <select id="agentId" name="agentId" class="select-jobx w110">
                     <option value="">全部</option>
                     <c:forEach var="d" items="${agents}">
-                        <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
+                        <option value="${d.agentId}" ${d.agentId eq record.agentId ? 'selected' : ''}>${d.name}</option>
                     </c:forEach>
                 </select>
                 &nbsp;&nbsp;&nbsp;
-                <label for="jobId">任务名称：</label>
-                <select id="jobId" name="jobId" class="select-jobx" style="width: 110px;">
-                    <option value="">全部</option>
-                    <c:forEach var="t" items="${jobs}">
-                        <option value="${t.jobId}" ${t.jobId eq jobId ? 'selected' : ''}>${t.jobName}&nbsp;</option>
-                    </c:forEach>
-                </select>
+                <label for="jobName">任务名称：</label>
+                <input id="jobName" name="jobName" type="text" value="${record.jobName}" class="w110" placeholder="根据名称搜索"/>
                 &nbsp;&nbsp;&nbsp;
                 <label for="success">执行状态：</label>
-                <select id="success" name="success" class="select-jobx" style="width: 80px;">
+                <select id="success" name="success" class="select-jobx w80">
                     <option value="">全部</option>
-                    <option value="1" ${success eq 1 ? 'selected' : ''}>成功</option>
-                    <option value="0" ${success eq 0 ? 'selected' : ''}>失败</option>
-                    <option value="2" ${success eq 2 ? 'selected' : ''}>被杀</option>
-                    <option value="3" ${success eq 3 ? 'selected' : ''}>超时</option>
+                    <option value="1" ${record.success eq 1 ? 'selected' : ''}>成功</option>
+                    <option value="0" ${record.success eq 0 ? 'selected' : ''}>失败</option>
+                    <option value="2" ${record.success eq 2 ? 'selected' : ''}>被杀</option>
+                    <option value="3" ${record.success eq 3 ? 'selected' : ''}>超时</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <label for="execType">执行方式：</label>
-                <select id="execType" name="execType" class="select-jobx" style="width: 80px;">
+                <select id="execType" name="execType" class="select-jobx w80">
                     <option value="">全部</option>
-                    <option value="0" ${execType eq 0 ? 'selected' : ''}>自动</option>
-                    <option value="1" ${execType eq 1 ? 'selected' : ''}>手动</option>
-                    <option value="2" ${execType eq 2 ? 'selected' : ''}>接口</option>
-                    <option value="3" ${execType eq 3 ? 'selected' : ''}>重跑</option>
-                    <option value="4" ${execType eq 4 ? 'selected' : ''}>现场</option>
+                    <option value="0" ${record.execType eq 0 ? 'selected' : ''}>自动</option>
+                    <option value="1" ${record.execType eq 1 ? 'selected' : ''}>手动</option>
+                    <option value="2" ${record.execType eq 2 ? 'selected' : ''}>接口</option>
+                    <option value="3" ${record.execType eq 3 ? 'selected' : ''}>重跑</option>
+                    <option value="4" ${record.execType eq 4 ? 'selected' : ''}>现场</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;
-                <label for="queryTime">开始时间：</label>
-                <input type="text" id="queryTime" name="queryTime" value="${queryTime}" onfocus="WdatePicker({onpicked:function(){doUrl(); },dateFmt:'yyyy-MM-dd'})" class="Wdate select-jobx" style="width: 90px"/>
+                <label for="queryDate">开始时间：</label>
+                <input type="text" id="queryDate" name="queryDate" value="${record.queryDate}" onfocus="WdatePicker({onpicked:function(){doUrl(); },dateFmt:'yyyy-MM-dd'})" class="Wdate select-jobx w90"/>
             </div>
         </div>
 
@@ -263,40 +250,27 @@
             <%--父记录--%>
             <c:forEach var="r" items="${pageBean.result}" varStatus="index">
                 <tbody class="tbody_${empty r.groupId ? r.recordId : r.groupId} tbody_${index.index}" style="border-top: none">
-
                     <tr class="tr-flow_${empty r.groupId ? "" : r.groupId}">
                         <c:if test="${r.jobType eq 0}">
-                            <td id="row_${r.recordId}" rowspan="1" class="text-center">
+                            <td id="row_${r.recordId}" rowspan="1">
                                     ${empty r.jobName ? 'batchJob' : r.jobName}
-                                    <c:forEach var="c" items="${r.childRecord}" varStatus="index">
-                                        <div style="display: none" class="redoIndex_${r.recordId}">
-                                            <div class="div-circle"><span class="span-circle">${index.count}</span></div>${c.jobName}
+                                    <c:forEach var="c" items="${r.redoList}" varStatus="index">
+                                        <div style="display: none" class="redoNum_${r.recordId}">
+                                            <div class="div-circle"><span class="span-circle">${c.redoNum}</span></div>${c.jobName}
                                         </div>
                                     </c:forEach>
                             </td>
                         </c:if>
                         <c:if test="${r.jobType eq 1}">
-                            <td id="row_${r.groupId}" rowspan="1" class="text-center">
+                            <td id="row_${r.groupId}" rowspan="1">
                                 ${r.jobName}
                                 <c:if test="${r.redoCount ne 0}">
-                                    <c:forEach var="rc" items="${r.childRecord}" varStatus="index">
-                                        <div class="redoIndex_${r.recordId} groupIndex_${r.groupId}" style="display: none">
-                                            <div class="div-circle"><span class="span-circle">${index.count}</span></div>${rc.jobName}
+                                    <c:forEach var="rc" items="${r.redoList}" varStatus="index">
+                                        <div class="redoNum_${r.recordId} groupIndex_${r.groupId}" style="display: none">
+                                            <span class="span-circle">${rc.redoNum}</span>${rc.jobName}
                                         </div>
                                     </c:forEach>
                                 </c:if>
-                                <c:forEach var="t" items="${r.childJob}" varStatus="index">
-                                    <div class="flowIndex_${r.recordId} " style="display: none">
-                                        <div class="down"><i class="fa fa-arrow-down" style="font-size:14px" aria-hidden="true"></i></div>${t.jobName}
-                                    </div>
-                                    <c:if test="${t.redoCount ne 0}">
-                                        <c:forEach var="tc" items="${t.childRecord}" varStatus="count">
-                                            <div class="redoIndex_${t.recordId} groupIndex_${r.groupId}" style="display: none">
-                                                <div class="div-circle"><span class="span-circle">${count.count}</span></div>${tc.jobName}
-                                            </div>
-                                        </c:forEach>
-                                    </c:if>
-                                </c:forEach>
                             </td>
                         </c:if>
                         <td>${r.agentName}</td>
@@ -318,6 +292,9 @@
                             <c:if test="${r.success eq 3}">
                                 <span class="label label-warning">&nbsp;&nbsp;超&nbsp;时&nbsp;&nbsp;</span>
                             </c:if>
+                            <c:if test="${r.success eq 4}">
+                                <span class="label label-warning">&nbsp;&nbsp;失&nbsp;联&nbsp;&nbsp;</span>
+                            </c:if>
                         </td>
                         <td>
                             <c:if test="${r.execType eq 0}"><span class="label label-default">&nbsp;&nbsp;自&nbsp;动&nbsp;&nbsp;</span></c:if>
@@ -332,13 +309,8 @@
                         </td>
                         <td class="text-center">
                             <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                                <c:if test="${r.jobType eq 1 and r.childJob ne null}">
-                                    <a href="#" title="流程任务" onclick="showFlow(${r.recordId},'${fn:length(r.childJob)}','${r.groupId}')">
-                                        <i aria-hidden="true" class="fa fa-angle-double-down" style="font-size:15px;" childOpen="off" id="flowIcon_${r.recordId}"></i>
-                                    </a>&nbsp;&nbsp;
-                                </c:if>
-                                <c:if test="${r.redoCount ne 0}">
-                                    <a href="#" title="重跑记录" onclick="showRedo('${r.recordId}','${fn:length(r.childRecord)}',${empty r.groupId ? false : r.groupId},'1')">
+                                <c:if test="${r.redoCount>0}">
+                                    <a href="#" title="重跑记录" onclick="showRedo('${r.recordId}','${fn:length(r.redoList)}',${empty r.groupId ? false : r.groupId},'1')">
                                         <i aria-hidden="true" class="fa fa-chevron-down groupIcon_${r.groupId}" redoOpen="off" id="redoIcon_${r.recordId}"></i>
                                     </a>&nbsp;&nbsp;
                                 </c:if>
@@ -350,7 +322,7 @@
                     </tr>
                     <%--父记录重跑记录--%>
                     <c:if test="${r.redoCount ne 0}">
-                        <c:forEach var="rc" items="${r.childRecord}" varStatus="index">
+                        <c:forEach var="rc" items="${r.redoList}" varStatus="index">
                             <tr class="redoGroup_${r.recordId} groupRecord_${r.groupId}" style="display: none;">
                                 <td class="${index.count eq 1 ? (r.redoCount eq index.count ? "redo-first" : "redo-first-top") : (r.redoCount eq index.count ? "redo-first-bottom" : "")}" >${rc.agentName}</td>
                                 <td style="width: 25%" title="${cron:escapeHtml(rc.command)}">
@@ -387,92 +359,10 @@
                             </tr>
                         </c:forEach>
                     </c:if>
-                    <%--流程子任务--%>
-                    <c:if test="${r.jobType eq 1}">
-                        <c:forEach var="t" items="${r.childJob}" varStatus="index">
-
-                            <tr class="flowGroup_${r.recordId} tr-flow_${empty r.groupId ? "" : r.groupId+index.count}" style="display: none;">
-                                <td>${t.agentName}</td>
-                                <td style="width: 25%" title="${cron:escapeHtml(t.command)}">
-                                    <div class="jobx_command">${cron:escapeHtml(t.command)}</div>
-                                </td>
-                                <td><fmt:formatDate value="${t.startTime}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
-                                <td>${cron:diffdate(t.startTime,t.endTime)}</td>
-                                <td>
-                                    <c:if test="${t.success eq 1}">
-                                        <span class="label label-success">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
-                                    </c:if>
-                                    <c:if test="${t.success eq 0}">
-                                        <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
-                                    </c:if>
-                                    <c:if test="${t.success eq 2}">
-                                        <span class="label label-warning">&nbsp;&nbsp;被&nbsp;杀&nbsp;&nbsp;</span>
-                                    </c:if>
-                                    <c:if test="${t.success eq 3}">
-                                        <span class="label label-warning">&nbsp;&nbsp;超&nbsp;时&nbsp;&nbsp;</span>
-                                    </c:if>
-                                </td>
-                                <td>
-                                    <c:if test="${t.execType eq 0}"><span class="label label-default">&nbsp;&nbsp;自&nbsp;动&nbsp;&nbsp;</span></c:if>
-                                    <c:if test="${t.execType eq 1}"><span class="label label-info">&nbsp;&nbsp;手&nbsp;动&nbsp;&nbsp;</span></c:if>
-                                    <c:if test="${t.execType eq 2}"><span class="label label-warning">&nbsp;&nbsp;重&nbsp;跑&nbsp;&nbsp;</span></c:if>
-                                </td>
-                                <td>流程任务</td>
-                                <td class="text-center">
-                                        <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                                            <c:if test="${t.redoCount ne 0}">
-                                                <a href="#" title="重跑记录" onclick="showRedo('${t.recordId}','${fn:length(t.childRecord)}','${t.groupId}',${index.count+1})">
-                                                    <i aria-hidden="true" class="fa fa-chevron-down groupIcon_${r.groupId}" redoOpen="off" id="redoIcon_${t.recordId}"></i>
-                                                </a>&nbsp;&nbsp;
-                                            </c:if>
-                                            <a href="${contextPath}/record/detail/${t.recordId}.htm" title="查看详情">
-                                                <i class="glyphicon glyphicon-eye-open"></i>
-                                            </a>&nbsp;&nbsp;
-                                        </div>
-                                </td>
-                            </tr>
-                            <%--流程子任务的重跑记录--%>
-                            <c:if test="${t.redoCount ne 0}">
-                                <c:forEach var="tc" items="${t.childRecord}" varStatus="index">
-                                    <tr class="redoGroup_${t.recordId} groupRecord_${r.groupId}" style="display: none;">
-                                        <td class="${index.count eq 1 ? (t.redoCount eq index.count ? "redo-first" : "redo-first-top") : (t.redoCount eq index.count ? "redo-first-bottom" : "")} ">${tc.agentName}</td>
-                                        <td style="width: 25%" title="${cron:escapeHtml(tc.command)}">
-                                            <div class="jobx_command">${cron:escapeHtml(tc.command)}</div>
-                                        </td>
-                                        <td><fmt:formatDate value="${tc.startTime}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
-                                        <td>${cron:diffdate(tc.startTime,tc.endTime)}</td>
-                                        <td>
-                                            <c:if test="${tc.success eq 1}">
-                                                <span class="label label-success">&nbsp;&nbsp;成&nbsp;功&nbsp;&nbsp;</span>
-                                            </c:if>
-                                            <c:if test="${tc.success eq 0}">
-                                                <span class="label label-danger">&nbsp;&nbsp;失&nbsp;败&nbsp;&nbsp;</span>
-                                            </c:if>
-                                            <c:if test="${tc.success eq 2}">
-                                                <span class="label label-warning">&nbsp;&nbsp;被&nbsp;杀&nbsp;&nbsp;</span>
-                                            </c:if>
-                                            <c:if test="${tc.success eq 3}">
-                                                <span class="label label-warning">&nbsp;&nbsp;超&nbsp;时&nbsp;&nbsp;</span>
-                                            </c:if>
-                                        </td>
-                                        <td><span class="label label-warning">&nbsp;&nbsp;重&nbsp;跑&nbsp;&nbsp;</span></td>
-                                        <td>流程任务</td>
-                                        <td class="text-center${index.count eq 1 ? (t.redoCount eq index.count ? "redo-last" : "redo-last-top") : (t.redoCount eq index.count ? "redo-last-bottom" : "")}" >
-                                            <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                                                    <a href="${contextPath}/record/detail/${tc.recordId}.htm" title="查看详情">
-                                                        <i class="glyphicon glyphicon-eye-open"></i>
-                                                    </a>&nbsp;&nbsp;
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:if>ƒ
-                        </c:forEach>
-                    </c:if>
                 </tbody>
             </c:forEach>
         </table>
-        <cron:pager href="${contextPath}/record/done.htm?queryTime=${queryTime}&success=${success}&agentId=${agentId}&jobId=${jobId}&execType=${execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/record/done.htm?queryDate=${record.queryDate}&success=${record.success}&agentId=${record.agentId}&jobName=${record.jobName}&execType=${record.execType}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
     </div>
 
 </section>

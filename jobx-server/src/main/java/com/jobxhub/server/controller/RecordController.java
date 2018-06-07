@@ -21,15 +21,15 @@
 
 package com.jobxhub.server.controller;
 
+import com.jobxhub.server.dto.Record;
+import com.jobxhub.server.dto.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpSession;
 
 import com.jobxhub.common.Constants;
-import com.jobxhub.server.domain.Record;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.tag.PageBean;
-import com.jobxhub.server.vo.RecordInfo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,87 +59,55 @@ public class RecordController extends BaseController {
      * 查询已完成任务列表
      *
      * @param pageBean
-     * @param recordInfo
+     * @param record
      * @param model
      * @return
      */
     @RequestMapping("done.htm")
-    public String queryDone(HttpSession session, PageBean pageBean, RecordInfo recordInfo, String queryTime, Model model) {
-
+    public String queryDone(HttpSession session, PageBean pageBean, Record record,Model model) {
         model.addAttribute("agents", agentService.getOwnerAgents(session));
-
-        if (notEmpty(recordInfo.getSuccess())) {
-            model.addAttribute("success", recordInfo.getSuccess());
-        }
-        if (notEmpty(recordInfo.getAgentId())) {
-            model.addAttribute("agentId", recordInfo.getAgentId());
-        }
-
-        if (notEmpty(recordInfo.getAgentId())) {
-            model.addAttribute("agentId", recordInfo.getAgentId());
-            model.addAttribute("jobs", jobService.getJobByAgentId(recordInfo.getAgentId()));
+        if (notEmpty(record.getAgentId())) {
+            model.addAttribute("jobs", jobService.getByAgent(record.getAgentId()));
         } else {
             model.addAttribute("jobs", jobService.getAll());
         }
-
-        if (notEmpty(recordInfo.getJobId())) {
-            model.addAttribute("jobId", recordInfo.getJobId());
-        }
-        if (notEmpty(queryTime)) {
-            model.addAttribute("queryTime", queryTime);
-        }
-        if (notEmpty(recordInfo.getExecType())) {
-            model.addAttribute("execType", recordInfo.getExecType());
-        }
-        recordService.query(session, pageBean, recordInfo, queryTime, true);
-
+        recordService.getPageBean(session, pageBean, record, true);
         return "/record/done";
     }
 
     @RequestMapping("running.htm")
-    public String queryRunning(HttpSession session, PageBean pageBean, RecordInfo recordInfo, String queryTime, Model model, Boolean refresh) {
+    public String queryRunning(HttpSession session, PageBean pageBean, Record record, Model model, Boolean refresh) {
 
         model.addAttribute("agents", agentService.getOwnerAgents(session));
 
-        if (notEmpty(recordInfo.getAgentId())) {
-            model.addAttribute("agentId", recordInfo.getAgentId());
-            model.addAttribute("jobs", jobService.getJobByAgentId(recordInfo.getAgentId()));
+        if (notEmpty(record.getAgentId())) {
+            model.addAttribute("jobs", jobService.getByAgent(record.getAgentId()));
         } else {
             model.addAttribute("jobs", jobService.getAll());
         }
-
-        if (notEmpty(recordInfo.getJobId())) {
-            model.addAttribute("jobId", recordInfo.getJobId());
-        }
-        if (notEmpty(queryTime)) {
-            model.addAttribute("queryTime", queryTime);
-        }
-        if (notEmpty(recordInfo.getExecType())) {
-            model.addAttribute("execType", recordInfo.getExecType());
-        }
-        recordService.query(session, pageBean, recordInfo, queryTime, false);
+        recordService.getPageBean(session, pageBean, record, false);
         return refresh == null ? "/record/running" : "/record/refresh";
     }
 
     @RequestMapping("refresh.htm")
-    public String refresh(HttpSession session, PageBean pageBean, RecordInfo recordInfo, String queryTime, Model model) {
-        return this.queryRunning(session, pageBean, recordInfo, queryTime, model, true);
+    public String refresh(HttpSession session, PageBean pageBean, Record record, Model model) {
+        return this.queryRunning(session, pageBean, record, model, true);
     }
 
     @RequestMapping("detail/{id}.htm")
     public String showDetail(Model model, @PathVariable("id") Long id) {
-        RecordInfo recordInfo = recordService.getDetailById(id);
-        if (recordInfo == null) {
+        Record record = recordService.getById(id);
+        if (record == null) {
             return "/error/404";
         }
-        model.addAttribute("record", recordInfo);
+        model.addAttribute("record", record);
         return "/record/detail";
     }
 
     @RequestMapping(value = "kill.do", method = RequestMethod.POST)
     @ResponseBody
-    public boolean kill(HttpSession session, Long recordId) {
-        Record record = recordService.get(recordId);
+    public Status kill(HttpSession session, Long recordId) {
+        Record record = recordService.getById(recordId);
         if (Constants.RunStatus.RERUNNING.getStatus().equals(record.getStatus())) {
             //父记录临时改为停止中
             record.setStatus(Constants.RunStatus.STOPPING.getStatus());
@@ -147,8 +115,9 @@ public class RecordController extends BaseController {
             //得到当前正在重跑的子记录
             record = recordService.getReRunningSubJob(recordId);
         }
-        if (!jobService.checkJobOwner(session, record.getUserId())) return false;
-        return executeService.killJob(record);
+        if (!jobService.checkJobOwner(session, record.getUserId())) return Status.FALSE;
+        executeService.killJob(record);
+        return Status.TRUE;
     }
 
 }

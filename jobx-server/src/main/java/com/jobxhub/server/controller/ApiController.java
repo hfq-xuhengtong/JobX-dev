@@ -23,11 +23,10 @@ package com.jobxhub.server.controller;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.collection.ParamsMap;
-import com.jobxhub.server.domain.Job;
 import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.ExecuteService;
 import com.jobxhub.server.service.JobService;
-import com.jobxhub.server.vo.JobInfo;
+import com.jobxhub.server.dto.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +54,7 @@ public class ApiController extends BaseController {
             return ParamsMap.map().put("status", "404", "message", "job not found");
         }
 
-        final JobInfo job = jobService.getJobInfoById(jobParams.getJobId());
+        final Job job = jobService.getById(jobParams.getJobId());
         if (job == null) {
             return ParamsMap.map().put("status", "404", "message", "job not found");
         }
@@ -76,7 +75,7 @@ public class ApiController extends BaseController {
             @Override
             public void run() {
                 try {
-                    executeService.execute(job, Constants.ExecType.API);
+                    executeService.executeJob(job, Constants.ExecType.API);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

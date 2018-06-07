@@ -219,3 +219,176 @@ b{color: red;}
     -o-transform: rotate(360deg);
     transform: rotate(360deg);
 }
+
+#overview_report_bar {
+    text-align: center;
+    height: 40px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 5px;
+    font-size: 12px;
+    display: none;
+}
+
+.legendColorBox {
+    width:12px;
+    height:12px;
+    background-color:rgba(255,255,255,0.8);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.legendLabel{
+    padding-left: 4px;
+    padding-right: 8px;
+    cursor: pointer;
+}
+
+.success-bar {
+    background-color: #20c05c;
+}
+
+.success-color {
+    color: #20c05c;;
+}
+
+
+.failed-bar {
+    background-color: #ed4949;
+}
+
+.failed-color {
+    color: #ed4949;;
+}
+
+.timeout-bar {
+    background-color: #fed42a;
+}
+
+.timeout-color {
+    color: #fed42a;;
+}
+
+.killed-bar {
+    background-color: #0b62a4;
+}
+
+.killed-color {
+    color: #0b62a4;
+}
+
+.lost-bar {
+    background-color:#b5aeb4;
+}
+
+.lost-color {
+    color: #b5aeb4;
+}
+
+.off .legendColorBox {
+    background-color: rgba(222,222,222,0.2);
+}
+
+.off {
+    color: rgba(222,222,222,0.2);
+}
+
+#overview_report_bar table {
+    display: inline-block;
+}
+
+#config-view h6 {
+    margin-bottom: 10px;
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: bold;
+}
+
+.pie-title {
+    color: rgba(235, 235, 235, 0.85);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.labact{
+    color:rgb(255,255,255);
+    font-weight: lighter;
+}
+
+.block-area{
+    margin-top: -6px;
+}
+
+.disk-item{
+    font-weight: lighter;
+}
+
+#config-view .counts{
+    font-weight: lighter;
+}
+
+#config-view h6{
+    font-weight: lighter;
+}
+
+.main-chart {
+    font-weight: lighter;
+}
+
+.report_detail {
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+
+.noborder{
+    font-family: "Roboto","Arial",sans-serif;
+    color: rgba(192, 192, 192,0.9);
+    font-weight: lighter;
+}
+
+.pull-left i {
+    color: rgba(225,225,225,0.9);
+}
+
+.eye-grey{
+    filter:alpha(opacity=20);
+    -moz-opacity:0.2;
+    opacity:0.2;
+}
+.record-div-nodata{
+    display: none;
+    height: 235px;
+    position: relative;
+    z-index: -1;
+    margin-bottom: -15px;
+}
+.div-nodata{
+    display: none;
+}
+.eye-record-nodata{
+    filter:alpha(opacity=40);
+    -moz-opacity:0.4;
+    opacity:0.4;
+}
+
+.nodata{
+    font-size: 40px;
+    font-weight: 400;
+}
+
+a:visited {
+    color: rgba(225,225,225,1);
+}
+
+.pagination input {
+    height: 22px;
+    width: 38px;
+    margin: -3px 3px;
+    padding-left: 4px;
+}
+
+.pagination .pagesize {
+    height: 31px;
+    padding-top: 3px;
+}

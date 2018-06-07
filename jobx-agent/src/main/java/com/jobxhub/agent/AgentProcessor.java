@@ -21,6 +21,7 @@
 package com.jobxhub.agent;
 
 import com.alibaba.fastjson.JSON;
+import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.registry.URL;
 import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
@@ -51,11 +52,14 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     private AgentMonitor agentMonitor = new AgentMonitor();
 
-    private static String registryAddress = AgentProperties.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);
-    private static final URL url = URL.valueOf(registryAddress);
+    private static ZookeeperRegistry registry = null;
 
-    private static ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
-    private static final ZookeeperRegistry registry = new ZookeeperRegistry(url,transporter);
+    public AgentProcessor() {
+        String registryAddress = SystemPropertyUtils.get(Constants.PARAM_JOBX_REGISTRY_KEY);
+        URL url = URL.valueOf(registryAddress);
+        ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
+        registry = new ZookeeperRegistry(url,transporter);
+    }
 
     @Override
     public Response handle(Request request) {
@@ -126,7 +130,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     @Override
     public Response listPath(Request request) {
         Response response = Response.response(request).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue());
-        String path = request.getParams().get(Constants.PARAM_LISTPATH_PATH_KEY);
+        String path = request.getParams().getString(Constants.PARAM_LISTPATH_PATH_KEY);
         if (CommonUtils.isEmpty(path)) return response.setSuccess(false).end();
         File file = new File(path);
         if (!file.exists()) {
@@ -149,7 +153,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response monitor(Request request) {
-        Constants.ConnType connType = Constants.ConnType.getByName(request.getParams().get("connType"));
+        Constants.ConnType connType = Constants.ConnType.getByName(request.getParams().getString("connType"));
         Response response = Response.response(request);
         switch (connType) {
             case PROXY:
@@ -172,11 +176,12 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     @Override
     public Response execute(final Request request) {
 
-        String command = request.getParams().get(Constants.PARAM_COMMAND_KEY);
+        String command = request.getParams().getString(Constants.PARAM_COMMAND_KEY);
 
-        String pid = request.getParams().get(Constants.PARAM_PID_KEY);
+        String pid = request.getParams().getString(Constants.PARAM_PID_KEY);
         //以分钟为单位
-        Long timeout = CommonUtils.toLong(request.getParams().get(Constants.PARAM_TIMEOUT_KEY), 0L);
+        Integer timeout = request.getParams().getInt(Constants.PARAM_TIMEOUT_KEY);
+        timeout = timeout == null?0:timeout;
 
         boolean timeoutFlag = timeout > 0;
 
@@ -184,7 +189,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             logger.info("[JobX]:execute:{},pid:{}", command, pid);
         }
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream outputStream= new ByteArrayOutputStream();
 
         final Response response = Response.response(request);
 
@@ -194,22 +199,13 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
         DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
 
-        Integer exitValue;
-
-        String successExit = request.getParams().get(Constants.PARAM_SUCCESSEXIT_KEY);
-        if (CommonUtils.isEmpty(successExit)) {
-            exitValue = 0;//标准退住值:0
-        } else {
-            exitValue = Integer.parseInt(successExit);
-        }
-
+        Integer successExit = request.getParams().getInt(Constants.PARAM_SUCCESSEXIT_KEY);
+        Integer exitValue = successExit == null?0:successExit;
         File shellFile = CommandUtils.createShellFile(command, pid);
-
         try {
             String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
             CommandLine commandLine = CommandLine.parse(runCmd + shellFile.getAbsoluteFile());
             final DefaultExecutor executor = new DefaultExecutor();
-
             ExecuteStreamHandler stream = new PumpStreamHandler(outputStream, outputStream);
             executor.setStreamHandler(stream);
             response.setStartTime(new Date().getTime());
@@ -261,11 +257,8 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                     }
                 };
             }
-
             executor.execute(commandLine, resultHandler);
-
             resultHandler.waitFor();
-
         } catch (Exception e) {
             if (e instanceof ExecuteException) {
                 exitValue = ((ExecuteException) e).getExitValue();
@@ -292,19 +285,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                     outputStream.flush();
                     String text = outputStream.toString();
                     if (notEmpty(text)) {
-                        try {
-                            if (CommonUtils.isWindows()) {
-                                response.setMessage(text);
-                            } else {
-                                String replaceReg = shellFile.getAbsolutePath().concat(":\\sline\\s[0-9]+:");
-                                text = text.replaceAll(replaceReg, "");
-                                String message = getUnixExecuteMessage(text);
-                                response.setMessage(message);
-                                exitValue = getUnixExecuteExitCode(text);
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            response.setMessage(text);
-                        }
+                        response.setMessage(text);
                     }
                     outputStream.close();
                 } catch (Exception e) {
@@ -320,7 +301,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                 if (CommonUtils.isEmpty(successExit)) {
                     response.setExitCode(exitValue).setSuccess(exitValue == Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
                 } else {
-                    response.setExitCode(exitValue).setSuccess(successExit.equals(exitValue.toString())).end();
+                    response.setExitCode(exitValue).setSuccess(successExit.equals(exitValue)).end();
                 }
             }
 
@@ -341,7 +322,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response password(Request request) {
-        String newPassword = request.getParams().get(Constants.PARAM_NEWPASSWORD_KEY);
+        String newPassword = request.getParams().getString(Constants.PARAM_NEWPASSWORD_KEY);
         Response response = Response.response(request);
         if (isEmpty(newPassword)) {
             return response.setSuccess(false).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setMessage("密码不能为空").end();
@@ -351,7 +332,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         unRegister(request.getHost(),request.getPort());
 
         SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY, newPassword);
-        IOUtils.writeText(Constants.JOBX_PASSWORD_FILE, newPassword, "UTF-8");
+        IOUtils.writeText(Constants.JOBX_PASSWORD_FILE, newPassword, Constants.CHARSET_UTF8);
 
         //最新密码信息注册进来
         register(request.getHost(),request.getPort());
@@ -361,32 +342,13 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response kill(Request request) {
-        String pid = request.getParams().get(Constants.PARAM_PID_KEY);
+        String pid = request.getParams().getString(Constants.PARAM_PID_KEY);
         if (logger.isInfoEnabled()) {
             logger.info("[JobX]:kill pid:{}", pid);
         }
-
         Response response = Response.response(request);
         String text = CommandUtils.executeShell(Constants.JOBX_KILL_SHELL, pid);
-        String message = "";
-        Integer exitVal = 0;
-
-        if (notEmpty(text)) {
-            try {
-                if (CommonUtils.isWindows()) {
-
-                }else {
-                    message = getUnixExecuteMessage(text);
-                    exitVal = getUnixExecuteExitCode(text);
-                }
-            } catch (StringIndexOutOfBoundsException e) {
-                message = text;
-            }
-        }
-        response.setExitCode(Constants.StatusCode.ERROR_EXIT.getValue().equals(exitVal) ? Constants.StatusCode.ERROR_EXIT.getValue() : Constants.StatusCode.SUCCESS_EXIT.getValue())
-                .setMessage(message)
-                .end();
-
+        response.setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setMessage(text).end();
         if (logger.isInfoEnabled()) {
             logger.info("[JobX]:kill result:{}" + response);
         }
@@ -395,26 +357,22 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     @Override
     public Response proxy(Request request) {
-
         if (this.client == null) {
             this.client = ExtensionLoader.load(Client.class);
         }
-
-        String proxyHost = request.getParams().get(Constants.PARAM_PROXYHOST_KEY);
-        String proxyPort = request.getParams().get(Constants.PARAM_PROXYPORT_KEY);
-        String proxyAction = request.getParams().get(Constants.PARAM_PROXYACTION_KEY);
-        String proxyPassword = request.getParams().get(Constants.PARAM_PROXYPASSWORD_KEY);
-
+        String proxyHost = request.getParams().getString(Constants.PARAM_PROXYHOST_KEY);
+        String proxyPort = request.getParams().getString(Constants.PARAM_PROXYPORT_KEY);
+        String proxyAction = request.getParams().getString(Constants.PARAM_PROXYACTION_KEY);
+        String proxyPassword = request.getParams().getString(Constants.PARAM_PROXYPASSWORD_KEY);
         //其他参数....
-        String proxyParams = request.getParams().get(Constants.PARAM_PROXYPARAMS_KEY);
-        Map<String, String> params = new HashMap<String, String>(0);
+        String proxyParams = request.getParams().getString(Constants.PARAM_PROXYPARAMS_KEY);
+        HashMap<String, Object> params = new HashMap<String, Object>(0);
         if (CommonUtils.notEmpty(proxyParams)) {
-            params = (Map<String, String>) JSON.parse(proxyParams);
+            params = (HashMap<String, Object>) JSON.parse(proxyParams);
         }
 
         Request proxyReq = Request.request(proxyHost, toInt(proxyPort), Action.findByName(proxyAction), proxyPassword, request.getTimeOut(), null).setParams(params);
-
-        Response response = null;
+        Response response;
         try {
             response = this.client.sentSync(proxyReq);
         } catch (Exception e) {
@@ -448,14 +406,6 @@ public class AgentProcessor implements ServerHandler, AgentJob {
     @Override
     public void restart(Request request) {
 
-    }
-
-    private Integer getUnixExecuteExitCode(String text) {
-        return Integer.parseInt(text.substring(text.lastIndexOf(Constants.JOBX_UNIX_EXITCODE_SCRIPT) + Constants.JOBX_UNIX_EXITCODE_SCRIPT.length() + 1).trim());
-    }
-
-    private String getUnixExecuteMessage(String text) {
-        return text.substring(0, text.lastIndexOf(Constants.JOBX_UNIX_EXITCODE_SCRIPT));
     }
 
     public static void register(final String host,final Integer port) {

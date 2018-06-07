@@ -22,73 +22,118 @@
 
 package com.jobxhub.server.service;
 
+import com.google.common.collect.Lists;
+import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DigestUtils;
-import com.jobxhub.server.dao.QueryDao;
-import com.jobxhub.server.dao.UploadDao;
-import com.jobxhub.server.domain.Role;
-import com.jobxhub.server.domain.User;
+import com.jobxhub.common.util.IOUtils;
+import com.jobxhub.server.domain.UserBean;
+import com.jobxhub.server.dao.UserDao;
+import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.tag.PageBean;
+import com.jobxhub.server.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
+ *
  * Created by ChenHui on 2016/2/18.
  */
 @Service
-@Transactional
 public class UserService {
 
     @Autowired
-    private QueryDao queryDao;
+    private UserDao userDao;
 
     @Autowired
-    private UploadDao uploadDao;
+    private UserAgentService userAgentService;
 
-    public PageBean queryUser(PageBean pageBean) {
-        String sql = "SELECT U.*,R.roleName FROM T_USER AS U LEFT JOIN T_ROLE R ON U.roleId = R.roleId";
-        queryDao.sqlPageQuery(pageBean, User.class, sql);
+    public int login(HttpServletRequest request, String userName, String password) throws IOException {
+
+        HttpSession httpSession = request.getSession();
+
+        User user = null;
+        UserBean userBean = userDao.getByName(userName);
+        if (userBean != null) {
+            user = User.transfer.apply(userBean);
+        }
+        if (user == null) return 500;
+
+        //拿到数据库的数据盐
+        byte[] salt = DigestUtils.decodeHex(user.getSalt());
+        String saltPassword = DigestUtils.encodeHex(DigestUtils.sha1(password.getBytes(), salt, 1024));
+
+        if (saltPassword.equals(user.getPassword())) {
+            if (user.getRoleId() == 999L) {
+                httpSession.setAttribute(Constants.PARAM_PERMISSION_KEY, true);
+            } else {
+                httpSession.setAttribute(Constants.PARAM_PERMISSION_KEY, false);
+            }
+            JobXTools.logined(request, user);
+            return 200;
+        } else {
+            return 500;
+        }
+    }
+
+    public User getByName(String userName) {
+        UserBean userBean = userDao.getByName(userName);
+        if (userBean != null) {
+            return User.transfer.apply(userBean);
+        }
+        return null;
+    }
+
+    public PageBean getPageBean(PageBean pageBean) {
+        List<UserBean> userList = userDao.getByPageBean(pageBean);
+        int count = userDao.getCount(pageBean.getFilter());
+        pageBean.setResult(Lists.transform(userList, User.transfer));
+        pageBean.setTotalCount(count);
         return pageBean;
     }
 
-    public List<Role> getRoleGroup() {
-        return queryDao.getAll(Role.class);
-    }
-
     public void addUser(User user) {
+        UserBean userBean = UserBean.transfer.apply(user);
         String salter = CommonUtils.uuid(16);
-        user.setSalt(salter);
+        userBean.setSalt(salter);
         byte[] salt = DigestUtils.decodeHex(salter);
-        String saltPassword = DigestUtils.encodeHex(DigestUtils.sha1(user.getPassword().getBytes(), salt, 1024));
-        user.setPassword(saltPassword);
-        user.setCreateTime(new Date());
-        queryDao.merge(user);
+        String saltPassword = DigestUtils.encodeHex(DigestUtils.sha1(userBean.getPassword().getBytes(), salt, 1024));
+        userBean.setPassword(saltPassword);
+        userBean.setCreateTime(new Date());
+        userDao.save(userBean);
+        user.setUserId(userBean.getUserId());
     }
 
     public User getUserById(Long id) {
-        return queryDao.get(User.class, id);
+        UserBean userBean = userDao.getById(id);
+        if (userBean != null) {
+            return User.transfer.apply(userBean);
+        }
+        return null;
     }
 
-    public void updateUser(User user) {
-        queryDao.merge(user);
+    public void updateUser(HttpSession session, User user) {
+        if (!JobXTools.isPermission(session)) {
+            userAgentService.update(user.getUserId(), user.getAgentIds());
+        }
+        userDao.update(UserBean.transfer.apply(user));
     }
 
-    public User uploadimg(File file, Long userId) throws IOException {
-        return uploadDao.uploadimg(file, userId);
+    public void uploadImg(Long userId, File file) throws IOException {
+        byte[] bytes = IOUtils.toByteArray(file);
+        userDao.uploadImg(userId, bytes);
     }
 
-    public User queryUserById(Long id) {
-        String sql = "SELECT U.*,R.roleName FROM T_USER AS U LEFT JOIN T_ROLE R ON U.roleId = R.roleId WHERE userId = ?";
-        return queryDao.sqlUniqueQuery(User.class, sql, id);
-    }
-
-    public String editPwd(Long id, String pwd0, String pwd1, String pwd2) {
+    public String editPassword(Long id, String pwd0, String pwd1, String pwd2) {
         User user = getUserById(id);
         byte[] salt = DigestUtils.decodeHex(user.getSalt());
         byte[] hashPassword = DigestUtils.sha1(pwd0.getBytes(), salt, 1024);
@@ -97,7 +142,7 @@ public class UserService {
             if (pwd1.equals(pwd2)) {
                 byte[] hashPwd = DigestUtils.sha1(pwd1.getBytes(), salt, 1024);
                 user.setPassword(DigestUtils.encodeHex(hashPwd));
-                queryDao.merge(user);
+                userDao.updatePassword(user.getUserId(), user.getPassword());
                 return "true";
             } else {
                 return "two";
@@ -107,15 +152,12 @@ public class UserService {
         }
     }
 
-    /**
-     * if exists return true
-     * not exists return false
-     * @param name
-     * @return
-     */
     public boolean existsName(String name) {
-        return queryDao.hqlCount("from User where userName=?",name)>0;
+        Map<String,Object> map = new HashMap<String, Object>(0);
+        map.put("user_name",name);
+        return userDao.getCount(map) > 0;
     }
 
-
 }
+
+

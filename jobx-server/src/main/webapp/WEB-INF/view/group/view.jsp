@@ -18,22 +18,11 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href=""> 执行器组管理</a></li>
     </ol>
     <h4 class="page-title"><i aria-hidden="true" class="fa fa-group"></i>&nbsp;分组管理</h4>
     <div class="block-area" id="defaultStyle">
-
-        <div style="float: left">
-            <label>
-                每页 <select size="1" class="select-jobx" id="size" style="width: 50px;">
-                <option value="15">15</option>
-                <option value="30" ${pageBean.pageSize eq 30 ? 'selected' : ''}>30</option>
-                <option value="50" ${pageBean.pageSize eq 50 ? 'selected' : ''}>50</option>
-                <option value="100" ${pageBean.pageSize eq 100 ? 'selected' : ''}>100</option>
-            </select> 条记录
-            </label>
-        </div>
 
         <div style="float: right;margin-top: -10px">
             <a href="${contextPath}/group/add.htm" class="btn btn-sm m-t-10" style="margin-left: 50px;margin-bottom: 8px"><i class="icon">&#61943;</i>添加</a>
@@ -44,9 +33,8 @@
             <tr>
                 <th>分组名称</th>
                 <th>机器台数</th>
-                <th>创建人</th>
-                <th>创建时间</th>
                 <th>备注信息</th>
+                <th>创建时间</th>
                 <th class="text-center">操作</th>
             </tr>
             </thead>
@@ -56,9 +44,8 @@
                     <tr>
                         <td>${g.groupName}</td>
                         <td>${g.agentCount}</td>
-                        <td>${g.userName}</td>
-                        <td><fmt:formatDate value="${g.createTime}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
                         <td>${g.comment}</td>
+                        <td><fmt:formatDate value="${g.createTime}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
                         <td class="text-center">
                                 <a href="${contextPath}/group/edit/${g.groupId}.htm" title="编辑">
                                     <i class="glyphicon glyphicon-pencil"></i>

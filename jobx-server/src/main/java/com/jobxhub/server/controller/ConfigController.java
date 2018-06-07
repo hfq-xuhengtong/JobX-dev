@@ -22,11 +22,11 @@
 package com.jobxhub.server.controller;
 
 import com.jobxhub.common.Constants;
-import com.jobxhub.common.util.DigestUtils;
-import com.jobxhub.server.domain.Config;
+import com.jobxhub.server.annotation.RequestRepeat;
+import com.jobxhub.server.dto.Config;
 import com.jobxhub.server.service.ConfigService;
 import com.jobxhub.server.service.RecordService;
-import com.jobxhub.server.vo.Status;
+import com.jobxhub.server.dto.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -62,24 +62,16 @@ public class ConfigController extends BaseController {
     }
 
     @RequestMapping(value = "edit.do", method = RequestMethod.POST)
+    @RequestRepeat(view = true)
     public String edit(Config config) {
-        Config cfg = configService.getSysConfig();
-        cfg.setSenderEmail(config.getSenderEmail());
-        cfg.setConfigId(configService.getSysConfig().getConfigId());
-        cfg.setTemplate(DigestUtils.passBase64(config.getTemplate()));
-        cfg.setSendUrl(DigestUtils.passBase64(config.getSendUrl()));
-        cfg.setPassword(config.getPassword());
-        cfg.setSmtpHost(config.getSmtpHost());
-        cfg.setSpaceTime(config.getSpaceTime());
-        cfg.setSmtpPort(config.getSmtpPort());
-        configService.update(cfg);
+        configService.update(config);
         return "redirect:/config/view.htm";
     }
 
     @RequestMapping(value = "clear.do", method = RequestMethod.POST)
     @ResponseBody
     public Status clearRecord(String startTime, String endTime) {
-        recordService.deleteRecordBetweenTime(startTime, endTime);
+        recordService.deleteRecord(startTime, endTime);
         return Status.TRUE;
     }
 

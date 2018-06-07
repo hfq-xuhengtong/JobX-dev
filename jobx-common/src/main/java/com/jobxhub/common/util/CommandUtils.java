@@ -22,7 +22,6 @@
 package com.jobxhub.common.util;
 
 
-import com.jobxhub.common.Constants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -56,7 +55,8 @@ public abstract class CommandUtils implements Serializable {
                 if (CommonUtils.isWindows()) {
                     out.write("@echo off\n\n" + command);
                 }else {
-                    out.write("#!/bin/bash\n\n" + command + Constants.JOBX_UNIX_EXITCODE_SCRIPT);
+                    //追加一个不可见字符
+                    out.write("#!/bin/bash\n\n" + command);
                 }
                 out.flush();
                 out.close();

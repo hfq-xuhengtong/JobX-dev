@@ -32,7 +32,7 @@
     <ol class="breadcrumb hidden-xs">
         <li class="icon">&#61753;</li>
         当前位置：
-        <li><a href="">jobx</a></li>
+        <li><a href="">JobX</a></li>
         <li><a href="">告警日志</a></li>
     </ol>
     <h4 class="page-title"><i class="glyphicon glyphicon-eye-open"></i>&nbsp;告警详情</h4>

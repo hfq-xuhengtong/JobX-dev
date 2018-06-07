@@ -99,7 +99,7 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>../lib</classpathPrefix>
-                            <mainClass>com.jobxhub.agent.AgentBootstrap</mainClass>
+                            <mainClass>com.jobxhub.agent.JobXAgent</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
