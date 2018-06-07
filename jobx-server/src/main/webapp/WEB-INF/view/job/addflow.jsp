@@ -19,12 +19,12 @@
 
         .flowJobUl li {
             background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
+            border-radius: 17px;
             height: 33px;
             list-style: outside none none;
             margin-top: -24px;
             margin-bottom: 29px;
-            margin-left: 136px;
+            margin-left: 144px;
             padding: 6px 16px;
             width: 100%;
         }

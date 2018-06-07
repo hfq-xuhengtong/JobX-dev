@@ -8,7 +8,8 @@
 }
 
 .form-horizontal > .form-group{
-    padding-bottom:2px;
+    padding-bottom:10px;
+    padding-top: 2px;
 }
 
 .highcharts-button{
