@@ -2,7 +2,7 @@ package com.jobxhub.server.common;
 /**
  * @Package com.jobxhub.server.common
  * @Title: Parser
- * @author hapic
+ * @author hitechr
  * @date 2018/6/8 21:02
  * @version V1.0
  */
@@ -10,12 +10,6 @@ package com.jobxhub.server.common;
 import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.server.dto.Job;
-import org.junit.Assert;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Date;
 
