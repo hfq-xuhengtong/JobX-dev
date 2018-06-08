@@ -47,6 +47,8 @@ public interface JobDao {
 
     void update(JobBean job);
 
+    void delete(Long id);
+
     void updateToken(@Param("jobId") Long jobId,@Param("token") String token);
 
     void pause(@Param("jobId") Long jobId,@Param("pause") Boolean pause);

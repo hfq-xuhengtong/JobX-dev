@@ -153,6 +153,11 @@
                 changeUrl();
             });
 
+            $(".jobType").find("a").click(function () {
+                $("#jobType").val($(this).attr("type"));
+                console.log($("#jobType").val());
+            });
+
         });
 
         function graph() {
@@ -347,7 +352,7 @@
         <div class="tile p-15 textured">
             <form class="form-horizontal" role="form" id="jobform" action="${contextPath}/job/save.do" method="post"></br>
                 <input type="hidden" name="command" id="command">
-                <input type="hidden" name="jobType" value="0">
+                <input type="hidden" name="jobType" id="jobType" value="0">
 
                 <div class="form-group">
                     <label for="jobName" class="col-lab control-label wid150"><i class="glyphicon glyphicon-tasks"></i>&nbsp;&nbsp;作业名称&nbsp;&nbsp;<b>*&nbsp;</b></label>
@@ -425,8 +430,7 @@
                 <div class="form-group">
                     <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-transfer"></i>&nbsp;&nbsp;&nbsp;作业类型&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <ul class="nav nav-tabs wid150">
-                            <input type="hidden" id="jobType" name="jobType" value="0"/>
+                        <ul class="nav nav-tabs wid150 jobType">
                             <li class="active">
                                 <a href="#simple" type="0" data-toggle="tab">简单作业</a>
                             </li>

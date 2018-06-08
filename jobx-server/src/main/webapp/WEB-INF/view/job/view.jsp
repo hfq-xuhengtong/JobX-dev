@@ -394,8 +394,7 @@
                     ajax({
                         type: "post",
                         url: "${contextPath}/job/checkdel.do",
-                        data: {"id": id},
-                        dataType:"html"
+                        data: {"id": id}
                     },function (data) {
                         if (!data.status) {
                             alert("该作业正在运行中,删除失败!")

@@ -150,12 +150,16 @@ public class JobService {
         return true;
     }
 
-    public void delete(Long jobId) throws Exception {
+    public boolean delete(Long jobId) throws Exception {
         Job job = getById(jobId);
         //单一任务...
+        if (job == null)return false;
         if (job.getJobType() == JobType.SIMPLE.getCode()) {
-
+            jobxRegistry.jobUnRegister(jobId);
+            jobDao.delete(jobId);
+            return true;
         }
+        return false;
         //todo ...
     }
 

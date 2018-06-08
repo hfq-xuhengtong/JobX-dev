@@ -222,11 +222,16 @@ function Validata() {
             this.init();
             this.jobName();
             this.cronExp();
-            this.command();
-            this.successExit();
             this.runCount();
             this.timeout();
             this.warning();
+            var jobType = $("#jobType").val();
+            if (jobType == 0) {
+                this.command();
+                this.successExit();
+            } else {
+
+            }
             return this.status;
         }
     };

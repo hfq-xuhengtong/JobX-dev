@@ -23,14 +23,12 @@ package com.jobxhub.agent;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.logging.LoggerFactory;
-import com.jobxhub.common.util.*;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Properties;
 
 
