@@ -140,12 +140,7 @@ b{color: red;}
     white-space: nowrap;
     -moz-binding: url("ellipsis.xml#ellipsis");
     text-overflow: ellipsis;
-}
-
-@media (max-width: 1900px) {
-    .jobx_command{
-        width: 60em;
-    }
+    max-width:50px;
 }
 
 @media (max-width: 1800px) {
