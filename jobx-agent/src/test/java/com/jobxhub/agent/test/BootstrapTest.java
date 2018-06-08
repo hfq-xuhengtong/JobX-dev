@@ -1,8 +1,8 @@
 package com.jobxhub.agent.test;
 
+import com.jobxhub.agent.service.AgentService;
 import com.jobxhub.common.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
-import com.jobxhub.agent.AgentProcessor;
 import com.jobxhub.common.ext.ExtensionLoader;
 import com.jobxhub.common.logging.LoggerFactory;
 import com.jobxhub.common.util.SystemPropertyUtils;
@@ -63,13 +63,13 @@ public class BootstrapTest implements Serializable {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    server.start(port, new AgentProcessor());
+                    server.start(port, new AgentService());
                 }
             }).start();
 
             logger.info("[JobX]agent started @ port:{},pid:{}", port, getPid());
             Thread.sleep(5000);
-            AgentProcessor.register(System.getProperty(Constants.PARAM_JOBX_HOST_KEY),port);
+            AgentService.register(System.getProperty(Constants.PARAM_JOBX_HOST_KEY),port);
 
         } catch (Exception e) {
             e.printStackTrace();

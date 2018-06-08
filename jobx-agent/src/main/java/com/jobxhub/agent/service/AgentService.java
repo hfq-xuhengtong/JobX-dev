@@ -18,49 +18,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.jobxhub.agent;
+package com.jobxhub.agent.service;
 
 import com.alibaba.fastjson.JSON;
+import com.jobxhub.agent.util.PropertiesLoader;
+import com.jobxhub.common.Constants;
+import com.jobxhub.common.api.AgentJob;
+import com.jobxhub.common.ext.ExtensionLoader;
+import com.jobxhub.common.job.Action;
+import com.jobxhub.common.job.Monitor;
+import com.jobxhub.common.job.Request;
+import com.jobxhub.common.job.Response;
+import com.jobxhub.common.logging.LoggerFactory;
+import com.jobxhub.common.util.*;
 import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.registry.URL;
 import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
-import org.apache.commons.exec.*;
-import org.hyperic.sigar.SigarException;
-import com.jobxhub.common.Constants;
-import com.jobxhub.common.api.AgentJob;
-import com.jobxhub.common.ext.ExtensionLoader;
-import com.jobxhub.common.job.*;
-import com.jobxhub.common.logging.LoggerFactory;
-import com.jobxhub.common.util.*;
 import com.jobxhub.rpc.Client;
 import com.jobxhub.rpc.ServerHandler;
+import org.apache.commons.exec.*;
+import org.hyperic.sigar.SigarException;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.*;
 
 import static com.jobxhub.common.util.CommonUtils.*;
 
 
-public class AgentProcessor implements ServerHandler, AgentJob {
+public class AgentService implements ServerHandler, AgentJob {
 
-    private static Logger logger = LoggerFactory.getLogger(AgentProcessor.class);
+    private static Logger logger = LoggerFactory.getLogger(AgentService.class);
 
     private Client client = null;
 
-    private AgentMonitor agentMonitor = new AgentMonitor();
+    private MonitorService monitorService = new MonitorService();
 
     private static ZookeeperRegistry registry = null;
 
-    private boolean log2hbase = false;
+    private boolean log2hbase;
 
-    public AgentProcessor() {
+    public AgentService() {
         String registryAddress = SystemPropertyUtils.get(Constants.PARAM_JOBX_REGISTRY_KEY);
         URL url = URL.valueOf(registryAddress);
         ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
         registry = new ZookeeperRegistry(url,transporter);
-        log2hbase = AgentProperties.getBoolean(Constants.PARAM_LOG2HBASE_KEY);
+        log2hbase = PropertiesLoader.getBoolean(Constants.PARAM_LOG2HBASE_KEY);
     }
 
     @Override
@@ -160,7 +165,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         switch (connType) {
             case PROXY:
                 try {
-                    Monitor monitor = agentMonitor.monitor();
+                    Monitor monitor = monitorService.monitor();
                     Map<String, String> map = monitor.toMap();
                     response.setResult(map)
                             .setSuccess(true)
@@ -205,11 +210,11 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         Integer exitValue = successExit == null?0:successExit;
         File shellFile = CommandUtils.createShellFile(command, pid);
 
-        AgentMessageWriter agentMessageWriter = null;
+        MessageService messageService = null;
 
         try {
             if (log2hbase) {
-                new AgentMessageWriter(outputStream, pid);
+                new MessageService(outputStream, pid);
             }
             String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
             CommandLine commandLine = CommandLine.parse(runCmd + shellFile.getAbsoluteFile());
@@ -268,7 +273,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
             //开始写入日志文件
             if (log2hbase) {
-                agentMessageWriter.start();
+                messageService.start();
             }
             executor.execute(commandLine, resultHandler);
             resultHandler.waitFor();
@@ -297,7 +302,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             response.setEndTime(new Date().getTime());
             //结束写入日志文件
             if (log2hbase) {
-                agentMessageWriter.stop();
+                messageService.stop();
             }
             exitValue = resultHandler.getExitValue();
             if (CommonUtils.notEmpty(outputStream.toByteArray())) {
@@ -439,14 +444,14 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         }
     }
 
-    protected static void unRegister(final String host,final Integer port) {
+    public static void unRegister(final String host,final Integer port) {
         registry.unRegister(getRegistryPath(host,port));
         if (logger.isInfoEnabled()) {
             logger.info("[JobX] agent unRegister to zookeeper done");
         }
     }
 
-    protected static void bindShutdownHook(final String host,final Integer port) {
+    public static void bindShutdownHook(final String host,final Integer port) {
         //register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {

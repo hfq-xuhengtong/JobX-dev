@@ -1,5 +1,6 @@
-package com.jobxhub.agent;
+package com.jobxhub.agent.service;
 
+import com.jobxhub.agent.util.PropertiesLoader;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.logging.LoggerFactory;
 import com.jobxhub.common.util.CommandUtils;
@@ -18,9 +19,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 
-public class AgentMessageWriter {
+public class MessageService {
 
-    private Logger logger = LoggerFactory.getLogger(AgentMessageWriter.class);
+    private Logger logger = LoggerFactory.getLogger(MessageService.class);
 
     private Configuration conf = HBaseConfiguration.create();
 
@@ -37,11 +38,11 @@ public class AgentMessageWriter {
     private volatile boolean running = false;
     private Integer msgLength = 0;
 
-    public AgentMessageWriter(ByteArrayOutputStream outputStream, String pid) {
+    public MessageService(ByteArrayOutputStream outputStream, String pid) {
         // conf.set("hbase.rootdir", "hdfs://CDH-HUAXIA-00005:8020/hbase");
         // conf.set("hbase.zookeeper.quorum", "CDH-HUAXIA-00005:2181");\
         // 设置Zookeeper,直接设置IP地址
-        conf.set("hbase.zookeeper.quorum", AgentProperties.getProperty(Constants.PARAM_HBASE_ZOOKEEPER_QUORUM));
+        conf.set("hbase.zookeeper.quorum", PropertiesLoader.getProperty(Constants.PARAM_HBASE_ZOOKEEPER_QUORUM));
         this.outputStream = outputStream;
         this.pid = pid;
         this.logFile = CommandUtils.createLogFile(pid);
@@ -80,10 +81,10 @@ public class AgentMessageWriter {
         public void run() {
             while (running) {
                 try {
-                    AgentMessageWriter.this.writeMessage();
+                    MessageService.this.writeMessage();
                 } catch (IOException e) {
                     logger.debug("[JobX]:writeMsg error:{}", e.getMessage());
-                    AgentMessageWriter.this.stop();
+                    MessageService.this.stop();
                 }
                 try {
                     Thread.currentThread().sleep(CHECK_DELAY);
@@ -95,8 +96,8 @@ public class AgentMessageWriter {
             if(!running){
                 // write into HBase
                 try {
-                    AgentMessageWriter.this.createTable();
-                    AgentMessageWriter.this.saveMessage();
+                    MessageService.this.createTable();
+                    MessageService.this.saveMessage();
                 } catch (Exception e){
                     logger.debug("[JobX] Write log into HBase failed! {}", e.getMessage());
                 }

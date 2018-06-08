@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.jobxhub.agent;
+package com.jobxhub.agent.util;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.logging.LoggerFactory;
@@ -37,9 +37,9 @@ import java.util.Properties;
  *
  * @author benjobs.
  */
-public class AgentProperties {
+public class PropertiesLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(AgentProperties.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesLoader.class);
 
     private static Properties properties = null;
 

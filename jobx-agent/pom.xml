@@ -73,8 +73,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>7</source>
+                    <target>7</target>
                 </configuration>
             </plugin>
 
@@ -110,7 +110,7 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>../lib</classpathPrefix>
-                            <mainClass>com.jobxhub.agent.JobXAgent</mainClass>
+                            <mainClass>com.jobxhub.agent.bootstrap.JobXAgent</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

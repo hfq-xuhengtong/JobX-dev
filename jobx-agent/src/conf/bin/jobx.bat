@@ -135,7 +135,7 @@ echo Using JOBX_TMPDIR: "%JOBX_TMPDIR%"
 
 if "%TITLE%" == "" set TITLE=JobX
 set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
-set MAINCLASS=com.jobxhub.agent.JobXAgent
+set MAINCLASS=com.jobxhub.agent.bootstrap.JobXAgent
 
 set Action=%1
 if "%Action%" == "start" goto doAction
