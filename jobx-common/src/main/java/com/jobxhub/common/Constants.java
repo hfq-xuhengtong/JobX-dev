@@ -191,6 +191,10 @@ public class Constants {
      */
     public static final File JOBX_KILL_SHELL = new File(JOBX_HOME + "/bin/kill.sh");
 
+    /**
+     * ExecuteUser lib
+     */
+    public static final File JOBX_EXECUTE_AS_USER_LIB =  new File(JOBX_HOME + "/lib/ExecuteUser");
 
     public enum CachedProvider implements Serializable {
 
