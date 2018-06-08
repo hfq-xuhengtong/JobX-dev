@@ -330,7 +330,7 @@ public class JobController extends BaseController {
         //手动执行
         Long userId = JobXTools.getUserId(session);
         if(StringUtils.isNotEmpty(param)){
-            job.setCommand(job.getCommand()+" "+param);
+            job.setInputParam(param);
         }
         job.setUserId(userId);
         job.setAgent(agentService.getAgent(job.getAgentId()));

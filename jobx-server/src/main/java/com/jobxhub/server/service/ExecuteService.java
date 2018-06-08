@@ -29,6 +29,7 @@ import com.jobxhub.common.job.Request;
 import com.jobxhub.common.job.RequestFile;
 import com.jobxhub.common.job.Response;
 import com.jobxhub.rpc.InvokeCallback;
+import com.jobxhub.server.common.Parser;
 import com.jobxhub.server.job.JobXInvoker;
 import com.jobxhub.server.dto.Agent;
 import com.jobxhub.server.dto.Job;
@@ -91,6 +92,9 @@ public class ExecuteService {
             @Override
             public void run() {
                 final Record record = new Record(job, execType,JobType.SIMPLE);
+
+                record.setCommand(Parser.parse(job));
+
                 InvokeCallback invokeCallback = new ExecuteCallback(job,execType,record);
                 try {
                     checkPing(job, record);
@@ -101,7 +105,7 @@ public class ExecuteService {
                             agent.getPassword(),
                             job.getTimeout(),
                             agent.getProxyId());
-                    request.putParam(Constants.PARAM_COMMAND_KEY, job.getCommand());
+                    request.putParam(Constants.PARAM_COMMAND_KEY, record.getCommand());
                     request.putParam(Constants.PARAM_PID_KEY, record.getPid());
                     request.putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
                     request.putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout());
