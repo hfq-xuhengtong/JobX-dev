@@ -140,7 +140,7 @@ b{color: red;}
     white-space: nowrap;
     -moz-binding: url("ellipsis.xml#ellipsis");
     text-overflow: ellipsis;
-    max-width:50px;
+    max-width:50em;
 }
 
 @media (max-width: 1800px) {
