@@ -19,18 +19,16 @@
  * under the License.
  */
 
-package com.jobxhub.agent;
+package com.jobxhub.agent.util;
 
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.logging.LoggerFactory;
-import com.jobxhub.common.util.*;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Properties;
 
 
@@ -39,9 +37,9 @@ import java.util.Properties;
  *
  * @author benjobs.
  */
-public class AgentProperties {
+public class PropertiesLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(AgentProperties.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesLoader.class);
 
     private static Properties properties = null;
 
@@ -54,6 +52,14 @@ public class AgentProperties {
             loadProperties();
         }
         return properties.getProperty(name);
+    }
+
+    public static boolean getBoolean(String name){
+        String val = getProperty(name);
+        if (val == null) {
+            return false;
+        }
+        return name.trim().equalsIgnoreCase("true");
     }
 
     /**

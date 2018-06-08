@@ -18,38 +18,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.jobxhub.server.dao;
 
-import com.jobxhub.server.domain.JobBean;
-import com.jobxhub.server.tag.PageBean;
-import org.apache.ibatis.annotations.Param;
+package com.jobxhub.agent.process;
 
-import java.util.List;
-import java.util.Map;
+public class ProcessException extends RuntimeException {
 
-public interface JobDao {
+  private static final long serialVersionUID = 1;
 
-    List<JobBean> getAll();
+  private final int exitCode;
+  private final String logSnippet;
 
-    List<JobBean> getByPageBean(@Param("pager") PageBean pageBean);
+  public ProcessException(final int exitCode, final String logSnippet) {
+    this.exitCode = exitCode;
+    this.logSnippet = logSnippet;
+  }
 
-    int getCount(@Param("filter") Map<String, Object> filter);
+  public int getExitCode() {
+    return this.exitCode;
+  }
 
-    JobBean getById(Long id);
+  public String getLogSnippet() {
+    return this.logSnippet;
+  }
 
-    List<JobBean> getByAgent(Long agentId);
-
-    int existsCount(@Param("jobId") Long jobId, @Param("agentId") Long agentId, @Param("name") String name);
-
-    List<JobBean> getScheduleJob();
-
-    void save(JobBean job);
-
-    void update(JobBean job);
-
-    void delete(Long id);
-
-    void updateToken(@Param("jobId") Long jobId,@Param("token") String token);
-
-    void pause(@Param("jobId") Long jobId,@Param("pause") Boolean pause);
 }

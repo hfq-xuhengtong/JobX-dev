@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.jobxhub.agent;
+package com.jobxhub.agent.service;
 
 import org.hyperic.sigar.*;
 import com.jobxhub.common.job.Monitor;
@@ -31,9 +31,9 @@ import java.util.*;
 /**
  * Created by benjobs on 16/4/7.
  */
-public class AgentMonitor {
+public class MonitorService {
 
-    private Logger logger = LoggerFactory.getLogger(AgentMonitor.class);
+    private Logger logger = LoggerFactory.getLogger(MonitorService.class);
 
     private Sigar sigar;
 

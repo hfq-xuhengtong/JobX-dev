@@ -19,25 +19,33 @@
  * under the License.
  */
 
-package com.jobxhub.agent;
+package com.jobxhub.agent.bootstrap;
 
 /**
  * Created by benjobs on 16/3/3.
  */
 
+import com.jobxhub.agent.service.AgentService;
+import com.jobxhub.agent.util.PropertiesLoader;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.ext.ExtensionLoader;
-import com.jobxhub.common.util.*;
 import com.jobxhub.common.logging.LoggerFactory;
-import com.jobxhub.rpc.ServerHandler;
+import com.jobxhub.common.util.*;
 import com.jobxhub.rpc.Server;
+import com.jobxhub.rpc.ServerHandler;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.InvocationTargetException;
-import java.net.*;
+import java.net.ConnectException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.AccessControlException;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -148,7 +156,7 @@ public class JobXAgent implements Serializable {
          */
         String portStr = SystemPropertyUtils.get(Constants.PARAM_JOBX_PORT_KEY);
         if (isEmpty(portStr)) {
-            portStr = AgentProperties.getProperty(Constants.PARAM_JOBX_PORT_KEY);
+            portStr = PropertiesLoader.getProperty(Constants.PARAM_JOBX_PORT_KEY);
         }
         if (isEmpty(portStr)) {
             throw new ExceptionInInitializerError("[JobX] agent port must be not null");
@@ -161,7 +169,7 @@ public class JobXAgent implements Serializable {
         //host
         this.host = SystemPropertyUtils.get(Constants.PARAM_JOBX_HOST_KEY);
         if (isEmpty(this.host)) {
-            this.host = AgentProperties.getProperty(Constants.PARAM_JOBX_HOST_KEY);
+            this.host = PropertiesLoader.getProperty(Constants.PARAM_JOBX_HOST_KEY);
         }
         if (notEmpty(this.host) && NetUtils.isValidAddress(this.host)) {
             throw new ExceptionInInitializerError("[JobX] agent host is valid");
@@ -188,7 +196,7 @@ public class JobXAgent implements Serializable {
                 this.password = IOUtils.readText(Constants.JOBX_PASSWORD_FILE, Constants.CHARSET_UTF8).trim();
             } else {
                 //read pass from conf
-                this.password = AgentProperties.getProperty(Constants.PARAM_JOBX_PASSWORD_KEY);
+                this.password = PropertiesLoader.getProperty(Constants.PARAM_JOBX_PASSWORD_KEY);
                 if (notEmpty(this.password)) {
                     this.password = DigestUtils.md5Hex(this.password);
                     Constants.JOBX_PASSWORD_FILE.delete();
@@ -208,7 +216,7 @@ public class JobXAgent implements Serializable {
             libPath += ";" + path;
         }
         SystemPropertyUtils.setProperty(Constants.PARAM_JAVA_LIBRARY_PATH_KEY, libPath);
-        String registryUrl = AgentProperties.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);
+        String registryUrl = PropertiesLoader.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);
         SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_REGISTRY_KEY,registryUrl);
     }
 
@@ -239,8 +247,8 @@ public class JobXAgent implements Serializable {
              * 会发起rpc连接,而这时的jobx-agent里的server可能还未启动,导致连接失败,agent自动注册也会失败....
              */
             Thread.sleep(5000);
-            AgentProcessor.register(this.host,this.port);
-            AgentProcessor.bindShutdownHook(this.host,this.port);
+            AgentService.register(this.host,this.port);
+            AgentService.bindShutdownHook(this.host,this.port);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -266,7 +274,7 @@ public class JobXAgent implements Serializable {
             return;
         }
 
-        Integer shutdownPort = Integer.valueOf(AgentProperties.getProperty(Constants.PARAM_JOBX_SHUTDOWN_KEY));
+        Integer shutdownPort = Integer.valueOf(PropertiesLoader.getProperty(Constants.PARAM_JOBX_SHUTDOWN_KEY));
 
         // Set up a server socket to wait on
         try {
@@ -364,7 +372,7 @@ public class JobXAgent implements Serializable {
             if (serverSocket != null) {
                 try {
                     //unzookeeper before stop...
-                    AgentProcessor.unRegister(this.host,this.port);
+                    AgentService.unRegister(this.host,this.port);
                     serverSocket.close();
                 } catch (IOException e) {
                     // Ignore
@@ -382,7 +390,7 @@ public class JobXAgent implements Serializable {
 
         String address = "localhost";
 
-        Integer shutdownPort = Integer.valueOf(AgentProperties.getProperty(Constants.PARAM_JOBX_SHUTDOWN_KEY));
+        Integer shutdownPort = Integer.valueOf(PropertiesLoader.getProperty(Constants.PARAM_JOBX_SHUTDOWN_KEY));
 
         // Stop the existing server
         try {

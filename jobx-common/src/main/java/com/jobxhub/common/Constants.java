@@ -109,6 +109,10 @@ public class Constants {
 
     public static final String PARAM_JOBX_REGISTRY_KEY = "jobx.registry";
 
+    public static final String PARAM_LOG2HBASE_KEY = "jobx.log2hbase";
+
+    public static final String PARAM_HBASE_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
+
     public static final String PARAM_JOBX_HOME_KEY = "jobx.home";
 
     public static final String PARAM_JOBX_PORT_KEY = "jobx.port";
@@ -187,6 +191,10 @@ public class Constants {
      */
     public static final File JOBX_KILL_SHELL = new File(JOBX_HOME + "/bin/kill.sh");
 
+    /**
+     * ExecuteUser lib
+     */
+    public static final File JOBX_EXECUTE_AS_USER_LIB =  new File(JOBX_HOME + "/lib/ExecuteUser");
 
     public enum CachedProvider implements Serializable {
 

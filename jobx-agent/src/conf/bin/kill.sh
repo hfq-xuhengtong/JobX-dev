@@ -22,7 +22,7 @@
 
 sleep 2;
 
-pid=$(ps -ef|grep $1.sh|grep -v grep|awk '{print $2}');
+pid=$(ps -ef|grep $1.sh|grep -v grep|awk '{print $2}'|sort|head -1);
 if [ ${pid}x == "x" ];then
   echo "pid is null"
   exit 1;

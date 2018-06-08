@@ -22,6 +22,7 @@
 package com.jobxhub.common.util;
 
 
+import com.jobxhub.common.Constants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -42,12 +43,45 @@ public abstract class CommandUtils implements Serializable {
 
     private static final long serialVersionUID = 6458428317155311192L;
 
+    public static File createLogFile(String logFileName) {
+        String dirPath = IOUtils.getTempFolderPath();
+        File dir = new File(dirPath);
+        if (!dir.exists()) dir.mkdirs();
+        String tempLogFilePath = dirPath + File.separator + logFileName + ".log";
+        File logFile = new File(tempLogFilePath);
+        return logFile;
+    }
+
+    public static File createAttachmentFile(String fileName, String content) {
+        String dirPath = Constants.JOBX_USER_HOME;
+        File dir = new File(dirPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        String tempShellFilePath = dirPath + File.separator + fileName + ".txt";
+        File attachmentFile = new File(tempShellFilePath);
+        try {
+            if (attachmentFile.exists()) {
+                attachmentFile.delete();
+            }
+            attachmentFile.createNewFile();
+            FileWriter fw = new FileWriter(attachmentFile);
+            BufferedWriter out = new BufferedWriter(fw);
+            out.write(content, 0, content.length() - 1);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return attachmentFile;
+        }
+    }
+
     public static File createShellFile(String command, String shellFileName) {
         String dirPath = IOUtils.getTempFolderPath();
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 
-        String tempShellFilePath = dirPath + File.separator + shellFileName + (CommonUtils.isWindows()?".bat":".sh");
+        String tempShellFilePath = dirPath + File.separator + shellFileName + (CommonUtils.isWindows() ? ".bat" : ".sh");
         File shellFile = new File(tempShellFilePath);
         try {
             if (!shellFile.exists()) {
@@ -68,7 +102,6 @@ public abstract class CommandUtils implements Serializable {
         }
     }
 
-
     public static String executeShell(File shellFile, String... args) {
         String info = null;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -80,8 +113,8 @@ public abstract class CommandUtils implements Serializable {
                     params += p + " ";
                 }
             }
-
-            CommandLine commandLine = CommandLine.parse("/bin/bash +x " + shellFile.getAbsolutePath() + params);
+            String line = "/bin/bash +x " + shellFile.getAbsolutePath() + params;
+            CommandLine commandLine = CommandLine.parse(line);
             DefaultExecutor exec = new DefaultExecutor();
             exec.setExitValues(null);
             PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);

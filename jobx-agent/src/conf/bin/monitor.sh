@@ -76,3 +76,6 @@ conf=$(echo  "{"hostname":\"$hostname\","os":\"$os\","kernel":\"$kernel\","machi
 echo  "{top:\"$top\",cpu:$cpu,disk:\"$disk\",mem:$mem,swap:$swap,load:\"$load\",conf:$conf}";
 
 exit 0;
+
+
+
