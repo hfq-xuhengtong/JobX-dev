@@ -22,18 +22,11 @@ public class AgentMessageWriter {
 
     private Logger logger = LoggerFactory.getLogger(AgentMessageWriter.class);
 
-    private static Configuration conf = HBaseConfiguration.create();
+    private Configuration conf = HBaseConfiguration.create();
 
     private String tableName = "jobx_log";
     private String family = "record";
     private String qualifier = "message";
-
-    static {
-        // conf.set("hbase.rootdir", "hdfs://CDH-HUAXIA-00005:8020/hbase");
-        // conf.set("hbase.zookeeper.quorum", "CDH-HUAXIA-00005:2181");\
-        // 设置Zookeeper,直接设置IP地址
-        conf.set("hbase.zookeeper.quorum", AgentProperties.getProperty(Constants.PARAM_HBASE_ZOOKEEPER_QUORUM));
-    }
 
     private static final long CHECK_DELAY = 500;  // 每500毫秒写入一次
 
@@ -45,6 +38,10 @@ public class AgentMessageWriter {
     private Integer msgLength = 0;
 
     public AgentMessageWriter(ByteArrayOutputStream outputStream, String pid) {
+        // conf.set("hbase.rootdir", "hdfs://CDH-HUAXIA-00005:8020/hbase");
+        // conf.set("hbase.zookeeper.quorum", "CDH-HUAXIA-00005:2181");\
+        // 设置Zookeeper,直接设置IP地址
+        conf.set("hbase.zookeeper.quorum", AgentProperties.getProperty(Constants.PARAM_HBASE_ZOOKEEPER_QUORUM));
         this.outputStream = outputStream;
         this.pid = pid;
         this.logFile = CommandUtils.createLogFile(pid);

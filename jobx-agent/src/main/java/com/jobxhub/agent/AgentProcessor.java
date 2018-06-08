@@ -53,11 +53,14 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
     private static ZookeeperRegistry registry = null;
 
+    private boolean log2hbase = false;
+
     public AgentProcessor() {
         String registryAddress = SystemPropertyUtils.get(Constants.PARAM_JOBX_REGISTRY_KEY);
         URL url = URL.valueOf(registryAddress);
         ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
         registry = new ZookeeperRegistry(url,transporter);
+        log2hbase = AgentProperties.getBoolean(Constants.PARAM_LOG2HBASE_KEY);
     }
 
     @Override
@@ -202,9 +205,12 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         Integer exitValue = successExit == null?0:successExit;
         File shellFile = CommandUtils.createShellFile(command, pid);
 
-        AgentMessageWriter agentMessageWriter = new AgentMessageWriter(outputStream, pid);
+        AgentMessageWriter agentMessageWriter = null;
 
         try {
+            if (log2hbase) {
+                new AgentMessageWriter(outputStream, pid);
+            }
             String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
             CommandLine commandLine = CommandLine.parse(runCmd + shellFile.getAbsoluteFile());
             final DefaultExecutor executor = new DefaultExecutor();
@@ -261,8 +267,9 @@ public class AgentProcessor implements ServerHandler, AgentJob {
             }
 
             //开始写入日志文件
-            agentMessageWriter.start();
-
+            if (log2hbase) {
+                agentMessageWriter.start();
+            }
             executor.execute(commandLine, resultHandler);
             resultHandler.waitFor();
         } catch (Exception e) {
@@ -288,10 +295,10 @@ public class AgentProcessor implements ServerHandler, AgentJob {
 
             //记录结束时间
             response.setEndTime(new Date().getTime());
-
             //结束写入日志文件
-            agentMessageWriter.stop();
-
+            if (log2hbase) {
+                agentMessageWriter.stop();
+            }
             exitValue = resultHandler.getExitValue();
             if (CommonUtils.notEmpty(outputStream.toByteArray())) {
                 try {

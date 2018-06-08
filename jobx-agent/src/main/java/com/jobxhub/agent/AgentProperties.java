@@ -56,6 +56,14 @@ public class AgentProperties {
         return properties.getProperty(name);
     }
 
+    public static boolean getBoolean(String name){
+        String val = getProperty(name);
+        if (val == null) {
+            return false;
+        }
+        return name.trim().equalsIgnoreCase("true");
+    }
+
     /**
      * Load properties.
      */

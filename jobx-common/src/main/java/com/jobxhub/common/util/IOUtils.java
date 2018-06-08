@@ -192,10 +192,6 @@ public abstract class IOUtils implements Serializable {
         return System.getProperty("java.io.tmpdir");
     }
 
-    public static final synchronized String getJobXHome() {
-        return System.getProperty("jobx.home");
-    }
-
     public static final synchronized String getProjectFolderPath() {
         String path = null;
         try {
