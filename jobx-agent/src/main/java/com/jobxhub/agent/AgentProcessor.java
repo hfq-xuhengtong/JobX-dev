@@ -37,8 +37,7 @@ import com.jobxhub.rpc.Client;
 import com.jobxhub.rpc.ServerHandler;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 import static com.jobxhub.common.util.CommonUtils.*;
@@ -202,6 +201,9 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         Integer successExit = request.getParams().getInt(Constants.PARAM_SUCCESSEXIT_KEY);
         Integer exitValue = successExit == null?0:successExit;
         File shellFile = CommandUtils.createShellFile(command, pid);
+
+        AgentMessageWriter agentMessageWriter = new AgentMessageWriter(outputStream, pid);
+
         try {
             String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
             CommandLine commandLine = CommandLine.parse(runCmd + shellFile.getAbsoluteFile());
@@ -257,6 +259,10 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                     }
                 };
             }
+
+            //开始写入日志文件
+            agentMessageWriter.start();
+
             executor.execute(commandLine, resultHandler);
             resultHandler.waitFor();
         } catch (Exception e) {
@@ -271,7 +277,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                     watchdog.stop();
                 }
                 if (logger.isInfoEnabled()) {
-                    logger.info("[JobX]:job has be killed!at pid :{}", request.getParams().get(Constants.PARAM_PID_KEY));
+                    logger.info("[JobX]:job has been killed! at pid :{}", request.getParams().get(Constants.PARAM_PID_KEY));
                 }
             } else {
                 if (logger.isInfoEnabled()) {
@@ -279,6 +285,13 @@ public class AgentProcessor implements ServerHandler, AgentJob {
                 }
             }
         } finally {
+
+            //记录结束时间
+            response.setEndTime(new Date().getTime());
+
+            //结束写入日志文件
+            agentMessageWriter.stop();
+
             exitValue = resultHandler.getExitValue();
             if (CommonUtils.notEmpty(outputStream.toByteArray())) {
                 try {
@@ -350,7 +363,7 @@ public class AgentProcessor implements ServerHandler, AgentJob {
         String text = CommandUtils.executeShell(Constants.JOBX_KILL_SHELL, pid);
         response.setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setMessage(text).end();
         if (logger.isInfoEnabled()) {
-            logger.info("[JobX]:kill result:{}" + response);
+            logger.info("[JobX]:kill result:{}", text);
         }
         return response;
     }

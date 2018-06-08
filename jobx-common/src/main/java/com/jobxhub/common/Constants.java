@@ -109,6 +109,8 @@ public class Constants {
 
     public static final String PARAM_JOBX_REGISTRY_KEY = "jobx.registry";
 
+    public static final String PARAM_HBASE_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
+
     public static final String PARAM_JOBX_HOME_KEY = "jobx.home";
 
     public static final String PARAM_JOBX_PORT_KEY = "jobx.port";
