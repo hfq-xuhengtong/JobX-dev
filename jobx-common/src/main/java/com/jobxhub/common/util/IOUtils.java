@@ -390,7 +390,6 @@ public abstract class IOUtils implements Serializable {
         if (file instanceof String) {
             file = new File((String) file);
         }
-
         return ((File) file).exists();
     }
 

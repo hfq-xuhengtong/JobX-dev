@@ -19,6 +19,10 @@
             <outputDirectory>lib</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>src/conf/native</directory>
+            <outputDirectory>native</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>src/conf/conf</directory>
             <outputDirectory>conf</outputDirectory>
         </fileSet>

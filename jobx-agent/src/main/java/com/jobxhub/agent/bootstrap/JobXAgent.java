@@ -209,11 +209,10 @@ public class JobXAgent implements Serializable {
 
         SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY,this.password);
 
-        //init sigar
+        //init native lib....
         String libPath = System.getProperty("java.library.path");
-        String path = Constants.JOBX_HOME.concat("/lib");
-        if (!libPath.contains(path)) {
-            libPath += ";" + path;
+        if (!libPath.contains(Constants.JOBX_NATIVE_PATH)) {
+            libPath += ";" + Constants.JOBX_NATIVE_PATH;
         }
         SystemPropertyUtils.setProperty(Constants.PARAM_JAVA_LIBRARY_PATH_KEY, libPath);
         String registryUrl = PropertiesLoader.getProperty(Constants.PARAM_JOBX_REGISTRY_KEY);

@@ -91,6 +91,8 @@ public class Constants {
 
     public static final String PARAM_EXECTYPE_KEY = "execType";
 
+    public static final String PARAM_RUNAS_KEY = "runAsUser";
+
     public static final String PARAM_BACKUP_KEY = "backup";
 
     public static final String PARAM_SUCCESSEXIT_KEY = "successExit";
@@ -164,7 +166,11 @@ public class Constants {
 
     public static final String JOBX_CACHED = PropertyPlaceholder.get(Constants.PARAM_CACHED_NAME_KEY);
 
-    public static final String JOBX_HOME = SystemPropertyUtils.get(PARAM_JOBX_HOME_KEY);
+    public static final String JOBX_HOME = SystemPropertyUtils.get(PARAM_JOBX_HOME_KEY,"");
+
+    public static final String JOBX_NATIVE_PATH = JOBX_HOME + "/native";
+
+    public static final String JOBX_LOG_PATH = JOBX_HOME + "/logs";
 
     public static final String JOBX_USER_HOME = SystemPropertyUtils.get("user.home") + File.separator + ".jobx";
 

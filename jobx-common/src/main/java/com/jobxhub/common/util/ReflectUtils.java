@@ -977,7 +977,11 @@ public final class ReflectUtils {
     public static Field getField(Class<?> clazz, String name) throws NoSuchFieldException {
         for (Class<?> cls = checkNotNull(clazz, "class"); cls != null; cls = cls.getSuperclass()) {
             try {
-                return cls.getDeclaredField(name);
+                Field field = cls.getDeclaredField(name);
+                if (field!=null) {
+                    field.setAccessible(true);
+                }
+                return field;
             } catch (Throwable ignored) {
             }
         }

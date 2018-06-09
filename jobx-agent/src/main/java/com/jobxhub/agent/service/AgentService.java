@@ -21,6 +21,7 @@
 package com.jobxhub.agent.service;
 
 import com.alibaba.fastjson.JSON;
+import com.jobxhub.agent.process.JobXProcess;
 import com.jobxhub.agent.util.PropertiesLoader;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.api.AgentJob;
@@ -37,11 +38,9 @@ import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
 import com.jobxhub.rpc.Client;
 import com.jobxhub.rpc.ServerHandler;
-import org.apache.commons.exec.*;
 import org.hyperic.sigar.SigarException;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.*;
 
@@ -55,6 +54,8 @@ public class AgentService implements ServerHandler, AgentJob {
     private Client client = null;
 
     private MonitorService monitorService = new MonitorService();
+
+    private Map<String,JobXProcess> processMap = new HashMap<String, JobXProcess>(0);
 
     private static ZookeeperRegistry registry = null;
 
@@ -186,162 +187,33 @@ public class AgentService implements ServerHandler, AgentJob {
         String command = request.getParams().getString(Constants.PARAM_COMMAND_KEY);
 
         String pid = request.getParams().getString(Constants.PARAM_PID_KEY);
-        //以分钟为单位
-        Integer timeout = request.getParams().getInt(Constants.PARAM_TIMEOUT_KEY);
-        timeout = timeout == null?0:timeout;
 
-        boolean timeoutFlag = timeout > 0;
+        Integer timeout = request.getTimeOut();
+
+        String runAsUser = request.getParams().getString(Constants.PARAM_RUNAS_KEY);
 
         if (logger.isInfoEnabled()) {
             logger.info("[JobX]:execute:{},pid:{}", command, pid);
         }
 
-        ByteArrayOutputStream outputStream= new ByteArrayOutputStream();
+        Response response = Response.response(request);
 
-        final Response response = Response.response(request);
+        JobXProcess jobXProcess = new JobXProcess(command,timeout,pid,runAsUser);
 
-        final ExecuteWatchdog watchdog = new ExecuteWatchdog(Integer.MAX_VALUE);
-
-        final Timer timer = new Timer();
-
-        DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
-
-        Integer successExit = request.getParams().getInt(Constants.PARAM_SUCCESSEXIT_KEY);
-        Integer exitValue = successExit == null?0:successExit;
-        File shellFile = CommandUtils.createShellFile(command, pid);
-
-        MessageService messageService = null;
+        processMap.put(pid,jobXProcess);
 
         try {
-            if (log2hbase) {
-                new MessageService(outputStream, pid);
-            }
-            String runCmd = CommonUtils.isWindows()?"":"/bin/bash +x ";
-            CommandLine commandLine = CommandLine.parse(runCmd + shellFile.getAbsoluteFile());
-            final DefaultExecutor executor = new DefaultExecutor();
-            ExecuteStreamHandler stream = new PumpStreamHandler(outputStream, outputStream);
-            executor.setStreamHandler(stream);
-            response.setStartTime(new Date().getTime());
-            //成功执行完毕时退出值为0,shell标准的退出
-            executor.setExitValue(exitValue);
-
-            if (timeoutFlag) {
-                //设置监控狗...
-                executor.setWatchdog(watchdog);
-                //监控超时的计时器
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        //超时,kill...
-                        if (watchdog.isWatching()) {
-                            /**
-                             * 调用watchdog的destroyProcess无法真正kill进程...
-                             * watchdog.destroyProcess();
-                             */
-                            timer.cancel();
-                            watchdog.stop();
-                            //call  kill...
-                            request.setAction(Action.KILL);
-                            try {
-                                if (!CommonUtils.isWindows()) {
-                                    kill(request);
-                                }
-                                response.setExitCode(Constants.StatusCode.TIME_OUT.getValue());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }
-                }, timeout * 60 * 1000);
-
-                //正常执行完毕则清除计时器
-                resultHandler = new DefaultExecuteResultHandler() {
-                    @Override
-                    public void onProcessComplete(int exitValue) {
-                        super.onProcessComplete(exitValue);
-                        timer.cancel();
-                    }
-
-                    @Override
-                    public void onProcessFailed(ExecuteException e) {
-                        super.onProcessFailed(e);
-                        timer.cancel();
-                    }
-                };
-            }
-
-            //开始写入日志文件
-            if (log2hbase) {
-                messageService.start();
-            }
-            executor.execute(commandLine, resultHandler);
-            resultHandler.waitFor();
-        } catch (Exception e) {
-            if (e instanceof ExecuteException) {
-                exitValue = ((ExecuteException) e).getExitValue();
-            } else {
-                exitValue = Constants.StatusCode.ERROR_EXEC.getValue();
-            }
-            if (Constants.StatusCode.KILL.getValue().equals(exitValue)) {
-                if (timeoutFlag) {
-                    timer.cancel();
-                    watchdog.stop();
-                }
-                if (logger.isInfoEnabled()) {
-                    logger.info("[JobX]:job has been killed! at pid :{}", request.getParams().get(Constants.PARAM_PID_KEY));
-                }
-            } else {
-                if (logger.isInfoEnabled()) {
-                    logger.info("[JobX]:job execute error:{}", e.getCause().getMessage());
-                }
-            }
-        } finally {
-
-            //记录结束时间
-            response.setEndTime(new Date().getTime());
-            //结束写入日志文件
-            if (log2hbase) {
-                messageService.stop();
-            }
-            exitValue = resultHandler.getExitValue();
-            if (CommonUtils.notEmpty(outputStream.toByteArray())) {
-                try {
-                    outputStream.flush();
-                    String text = outputStream.toString();
-                    if (notEmpty(text)) {
-                        response.setMessage(text);
-                    }
-                    outputStream.close();
-                } catch (Exception e) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("[JobX]:error:{}", e);
-                    }
-                }
-            }
-
-            if (Constants.StatusCode.TIME_OUT.getValue() == response.getExitCode()) {
-                response.setSuccess(false).end();
-            } else {
-                if (CommonUtils.isEmpty(successExit)) {
-                    response.setExitCode(exitValue).setSuccess(exitValue == Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
-                } else {
-                    response.setExitCode(exitValue).setSuccess(successExit.equals(exitValue)).end();
-                }
-            }
-
+            int exitCode = jobXProcess.start();
+            response.setExitCode(exitCode);
+        }catch (Exception e) {
+            response.setExitCode(-1);
+        }finally {
+            String message = jobXProcess.getLog();
+            jobXProcess.deleteLog();
+            response.setMessage(message);
+            response.end();
+            processMap.remove(pid);
         }
-
-        if (CommonUtils.notEmpty(shellFile)) {
-            shellFile.delete();
-        }
-
-        if (logger.isInfoEnabled()) {
-            logger.info("[JobX]:execute result:{}", response.toString());
-        }
-
-        watchdog.stop();
-
         return response;
     }
 
@@ -372,10 +244,18 @@ public class AgentService implements ServerHandler, AgentJob {
             logger.info("[JobX]:kill pid:{}", pid);
         }
         Response response = Response.response(request);
-        String text = CommandUtils.executeShell(Constants.JOBX_KILL_SHELL, pid);
-        response.setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).setMessage(text).end();
-        if (logger.isInfoEnabled()) {
-            logger.info("[JobX]:kill result:{}", text);
+        JobXProcess jobXProcess = processMap.get(pid);
+        if (jobXProcess!=null) {
+            jobXProcess.hardKill();
+            response.setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
+            if (logger.isInfoEnabled()) {
+                logger.info("[JobX]:kill successful");
+            }
+        }else {
+            response.setExitCode(Constants.StatusCode.ERROR_EXIT.getValue()).end();
+            if (logger.isInfoEnabled()) {
+                logger.info("[JobX]:kill error,can not found process");
+            }
         }
         return response;
     }

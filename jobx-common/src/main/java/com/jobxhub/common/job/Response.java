@@ -36,6 +36,8 @@
 package com.jobxhub.common.job;
 
 
+import com.jobxhub.common.Constants;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -86,6 +88,7 @@ public class Response implements Serializable {
 
     public Response setExitCode(int exitCode) {
         this.exitCode = exitCode;
+        setSuccess(Constants.StatusCode.SUCCESS_EXIT.getValue() == exitCode);
         return this;
     }
 
