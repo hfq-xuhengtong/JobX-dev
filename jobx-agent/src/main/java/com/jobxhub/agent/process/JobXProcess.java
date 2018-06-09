@@ -114,8 +114,8 @@ public class JobXProcess {
             this.completeLatch.countDown();
 
             // try to wait for everything to get logged out before exiting
-            outputLogger.awaitCompletion(5000);
-            errorLogger.awaitCompletion(5000);
+            outputLogger.awaitCompletion(1000);
+            errorLogger.awaitCompletion(1000);
 
             if (exitCode != 0) {
                 String output =

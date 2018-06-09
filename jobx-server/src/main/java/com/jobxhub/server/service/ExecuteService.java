@@ -201,10 +201,12 @@ public class ExecuteService {
         }else {
             record.setSuccess(ResultStatus.FAILED.getStatus());
         }
-        if (StatusCode.KILL.getValue().equals(response.getExitCode())) {
+        int exitCode = response.getExitCode();
+        if (exitCode == StatusCode.KILL.getValue()
+                ||exitCode == StatusCode.OTHER_KILL.getValue()) {
             record.setStatus(RunStatus.STOPED.getStatus());
             record.setSuccess(ResultStatus.KILLED.getStatus());
-        } else if (StatusCode.TIME_OUT.getValue().equals(response.getExitCode())) {
+        } else if (exitCode == StatusCode.TIME_OUT.getValue()) {
             record.setStatus(RunStatus.STOPED.getStatus());
             record.setSuccess(ResultStatus.TIMEOUT.getStatus());
         } else {
@@ -475,7 +477,6 @@ public class ExecuteService {
             this.job = job;
             this.record = record;
             record.setStatus(RunStatus.STOPPING.getStatus());
-            record.setSuccess(ResultStatus.KILLED.getStatus());
             recordService.merge(record);
         }
 
@@ -490,7 +491,6 @@ public class ExecuteService {
         @Override
         public void caught(Throwable err) {
             record.setStatus(RunStatus.STOPED.getStatus());
-            record.setEndTime(new Date());
             recordService.merge(record);
             printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", job, record.getPid());
         }
