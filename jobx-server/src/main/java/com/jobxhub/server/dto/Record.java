@@ -26,7 +26,6 @@ package com.jobxhub.server.dto;
 import com.google.common.base.Function;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
-import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.server.domain.RecordBean;
 import org.springframework.beans.BeanUtils;
 
@@ -89,11 +88,11 @@ public class Record implements Serializable {
         this.setAgentId(job.getAgentId());
         this.setUserId(job.getUserId());
         this.setCommand(job.getCommand());//执行的命令
-        this.setStartTime(new Date());//开始执行的时间
         this.setSuccess(Constants.ResultStatus.SUCCESSFUL.getStatus());
         this.setStatus(Constants.RunStatus.RUNNING.getStatus());//任务还未完成
         this.setPid(CommonUtils.uuid());
         this.setJobType(jobType.getCode());
+        this.start();
     }
 
     public Long getRecordId() {
@@ -156,12 +155,20 @@ public class Record implements Serializable {
         return startTime;
     }
 
+    public void start(){
+        setStartTime(new Date());
+    }
+
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
     public Date getEndTime() {
         return endTime;
+    }
+
+    public void end(){
+        setEndTime(new Date());
     }
 
     public void setEndTime(Date endTime) {
