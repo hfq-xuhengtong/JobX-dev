@@ -195,6 +195,11 @@ public class ExecuteService {
     private void responseToRecord(Response response, Record record) {
         record.setReturnCode(response.getExitCode());
         record.setMessage(response.getMessage());
+        if (response.isSuccess()) {
+            record.setSuccess(ResultStatus.SUCCESSFUL.getStatus());
+        }else {
+            record.setSuccess(ResultStatus.FAILED.getStatus());
+        }
         int exitCode = response.getExitCode();
         if (exitCode == StatusCode.KILL.getValue()
                 ||exitCode == StatusCode.OTHER_KILL.getValue()) {
@@ -205,11 +210,6 @@ public class ExecuteService {
             record.setSuccess(ResultStatus.TIMEOUT.getStatus());
         } else {
             record.setStatus(RunStatus.DONE.getStatus());
-        }
-        if (response.isSuccess()) {
-            record.setSuccess(ResultStatus.SUCCESSFUL.getStatus());
-        }else {
-            record.setSuccess(ResultStatus.FAILED.getStatus());
         }
         record.end();
     }
