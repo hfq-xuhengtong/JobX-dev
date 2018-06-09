@@ -73,6 +73,9 @@ public class Job implements Serializable {
     private User user;
     private String operateUname;
 
+
+    private String inputParam;//手动触发时的参数
+
     public Job() {
 
     }
@@ -317,6 +320,14 @@ public class Job implements Serializable {
 
     public String getOperateUname() {
         return operateUname;
+    }
+
+    public String getInputParam() {
+        return inputParam;
+    }
+
+    public void setInputParam(String inputParam) {
+        this.inputParam = inputParam;
     }
 
     public void setOperateUname(String operateUname) {

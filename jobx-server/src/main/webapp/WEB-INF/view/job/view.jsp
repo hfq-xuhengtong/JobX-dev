@@ -312,15 +312,17 @@
                     swal({
                         title: "",
                         text: data.status?"该作业已经在运作中,您确定要再次执行吗?":"您确定要执行这个作业吗",
-                        type: "warning",
+                        type: "input",
                         showCancelButton: true,
                         closeOnConfirm: false,
-                        confirmButtonText:data.status?"再次执行":"执行"
-                    }, function () {
+                        confirmButtonText:data.status?"再次执行":"执行",
+                        inputPlaceholder: "请输入执行参数,默认为当前时间"
+                    }, function (inputParam) {
+                        if (inputParam === false) return false;
                         ajax({
                             type: "post",
                             url: "${contextPath}/job/execute.do",
-                            data: {"id": id}
+                            data: {"id": id,"param":inputParam}
                         },function (data) {
                             if (data.status) {
                                 alertMsg("该作业已启动,正在执行中.");
