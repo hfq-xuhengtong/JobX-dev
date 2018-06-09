@@ -25,8 +25,8 @@ import com.jobxhub.agent.util.ProcessLogger;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.logging.LoggerFactory;
 import com.jobxhub.common.util.CommonUtils;
+import com.jobxhub.common.util.IOUtils;
 import com.jobxhub.common.util.ReflectUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.*;
 
 import java.io.File;
@@ -37,9 +37,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
  * @author benjobs
- *
  */
 
 public class JobXProcess {
@@ -52,21 +50,20 @@ public class JobXProcess {
 
     public static String KILL_COMMAND = "kill";
 
-    private final List<String> cmd;
+    private final List<String> command;
     private final int timeout;
     private final CountDownLatch startupLatch;
     private final CountDownLatch completeLatch;
     private volatile int processId;
     private File logFile;
     private volatile Process process;
+    private String runAsUser;
 
-    private String runAsUser = null;
-
-    public JobXProcess(String cmd, int timeout,String pid,String runAsUser) {
-        this.cmd = partitionCommandLine(cmd);
-        this.workingDir = com.jobxhub.common.util.IOUtils.getTempFolderPath();
+    public JobXProcess(String command, int timeout, String pid, String runAsUser) {
+        this.command = partitionCommandLine(command);
+        this.workingDir = IOUtils.getTmpdir();
         this.timeout = timeout;
-        this.logFile = new File(Constants.JOBX_LOG_PATH + "/" + pid + ".log");
+        this.logFile = new File(Constants.JOBX_LOG_PATH + "/." + pid + ".log");
         this.processId = -1;
         this.processLogger = this.getLogger(pid);
         this.startupLatch = new CountDownLatch(1);
@@ -83,7 +80,7 @@ public class JobXProcess {
             throw new IllegalStateException("[JobX]The process can only be used once.");
         }
 
-        ProcessBuilder builder = new ProcessBuilder(this.cmd);
+        ProcessBuilder builder = new ProcessBuilder(this.command);
         builder.directory(new File(this.workingDir));
         builder.redirectErrorStream(true);
 
@@ -100,8 +97,8 @@ public class JobXProcess {
 
             this.startupLatch.countDown();
 
-            ProcessLogger outputLogger = ProcessLogger.getLoger(this.process.getInputStream(),this.processLogger, Level.INFO);
-            ProcessLogger errorLogger = ProcessLogger.getLoger(this.process.getErrorStream(),this.processLogger, Level.ERROR);
+            ProcessLogger outputLogger = ProcessLogger.getLoger(this.process.getInputStream(), this.processLogger, Level.INFO);
+            ProcessLogger errorLogger = ProcessLogger.getLoger(this.process.getErrorStream(), this.processLogger, Level.ERROR);
             outputLogger.start();
             errorLogger.start();
 
@@ -118,25 +115,25 @@ public class JobXProcess {
             errorLogger.awaitCompletion(1000);
 
             if (exitCode != 0) {
-                String output =
-                        new StringBuilder().append("Stdout:\n")
+                String output = new StringBuilder().append("Stdout:\n")
                                 .append(outputLogger.getRecentLog()).append("\n\n")
                                 .append("Stderr:\n").append(errorLogger.getRecentLog())
                                 .append("\n").toString();
                 throw new ProcessException(exitCode, output);
             }
-
         } finally {
             IOUtils.closeQuietly(this.process.getInputStream());
             IOUtils.closeQuietly(this.process.getOutputStream());
             IOUtils.closeQuietly(this.process.getErrorStream());
             this.process.destroy();
+            //最后以特殊不了见的字符作为log和exitCode+结束时间的分隔符.
+            this.processLogger.info(IOUtils.FIELD_TERMINATED_BY + exitCode + IOUtils.TAB + new Date().getTime());
             return exitCode;
         }
     }
 
     private void watchTimeOut() {
-        if (this.timeout>0) {
+        if (this.timeout > 0) {
             final Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -151,12 +148,17 @@ public class JobXProcess {
 
     /**
      * read message from log
+     *
      * @return String
      */
-    public String getLog() {
-        String log = com.jobxhub.common.util.IOUtils.readText(this.logFile, Constants.CHARSET_UTF8);
-        return log;
+    public String getLogMessage() {
+        String log = IOUtils.readText(this.logFile, Constants.CHARSET_UTF8);
+        if (CommonUtils.notEmpty(log)) {
+            return log.split(IOUtils.FIELD_TERMINATED_BY)[0];
+        }
+        return null;
     }
+
 
     public void deleteLog() {
         if (this.logFile.exists()) {
@@ -201,7 +203,7 @@ public class JobXProcess {
      * @param unit The time unit
      * @return true iff this soft kill kills the process in the given wait time.
      */
-    public boolean softKill(long time,TimeUnit unit)
+    public boolean softKill(long time, TimeUnit unit)
             throws InterruptedException {
         checkStarted();
         if (this.processId != 0 && isStarted()) {
@@ -257,7 +259,7 @@ public class JobXProcess {
     private int processId(Process process) {
         int processId = 0;
         try {
-            Field field = ReflectUtils.getField(process.getClass(),"pid");
+            Field field = ReflectUtils.getField(process.getClass(), "pid");
             processId = field.getInt(process);
         } catch (Throwable e) {
             e.printStackTrace();
@@ -316,7 +318,7 @@ public class JobXProcess {
         return logger;
     }
 
-    public static List<String> partitionCommandLine(String command) {
+    private List<String> partitionCommandLine(String command) {
         ArrayList<String> commands = new ArrayList<>();
         int index = 0;
 

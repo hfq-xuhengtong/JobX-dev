@@ -159,4 +159,35 @@ public class RecordService {
        //todo
         return null;
     }
+
+    public void doLostLog(String pid, String message, Integer exitCode, Long entTime) {
+        RecordBean recordBean =  recordDao.getByPid(pid);
+        if (recordBean!=null) {
+            recordBean.setEndTime(new Date(entTime));
+            recordBean.setReturnCode(exitCode);
+            if (exitCode == Constants.StatusCode.SUCCESS_EXIT.getValue()) {
+                recordBean.setSuccess(Constants.ResultStatus.SUCCESSFUL.getStatus());
+            }else {
+                recordBean.setSuccess(Constants.ResultStatus.FAILED.getStatus());
+
+            }
+            if (exitCode == Constants.StatusCode.KILL.getValue()
+                    ||exitCode == Constants.StatusCode.OTHER_KILL.getValue()) {
+                recordBean.setStatus(Constants.RunStatus.STOPED.getStatus());
+                recordBean.setSuccess(Constants.ResultStatus.KILLED.getStatus());
+            } else if (exitCode == Constants.StatusCode.TIME_OUT.getValue()) {
+                recordBean.setStatus(Constants.RunStatus.STOPED.getStatus());
+                recordBean.setSuccess(Constants.ResultStatus.TIMEOUT.getStatus());
+            } else {
+                recordBean.setStatus(Constants.RunStatus.DONE.getStatus());
+            }
+            recordDao.update(recordBean);
+            RecordMessageBean messageBean = new RecordMessageBean();
+            messageBean.setRecordId(recordBean.getRecordId());
+            messageBean.setMessage(message);
+            messageBean.setStartTime(recordBean.getStartTime());
+            recordDao.updateMessage(messageBean);
+        }
+
+    }
 }

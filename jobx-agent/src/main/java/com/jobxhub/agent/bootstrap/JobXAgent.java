@@ -35,10 +35,7 @@ import com.jobxhub.rpc.Server;
 import com.jobxhub.rpc.ServerHandler;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.InvocationTargetException;
@@ -151,6 +148,7 @@ public class JobXAgent implements Serializable {
      * @throws Exception
      */
     private void init() {
+
         /**
          * port
          */
@@ -205,6 +203,11 @@ public class JobXAgent implements Serializable {
                     throw new ExceptionInInitializerError("[JobX] agent password cat not be null");
                 }
             }
+        }
+
+        if (!IOUtils.fileExists(Constants.JOBX_LOG_PATH)) {
+            logger.warn("[JobX] logs folder is not found!make...");
+            new File(Constants.JOBX_LOG_PATH).mkdir();
         }
 
         SystemPropertyUtils.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY,this.password);

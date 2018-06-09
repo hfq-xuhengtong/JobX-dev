@@ -38,7 +38,7 @@ public class Request implements Serializable  {
     private String password;
     private Long proxyId;
     private RequestFile uploadFile;
-    private HashMap<String, Object> params;
+    private HashMap<String, Object> params = new HashMap<String, Object>(0);
 
     public Request() {
 

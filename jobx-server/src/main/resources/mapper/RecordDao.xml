@@ -168,10 +168,10 @@
         where r.record_id = #{recordId}
     </select>
 
-    <select id="getMessage" resultType="com.jobxhub.server.domain.RecordMessageBean">
-        select record_id,message
-        from t_record_message
-        where record_id = #{recordId}
+    <select id="getByPid" parameterType="java.lang.Long" resultMap="RecordBean">
+        select <include refid="query_Record"/>
+        from  t_record as r
+        where r.pid = #{pid}
     </select>
 
     <select id="getReportChart" parameterType="java.util.Map" resultType="com.jobxhub.server.dto.Chart">
@@ -298,15 +298,7 @@
         );
     </insert>
 
-    <insert id="saveMessage" parameterType="com.jobxhub.server.domain.RecordMessageBean">
-        INSERT INTO t_record_message (
-            record_id,
-            message
-        ) SELECT
-              #{recordId},
-              #{message}
-        ON DUPLICATE KEY UPDATE message = values(message)
-    </insert>
+
 
     <update id="update" parameterType="com.jobxhub.server.domain.RecordBean">
         update t_record
@@ -321,6 +313,35 @@
     <delete id="delete">
        delete from  t_record where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}
     </delete>
+
+    <select id="getMessage" resultType="com.jobxhub.server.domain.RecordMessageBean">
+        select record_id,message
+        from t_record_message
+        where record_id = #{recordId}
+    </select>
+
+    <insert id="saveMessage" parameterType="com.jobxhub.server.domain.RecordMessageBean">
+        INSERT INTO t_record_message (
+            record_id,
+            message
+        ) SELECT
+              #{recordId},
+              #{message}
+        ON DUPLICATE KEY UPDATE message = values(message)
+    </insert>
+
+    <update id="updateMessage" parameterType="com.jobxhub.server.domain.RecordBean">
+        replace into t_record_message(
+            record_id,
+            message,
+            start_time
+        )
+        values (
+            #{recordId},
+            #{message},
+            #{startTime}
+        )
+    </update>
 
     <delete id="deleteMessage">
        delete from t_record_message where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}

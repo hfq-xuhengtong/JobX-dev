@@ -39,6 +39,7 @@ package com.jobxhub.common.job;
 import com.jobxhub.common.Constants;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,7 +52,7 @@ public class Response implements Serializable {
      * @see Action
      */
     private Action action;
-    private Map<String, String> result;
+    private Map<String, String> result = new HashMap<String, String>(0);
     private int exitCode;
     private boolean success;
     private long startTime;

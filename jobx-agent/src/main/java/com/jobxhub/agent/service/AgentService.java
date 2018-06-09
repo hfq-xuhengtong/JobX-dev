@@ -33,6 +33,7 @@ import com.jobxhub.common.job.Response;
 import com.jobxhub.common.logging.LoggerFactory;
 import com.jobxhub.common.util.*;
 import com.jobxhub.common.util.collection.HashMap;
+import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.registry.URL;
 import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
@@ -57,6 +58,8 @@ public class AgentService implements ServerHandler, AgentJob {
 
     private Map<String,JobXProcess> processMap = new HashMap<String, JobXProcess>(0);
 
+    private Map<String,String> lostResponse = new HashMap<String,String>(0);
+
     private static ZookeeperRegistry registry = null;
 
     private boolean log2hbase;
@@ -67,6 +70,33 @@ public class AgentService implements ServerHandler, AgentJob {
         ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
         registry = new ZookeeperRegistry(url,transporter);
         log2hbase = PropertiesLoader.getBoolean(Constants.PARAM_LOG2HBASE_KEY);
+        //read lost log...
+        File filePath = new File(Constants.JOBX_LOG_PATH);
+        for (File file:filePath.listFiles()) {
+            if (file.getName().matches("^\\.[a-z0-9]{32}\\.log$")) {
+                String pid = file.getName().replaceAll("^\\.|\\.log$","");
+                String log = IOUtils.readText(file, Constants.CHARSET_UTF8);
+                if (CommonUtils.notEmpty(log)) {
+                    lostResponse.put(pid,log);
+                }
+                file.delete();
+                /**
+                Response response = new Response();
+                if (CommonUtils.notEmpty(log)) {
+                    String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
+                    String message = logInfo[0];
+                    if (logInfo.length == 2) {
+                        int exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
+                        long entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
+                        response.setExitCode(exitCode);
+                        response.setEndTime(entTime);
+                    }
+                    response.setMessage(message);
+                    response.setResult(ParamsMap.map().set(Constants.PARAM_PID_KEY,pid));
+                }
+               **/
+            }
+        }
     }
 
     @Override
@@ -114,16 +144,29 @@ public class AgentService implements ServerHandler, AgentJob {
         return null;
     }
 
+    /**
+     * ping的时候将失联的信息返回server...
+     * @param request
+     * @return
+     */
     @Override
     public Response ping(Request request) {
-        Map<String, String> platform = new HashMap<String, String>(0);
+        Map<String, String> result = new HashMap<String, String>(0);
         //agent Platform...
         if (CommonUtils.isWindows()) {
-            platform.put(Constants.PARAM_OS_KEY, Constants.Platform.Windows.toString());
+            result.put(Constants.PARAM_OS_KEY, Constants.Platform.Windows.toString());
         } else {
-            platform.put(Constants.PARAM_OS_KEY, Constants.Platform.Unix.toString());
+            result.put(Constants.PARAM_OS_KEY, Constants.Platform.Unix.toString());
         }
-        return Response.response(request).setResult(platform).setSuccess(true).setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue()).end();
+        if (!lostResponse.isEmpty()) {
+            result.putAll(lostResponse);
+            lostResponse.clear();
+        }
+        return Response.response(request)
+                .setResult(result)
+                .setSuccess(true)
+                .setExitCode(Constants.StatusCode.SUCCESS_EXIT.getValue())
+                .end();
     }
 
     @Override
@@ -208,7 +251,7 @@ public class AgentService implements ServerHandler, AgentJob {
         }catch (Exception e) {
             response.setExitCode(-1);
         }finally {
-            String message = jobXProcess.getLog();
+            String message = jobXProcess.getLogMessage();
             jobXProcess.deleteLog();
             response.setMessage(message);
             response.end();
