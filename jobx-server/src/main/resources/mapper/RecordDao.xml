@@ -330,7 +330,7 @@
         ON DUPLICATE KEY UPDATE message = values(message)
     </insert>
 
-    <update id="updateMessage" parameterType="com.jobxhub.server.domain.RecordBean">
+    <update id="updateMessage" parameterType="com.jobxhub.server.domain.RecordMessageBean">
         replace into t_record_message(
             record_id,
             message,
