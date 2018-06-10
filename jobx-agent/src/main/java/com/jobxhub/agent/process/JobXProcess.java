@@ -60,7 +60,6 @@ public class JobXProcess {
     private String runAsUser;
 
     public JobXProcess(String command, int timeout, String pid, String runAsUser) {
-        this.command = getCommandLine(command);
         this.workingDir = IOUtils.getTmpdir();
         this.timeout = timeout;
         this.logFile = new File(Constants.JOBX_LOG_PATH + "/." + pid + ".log");
@@ -69,6 +68,12 @@ public class JobXProcess {
         this.startupLatch = new CountDownLatch(1);
         this.completeLatch = new CountDownLatch(1);
         this.runAsUser = runAsUser;
+        if (isRunAsUser()) {
+            ExecuteUser executeUser = new ExecuteUser();
+            this.command = executeUser.buildCommand(runAsUser,getCommandLine(command));
+        }else {
+            this.command = getCommandLine(command);
+        }
     }
 
     /**
@@ -370,13 +375,6 @@ public class JobXProcess {
             commands.add(arg);
         }
 
-        List<String> cmdList = new ArrayList<String>(0);
-        if (isRunAsUser()) {
-            cmdList.add(Constants.JOBX_EXECUTE_AS_USER_LIB_PATH);
-            cmdList.add(this.runAsUser);
-        }
-
-        Collections.addAll(cmdList,commands.toArray(new String[commands.size()]));
-        return cmdList;
+        return Arrays.asList(commands.toArray(new String[commands.size()]));
     }
 }
