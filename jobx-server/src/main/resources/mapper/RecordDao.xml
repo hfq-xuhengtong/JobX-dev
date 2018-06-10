@@ -323,25 +323,14 @@
     <insert id="saveMessage" parameterType="com.jobxhub.server.domain.RecordMessageBean">
         INSERT INTO t_record_message (
             record_id,
-            message
-        ) SELECT
-              #{recordId},
-              #{message}
-        ON DUPLICATE KEY UPDATE message = values(message)
-    </insert>
-
-    <update id="updateMessage" parameterType="com.jobxhub.server.domain.RecordMessageBean">
-        replace into t_record_message(
-            record_id,
             message,
             start_time
-        )
-        values (
-            #{recordId},
-            #{message},
-            #{startTime}
-        )
-    </update>
+        ) SELECT
+              #{recordId},
+              #{message},
+              #{startTime}
+        ON DUPLICATE KEY UPDATE message = values(message)
+    </insert>
 
     <delete id="deleteMessage">
        delete from t_record_message where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}
