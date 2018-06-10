@@ -357,11 +357,11 @@
                     </div>
                 </div>
 
-                <div class="form-group cronExpDiv">
+                <div class="form-group cronExpDiv" style="display: none;">
                     <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-bookmark"></i>&nbsp;&nbsp;规则类型&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <label for="cronType0" class="radio-label"><input type="radio" name="cronType" value="0" id="cronType0" checked>crontab&nbsp;&nbsp;&nbsp;</label>
-                        <label for="cronType1" class="radio-label"><input type="radio" name="cronType" value="1" id="cronType1">quartz</label>&nbsp;&nbsp;&nbsp;
+                        <label for="cronType0" class="radio-label"><input type="radio" name="cronType" value="0" id="cronType0">crontab&nbsp;&nbsp;&nbsp;</label>
+                        <label for="cronType1" class="radio-label"><input type="radio" name="cronType" value="1" id="cronType1" checked>quartz</label>&nbsp;&nbsp;&nbsp;
                         </br><span class="tips" id="cronTip" tip="crontab: unix/linux的时间格式表达式">crontab: unix/linux的时间格式表达式</span>
                     </div>
                 </div>
@@ -419,6 +419,8 @@
                                 <option value="${i}">${i}秒</option>
                             </c:forEach>
                         </select>
+                        &nbsp;&nbsp;
+                        <button type="button" class="btn btn-sm" id="slideUp-btn" style="vertical-align:top;">收起</button>
                     </div>
                 </div>
 
