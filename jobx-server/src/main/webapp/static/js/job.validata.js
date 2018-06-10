@@ -5,7 +5,6 @@ Number.prototype.getChar = function(){
 
 function Validata() {
 
-
     this.contextPath = arguments[0]||'';
     this.jobId = arguments[1]||null;
 
@@ -77,35 +76,43 @@ function Validata() {
             }
 
             var cronExp = $("#cronExp").val();
-            if (!cronExp) {
-                jobx.tipError($("#cronExp"),"时间规则不能为空,请填写时间规则");
+
+            if (cronExp.trim().length === 0) {
+                jobx.tipError($("#cronExp"), "时间规则不能为空,请填写时间规则");
                 this.status = false;
-            } else {
-                var _this = this;
-                $.ajax({
-                    type: "POST",
-                    url: self.contextPath+"/verify/exp.do",
-                    data: {
-                        "cronType": cronType,
-                        "cronExp": cronExp
-                    },
-                    dataType:"json"
-                }).done(function (data) {
-                    _this.cronExpRemote = true;
-                    if (data.status) {
-                        jobx.tipOk($("#expTip"));
-                    } else {
-                        self.toggle.cronTip(cronType);
-                        $("#expTip").css("visibility","visible");
-                        jobx.tipError($("#expTip"), "时间规则语法错误!");
-                        _this.status = false;
-                    }
-                }).fail(function () {
-                    _this.cronExpRemote = true;
-                    jobx.tipError($("#expTip"), "网络请求错误,请重试!");
-                    _this.status = false;
-                });
+                return;
             }
+
+            if(cronExp.trim().split(' ').length < 7){
+                jobx.tipError($("#expTip"), "时间规则语法错误!");
+                this.status = false;
+                return;
+            }
+
+            var _this = this;
+            $.ajax({
+                type: "POST",
+                url: self.contextPath+"/verify/exp.do",
+                data: {
+                    "cronType": cronType,
+                    "cronExp": cronExp
+                },
+                dataType:"json"
+            }).done(function (data) {
+                _this.cronExpRemote = true;
+                if (data.status) {
+                    jobx.tipOk($("#expTip"));
+                } else {
+                    self.toggle.cronTip(cronType);
+                    $("#expTip").css("visibility","visible");
+                    jobx.tipError($("#expTip"), "时间规则语法错误!");
+                    _this.status = false;
+                }
+            }).fail(function () {
+                _this.cronExpRemote = true;
+                jobx.tipError($("#expTip"), "网络请求错误,请重试!");
+                _this.status = false;
+            });
         },
 
         command: function () {
@@ -484,6 +491,7 @@ Validata.prototype.ready = function () {
 
     var _this = this;
 
+    /*
     $("#cronType0").next().click(function () {
         _this.validata.cronExp();
     });
@@ -496,6 +504,7 @@ Validata.prototype.ready = function () {
     $("#cronType1").parent().parent().click(function () {
         _this.validata.cronExp();
     });
+    */
 
     $("#redo01").next().click(function () {
         _this.toggle.count(true)
@@ -547,20 +556,31 @@ Validata.prototype.ready = function () {
     _this.toggle.cronTip($('input[type="radio"][name="cronType"]:checked').val());
 
     $("#year,#month,#day,#week,#hour,#minutes,#seconds").click(function () {
+
+        $("#seconds").val()
+
         var cronExp = "";
         var year = $("#year").val();
+        var month = $("#month").val();
+        var day = $("#day").val();
+        var week = $("#week").val();
+        var hour = $("#hour").val();
+        var minutes = $("#minutes").val();
+        var seconds = $("#seconds").val();
+
+        if(seconds === null){
+            return;
+        }
+
         if(year.length > 1 && year.indexOf("*") == 0){
             year = year.toString().substr(2);
         }
-        var month = $("#month").val();
         if(month.length > 1 && month.indexOf("*") == 0){
             month = month.toString().substr(2);
         }
-        var day = $("#day").val();
         if(day.length > 1 && day.indexOf("*") == 0){
             day = day.toString().substr(2);
         }
-        var week = $("#week").val();
         if(!week){week="*";}
         if(week.length > 1 && week.indexOf("*") == 0){
             week = week.toString().substr(2);
@@ -569,31 +589,35 @@ Validata.prototype.ready = function () {
             week = parseInt(week)+1;
             if(week==8) week=1;
         }
-
-        var hour = $("#hour").val();
         if(hour.length > 1 && hour.indexOf("*") == 0){
             hour = hour.toString().substr(2);
         }
-        var minutes = $("#minutes").val();
         if(minutes.length > 1 && minutes.indexOf("*") == 0){
             minutes = minutes.toString().substr(2);
         }
-        var seconds = $("#seconds").val();
         if(seconds.length > 1 && seconds.indexOf("*") == 0){
             seconds = seconds.toString().substr(2);
         }
-
         cronExp = seconds + " " + minutes + " " + hour + " " ;
         if(week == "*"){
             cronExp += day + " " + month + " ? ";
         }else if(day == "*" && week != "*"){
             cronExp += "? " + month + " " + week + " ";
         }else if(day != "*" && week != "*"){
-            alert("日期和星期不能同时选择!");
-            return false;
+            //alert("日期和星期不能同时选择!");
+            jobx.tipError($("#cronExp"),"日期和星期不能同时选择!");
+            $("#cronExp").val('');
+            _this.validata.status = false;
+            return;
         }
         cronExp += year;
+        $("#expTip").css("visibility","visible").html('quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ? *');
         $("#cronExp").val(cronExp);
+    });
+
+    $("#slideUp-btn").click(function () {
+        $('#cronSelector').slideUp();
+        _this.validata.cronExp();
     });
 
     $("#save-btn").click(function () {
@@ -630,7 +654,7 @@ Validata.prototype.ready = function () {
 
     $("#cronExp").blur(function () {
         _this.validata.cronExp();
-        $('#cronSelector').slideUp();
+        // $('#cronSelector').slideUp();
     }).focus(function () {
         $('#cronSelector').slideDown();
         if ($('#cronType0').prop("checked")) {
@@ -640,6 +664,8 @@ Validata.prototype.ready = function () {
             $("#cronTip").css("visibility","visible").html('quartz: quartz框架的时间格式表达式');
             $("#expTip").css("visibility","visible").html('quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
         }
+    }).bind('input propertychange change', function() {
+        _this.validata.cronExp();
     });
 
 
