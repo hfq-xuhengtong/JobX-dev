@@ -33,7 +33,6 @@ import com.jobxhub.common.job.Response;
 import com.jobxhub.common.logging.LoggerFactory;
 import com.jobxhub.common.util.*;
 import com.jobxhub.common.util.collection.HashMap;
-import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.registry.URL;
 import com.jobxhub.registry.zookeeper.ZookeeperRegistry;
 import com.jobxhub.registry.zookeeper.ZookeeperTransporter;
@@ -80,21 +79,6 @@ public class AgentService implements ServerHandler, AgentJob {
                     lostResponse.put(pid,log);
                 }
                 file.delete();
-                /**
-                Response response = new Response();
-                if (CommonUtils.notEmpty(log)) {
-                    String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
-                    String message = logInfo[0];
-                    if (logInfo.length == 2) {
-                        int exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
-                        long entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
-                        response.setExitCode(exitCode);
-                        response.setEndTime(entTime);
-                    }
-                    response.setMessage(message);
-                    response.setResult(ParamsMap.map().set(Constants.PARAM_PID_KEY,pid));
-                }
-               **/
             }
         }
     }
