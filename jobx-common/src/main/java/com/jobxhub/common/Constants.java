@@ -91,6 +91,8 @@ public class Constants {
 
     public static final String PARAM_EXECTYPE_KEY = "execType";
 
+    public static final String PARAM_RUNAS_KEY = "runAsUser";
+
     public static final String PARAM_BACKUP_KEY = "backup";
 
     public static final String PARAM_SUCCESSEXIT_KEY = "successExit";
@@ -164,7 +166,11 @@ public class Constants {
 
     public static final String JOBX_CACHED = PropertyPlaceholder.get(Constants.PARAM_CACHED_NAME_KEY);
 
-    public static final String JOBX_HOME = SystemPropertyUtils.get(PARAM_JOBX_HOME_KEY);
+    public static final String JOBX_HOME = SystemPropertyUtils.get(PARAM_JOBX_HOME_KEY,"");
+
+    public static final String JOBX_NATIVE_PATH = JOBX_HOME + "/native";
+
+    public static final String JOBX_LOG_PATH = JOBX_HOME + "/logs";
 
     public static final String JOBX_USER_HOME = SystemPropertyUtils.get("user.home") + File.separator + ".jobx";
 
@@ -185,11 +191,6 @@ public class Constants {
      * monitor file
      */
     public static final File JOBX_MONITOR_SHELL = new File(JOBX_HOME + "/bin/monitor.sh");
-
-    /**
-     * kill file
-     */
-    public static final File JOBX_KILL_SHELL = new File(JOBX_HOME + "/bin/kill.sh");
 
     /**
      * ExecuteUser lib
@@ -231,7 +232,8 @@ public class Constants {
         SUCCESS_EXIT(0x0, "正常退出"),
         ERROR_EXIT(0x1, "异常退出"),
         ERROR_PING(-0x63, "连接失败,ping不通"),
-        KILL(0x89, "进程被kill"),
+        KILL(0x8f, "进程被kill"),
+        OTHER_KILL(0x89, "进程被外部kill"),
         NOTFOUND(0x7f, "未找到命令或文件"),
         ERROR_EXEC(-0x64, "连接成功，执行任务失败!"),
         ERROR_PASSWORD(-0x1f4, "密码不正确!"),

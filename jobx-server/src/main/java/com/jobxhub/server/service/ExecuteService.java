@@ -28,6 +28,8 @@ import com.jobxhub.common.job.Action;
 import com.jobxhub.common.job.Request;
 import com.jobxhub.common.job.RequestFile;
 import com.jobxhub.common.job.Response;
+import com.jobxhub.common.util.CommonUtils;
+import com.jobxhub.common.util.IOUtils;
 import com.jobxhub.rpc.InvokeCallback;
 import com.jobxhub.server.common.Parser;
 import com.jobxhub.server.job.JobXInvoker;
@@ -193,7 +195,6 @@ public class ExecuteService {
     }
 
     private void responseToRecord(Response response, Record record) {
-        record.setEndTime(new Date());
         record.setReturnCode(response.getExitCode());
         record.setMessage(response.getMessage());
         if (response.isSuccess()) {
@@ -201,15 +202,18 @@ public class ExecuteService {
         }else {
             record.setSuccess(ResultStatus.FAILED.getStatus());
         }
-        if (StatusCode.KILL.getValue().equals(response.getExitCode())) {
+        int exitCode = response.getExitCode();
+        if (exitCode == StatusCode.KILL.getValue()
+                ||exitCode == StatusCode.OTHER_KILL.getValue()) {
             record.setStatus(RunStatus.STOPED.getStatus());
             record.setSuccess(ResultStatus.KILLED.getStatus());
-        } else if (StatusCode.TIME_OUT.getValue().equals(response.getExitCode())) {
+        } else if (exitCode == StatusCode.TIME_OUT.getValue()) {
             record.setStatus(RunStatus.STOPED.getStatus());
             record.setSuccess(ResultStatus.TIMEOUT.getStatus());
         } else {
             record.setStatus(RunStatus.DONE.getStatus());
         }
+        record.end();
     }
 
     public void lostToRecord(Record record) {
@@ -274,6 +278,28 @@ public class ExecuteService {
             agent.setStatus(status.getValue());
             agentService.updateStatus(agent);
         }
+
+        //处理agent失联之后上报的log...
+        if (!response.getResult().isEmpty()) {
+            Map<String,String> result = response.getResult();
+            for (Map.Entry<String,String> entry:result.entrySet()) {
+                if (entry.getKey().length() == 32) {
+                    String log = entry.getValue();
+                    if (CommonUtils.notEmpty(log)) {
+                        String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
+                        String message = logInfo[0];
+                        Integer exitCode = null;
+                        Long entTime = null;
+                        if (logInfo.length == 2) {
+                            exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
+                            entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
+                        }
+                        recordService.doLostLog(entry.getKey(),message,exitCode,entTime);
+                    }
+                }
+            }
+        }
+
         return status;
     }
 
@@ -475,7 +501,6 @@ public class ExecuteService {
             this.job = job;
             this.record = record;
             record.setStatus(RunStatus.STOPPING.getStatus());
-            record.setSuccess(ResultStatus.KILLED.getStatus());
             recordService.merge(record);
         }
 
@@ -490,7 +515,6 @@ public class ExecuteService {
         @Override
         public void caught(Throwable err) {
             record.setStatus(RunStatus.STOPED.getStatus());
-            record.setEndTime(new Date());
             recordService.merge(record);
             printLog("killed successful :jobName:{} at host:{},port:{},pid:{}", job, record.getPid());
         }

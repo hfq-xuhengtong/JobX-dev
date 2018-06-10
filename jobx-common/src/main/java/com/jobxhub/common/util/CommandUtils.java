@@ -44,7 +44,7 @@ public abstract class CommandUtils implements Serializable {
     private static final long serialVersionUID = 6458428317155311192L;
 
     public static File createLogFile(String logFileName) {
-        String dirPath = IOUtils.getTempFolderPath();
+        String dirPath = IOUtils.getTmpdir();
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
         String tempLogFilePath = dirPath + File.separator + logFileName + ".log";
@@ -77,7 +77,7 @@ public abstract class CommandUtils implements Serializable {
     }
 
     public static File createShellFile(String command, String shellFileName) {
-        String dirPath = IOUtils.getTempFolderPath();
+        String dirPath = IOUtils.getTmpdir();
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 

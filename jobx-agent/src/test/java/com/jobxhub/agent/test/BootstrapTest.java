@@ -56,6 +56,8 @@ public class BootstrapTest implements Serializable {
             System.setProperty(Constants.PARAM_JOBX_PORT_KEY, port + "");
             System.setProperty(Constants.PARAM_JOBX_PASSWORD_KEY, password);
             System.setProperty(Constants.PARAM_JOBX_HOST_KEY, "127.0.0.1");
+            System.setProperty(Constants.PARAM_JOBX_HOME_KEY, "jobx-agent");
+            System.setProperty("java.io.tmpdir", "tmp");
             System.setProperty(Constants.PARAM_JOBX_REGISTRY_KEY, "zookeeper://127.0.0.1:2181");
 
             this.server = ExtensionLoader.load(Server.class);

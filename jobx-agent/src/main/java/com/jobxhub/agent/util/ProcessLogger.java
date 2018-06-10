@@ -22,25 +22,33 @@
 package com.jobxhub.agent.util;
 
 import com.google.common.base.Joiner;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-public class LogGobbler extends Thread {
+public class ProcessLogger extends Thread {
 
     private final BufferedReader inputReader;
     private final Logger logger;
     private final Level loggingLevel;
     private final CircularBuffer<String> buffer;
 
-    public LogGobbler(final Reader inputReader, final Logger logger,
-                      final Level level, final int bufferLines) {
+    public ProcessLogger(final Reader inputReader, final Logger logger,final Level level, final int bufferLines) {
         this.inputReader = new BufferedReader(inputReader);
         this.logger = logger;
         this.loggingLevel = level;
-        this.buffer = new CircularBuffer<>(bufferLines);
+        this.buffer = new CircularBuffer<String>(bufferLines);
+    }
+
+    public static ProcessLogger getLoger(InputStream inputStream, Logger logger, Level level) {
+        return new ProcessLogger(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8),
+                logger,
+                level,
+                30);
     }
 
     @Override
@@ -51,12 +59,11 @@ public class LogGobbler extends Thread {
                 if (line == null) {
                     return;
                 }
-
                 this.buffer.append(line);
                 log(line);
             }
         } catch (final IOException e) {
-            error("Error reading from logging stream:", e);
+            error("[JobX]Error reading from logging stream:", e);
         }
     }
 
@@ -82,7 +89,7 @@ public class LogGobbler extends Thread {
         try {
             join(waitMs);
         } catch (final InterruptedException e) {
-            info("I/O thread interrupted.", e);
+            info("[JobX]I/O thread interrupted.", e);
         }
     }
 

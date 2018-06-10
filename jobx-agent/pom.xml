@@ -10,6 +10,10 @@
     <packaging>jar</packaging>
     <name>jobx-agent</name>
 
+    <properties>
+        <native.source.dir>src/main/c</native.source.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.jobxhub</groupId>
@@ -18,6 +22,16 @@
         <dependency>
             <groupId>com.jobxhub</groupId>
             <artifactId>jobx-rpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jobxhub</groupId>
+            <artifactId>jobx-native</artifactId>
+            <version>RELEASE</version>
+            <type>so</type>
+        </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
         </dependency>
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>
@@ -30,19 +44,15 @@
         <dependency>
             <groupId>org.fusesource</groupId>
             <artifactId>sigar</artifactId>
-            <version>1.6.4</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -115,10 +125,8 @@
                     </archive>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
-
 
 </project>
 

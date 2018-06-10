@@ -23,8 +23,11 @@ package com.jobxhub.common.util;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.Selector;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,10 @@ public abstract class IOUtils implements Serializable {
      * The Windows line separator string.
      */
     public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
+
+    public static final String FIELD_TERMINATED_BY = new String(new char['\000']);
+
+    public static final String TAB = "\t";
 
     private static final int BUFFER_SIZE = 1024 * 8;
 
@@ -188,11 +195,11 @@ public abstract class IOUtils implements Serializable {
     }
 
 
-    public static final synchronized String getTempFolderPath() {
+    public static final String getTmpdir() {
         return System.getProperty("java.io.tmpdir");
     }
 
-    public static final synchronized String getProjectFolderPath() {
+    public static final String getProjectFolderPath() {
         String path = null;
         try {
             File directory = new File("");
@@ -390,7 +397,6 @@ public abstract class IOUtils implements Serializable {
         if (file instanceof String) {
             file = new File((String) file);
         }
-
         return ((File) file).exists();
     }
 
@@ -409,5 +415,64 @@ public abstract class IOUtils implements Serializable {
         return DigestUtils.md5Hex(toByteArray(file));
     }
 
+    public static void closeQuietly(Reader input) {
+        closeQuietly((Closeable)input);
+    }
+
+    public static void closeQuietly(Writer output) {
+        closeQuietly((Closeable)output);
+    }
+
+    public static void closeQuietly(InputStream input) {
+        closeQuietly((Closeable)input);
+    }
+
+    public static void closeQuietly(OutputStream output) {
+        closeQuietly((Closeable)output);
+    }
+
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException var2) {
+            ;
+        }
+
+    }
+
+    public static void closeQuietly(Socket sock) {
+        if (sock != null) {
+            try {
+                sock.close();
+            } catch (IOException var2) {
+                ;
+            }
+        }
+
+    }
+
+    public static void closeQuietly(Selector selector) {
+        if (selector != null) {
+            try {
+                selector.close();
+            } catch (IOException var2) {
+                ;
+            }
+        }
+
+    }
+
+    public static void closeQuietly(ServerSocket sock) {
+        if (sock != null) {
+            try {
+                sock.close();
+            } catch (IOException var2) {
+                ;
+            }
+        }
+
+    }
 
 }

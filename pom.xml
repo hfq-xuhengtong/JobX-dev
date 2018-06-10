@@ -15,6 +15,7 @@
         <module>jobx-examples</module>
         <module>jobx-api</module>
         <module>jobx-agent</module>
+        <module>jobx-native</module>
         <module>jobx-server</module>
     </modules>
     <packaging>pom</packaging>
@@ -93,20 +94,6 @@
 
     <dependencyManagement>
         <dependencies>
-
-            <!-- Hadoop 2.7.3 -->
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-hdfs</artifactId>
-                <version>${hadoop.version}</version>
-            </dependency>
-
-            <!-- HBase 1.3.0 -->
-            <dependency>
-                <groupId>org.apache.hbase</groupId>
-                <artifactId>hbase-client</artifactId>
-                <version>${hbase.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.jobxhub</groupId>
@@ -728,6 +715,26 @@
                 <groupId>org.fusesource.jansi</groupId>
                 <artifactId>jansi</artifactId>
                 <version>1.16</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.fusesource</groupId>
+                <artifactId>sigar</artifactId>
+                <version>1.6.4</version>
+            </dependency>
+
+            <!-- Hadoop 2.7.3 -->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+
+            <!-- HBase 1.3.0 -->
+            <dependency>
+                <groupId>org.apache.hbase</groupId>
+                <artifactId>hbase-client</artifactId>
+                <version>${hbase.version}</version>
             </dependency>
 
         </dependencies>

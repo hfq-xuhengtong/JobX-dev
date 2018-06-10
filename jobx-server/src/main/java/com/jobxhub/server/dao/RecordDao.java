@@ -38,6 +38,8 @@ public interface RecordDao {
 
     RecordBean getById(Long id);
 
+    RecordBean getByPid(String pid);
+
     void save(RecordBean record);
 
     void update(RecordBean record);
@@ -60,4 +62,5 @@ public interface RecordDao {
 
     void saveMessage(RecordMessageBean messageBean);
 
+    void updateMessage(RecordMessageBean messageBean);
 }
