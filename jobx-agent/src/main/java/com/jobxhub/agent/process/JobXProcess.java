@@ -157,7 +157,6 @@ public class JobXProcess {
      */
     public String getLogMessage() {
         String log = IOUtils.readText(this.logFile, Constants.CHARSET_UTF8);
-        logger.info("xxxxxxxxxxx>>"+log.split(IOUtils.FIELD_TERMINATED_BY).length+",-->"+log);
         if (CommonUtils.notEmpty(log)) {
             return log.split(IOUtils.FIELD_TERMINATED_BY)[0];
         }
