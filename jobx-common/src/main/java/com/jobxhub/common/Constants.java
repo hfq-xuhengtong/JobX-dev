@@ -195,7 +195,7 @@ public class Constants {
     /**
      * ExecuteUser lib
      */
-    public static final File JOBX_EXECUTE_AS_USER_LIB =  new File(JOBX_HOME + "/lib/ExecuteUser");
+    public static final String JOBX_EXECUTE_AS_USER_LIB_PATH =  JOBX_HOME + "/lib/jobx-native-RELEASE.so";
 
     public enum CachedProvider implements Serializable {
 
