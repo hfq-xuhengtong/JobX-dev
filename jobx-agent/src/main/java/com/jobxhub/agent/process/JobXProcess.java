@@ -115,19 +115,23 @@ public class JobXProcess {
             errorLogger.awaitCompletion(1000);
 
             if (exitCode != 0) {
-                String output = new StringBuilder().append("Stdout:\n")
-                                .append(outputLogger.getRecentLog()).append("\n\n")
-                                .append("Stderr:\n").append(errorLogger.getRecentLog())
-                                .append("\n").toString();
+                String output = new StringBuilder()
+                        .append("Stdout:\n")
+                        .append(outputLogger.getRecentLog())
+                        .append("\n\n")
+                        .append("Stderr:\n")
+                        .append(errorLogger.getRecentLog())
+                        .append("\n")
+                        .toString();
                 throw new ProcessException(exitCode, output);
             }
         } finally {
             IOUtils.closeQuietly(this.process.getInputStream());
             IOUtils.closeQuietly(this.process.getOutputStream());
             IOUtils.closeQuietly(this.process.getErrorStream());
-            this.process.destroy();
             //最后以特殊不了见的字符作为log和exitCode+结束时间的分隔符.
             this.processLogger.info(IOUtils.FIELD_TERMINATED_BY + exitCode + IOUtils.TAB + new Date().getTime());
+            this.process.destroy();
             return exitCode;
         }
     }
@@ -153,6 +157,7 @@ public class JobXProcess {
      */
     public String getLogMessage() {
         String log = IOUtils.readText(this.logFile, Constants.CHARSET_UTF8);
+        logger.info("xxxxxxxxxxx>>"+log.split(IOUtils.FIELD_TERMINATED_BY).length+",-->"+log);
         if (CommonUtils.notEmpty(log)) {
             return log.split(IOUtils.FIELD_TERMINATED_BY)[0];
         }
@@ -310,7 +315,7 @@ public class JobXProcess {
         FileAppender appender = new RollingFileAppender();
         PatternLayout layout = new PatternLayout();
         appender.setLayout(layout);
-        appender.setFile(Constants.JOBX_LOG_PATH + "/" + name + ".log");
+        appender.setFile(this.logFile.getAbsolutePath());
         appender.setEncoding(Constants.CHARSET_UTF8);
         appender.setAppend(false);
         appender.activateOptions();
@@ -319,7 +324,7 @@ public class JobXProcess {
     }
 
     private List<String> partitionCommandLine(String command) {
-        ArrayList<String> commands = new ArrayList<>();
+        ArrayList<String> commands = new ArrayList<String>();
         int index = 0;
 
         StringBuffer buffer = new StringBuffer(command.length());

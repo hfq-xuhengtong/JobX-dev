@@ -59,7 +59,7 @@ public abstract class IOUtils implements Serializable {
      */
     public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
 
-    public static final String FIELD_TERMINATED_BY = new String(new char['\000']);
+    public static final String FIELD_TERMINATED_BY = new String(new char['\001']);
 
     public static final String TAB = "\t";
 

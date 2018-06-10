@@ -41,7 +41,7 @@ public class CircularBuffer<T> implements Iterable<T> {
     private int start;
 
     public CircularBuffer(final int size) {
-        this.lines = new ArrayList<>();
+        this.lines = new ArrayList<T>();
         this.size = size;
         this.start = 0;
     }
