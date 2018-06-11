@@ -2,7 +2,7 @@ package com.jobxhub.common.graph;
 /**
  * @Package org.opencron.common.graph
  * @Title: KahnTopo
- * @author hapic
+ * @author hitechr
  * @date 2018/4/11 13:36
  * @version V1.0
  */

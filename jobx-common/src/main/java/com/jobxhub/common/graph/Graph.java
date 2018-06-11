@@ -2,7 +2,7 @@ package com.jobxhub.common.graph;
 /**
  * @Package org.opencron.common.graph
  * @Title: Graph
- * @author hapic
+ * @author hitechr
  * @date 2018/4/11 13:03
  * @version V1.0
  */
