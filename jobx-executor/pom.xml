@@ -31,9 +31,6 @@
                             </fileNames>
                         </source>
                     </sources>
-                    <linkerStartOptions>
-                        <linkerStartOption>-shared -Wall</linkerStartOption>
-                    </linkerStartOptions>
                     <compilerProvider>generic-classic</compilerProvider>
                     <compilerExecutable>g++</compilerExecutable>
                 </configuration>
