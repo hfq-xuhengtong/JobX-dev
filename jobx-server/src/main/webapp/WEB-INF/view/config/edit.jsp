@@ -140,7 +140,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="execUser" class="col-lab control-label"><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;执行用户</label>
+                    <label for="execUser" class="col-lab control-label"><i class="fa fa-users"></i>&nbsp;&nbsp;执行用户</label>
                     <div class="col-md-10">
                         <textarea class="form-control input-sm" id="execUser" name="execUser"> ${config.execUser}</textarea>
                         <span class="tips"><b>*&nbsp;</b>该平台执行命令的代理用户名,多个用户用","分隔</span>
