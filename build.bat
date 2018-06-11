@@ -132,7 +132,7 @@ if exist "%DIST_HOME%" rd /s /q %DIST_HOME%
 if not exist "%DIST_HOME%" mkdir %DIST_HOME%
 copy %JOBX_AGENT% %DIST_HOME%
 copy %JOBX_SERVER% %DIST_HOME%
-echo [JOBX] build jobx @Version %JOBX_VERSION% successfully! please goto %DIST_HOME%
+echo [JobX] build jobx @Version %JOBX_VERSION% successfully! please goto %DIST_HOME%
 pause
 
 :exit
