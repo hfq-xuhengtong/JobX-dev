@@ -186,7 +186,7 @@ public class RecordService {
             messageBean.setRecordId(recordBean.getRecordId());
             messageBean.setMessage(message);
             messageBean.setStartTime(recordBean.getStartTime());
-            recordDao.updateMessage(messageBean);
+            recordDao.saveMessage(messageBean);
         }
 
     }

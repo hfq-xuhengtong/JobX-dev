@@ -236,9 +236,10 @@ public class AgentService implements ServerHandler, AgentJob {
             response.setExitCode(-1);
         }finally {
             String message = jobXProcess.getLogMessage();
-            jobXProcess.deleteLog();
             response.setMessage(message);
             response.end();
+            //todo 得确保server和agent是连接的状态才可以清理log...
+            jobXProcess.deleteLog();
             processMap.remove(pid);
         }
         return response;

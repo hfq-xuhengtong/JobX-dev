@@ -60,7 +60,6 @@ public class JobXProcess {
     private String runAsUser;
 
     public JobXProcess(String command, int timeout, String pid, String runAsUser) {
-        this.command = partitionCommandLine(command);
         this.workingDir = IOUtils.getTmpdir();
         this.timeout = timeout;
         this.logFile = new File(Constants.JOBX_LOG_PATH + "/." + pid + ".log");
@@ -69,6 +68,12 @@ public class JobXProcess {
         this.startupLatch = new CountDownLatch(1);
         this.completeLatch = new CountDownLatch(1);
         this.runAsUser = runAsUser;
+        if (isRunAsUser()) {
+            ExecuteUser executeUser = new ExecuteUser();
+            this.command = executeUser.buildCommand(runAsUser,getCommandLine(command));
+        }else {
+            this.command = getCommandLine(command);
+        }
     }
 
     /**
@@ -115,19 +120,23 @@ public class JobXProcess {
             errorLogger.awaitCompletion(1000);
 
             if (exitCode != 0) {
-                String output = new StringBuilder().append("Stdout:\n")
-                                .append(outputLogger.getRecentLog()).append("\n\n")
-                                .append("Stderr:\n").append(errorLogger.getRecentLog())
-                                .append("\n").toString();
+                String output = new StringBuilder()
+                        .append("Stdout:\n")
+                        .append(outputLogger.getRecentLog())
+                        .append("\n\n")
+                        .append("Stderr:\n")
+                        .append(errorLogger.getRecentLog())
+                        .append("\n")
+                        .toString();
                 throw new ProcessException(exitCode, output);
             }
         } finally {
             IOUtils.closeQuietly(this.process.getInputStream());
             IOUtils.closeQuietly(this.process.getOutputStream());
             IOUtils.closeQuietly(this.process.getErrorStream());
-            this.process.destroy();
             //最后以特殊不了见的字符作为log和exitCode+结束时间的分隔符.
             this.processLogger.info(IOUtils.FIELD_TERMINATED_BY + exitCode + IOUtils.TAB + new Date().getTime());
+            this.process.destroy();
             return exitCode;
         }
     }
@@ -210,7 +219,7 @@ public class JobXProcess {
             try {
                 if (isRunAsUser()) {
                     String cmd =
-                            String.format("%s %s %s %d", Constants.JOBX_EXECUTE_AS_USER_LIB.getAbsoluteFile(),
+                            String.format("%s %s %s %d", Constants.JOBX_EXECUTE_AS_USER_LIB_PATH,
                                     this.runAsUser, KILL_COMMAND, this.processId);
                     Runtime.getRuntime().exec(cmd);
                 } else {
@@ -236,7 +245,7 @@ public class JobXProcess {
                 try {
                     if (isRunAsUser()) {
                         String cmd =
-                                String.format("%s %s %s -9 %d", Constants.JOBX_EXECUTE_AS_USER_LIB.getAbsoluteFile(),
+                                String.format("%s %s %s -9 %d", Constants.JOBX_EXECUTE_AS_USER_LIB_PATH,
                                         this.runAsUser, KILL_COMMAND, this.processId);
                         Runtime.getRuntime().exec(cmd);
                     } else {
@@ -310,7 +319,7 @@ public class JobXProcess {
         FileAppender appender = new RollingFileAppender();
         PatternLayout layout = new PatternLayout();
         appender.setLayout(layout);
-        appender.setFile(Constants.JOBX_LOG_PATH + "/" + name + ".log");
+        appender.setFile(this.logFile.getAbsolutePath());
         appender.setEncoding(Constants.CHARSET_UTF8);
         appender.setAppend(false);
         appender.activateOptions();
@@ -318,8 +327,8 @@ public class JobXProcess {
         return logger;
     }
 
-    private List<String> partitionCommandLine(String command) {
-        ArrayList<String> commands = new ArrayList<>();
+    private List<String> getCommandLine(String command) {
+        ArrayList<String> commands = new ArrayList<String>();
         int index = 0;
 
         StringBuffer buffer = new StringBuffer(command.length());
@@ -367,6 +376,5 @@ public class JobXProcess {
         }
 
         return Arrays.asList(commands.toArray(new String[commands.size()]));
-
     }
 }

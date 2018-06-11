@@ -62,5 +62,4 @@ public interface RecordDao {
 
     void saveMessage(RecordMessageBean messageBean);
 
-    void updateMessage(RecordMessageBean messageBean);
 }

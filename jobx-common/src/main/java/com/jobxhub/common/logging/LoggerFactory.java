@@ -34,7 +34,7 @@ import java.net.URL;
 public abstract class LoggerFactory {
 
     public static Logger getLogger(@SuppressWarnings("rawtypes") Class clazz) {
-       ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         URL url = loader.getResource("log4j.properties");
         String path;
         if (url == null) {

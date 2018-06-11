@@ -22,6 +22,7 @@
 package com.jobxhub.agent.process;
 
 import com.jobxhub.common.Constants;
+import com.jobxhub.common.util.IOUtils;
 import com.jobxhub.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,8 @@ public class ExecuteUser {
     private final static Logger logger = LoggerFactory.getLogger(ExecuteUser.class);
 
     public ExecuteUser() {
-        if (!Constants.JOBX_EXECUTE_AS_USER_LIB.exists()) {
-            throw new RuntimeException("[JobX]not found ExecuteUser binary. Invalid Path: " + Constants.JOBX_EXECUTE_AS_USER_LIB.getAbsolutePath());
-        }
-        if (!Constants.JOBX_EXECUTE_AS_USER_LIB.canExecute()) {
-            throw new RuntimeException("[JobX]Unable to execute ExecuteUser binary. Invalid Path: " + Constants.JOBX_EXECUTE_AS_USER_LIB.getAbsolutePath());
+        if (!IOUtils.fileExists(Constants.JOBX_EXECUTE_AS_USER_LIB_PATH)) {
+            throw new RuntimeException("[JobX]not found ExecuteUser binary. Invalid Path: " + Constants.JOBX_EXECUTE_AS_USER_LIB_PATH);
         }
     }
 
@@ -52,7 +50,7 @@ public class ExecuteUser {
      */
     public int execute(final String user, final List<String> command) throws IOException {
         logger.info("[Jobx]execute Command {} ",StringUtils.joinString(command));
-        final java.lang.Process process = new java.lang.ProcessBuilder()
+        final Process process = new ProcessBuilder()
                 .command(buildCommand(user, command))
                 .inheritIO()
                 .start();
@@ -66,9 +64,9 @@ public class ExecuteUser {
         return exitCode;
     }
 
-    private List<String> buildCommand(final String user, final List<String> command) {
+    public List<String> buildCommand(final String user, final List<String> command) {
         final List<String> commandList = new ArrayList<String>();
-        commandList.add(Constants.JOBX_EXECUTE_AS_USER_LIB.getAbsolutePath());
+        commandList.add(Constants.JOBX_EXECUTE_AS_USER_LIB_PATH);
         commandList.add(user);
         commandList.addAll(command);
         return commandList;
