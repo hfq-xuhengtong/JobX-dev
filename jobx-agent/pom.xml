@@ -24,12 +24,6 @@
             <artifactId>jobx-rpc</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jobxhub</groupId>
-            <artifactId>jobx-executor</artifactId>
-            <version>RELEASE</version>
-            <type>so</type>
-        </dependency>
-        <dependency>
             <groupId>com.corundumstudio.socketio</groupId>
             <artifactId>netty-socketio</artifactId>
         </dependency>
@@ -54,25 +48,24 @@
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
+            <!-- jar plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>../lib</classpathPrefix>
+                            <mainClass>com.jobxhub.agent.bootstrap.JobXAgent</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -96,31 +89,54 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
                     <excludeTransitive>false</excludeTransitive>
                     <stripVersion>true</stripVersion>
+                    <excludeTransitive>false</excludeTransitive>
+                    <stripVersion>false</stripVersion>
+                    <artifactItems>
+                        <dependency>
+                            <groupId>com.jobxhub</groupId>
+                            <artifactId>jobx-executor</artifactId>
+                            <version>${project.version}</version>
+                            <type>so</type>
+                            <destFileName>executor.so</destFileName>
+                            <outputDirectory>${project.build.directory}/bin</outputDirectory>
+                        </dependency>
+                    </artifactItems>
                 </configuration>
             </plugin>
 
-            <!-- jar plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>../lib</classpathPrefix>
-                            <mainClass>com.jobxhub.agent.bootstrap.JobXAgent</mainClass>
-                        </manifest>
-                    </archive>
+                    <descriptors>
+                        <descriptor>assembly.xml</descriptor>
+                    </descriptors>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+
         </plugins>
     </build>
 

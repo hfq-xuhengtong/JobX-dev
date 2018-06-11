@@ -15,6 +15,10 @@
             <outputDirectory>bin</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>src/conf/lib</directory>
             <outputDirectory>lib</outputDirectory>
         </fileSet>
