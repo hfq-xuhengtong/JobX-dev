@@ -35,7 +35,7 @@ label {
 }
 
 .form-control, .message-search {
-   background: rgba(0, 0, 0, 0.05);
+   background: rgba(0, 0, 0, 0.3);
    text-shadow: none;
    color: #fff;
    box-shadow: none;
@@ -63,7 +63,7 @@ textarea.form-control {
 }
 
 .select .form-control {
-    height: auto;
+    height: 35px;
 }
 
 .select .form-control:hover, .select .form-control:focus  {
@@ -223,7 +223,6 @@ input[type="checkbox"], input[type="radio"]{
 -----------------------------------------------------------*/
 .chzn-container {
      position: relative;
-     display: inline-block;
      vertical-align: middle;
      font-size: 12px;
      width: 100%;
@@ -236,7 +235,7 @@ input[type="checkbox"], input[type="radio"]{
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    width: 100%;
+    width: 75.333%;
     border-top: 0;
     background: rgba(255,255,255,0.85);
     margin-top: -1px;
@@ -254,12 +253,13 @@ input[type="checkbox"], input[type="radio"]{
     position: relative;
     overflow: hidden;
     margin: 0;
-    padding: 0 0 3px 0;
-    width: 100%;
+    padding: 4px 4px;
     cursor: text;
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 75.333%;
+    background: rgba(0, 0, 0, 0.3);
+    height: 35px;
 }
+
 .chzn-container-multi .chzn-choices li {
      float: left;
      list-style: none;
@@ -280,7 +280,7 @@ input[type="checkbox"], input[type="radio"]{
      height: 25px;
      line-height: 100%;
      padding: 3px 0 0 7px;
-     background: transparent;
+     background: transparent !important;
 }
 .chzn-container-multi .chzn-choices li.search-field .default {
     color: rgba(255,255,255,0.7);
@@ -348,7 +348,7 @@ input[type="checkbox"], input[type="radio"]{
      overflow-y: auto;
      max-height: 240px;
      -webkit-overflow-scrolling: touch;
-     width: 100% !important;
+     width: 75.333%;
 }
 .chzn-container .chzn-results li {
     font-family: open-sans-regular;

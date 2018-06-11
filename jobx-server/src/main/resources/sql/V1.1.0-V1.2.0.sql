@@ -42,6 +42,7 @@ insert into `t_config1`(`config_key`,`config_val`,`comment`) select "send_url",`
 insert into `t_config1`(`config_key`,`config_val`,`comment`) select "space_time",`spaceTime`,"发送告警时间间隔" from `t_config`;
 insert into `t_config1`(`config_key`,`config_val`,`comment`) select "template",`template`,"发送短信的模板" from `t_config`;
 insert into `t_config1`(`config_key`,`config_val`,`comment`) select "version","V1.2.0","当前JobX版本号" from `t_config`;
+insert into `t_config1`(`config_key`,`config_val`,`comment`) values ("exec_user",null,"该平台执行任务的代理用户,多个用户用\",\"分隔");
 drop table `t_config`;
 alter table `t_config1` rename `t_config`;
 
@@ -148,6 +149,7 @@ alter table `t_user` change column `qq` `qq` varchar(20);
 alter table `t_user` change column `realName` `real_name` varchar(50);
 alter table `t_user` change column `roleId` `role_id` bigint(20);
 alter table `t_user` change column `salt` `salt` varchar(64);
+alter table `t_user` add column `exec_user` text;
 
 --t_user_agent
 create table `t_user_agent` (

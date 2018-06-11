@@ -22,11 +22,8 @@
 package com.jobxhub.server.controller;
 
 import com.jobxhub.server.annotation.RequestRepeat;
-import com.jobxhub.server.service.RoleService;
-import com.jobxhub.server.service.UserAgentService;
+import com.jobxhub.server.service.*;
 import com.jobxhub.server.support.JobXTools;
-import com.jobxhub.server.service.AgentService;
-import com.jobxhub.server.service.UserService;
 import com.jobxhub.server.tag.PageBean;
 import com.jobxhub.server.dto.Role;
 import com.jobxhub.server.dto.Status;
@@ -64,6 +61,9 @@ public class UserController extends BaseController {
     @Autowired
     private AgentService agentService;
 
+    @Autowired
+    private ConfigService configService;
+
     @RequestMapping("view.htm")
     public String view(PageBean pageBean) {
         userService.getPageBean(pageBean);
@@ -85,6 +85,7 @@ public class UserController extends BaseController {
         List<Role> role = roleService.getAll();
         model.addAttribute("role", role);
         model.addAttribute("agents", agentService.getAll());
+        model.addAttribute("execUser",configService.getExecUser());
         return "/user/add";
     }
 
@@ -94,7 +95,6 @@ public class UserController extends BaseController {
         userService.addUser(user);
         return "redirect:/user/view.htm";
     }
-
 
     @RequestMapping("edit/{id}.htm")
     public String editPage(HttpSession session, Model model, @PathVariable("id") Long id) {
@@ -113,6 +113,7 @@ public class UserController extends BaseController {
         model.addAttribute("role", roleService.getAll());
         model.addAttribute("agents", agentService.getAll());
         model.addAttribute("userAgent", userAgent);
+        model.addAttribute("execUser",configService.getExecUser());
         return "/user/edit";
     }
 
@@ -126,6 +127,7 @@ public class UserController extends BaseController {
         user1.setEmail(user.getEmail());
         user1.setQq(user.getQq());
         user1.setModifyTime(new Date());
+        user1.setExecUser(user.getExecUser());
         userService.updateUser(session,user1);
         return "redirect:/user/view.htm";
     }

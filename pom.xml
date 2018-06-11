@@ -15,7 +15,7 @@
         <module>jobx-examples</module>
         <module>jobx-api</module>
         <module>jobx-agent</module>
-        <module>jobx-native</module>
+        <module>jobx-executor</module>
         <module>jobx-server</module>
     </modules>
     <packaging>pom</packaging>

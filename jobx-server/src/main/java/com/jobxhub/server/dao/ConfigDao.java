@@ -30,4 +30,5 @@ public interface ConfigDao {
 
     void update(ConfigBean configBean);
 
+    String getExecUser();
 }

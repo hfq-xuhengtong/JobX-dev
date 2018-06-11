@@ -272,32 +272,32 @@ public class ExecuteService {
                     status = ConnStatus.UNAUTHORIZED;
                 }
             }
+
+            //处理agent失联之后上报的log...
+            if (!response.getResult().isEmpty()) {
+                Map<String,String> result = response.getResult();
+                for (Map.Entry<String,String> entry:result.entrySet()) {
+                    if (entry.getKey().length() == 32) {
+                        String log = entry.getValue();
+                        if (CommonUtils.notEmpty(log)) {
+                            String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
+                            String message = logInfo[0];
+                            Integer exitCode = null;
+                            Long entTime = null;
+                            if (logInfo.length == 2) {
+                                exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
+                                entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
+                            }
+                            recordService.doLostLog(entry.getKey(),message,exitCode,entTime);
+                        }
+                    }
+                }
+            }
         }
 
         if (update) {
             agent.setStatus(status.getValue());
             agentService.updateStatus(agent);
-        }
-
-        //处理agent失联之后上报的log...
-        if (!response.getResult().isEmpty()) {
-            Map<String,String> result = response.getResult();
-            for (Map.Entry<String,String> entry:result.entrySet()) {
-                if (entry.getKey().length() == 32) {
-                    String log = entry.getValue();
-                    if (CommonUtils.notEmpty(log)) {
-                        String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
-                        String message = logInfo[0];
-                        Integer exitCode = null;
-                        Long entTime = null;
-                        if (logInfo.length == 2) {
-                            exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
-                            entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
-                        }
-                        recordService.doLostLog(entry.getKey(),message,exitCode,entTime);
-                    }
-                }
-            }
         }
 
         return status;

@@ -156,6 +156,7 @@ create table `t_user` (
   `role_id` bigint(20),
   `salt` varchar(64),
   `user_name` varchar(50),
+  `exec_user` text,
   primary key (`user_id`)
 ) engine=innodb auto_increment=10000 default charset=utf8;
 
@@ -179,6 +180,7 @@ values
 ("send_url",null,"短信发送通道商url"),
 ("space_time","30","发送告警时间间隔"),
 ("template",null,"发送短信的模板"),
+("exec_user",null,"该平台执行任务的代理用户,多个用户用\",\"分隔"),
 ("version","V1.2.0","当前jobx版本号");
 
 --init role

@@ -133,7 +133,7 @@
 
                 <input type="hidden" id="userId" name="userId" value="${u.userId}">
                 <div class="form-group">
-                    <label for="userName" class="col-lab control-label"><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;用&nbsp;&nbsp;户&nbsp;&nbsp;名：</label>
+                    <label for="userName" class="col-lab control-label"><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="userName" name="userName" value="${u.userName}" readonly>
                         <span class="tips"><b>*&nbsp;</b>只读</span>
@@ -142,7 +142,7 @@
 
                 <c:if test="${permission eq true}">
                 <div class="form-group">
-                    <label for="role" class="col-lab control-label"><i class="glyphicon glyphicon-random"></i>&nbsp;&nbsp;用户角色：</label>
+                    <label for="role" class="col-lab control-label"><i class="glyphicon glyphicon-random"></i>&nbsp;&nbsp;用户角色</label>
                     <div class="col-md-10">
                         <select style="height: 30px;" id="role" name="roleId" class="form-control m-b-10 input-sm">
                             <c:forEach var="r" items="${role}">
@@ -153,28 +153,34 @@
                     </div>
                 </div><br>
 
-                <div class="form-group" id="agentsDiv" style="display: ${u.roleId eq 999 ? 'none' : 'block'}">
-                    <label class="col-lab control-label"><i class="fa fa-desktop" aria-hidden="true"></i>&nbsp;执行器组：</label>
+                <div class="form-group" id="agentsDiv">
+                    <label class="col-lab control-label"><i class="fa fa-desktop" aria-hidden="true"></i>&nbsp;执行器组</label>
                     <div class="col-md-10">
-                        <input type="checkbox" id="checkAllInput">全选<span class="tips">&nbsp;&nbsp;&nbsp;<b>*&nbsp;</b>此管理员可操作的执行器操组</span></br>
-                        <div class="form-control m-b-10 input-sm" id="agent-content" style="height: 150px;overflow: hidden;">
+                        <select id="agentId-select" class="select input-sm" name="agentIds"  multiple data-selected-text-format="count>3">
                             <c:forEach var="w" items="${agents}" varStatus="index">
-                                <c:forEach var="a" items="${userAgent}" varStatus="aIndex">
-                                        <input type="checkbox"
-                                               name="agentIds"
-                                               value="${w.agentId}"
-                                               id="agent_${w.agentId}"
-                                               class="each-box form-control input-sm"
-                                               <c:if test="${a.agentId eq w.agentId}">checked</c:if>>${w.name}&nbsp;&nbsp;${w.host}<br>
-                                </c:forEach>
+                                <option selected value="${w.agentId}">${w.name}(${w.host})</option>
                             </c:forEach>
-                        </div>
+                        </select>
+                            <%--<label for="checkAllInput" class="radio-label checkAllInput"><input type="radio" id="checkAllInput">全选</label>--%>
+                        <div class="tips"><b>*&nbsp;</b>此管理员可操作的执行器操组</div></br>
+                    </div>
+                </div>
+
+                <div class="form-group" id="userDiv">
+                    <label class="col-lab control-label"><i class="fa fa-users" aria-hidden="true"></i>&nbsp;执行用户</label>
+                    <div class="col-md-10">
+                        <select name="execUser" data-placeholder="选择执行任务的用户" class="tag-select-limited select input-sm" multiple>
+                            <c:forEach var="user" items="${execUser}" varStatus="index">
+                                <option value="${user}">${user}</option>
+                            </c:forEach>
+                        </select>
+                        <div class="tips"><b>*&nbsp;</b>此管理员可使用的所有的用户身份</div></br>
                     </div>
                 </div>
                 </c:if>
 
                 <div class="form-group">
-                    <label for="realName" class="col-lab control-label"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;真实姓名：</label>
+                    <label for="realName" class="col-lab control-label"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;真实姓名</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="realName" name="realName" value="${u.realName}">
                         <span class="tips"><b>*&nbsp;</b>真实姓名必填</span>
@@ -183,7 +189,7 @@
 
 
                 <div class="form-group">
-                    <label for="contact" class="col-lab control-label"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;联系方式：</label>
+                    <label for="contact" class="col-lab control-label"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;联系方式</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="contact" name="contact" value="${u.contact}">
                         <span class="tips">选填</span>
@@ -191,7 +197,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="email" class="col-lab control-label"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;电子邮箱：</label>
+                    <label for="email" class="col-lab control-label"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;电子邮箱</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" style="clear: right;" id="email" name="email" value="${u.email}"><span class="tips">选填</span>
 
@@ -199,7 +205,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="qq" class="col-lab control-label"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;QQ&nbsp;号&nbsp;码：</label>
+                    <label for="qq" class="col-lab control-label"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;QQ&nbsp;号&nbsp;码</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="qq" name="qq" value="${u.qq}">
                         <span class="tips">选填</span>
@@ -217,6 +223,22 @@
     </div>
 
 </section>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        /* Tag Select */
+        (function(){
+            /* Limited */
+            $(".tag-select-limited").chosen({
+                max_selected_options: 99999
+            });
+
+            /* Overflow */
+            $('.overflow').niceScroll();
+        })();
+    });
+</script>
+
 
 </body>
 

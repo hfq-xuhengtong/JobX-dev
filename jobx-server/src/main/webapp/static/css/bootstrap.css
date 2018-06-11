@@ -1925,7 +1925,6 @@ input[type=radio][disabled], input[type=checkbox][disabled], .radio[disabled], .
 
 .input-sm {
     height: 30px;
-    padding: 5px 10px;
     font-size: 12px;
     line-height: 1.5;
     border-radius: 1px

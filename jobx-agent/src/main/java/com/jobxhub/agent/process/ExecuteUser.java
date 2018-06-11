@@ -64,7 +64,7 @@ public class ExecuteUser {
         return exitCode;
     }
 
-    public List<String> buildCommand(final String user, final List<String> command) {
+    public static List<String> buildCommand(final String user, final List<String> command) {
         final List<String> commandList = new ArrayList<String>();
         commandList.add(Constants.JOBX_EXECUTE_AS_USER_LIB_PATH);
         commandList.add(user);

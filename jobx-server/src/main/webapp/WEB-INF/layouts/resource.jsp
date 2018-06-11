@@ -78,6 +78,16 @@
     <script type="text/javascript" src="${contextPath}/static/js/cropper/cropper.js?resId=${resourceId}" ></script>
     <script type="text/javascript" src="${contextPath}/static/js/jobx.cropper.js?resId=${resourceId}" ></script>
 
+
+    <!--  Form Related -->
+    <script src="${contextPath}/static/js/chosen.min.js"></script> <!-- Custom Multi Select -->
+    <script src="${contextPath}/static/js/icheck.js"></script> <!-- Custom Checkbox + Radio -->
+    <script src="${contextPath}/static/js/autosize.min.js"></script> <!-- Textare autosize -->
+    <script src="${contextPath}/static/js/toggler.min.js"></script> <!-- Toggler -->
+    <script src="${contextPath}/static/js/input-mask.min.js"></script> <!-- Input Mask -->
+    <script src="${contextPath}/static/js/spinner.min.js"></script> <!-- Spinner -->
+    <script src="${contextPath}/static/js/slider.min.js"></script> <!-- Input Slider -->
+
     <!--flot
     <script type="text/javascript" src="${contextPath}/static/js/flot/jquery.flot.js?resId=${resourceId}" ></script>
     <script type="text/javascript" src="${contextPath}/static/js/flot/jquery.flot.pie.js?resId=${resourceId}" ></script>

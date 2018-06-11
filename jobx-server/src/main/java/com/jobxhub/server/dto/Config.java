@@ -34,6 +34,7 @@ public class Config implements Serializable {
     private String template;
     private String smtpHost;
     private Integer smtpPort;
+    private String execUser;
     private String version;
 
     public void transform(ConfigBean configBean) {
@@ -114,6 +115,13 @@ public class Config implements Serializable {
         this.smtpPort = smtpPort;
     }
 
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
+    }
 
     public String getVersion() {
         return version;
@@ -122,19 +130,4 @@ public class Config implements Serializable {
     public void setVersion(String version) {
         this.version = version;
     }
-
-    @Override
-    public String toString() {
-        return "Config{" +
-                ", senderEmail='" + senderEmail + '\'' +
-                ", emailPassword='" + emailPassword + '\'' +
-                ", sendUrl='" + sendUrl + '\'' +
-                ", spaceTime=" + spaceTime +
-                ", template='" + template + '\'' +
-                ", smtpHost='" + smtpHost + '\'' +
-                ", smtpPort=" + smtpPort +
-                '}';
-    }
-
-
 }

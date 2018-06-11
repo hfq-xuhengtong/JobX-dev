@@ -25,13 +25,9 @@
         </dependency>
         <dependency>
             <groupId>com.jobxhub</groupId>
-            <artifactId>jobx-native</artifactId>
+            <artifactId>jobx-executor</artifactId>
             <version>RELEASE</version>
             <type>so</type>
-        </dependency>
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
         </dependency>
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>

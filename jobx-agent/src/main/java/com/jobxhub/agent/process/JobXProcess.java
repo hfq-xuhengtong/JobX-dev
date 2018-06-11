@@ -58,6 +58,7 @@ public class JobXProcess {
     private File logFile;
     private volatile Process process;
     private String runAsUser;
+    private final String runAsUserBinary = Constants.JOBX_EXECUTE_AS_USER_LIB_PATH;
 
     public JobXProcess(String command, int timeout, String pid, String runAsUser) {
         this.workingDir = IOUtils.getTmpdir();
@@ -68,11 +69,11 @@ public class JobXProcess {
         this.startupLatch = new CountDownLatch(1);
         this.completeLatch = new CountDownLatch(1);
         this.runAsUser = runAsUser;
+        List<String> commandLine = getCommandLine(command);
         if (isRunAsUser()) {
-            ExecuteUser executeUser = new ExecuteUser();
-            this.command = executeUser.buildCommand(runAsUser,getCommandLine(command));
+            this.command = ExecuteUser.buildCommand(runAsUser,commandLine);
         }else {
-            this.command = getCommandLine(command);
+            this.command = commandLine;
         }
     }
 
@@ -218,9 +219,13 @@ public class JobXProcess {
         if (this.processId != 0 && isStarted()) {
             try {
                 if (isRunAsUser()) {
-                    String cmd =
-                            String.format("%s %s %s %d", Constants.JOBX_EXECUTE_AS_USER_LIB_PATH,
-                                    this.runAsUser, KILL_COMMAND, this.processId);
+                    String cmd = String.format(
+                                    "%s %s %s %d",
+                                    runAsUserBinary,
+                                    this.runAsUser,
+                                    KILL_COMMAND,
+                                    this.processId
+                            );
                     Runtime.getRuntime().exec(cmd);
                 } else {
                     String cmd = String.format("%s %d", KILL_COMMAND, this.processId);
@@ -245,7 +250,7 @@ public class JobXProcess {
                 try {
                     if (isRunAsUser()) {
                         String cmd =
-                                String.format("%s %s %s -9 %d", Constants.JOBX_EXECUTE_AS_USER_LIB_PATH,
+                                String.format("%s %s %s -9 %d", this.runAsUserBinary,
                                         this.runAsUser, KILL_COMMAND, this.processId);
                         Runtime.getRuntime().exec(cmd);
                     } else {
@@ -303,8 +308,12 @@ public class JobXProcess {
         }
     }
 
+    /**
+     * runUser only support linux...
+     * @return
+     */
     public boolean isRunAsUser() {
-        return CommonUtils.notEmpty(runAsUser);
+        return CommonUtils.isLinux() && CommonUtils.notEmpty(runAsUser);
     }
 
     public String getRunAsUser() {
