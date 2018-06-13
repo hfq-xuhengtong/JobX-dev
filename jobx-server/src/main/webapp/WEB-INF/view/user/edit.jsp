@@ -92,12 +92,6 @@
                     flag = false;
                 }
             });
-
-            $(window).on("load",function(){
-                $("#agent-content").mCustomScrollbar({
-                    theme:"dark"
-                });
-            });
         });
 
     </script>
@@ -170,8 +164,13 @@
                     <label class="col-lab control-label"><i class="fa fa-users" aria-hidden="true"></i>&nbsp;执行用户</label>
                     <div class="col-md-10">
                         <select name="execUser" data-placeholder="选择执行任务的用户" class="tag-select-limited select input-sm" multiple>
-                            <c:forEach var="user" items="${execUser}" varStatus="index">
-                                <option value="${user}">${user}</option>
+                            <c:forEach items="${execUser}" var="item">
+                                <c:if test="${item.value eq true}">
+                                    <option selected value="${item.key}">${item.key}</option>
+                                </c:if>
+                                <c:if test="${item.value ne true}">
+                                    <option value="${item.key}">${item.key}</option>
+                                </c:if>
                             </c:forEach>
                         </select>
                         <div class="tips"><b>*&nbsp;</b>此管理员可使用的所有的用户身份</div></br>

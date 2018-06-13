@@ -21,6 +21,8 @@
 
 package com.jobxhub.server.controller;
 
+import com.jobxhub.common.util.CommonUtils;
+import com.jobxhub.common.util.collection.HashMap;
 import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.support.JobXTools;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -113,7 +116,15 @@ public class UserController extends BaseController {
         model.addAttribute("role", roleService.getAll());
         model.addAttribute("agents", agentService.getAll());
         model.addAttribute("userAgent", userAgent);
-        model.addAttribute("execUser",configService.getExecUser());
+
+        Map<String,Boolean> execUser = new HashMap<String,Boolean>(0);
+        List<String> allExecUser = configService.getExecUser();
+        if (CommonUtils.notEmpty(user.getExecUser(),allExecUser)) {
+            for (String _execUser:allExecUser) {
+                execUser.put(_execUser,user.getExecUser().contains(_execUser));
+            }
+        }
+        model.addAttribute("execUser",execUser);
         return "/user/edit";
     }
 
