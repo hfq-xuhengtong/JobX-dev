@@ -50,10 +50,8 @@ public class VerifyController extends BaseController {
 
     @RequestMapping(value = "exp.do", method = RequestMethod.POST)
     @ResponseBody
-    public Status validateCronExp(Integer cronType, String cronExp) {
-        boolean pass = false;
-        if (cronType == 0) pass = SchedulingPattern.validate(cronExp);
-        if (cronType == 1) pass = CronExpression.isValidExpression(cronExp);
+    public Status validateCronExp(String cronExp) {
+        boolean pass = CronExpression.isValidExpression(cronExp);
         return Status.create(pass);
     }
 

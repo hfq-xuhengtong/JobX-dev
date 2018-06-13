@@ -6,7 +6,7 @@
 <!--[if IE 9 ]><html class="ie9"><![endif]-->
 <head>
     <meta charset="UTF-8">
-    <meta name="keywords" content="jobx,crontab,a better crontab,Let's crontab easy">
+    <meta name="keywords" content="JobX,Let's scheduling easy">
     <meta name="author" content="author:benjobs,wechat:wolfboys,Created by  2016" />
 
     <title>jobx</title>

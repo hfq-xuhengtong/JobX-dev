@@ -61,9 +61,6 @@ public class JobXRegistry {
     private JobService jobService;
 
     @Autowired
-    private JobXCollector jobxCollector;
-
-    @Autowired
     private AgentService agentService;
 
     @Autowired
@@ -317,14 +314,15 @@ public class JobXRegistry {
 
     public void agentUnRegister(Agent agent) {
         //mac_password
-        String registryData = String.format("%s_%s",agent.getMachineId(), agent.getPassword());
+        String registryData = String.format("%s_%s_%s",agent.getMachineId(), agent.getPassword(),agent.getPlatform());
         agents.remove(registryData);
         String registryPath = Constants.ZK_REGISTRY_AGENT_PATH + "/"+registryData;
         registryService.unRegister(registryPath);
 
-        registryData = String.format("%s_%s_%s_%s",
+        registryData = String.format("%s_%s_%s_%s_%s",
                 agent.getMachineId(),
                 agent.getPassword(),
+                agent.getPlatform(),
                 agent.getHost(),
                 agent.getPort());
 
@@ -349,15 +347,7 @@ public class JobXRegistry {
                 this.jobRemove(jobId);
             }
             Job job = this.jobService.getById(jobId);
-            Constants.CronType cronType = Constants.CronType.getByType(job.getCronType());
-            switch (cronType) {
-                case CRONTAB:
-                    this.jobxCollector.add(job);
-                    break;
-                case QUARTZ:
-                    this.schedulerService.put(job);
-                    break;
-            }
+            this.schedulerService.put(job);
             dispatchedInfo(1, jobId);
         } catch (Exception e) {
             new RuntimeException(e);
@@ -372,7 +362,6 @@ public class JobXRegistry {
             if (Constants.JOBX_CLUSTER) {
                 this.jobs.remove(jobId);
             }
-            this.jobxCollector.remove(jobId);
             this.schedulerService.remove(jobId);
             dispatchedInfo(0, jobId);
         } catch (Exception e) {

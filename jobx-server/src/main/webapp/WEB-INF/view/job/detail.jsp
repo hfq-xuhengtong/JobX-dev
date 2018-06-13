@@ -93,14 +93,6 @@
             </tr>
 
             <tr>
-                <td class="item"><i class="glyphicon glyphicon-bookmark"></i>&nbsp;规则类型：</td>
-                <td>
-                    <c:if test="${job.cronType eq 0}"><span class="span-self">crontab</span></c:if>
-                    <c:if test="${job.cronType eq 1}"><span class="span-self">quartz</span></c:if>
-                </td>
-            </tr>
-
-            <tr>
                 <td class="item"><i class="glyphicon glyphicon-filter"></i>&nbsp;时间规则：</td>
                 <td>${job.cronExp}</td>
             </tr>

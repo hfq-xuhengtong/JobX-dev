@@ -62,18 +62,6 @@ function Validata() {
         },
 
         cronExp: function () {
-            var cronType = $('input[type="radio"][name="cronType"]:checked').val();
-
-            if(cronType == 0){
-                $('#cronSelector').slideUp()
-            }
-
-            if ( !arguments[0] && cronType == 0) {
-                $("#cronTip").css("visibility","visible").html("crontab: unix/linux的时间格式表达式 ");
-            }
-            if ( !arguments[0] && cronType == 1) {
-                $("#cronTip").css("visibility","visible").html('quartz: quartz框架的时间格式表达式');
-            }
 
             var cronExp = $("#cronExp").val();
 
@@ -94,7 +82,6 @@ function Validata() {
                 type: "POST",
                 url: self.contextPath+"/verify/exp.do",
                 data: {
-                    "cronType": cronType,
                     "cronExp": cronExp
                 },
                 dataType:"json"
@@ -103,7 +90,6 @@ function Validata() {
                 if (data.status) {
                     jobx.tipOk($("#expTip"));
                 } else {
-                    self.toggle.cronTip(cronType);
                     $("#expTip").css("visibility","visible");
                     jobx.tipError($("#expTip"), "时间规则语法错误!");
                     _this.status = false;
@@ -482,17 +468,6 @@ function Validata() {
             } else {
                 $(".contact").hide();
             }
-        },
-        cronTip: function (type) {
-            if (type == 0) {
-                $("#cronTip").css("visibility","visible").html("crontab: unix/linux的时间格式表达式 ");
-            }
-            if (type == 1) {
-                $("#cronTip").css("visibility","visible").html('quartz: quartz框架的时间格式表达式');
-            }
-            if ( (arguments[1]||false) && $("#cronExp").val().length > 0) {
-                self.validata.cronExp();
-            }
         }
     };
 
@@ -502,21 +477,6 @@ function Validata() {
 Validata.prototype.ready = function () {
 
     var _this = this;
-
-    /*
-    $("#cronType0").next().click(function () {
-        _this.validata.cronExp();
-    });
-    $("#cronType0").parent().parent().click(function () {
-        _this.validata.cronExp();
-    });
-    $("#cronType1").next().click(function () {
-        _this.validata.cronExp();
-    });
-    $("#cronType1").parent().parent().click(function () {
-        _this.validata.cronExp();
-    });
-    */
 
     $("#redo01").next().click(function () {
         _this.toggle.count(true)
@@ -564,8 +524,6 @@ Validata.prototype.ready = function () {
 
     var warning = $('input[type="radio"][name="warning"]:checked').val();
     _this.toggle.contact(warning == 1);
-
-    _this.toggle.cronTip($('input[type="radio"][name="cronType"]:checked').val());
 
     $("#year,#month,#day,#week,#hour,#minutes,#seconds").click(function () {
 
@@ -623,7 +581,7 @@ Validata.prototype.ready = function () {
             return;
         }
         cronExp += year;
-        $("#expTip").css("visibility","visible").html('quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ? *');
+        $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ? *');
         $("#cronExp").val(cronExp);
     });
 
@@ -669,13 +627,7 @@ Validata.prototype.ready = function () {
         // $('#cronSelector').slideUp();
     }).focus(function () {
         $('#cronSelector').slideDown();
-        if ($('#cronType0').prop("checked")) {
-            $("#cronTip").css("visibility","visible").html("crontab: unix/linux的时间格式表达式 ");
-            $("#expTip").css("visibility","visible").html('crontab: 请采用unix/linux的时间格式表达式,如 00 01 * * *');
-        } else {
-            $("#cronTip").css("visibility","visible").html('quartz: quartz框架的时间格式表达式');
-            $("#expTip").css("visibility","visible").html('quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
-        }
+        $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
     }).bind('input propertychange change', function() {
         _this.validata.cronExp();
     });

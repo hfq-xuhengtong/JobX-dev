@@ -42,7 +42,6 @@ public class Job implements Serializable {
     private Long agentId;
     private String agentName;
     private String jobName;
-    private Integer cronType;
     private String cronExp;
     /**
      * 当前作业的执行身份
@@ -136,14 +135,6 @@ public class Job implements Serializable {
 
     public void setJobName(String jobName) {
         this.jobName = jobName;
-    }
-
-    public Integer getCronType() {
-        return cronType;
-    }
-
-    public void setCronType(Integer cronType) {
-        this.cronType = cronType;
     }
 
     public String getCronExp() {

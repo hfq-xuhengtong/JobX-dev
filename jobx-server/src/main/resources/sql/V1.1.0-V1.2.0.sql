@@ -61,7 +61,6 @@ alter table `t_job` change column `userId` `user_id` bigint(20);
 alter table `t_job` change column `jobType` `job_type` tinyint(1);
 alter table `t_job` change column `jobName` `job_name` varchar(50);
 alter table `t_job` change column `cronExp` `cron_exp` varchar(255);
-alter table `t_job` change column `cronType` `cron_type` tinyint(1);
 alter table `t_job` change column `emailAddress` `email` text;
 alter table `t_job` change column `mobiles` `mobile` text;
 alter table `t_job` change column `redo` `redo` bit(1);
@@ -83,6 +82,7 @@ alter table `t_job` drop column `flowId`;
 alter table `t_job` drop column `flowNum`;
 alter table `t_job` drop column `lastChild`;
 alter table `t_job` drop column `runModel`;
+alter table `t_job` drop column `cronType`;
 
 --log
 alter table `t_log` change column `logId` `log_id` bigint(20) auto_increment;

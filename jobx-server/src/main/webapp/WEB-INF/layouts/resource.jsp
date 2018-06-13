@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="description" content="jobx">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="keywords" content="jobx,crontab,a better crontab,Let's crontab easy">
+    <meta name="keywords" content="JobX,Let's scheduling easy">
     <meta name="author" content="author:benjobs,wechat:wolfboys,Created by 2016" />
 
     <!-- CSS -->

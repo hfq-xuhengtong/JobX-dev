@@ -34,7 +34,6 @@ public class JobBean {
     private Long agentId;
 
     private String jobName;
-    private Integer cronType;
     private String cronExp;
 
     /**
@@ -121,14 +120,6 @@ public class JobBean {
 
     public void setJobName(String jobName) {
         this.jobName = jobName;
-    }
-
-    public Integer getCronType() {
-        return cronType;
-    }
-
-    public void setCronType(Integer cronType) {
-        this.cronType = cronType;
     }
 
     public String getCronExp() {

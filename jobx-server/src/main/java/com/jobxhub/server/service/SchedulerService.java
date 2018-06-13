@@ -22,10 +22,8 @@
 
 package com.jobxhub.server.service;
 
-import com.jobxhub.server.job.JobXCollector;
 import com.jobxhub.server.job.JobXRegistry;
 import com.jobxhub.server.dto.Job;
-import com.jobxhub.server.support.JobXTools;
 import org.quartz.*;
 import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
@@ -48,9 +46,6 @@ public final class SchedulerService {
 
     @Autowired
     private JobService jobService;
-
-    @Autowired
-    private JobXCollector jobxCollector;
 
     @Autowired
     private JobXRegistry jobxRegistry;
@@ -140,12 +135,6 @@ public final class SchedulerService {
     }
 
     public void initJob() throws SchedulerException {
-        //crontab
-        it.sauronsoftware.cron4j.Scheduler scheduler = new it.sauronsoftware.cron4j.Scheduler();
-        scheduler.addTaskCollector(jobxCollector);
-        scheduler.start();
-
-        //quartz
         this.quartzScheduler = new StdSchedulerFactory().getScheduler();
         this.startQuartz();
     }

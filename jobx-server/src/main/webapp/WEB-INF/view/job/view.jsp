@@ -61,9 +61,6 @@
             $("#sagentId").change(function () {
                 jobObj.changeUrl();
             });
-            $("#cronType").change(function () {
-                jobObj.changeUrl();
-            });
             $("#jobType").change(function () {
                 jobObj.changeUrl();
             });
@@ -116,7 +113,6 @@
                             var jobName = $("#jobName").val();
                             var jobId = $("#id").val();
                             var agentId = $("#agentId").val();
-                            var cronType = $('input[type="radio"][name="cronType"]:checked').val();
                             var cronExp = $("#cronExp").val();
                             var command = $("#cmd").val();
                             var successExit = $("#successExit").val();
@@ -128,7 +124,6 @@
                                 "id": jobId,
                                 "name": jobName,
                                 "jobId": jobId,
-                                "cronType": cronType,
                                 "cronExp": cronExp,
                                 "agentId": agentId,
                                 "command": toBase64(command),
@@ -153,7 +148,6 @@
                                         alertMsg("修改成功");
                                         $("#jobName_" + jobId).html(jobName);
                                         $("#command_" + jobId).html(command);
-                                        $("#cronType_" + jobId).html(cronType == "0" ? '<img class="text-center" width="70px" src="${contextPath}/static/img/crontab_ico.png">' : '<img  class="text-center" width="70px" src="${contextPath}/static/img/quartz_ico.png">');
                                         $("#cronExp_" + jobId).html(cronExp);
                                         if (redo == "0") {
                                             $("#redo_" + jobId).html('<span color="green">否</span>');
@@ -189,19 +183,6 @@
                         $("#cronExp").val(obj.cronExp);
                         $("#cmd").val(obj.command);
                         $(".cronExpDiv").find(".tips").css("visibility","hidden");
-                        if (obj.cronType == 1) {
-                            $("#cronType1").prop("checked", true);
-                            $("#cronType1").parent().removeClass("checked").addClass("checked");
-                            $("#cronType1").parent().attr("aria-checked", true);
-                            $("#cronType0").parent().removeClass("checked");
-                            $("#cronType0").parent().attr("aria-checked", false);
-                        } else {
-                            $("#cronType0").prop("checked", true);
-                            $("#cronType0").parent().removeClass("checked").addClass("checked");
-                            $("#cronType0").parent().attr("aria-checked", true);
-                            $("#cronType1").parent().removeClass("checked");
-                            $("#cronType1").parent().attr("aria-checked", false);
-                        }
                         if (obj.redo == 1) {
                             toggle.count.show();
                             $("#redo1").prop("checked", true);
@@ -247,11 +228,10 @@
             changeUrl:function () {
                 var pageSize = $("#size").val()||${pageBean.pageSize};
                 var agentId = $("#sagentId").val();
-                var cronType = $("#cronType").val();
                 var keyWord = $("#keyWord").val().trim();
                 var jobType = $("#jobType").val();
                 var redo = $("#sredo").val();
-                window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&jobName=" + keyWord + "&cronType=" + cronType + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize;
+                window.location.href = "${contextPath}/job/view.htm?agentId=" + agentId + "&jobName=" + keyWord + "&jobType=" + jobType + "&redo=" + redo + "&pageSize=" + pageSize;
             },
             copyURL:function (jobId,token) {
                 var clipboard =  new Clipboard('.fa-copy',{
@@ -463,14 +443,6 @@
                 </select>
 
                 &nbsp;&nbsp;&nbsp;
-                <label for="cronType">规则类型：</label>
-                <select id="cronType" name="cronType" class="select-jobx w80">
-                    <option value="">全部</option>
-                    <option value="0" ${job.cronType eq 0 ? 'selected' : ''}>crontab</option>
-                    <option value="1" ${job.cronType eq 1 ? 'selected' : ''}>quartz</option>
-                </select>
-
-                &nbsp;&nbsp;&nbsp;
                 <label for="sredo">重跑：</label>
                 <select id="sredo" name="sredo" class="select-jobx w60">
                     <option value="">全部</option>
@@ -488,9 +460,9 @@
                 <th>名称</th>
                 <th>执行器</th>
                 <th>作业人</th>
+                <th>执行身份</th>
                 <th>执行命令</th>
                 <th>作业类型</th>
-                <th>规则类型</th>
                 <th>时间规则</th>
                 <th class="text-center">
                      <i class="icon-time bigger-110 hidden-480"></i>操作
@@ -510,6 +482,7 @@
                     <c:if test="${permission eq false}">
                         <td>${r.operateUname}</td>
                     </c:if>
+                    <td>${r.execUser}</td>
                     <td style="width: 25%">
                         <div class="jobx_command">
                             <a href="#" title="${cron:escapeHtml(r.command)}" class="dot-ellipsis dot-resize-update" onclick="jobObj.editCmd('${r.jobId}')" id="command_${r.jobId}">
@@ -520,15 +493,6 @@
                     <td>
                         <c:if test="${r.jobType eq 0}">单一作业</c:if>
                         <c:if test="${r.jobType eq 1}">流程作业</c:if>
-                    </td>
-
-                    <td id="cronType_${r.jobId}">
-                        <c:if test="${r.cronType eq 0}">
-                            <img class="text-center" width="70px" src="${contextPath}/static/img/crontab_ico.png">
-                        </c:if>
-                        <c:if test="${r.cronType eq 1}">
-                            <img class="text-center" width="70px" src="${contextPath}/static/img/quartz_ico.png">
-                        </c:if>
                     </td>
 
                     <td id="cronExp_${r.jobId}">
@@ -627,18 +591,10 @@
                             </div>
                         </div>
                         <div class="form-group cronExpDiv">
-                            <label class="col-lab control-label wid100">规则类型&nbsp;&nbsp;&nbsp;</label>
-                            <div class="col-md-9">
-                                <label for="cronType0" class="radio-label"><input type="radio" name="cronType" value="0" id="cronType0" checked>crontab&nbsp;&nbsp;&nbsp;</label>
-                                <label for="cronType1" class="radio-label"><input type="radio" name="cronType" value="1" id="cronType1">quartz</label>&nbsp;&nbsp;&nbsp;
-                                </br><span class="tips none" id="cronTip" tip="crontab: unix/linux的时间格式表达式">crontab: unix/linux的时间格式表达式</span>
-                            </div>
-                        </div>
-                        <div class="form-group cronExpDiv">
                             <label for="cronExp" class="col-lab control-label wid100">时间规则&nbsp;<b>*</b></label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" id="cronExp" name="cronExp">
-                                <span class="tips none" id="expTip" tip="请采用unix/linux的时间格式表达式,如 00 01 * * *">请采用unix/linux的时间格式表达式,如 00 01 * * *</span>
+                                <span class="tips none" id="expTip" tip="请采用quartz框架的时间格式表达式">请采用quartz框架的时间格式表达式</span>
                             </div>
                         </div>
                         <div class="form-group">

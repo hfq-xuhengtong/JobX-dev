@@ -26,9 +26,6 @@ public class JobFlow {
 
     private String flowName;//工作流名称.
 
-    //表达式类型
-    private Integer cronType;
-
     //表达式
     private String cronExp;
 
@@ -54,14 +51,6 @@ public class JobFlow {
 
     public void setFlowName(String flowName) {
         this.flowName = flowName;
-    }
-
-    public Integer getCronType() {
-        return cronType;
-    }
-
-    public void setCronType(Integer cronType) {
-        this.cronType = cronType;
     }
 
     public String getCronExp() {

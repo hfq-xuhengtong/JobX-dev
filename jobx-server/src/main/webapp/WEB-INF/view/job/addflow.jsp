@@ -140,10 +140,6 @@
                 changeUrl();
             });
 
-            $("#cronType").change(function () {
-                changeUrl();
-            });
-
             $("#searchJobName").blur(function () {
                 changeUrl();
             });
@@ -255,14 +251,12 @@
         
         function changeUrl() {
             var agentId = $("#sagentId").val();
-            var cronType = $("#cronType").val();
             var searchJobName = $("#searchJobName").val();
             ajax({
                 url:"${contextPath}/job/search.do",
                 type: "post",
                 data: {
                     "agentId":agentId,
-                    "cronType":cronType,
                     "jobName":searchJobName
                 }
             },function (pageBean) {
@@ -357,19 +351,10 @@
                 </div>
 
                 <div class="form-group cronExpDiv">
-                    <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-bookmark"></i>&nbsp;&nbsp;规则类型&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <div class="col-md-10">
-                        <label for="cronType0" class="radio-label"><input type="radio" name="cronType" value="0" id="cronType0" checked>crontab&nbsp;&nbsp;&nbsp;</label>
-                        <label for="cronType1" class="radio-label"><input type="radio" name="cronType" value="1" id="cronType1">quartz</label>&nbsp;&nbsp;&nbsp;
-                        </br><span class="tips" id="cronTip" tip="crontab: unix/linux的时间格式表达式">crontab: unix/linux的时间格式表达式</span>
-                    </div>
-                </div>
-
-                <div class="form-group cronExpDiv">
                     <label for="cronExp" class="col-lab control-label wid150"><i class="glyphicon glyphicon-filter"></i>&nbsp;&nbsp;时间规则&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="cronExp" name="cronExp">
-                        <span class="tips" id="expTip" tip="请采用unix/linux的时间格式表达式,如 00 01 * * *">请采用unix/linux的时间格式表达式,如 00 01 * * *</span>
+                        <span class="tips" id="expTip" tip="请采用quartz框架的时间格式表达式">请采用quartz框架的时间格式表达式</span>
                     </div>
                 </div>
 
@@ -634,13 +619,6 @@
                                 <c:forEach var="d" items="${agents}">
                                     <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
                                 </c:forEach>
-                            </select>
-                            &nbsp;&nbsp;&nbsp;
-                            <label for="cronType">规则类型：</label>
-                            <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
-                                <option value="">全部</option>
-                                <option value="0" ${cronType eq 0 ? 'selected' : ''}>crontab</option>
-                                <option value="1" ${cronType eq 1 ? 'selected' : ''}>quartz</option>
                             </select>
                             <input class="pull-right message-search" placeholder="根据作业名称搜索...." type="text" id="searchJobName">
                         </div>

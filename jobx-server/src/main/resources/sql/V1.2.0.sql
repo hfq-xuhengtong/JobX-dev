@@ -57,7 +57,6 @@ create table `t_job` (
   `comment` text,
   `exec_user` varchar(50),
   `cron_exp` varchar(255),
-  `cron_type` tinyint(1),
   `warning` bit(1),
   `email` text,
   `mobile` text,
