@@ -91,7 +91,7 @@ public class Constants {
 
     public static final String PARAM_EXECTYPE_KEY = "execType";
 
-    public static final String PARAM_RUNAS_KEY = "runAsUser";
+    public static final String PARAM_EXECUSER_KEY = "runAsUser";
 
     public static final String PARAM_BACKUP_KEY = "backup";
 

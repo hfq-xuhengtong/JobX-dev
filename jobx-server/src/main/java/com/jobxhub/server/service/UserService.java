@@ -55,6 +55,9 @@ public class UserService {
     private UserDao userDao;
 
     @Autowired
+    private ConfigService configService;
+
+    @Autowired
     private UserAgentService userAgentService;
 
     public int login(HttpServletRequest request, String userName, String password) throws IOException {
@@ -75,6 +78,8 @@ public class UserService {
         if (saltPassword.equals(user.getPassword())) {
             if (user.getRoleId() == 999L) {
                 httpSession.setAttribute(Constants.PARAM_PERMISSION_KEY, true);
+                //超管拥有所有的用户执行身份...
+                user.setExecUser(configService.getExecUser());
             } else {
                 httpSession.setAttribute(Constants.PARAM_PERMISSION_KEY, false);
             }

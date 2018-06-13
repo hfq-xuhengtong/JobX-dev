@@ -111,6 +111,7 @@ public class ExecuteService {
                     request.putParam(Constants.PARAM_PID_KEY, record.getPid());
                     request.putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
                     request.putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout());
+                    request.putParam(Constants.PARAM_EXECUSER_KEY, job.getExecUser());
                     caller.sentAsync(request,invokeCallback);
                 } catch (Exception e) {
                     if ( !(e instanceof PingException) ) {

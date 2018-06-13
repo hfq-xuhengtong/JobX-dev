@@ -125,6 +125,17 @@ function Validata() {
             }
         },
 
+        platform:function() {
+            var platform = $("#agentId").find("option:selected").attr("platform");
+            if (platform==1) {
+                var execUser = $("#execUser").val();
+                if (!execUser) {
+                    jobx.tipError("#execUser","请选择执行身份");
+                    this.status = false;
+                }
+            }
+        },
+
         successExit: function () {
             var prefix = arguments[0] || "";
             var successExit = $("#successExit" + prefix).val();
@@ -235,6 +246,7 @@ function Validata() {
             var jobType = $("#jobType").val();
             if (jobType == 0) {
                 this.command();
+                this.platform();
                 this.successExit();
             } else {
 

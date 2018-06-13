@@ -37,6 +37,10 @@ public class JobBean {
     private Integer cronType;
     private String cronExp;
 
+    /**
+     * 当前作业的执行身份
+     */
+    private String execUser;
     private String command;
 
     private String comment;
@@ -133,6 +137,14 @@ public class JobBean {
 
     public void setCronExp(String cronExp) {
         this.cronExp = cronExp;
+    }
+
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
     }
 
     public String getCommand() {

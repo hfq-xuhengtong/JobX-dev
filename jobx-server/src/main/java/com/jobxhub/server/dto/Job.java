@@ -44,6 +44,10 @@ public class Job implements Serializable {
     private String jobName;
     private Integer cronType;
     private String cronExp;
+    /**
+     * 当前作业的执行身份
+     */
+    private String execUser;
     private String command;
     private String comment;
     private String successExit;
@@ -150,6 +154,14 @@ public class Job implements Serializable {
         this.cronExp = cronExp;
     }
 
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
+    }
+
     public String getCommand() {
         return command;
     }
@@ -254,6 +266,30 @@ public class Job implements Serializable {
         this.email = email;
     }
 
+    public String getCallbackURL() {
+        return callbackURL;
+    }
+
+    public void setCallbackURL(String callbackURL) {
+        this.callbackURL = callbackURL;
+    }
+
+    public Boolean getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Boolean cluster) {
+        this.cluster = cluster;
+    }
+
+    public List<Agent> getClusterAgent() {
+        return clusterAgent;
+    }
+
+    public void setClusterAgent(List<Agent> clusterAgent) {
+        this.clusterAgent = clusterAgent;
+    }
+
     public Integer getTimeout() {
         return timeout;
     }
@@ -294,32 +330,12 @@ public class Job implements Serializable {
         this.user = user;
     }
 
-    public String getCallbackURL() {
-        return callbackURL;
-    }
-
-    public void setCallbackURL(String callbackURL) {
-        this.callbackURL = callbackURL;
-    }
-
-    public Boolean getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Boolean cluster) {
-        this.cluster = cluster;
-    }
-
-    public List<Agent> getClusterAgent() {
-        return clusterAgent;
-    }
-
-    public void setClusterAgent(List<Agent> clusterAgent) {
-        this.clusterAgent = clusterAgent;
-    }
-
     public String getOperateUname() {
         return operateUname;
+    }
+
+    public void setOperateUname(String operateUname) {
+        this.operateUname = operateUname;
     }
 
     public String getInputParam() {
@@ -330,11 +346,7 @@ public class Job implements Serializable {
         this.inputParam = inputParam;
     }
 
-    public void setOperateUname(String operateUname) {
-        this.operateUname = operateUname;
-    }
-
-    public void callBack(Response response,Constants.ExecType execType) {
+    public void callBack(Response response, Constants.ExecType execType) {
         if (execType.getStatus().equals(Constants.ExecType.API.getStatus())) {
             if (CommonUtils.notEmpty(this.getCallbackURL())) {
                 try {

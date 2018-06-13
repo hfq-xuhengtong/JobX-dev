@@ -29,6 +29,7 @@ import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.domain.JobBean;
+import com.jobxhub.server.dto.User;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.tag.PageBean;
@@ -177,7 +178,8 @@ public class JobController extends BaseController {
                     "warning",
                     "mobile",
                     "email",
-                    "timeout"
+                    "timeout",
+                    "execUser"
             );
         }
 

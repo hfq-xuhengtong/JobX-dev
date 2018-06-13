@@ -12,6 +12,7 @@
         <result column="job_name"       property="jobName"/>
         <result column="command"        property="command"/>
         <result column="comment"        property="comment"/>
+        <result column="exec_user"      property="execUser"/>
         <result column="cron_exp"       property="cronExp"/>
         <result column="cron_type"      property="cronType"/>
         <result column="warning"        property="warning"/>
@@ -36,6 +37,7 @@
         j.job_name,
         j.command,
         j.comment,
+        j.exec_user,
         j.cron_exp,
         j.cron_type,
         j.warning,
@@ -158,6 +160,7 @@
             job_name,
             command,
             comment,
+            exec_user,
             cron_exp,
             cron_type,
             warning,
@@ -178,6 +181,7 @@
             #{jobName},
             #{command},
             #{comment},
+            #{execUser},
             #{cronExp},
             #{cronType},
             #{warning},
@@ -203,6 +207,7 @@
             job_name      =     #{jobName},
             command       =     #{command},
             comment       =     #{comment},
+            exec_user     =     #{execUser},
             cron_exp      =     #{cronExp},
             cron_type     =     #{cronType},
             warning       =     #{warning},

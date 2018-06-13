@@ -25,6 +25,7 @@ alter table `t_agent` change column `port` `port` int(10);
 alter table `t_agent` change column `proxyAgent` `proxy_id` bigint(20);
 alter table `t_agent` change column `status` `status` tinyint(1);
 alter table `t_agent` change column `updateTime` `update_time` datetime;
+alter table `t_agent` add column `platform` tinyint(1);
 alter table `t_agent` drop column `proxy`;
 
 --t_config
@@ -73,6 +74,7 @@ alter table `t_job` change column `createType` `create_type` tinyint(1);
 alter table `t_job` add column `create_type` tinyint(1);
 alter table `t_job` add column  `token` varchar(64);
 alter table `t_job` add column `pause` bit(1);
+alter table `t_job` add column `exec_user` varchar(50);
 alter table `t_job` add index qa_agent_id (`agent_id`);
 update `t_job` set `pause`=0 where `pause` is null ;
 update `t_job` set `token`=MD5(RAND()) where `token` is null;

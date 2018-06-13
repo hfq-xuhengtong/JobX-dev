@@ -132,13 +132,28 @@
 
     <script type="text/javascript">
 
-
         $(document).ready(function(){
 
             window.jobxValidata = new Validata('${contextPath}');
 
+            var platform = $("#agentId").find("option:selected").attr("platform");
+            if (platform!=1) {
+                $("#execUserDiv").hide();
+            }else {
+                $("#execUserDiv").show();
+            }
+
             $(".depen-input").change(function () {
                 graph();
+            });
+
+            $("#agentId").change(function () {
+                var platform = $(this).find("option:selected").attr("platform");
+                if (platform!=1) {
+                    $("#execUserDiv").hide();
+                }else {
+                    $("#execUserDiv").show();
+                }
             });
 
             $("#sagentId").change(function () {
@@ -452,14 +467,14 @@
                                 <c:if test="${empty agent}">
                                     <select id="agentId" name="agentId" class="form-control m-b-10 input-sm">
                                         <c:forEach var="d" items="${agents}">
-                                            <option value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
+                                            <option platform=${d.platform} value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
                                         </c:forEach>
                                     </select>
                                 </c:if>
                                 <c:if test="${!empty agent}">
                                     <input type="hidden" id="agentId" name="agentId" value="${agent.agentId}">
                                     <input type="text" class="form-control input-sm" value="${agent.name}&nbsp;&nbsp;&nbsp;${agent.host}" readonly>
-                                    <font color="red">&nbsp;*只读</font>
+                                    <label color="red">&nbsp;*只读</label>
                                 </c:if>
                                 <span class="tips">&nbsp;&nbsp;要执行此作业的机器名称和Host</span>
                             </div>
@@ -473,6 +488,18 @@
                             </div>
                         </div>
 
+                        <div class="form-group" id="execUserDiv">
+                            <label for="execUser"  class="col-lab control-label wid150"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;执行身份&nbsp;&nbsp;<b>*&nbsp;</b></label>
+                            <div class="col-md-10">
+                                <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited select input-sm" multiple>
+                                    <c:forEach items="${jobx_user.execUser}" var="item">
+                                        <option value="${item}">${item}</option>
+                                    </c:forEach>
+                                </select>
+                                <div class="tips"><b>*&nbsp;</b>执行该作业的用户身份</div></br>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="successExit" class="col-lab control-label wid150"><i class="glyphicons glyphicons-tags"></i>&nbsp;&nbsp;成功标识&nbsp;&nbsp;<b>*&nbsp;</b></label>
                             <div class="col-md-10">
@@ -481,7 +508,6 @@
                             </div>
                         </div>
                     </div>
-
 
                     <div class="tab-pane fade in" id="flow">
                         <div class="form-group">
@@ -743,6 +769,21 @@
     </div>
 
 </section>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        /* Tag Select */
+        (function(){
+            /* Limited */
+            $(".tag-select-limited").chosen({
+                max_selected_options: 1
+            });
+
+            /* Overflow */
+            $('.overflow').niceScroll();
+        })();
+    });
+</script>
 
 </body>
 

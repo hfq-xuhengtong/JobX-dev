@@ -21,6 +21,7 @@
 
 package com.jobxhub.common.util;
 
+import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.collection.HashMap;
 
 import java.io.File;
@@ -454,6 +455,73 @@ public abstract class CommonUtils implements Serializable {
         return OS.indexOf("openvms")>=0;
     }
 
+    public static boolean isUnix() {
+        boolean isUnix = isLinux();
+        if (!isUnix) {
+            isUnix = isMacOS();
+        }
+        if (!isUnix) {
+            isUnix = isMacOSX();
+        }
+        if (!isUnix) {
+            isUnix = isLinux();
+        }
+        if (!isUnix) {
+            isUnix = isDigitalUnix();
+        }
+        if (!isUnix) {
+            isUnix = isAix();
+        }
+        if (!isUnix) {
+            isUnix = isFreeBSD();
+        }
+        if (!isUnix) {
+            isUnix = isHPUX();
+        }
+        if (!isUnix) {
+            isUnix = isIrix();
+        }
+        if (!isUnix) {
+            isUnix = isMPEiX();
+        }
+        if (!isUnix) {
+            isUnix = isNetWare();
+        }
+        if (!isUnix) {
+            isUnix = isOpenVMS();
+        }
+        if (!isUnix) {
+            isUnix = isOS2();
+        }
+        if (!isUnix) {
+            isUnix = isOS390();
+        }
+        if (!isUnix) {
+            isUnix = isOSF1();
+        }
+        if (!isUnix) {
+            isUnix = isSunOS();
+        }
+        if (!isUnix) {
+            isUnix = isSolaris();
+        }
+        return isUnix;
+    }
+    /**
+     * linux内核平台 1
+     * window： 2
+     * 其他平台 0
+     */
+    public static int getPlatform(){
+        int platform = 0;
+        if (CommonUtils.isUnix()) {
+            platform = 1;
+        }
+        if (CommonUtils.isWindows()) {
+            platform = 2;
+        }
+        return platform;
+    }
     /**
      * 将String数组转化为Long数组
      *
@@ -571,6 +639,7 @@ public abstract class CommonUtils implements Serializable {
             System.out.println(val);
         }
     }
+
 
 
 }
