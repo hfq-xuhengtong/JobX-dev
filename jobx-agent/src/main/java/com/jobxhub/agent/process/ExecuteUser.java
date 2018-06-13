@@ -36,8 +36,8 @@ public class ExecuteUser {
     private final static Logger logger = LoggerFactory.getLogger(ExecuteUser.class);
 
     public ExecuteUser() {
-        if (!IOUtils.fileExists(Constants.JOBX_EXECUTE_AS_USER_LIB_PATH)) {
-            throw new RuntimeException("[JobX]not found ExecuteUser binary. Invalid Path: " + Constants.JOBX_EXECUTE_AS_USER_LIB_PATH);
+        if (!IOUtils.fileExists(Constants.JOBX_EXECUTE_AS_USER_LIB)) {
+            throw new RuntimeException("[JobX]not found ExecuteUser binary. Invalid Path: " + Constants.JOBX_EXECUTE_AS_USER_LIB);
         }
     }
 
@@ -66,7 +66,7 @@ public class ExecuteUser {
 
     public static List<String> buildCommand(final String user, final List<String> command) {
         final List<String> commandList = new ArrayList<String>();
-        commandList.add(Constants.JOBX_EXECUTE_AS_USER_LIB_PATH);
+        commandList.add(Constants.JOBX_EXECUTE_AS_USER_LIB);
         commandList.add(user);
         commandList.addAll(command);
         return commandList;

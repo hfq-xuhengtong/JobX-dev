@@ -58,7 +58,7 @@ public class JobXProcess {
     private File logFile;
     private volatile Process process;
     private String execUser;
-    private final String runAsUserBinary = Constants.JOBX_EXECUTE_AS_USER_LIB_PATH;
+    private final String runAsUserBinary = Constants.JOBX_EXECUTE_AS_USER_LIB;
 
     public JobXProcess(String command, int timeout, String pid, String execUser) {
         this.workingDir = IOUtils.getTmpdir();
