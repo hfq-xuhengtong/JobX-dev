@@ -581,7 +581,7 @@ Validata.prototype.ready = function () {
         }
         cronExp += year;
         $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ? *');
-        $("#cronExpInput").val(cronExp);
+        $("#cronExpInput").text(cronExp);
         ajax({
             type: "POST",
             url: self.contextPath+"/verify/recenttime.do",

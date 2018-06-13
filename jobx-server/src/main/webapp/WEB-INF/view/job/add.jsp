@@ -786,13 +786,21 @@
                         </tr>
                         </tbody>
                     </table>
-                    <input type="text" class="form-control input-sm" id="cronExpInput">
-                    <table class="tile textured recenttime">
-                        <tr> <td>2018-06-13 19:26:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:27:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:28:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:29:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:30:00</td> </tr>
+                    <table class="recenttime" style="border: #000 solid 1px">
+                        <tr>
+                            <td>1351234567</td>
+                            <td rowspan="5" id="cronExpInput" style="width: 100%;text-align: center;font-size: 24px;"></td>
+                        </tr>
+                        <tr><td></td></tr>
+                        <tr>
+                            <td>1351234567</td>
+                        </tr>
+                        <tr>
+                            <td>1351234567</td>
+                        </tr>
+                        <tr>
+                            <td>1351234567</td>
+                        </tr>
                     </table>
                 </div>
             </div>
