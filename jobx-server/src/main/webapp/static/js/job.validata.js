@@ -584,7 +584,7 @@ Validata.prototype.ready = function () {
         $("#cronExpInput").val(cronExp);
         ajax({
             type: "POST",
-            url: self.contextPath+"/verify/recenttime.do",
+            url: _this.contextPath+"/verify/recenttime.do",
             data: {
                 "cronExp": cronExp
             }

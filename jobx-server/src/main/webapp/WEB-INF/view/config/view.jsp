@@ -8,7 +8,6 @@
 <head>
     <script type="text/javascript">
         function clearRecord() {
-
             var startTime = $("#startTime").val();
             if (!startTime){
                 alert("请填写起始时间！");

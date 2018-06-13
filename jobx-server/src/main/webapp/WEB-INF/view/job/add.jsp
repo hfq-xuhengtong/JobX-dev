@@ -786,6 +786,7 @@
                         </tr>
                         </tbody>
                     </table>
+                    <label for="cronExpInput" class="col-lab control-label"><i class="glyphicon glyphicon-filter"></i>时间规则</label>
                     <input type="text" class="form-control input-sm" id="cronExpInput">
                     <table class="tile textured recenttime">
                         <tr> <td>2018-06-13 19:26:00</td> </tr>
