@@ -31,7 +31,7 @@ import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.IOUtils;
 import com.jobxhub.rpc.InvokeCallback;
-import com.jobxhub.server.common.Parser;
+import com.jobxhub.server.util.Parser;
 import com.jobxhub.server.job.JobXInvoker;
 import com.jobxhub.server.dto.Agent;
 import com.jobxhub.server.dto.Job;

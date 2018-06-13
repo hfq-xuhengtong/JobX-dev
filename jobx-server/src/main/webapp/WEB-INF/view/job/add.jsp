@@ -124,6 +124,24 @@
         .tab-content{
             margin-bottom: -5px;
         }
+
+        .cronSelector select {
+            width: 68px;
+        }
+
+        .cronSelector th{
+            text-align: center;
+        }
+
+        .recenttime tr td {
+            padding-left: 20px;
+            font-size: 13px;
+            padding-top: 4px;
+        }
+        .recenttime {
+            padding-top: 5px;
+            padding-bottom: 10px;
+        }
     </style>
 
     <script type="text/javascript" src="${contextPath}/static/js/job.validata.js"></script>
@@ -376,56 +394,6 @@
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="cronExp" name="cronExp">
                         <span class="tips" id="expTip" tip="请采用quartz框架的时间格式表达式">请采用quartz框架的时间格式表达式</span>
-                    </div>
-                </div>
-
-                <div id="cronSelector" class="form-group cronExpDiv" style="display: none;">
-                    <label class="col-lab control-label wid150">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <div class="col-md-10">
-                        <select id="year" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每年</option>
-                            <c:forEach var="i" begin="2018" end="2050" step="1">
-                                <option value="${i}">${i}年</option>
-                            </c:forEach>
-                        </select>
-                        <select id="month" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每月</option>
-                            <c:forEach var="i" begin="1" end="12" step="1">
-                                <option value="${i}">${i}月</option>
-                            </c:forEach>
-                        </select>
-                        <select id="day" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每日</option>
-                            <c:forEach var="i" begin="1" end="31" step="1">
-                                <option value="${i}">${i}日</option>
-                            </c:forEach>
-                        </select>
-                        <select id="week" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每星期</option>
-                            <c:forEach var="i" begin="1" end="7" step="1">
-                                <option value="${i}">星期${i}</option>
-                            </c:forEach>
-                        </select>
-                        <select id="hour" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每时</option>
-                            <c:forEach var="i" begin="0" end="23" step="1">
-                                <option value="${i}">${i}时</option>
-                            </c:forEach>
-                        </select>
-                        <select id="minutes" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每分</option>
-                            <c:forEach var="i" begin="0" end="59" step="1">
-                                <option value="${i}">${i}分</option>
-                            </c:forEach>
-                        </select>
-                        <select id="seconds" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" >每秒</option>
-                            <c:forEach var="i" begin="0" end="59" step="1">
-                                <option value="${i}">${i}秒</option>
-                            </c:forEach>
-                        </select>
-                        &nbsp;&nbsp;
-                        <button type="button" class="btn btn-sm" id="slideUp-btn" style="vertical-align:top;">收起</button>
                     </div>
                 </div>
 
@@ -725,6 +693,108 @@
                     </table>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade cronSelector" id="cronSelector" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-search">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
+                    <h4>时间表达式</h4>
+                </div>
+                <div class="modal-body" style="padding: 0px;">
+                    <table class="table tile textured" style="font-size: 13px;">
+                        <thead>
+                        <tr>
+                            <th>年</th>
+                            <th>月</th>
+                            <th>日</th>
+                            <th>星期</th>
+                            <th>小时</th>
+                            <th>分钟</th>
+                            <th>秒</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <select id="year" size="8" multiple="multiple" >
+                                    <option value="*" selected="selected">每年</option>
+                                    <c:forEach var="i" begin="2018" end="2050" step="1">
+                                        <option value="${i}">${i}年</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="month" size="8" multiple="multiple" >
+                                    <option value="*" selected="selected">每月</option>
+                                    <c:forEach var="i" begin="1" end="12" step="1">
+                                        <option value="${i}">${i}月</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="day" size="8" multiple="multiple" >
+                                    <option value="*" selected="selected">每日</option>
+                                    <c:forEach var="i" begin="1" end="31" step="1">
+                                        <option value="${i}">${i}日</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="week" size="8" multiple="multiple" >
+                                    <option value="*" selected="selected">每星期</option>
+                                    <c:forEach var="i" begin="1" end="7" step="1">
+                                        <option value="${i}">星期${i}</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="hour" size="8" multiple="multiple" >
+                                    <option value="*" selected="selected">每时</option>
+                                    <c:forEach var="i" begin="0" end="23" step="1">
+                                        <option value="${i}">${i}时</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="minutes" size="8" multiple="multiple" >
+                                    <option value="*" selected="selected">每分</option>
+                                    <c:forEach var="i" begin="0" end="59" step="1">
+                                        <option value="${i}">${i}分</option>
+                                    </c:forEach>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="seconds" size="8" multiple="multiple" >
+                                    <option value="*" >每秒</option>
+                                    <c:forEach var="i" begin="0" end="59" step="1">
+                                        <c:choose>
+                                            <c:when test="${i eq 0}">
+                                                <option selected value="${i}">${i}秒</option>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <option value="${i}">${i}秒</option>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                    </c:forEach>
+                                </select>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="text" class="form-control input-sm" id="cronExpInput">
+                    <table class="tile textured recenttime">
+                        <tr> <td>2018-06-13 19:26:00</td> </tr>
+                           <tr>  <td>2018-06-13 19:27:00</td> </tr>
+                           <tr>  <td>2018-06-13 19:28:00</td> </tr>
+                           <tr>  <td>2018-06-13 19:29:00</td> </tr>
+                           <tr>  <td>2018-06-13 19:30:00</td> </tr>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

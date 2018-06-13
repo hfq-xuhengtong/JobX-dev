@@ -112,7 +112,7 @@ public class DashboardController extends BaseController {
 
         model.addAttribute("singleton", singleton);
         model.addAttribute("flow", flow);
-        model.addAttribute("job", singleton+failed);
+        model.addAttribute("job", singleton+flow);
 
         /**
          * 成功作业,自动执行

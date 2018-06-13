@@ -52,14 +52,14 @@
                 $("#agent_number_prop").attr("data-percentage",agent_number+"%").css("width",agent_number+"%");
             }
 
-            var job_number = (parseFloat("${singleton}")/parseFloat("${job}")*100).toFixed(2);
+        /*    var job_number = (parseFloat("${singleton}")/parseFloat("${job}")*100).toFixed(2);
             if(isNaN(job_number)){
                 $("#job_number").text(0).attr("data-value",0);
                 $("#job_number_prop").attr("data-percentage","0%").css("width","0%");
             }else {
                 $("#job_number").text(job_number).attr("data-value",job_number);
                 $("#job_number_prop").attr("data-percentage",job_number+"%").css("width",job_number+"%");
-            }
+            }*/
 
             var ok_number = (parseFloat("${successAutoRecord}")/parseFloat("${successRecord}")*100).toFixed(2);
             if(isNaN(ok_number)){
@@ -189,7 +189,6 @@
                                 <h2 data-animation-duration="1500" data-value="0" class="media-heading animate-number">${job}</h2>
                             </div>
                         </div>
-
                         <div class="progress-list">
                             <div class="details">
                                 <div class="title">作业类型(单一任务/流程任务)</div>
@@ -202,7 +201,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 

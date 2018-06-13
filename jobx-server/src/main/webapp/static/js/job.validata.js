@@ -78,14 +78,13 @@ function Validata() {
             }
 
             var _this = this;
-            $.ajax({
+            ajax({
                 type: "POST",
                 url: self.contextPath+"/verify/exp.do",
                 data: {
                     "cronExp": cronExp
-                },
-                dataType:"json"
-            }).done(function (data) {
+                }
+            },function (data) {
                 _this.cronExpRemote = true;
                 if (data.status) {
                     jobx.tipOk($("#expTip"));
@@ -94,11 +93,11 @@ function Validata() {
                     jobx.tipError($("#expTip"), "时间规则语法错误!");
                     _this.status = false;
                 }
-            }).fail(function () {
+            },function () {
                 _this.cronExpRemote = true;
                 jobx.tipError($("#expTip"), "网络请求错误,请重试!");
                 _this.status = false;
-            });
+            })
         },
 
         command: function () {
@@ -582,7 +581,18 @@ Validata.prototype.ready = function () {
         }
         cronExp += year;
         $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ? *');
-        $("#cronExp").val(cronExp);
+        $("#cronExpInput").val(cronExp);
+        ajax({
+            type: "POST",
+            url: self.contextPath+"/verify/recenttime.do",
+            data: {
+                "cronExp": cronExp
+            }
+        },function (data) {
+
+
+        },function () {
+        });
     });
 
     $("#slideUp-btn").click(function () {
@@ -624,9 +634,8 @@ Validata.prototype.ready = function () {
 
     $("#cronExp").blur(function () {
         _this.validata.cronExp();
-        // $('#cronSelector').slideUp();
     }).focus(function () {
-        $('#cronSelector').slideDown();
+        $('#cronSelector').modal("show");
         $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
     }).bind('input propertychange change', function() {
         _this.validata.cronExp();

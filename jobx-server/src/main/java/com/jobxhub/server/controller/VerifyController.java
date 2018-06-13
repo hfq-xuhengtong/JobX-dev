@@ -24,7 +24,7 @@ package com.jobxhub.server.controller;
 import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.server.dto.Agent;
-import it.sauronsoftware.cron4j.SchedulingPattern;
+import com.jobxhub.server.util.PageUtils;
 import com.jobxhub.server.service.AgentService;
 import com.jobxhub.server.service.ExecuteService;
 import com.jobxhub.server.dto.Status;
@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -55,6 +56,11 @@ public class VerifyController extends BaseController {
         return Status.create(pass);
     }
 
+    @RequestMapping(value = "recenttime.do", method = RequestMethod.POST)
+    @ResponseBody
+    public List<String> getRecentTriggerTime(String cronExp) {
+       return PageUtils.getRecentTriggerTime(cronExp);
+    }
     /**
      * 仅检查是否可以连接
      * @return
