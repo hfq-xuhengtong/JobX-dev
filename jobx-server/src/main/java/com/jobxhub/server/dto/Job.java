@@ -76,6 +76,9 @@ public class Job implements Serializable {
 
     private String inputParam;//手动触发时的参数
 
+    private Integer alarmCode;//通知类型
+    private Integer alarmType;//通知方式
+
     public Job() {
 
     }
@@ -320,6 +323,23 @@ public class Job implements Serializable {
 
     public String getOperateUname() {
         return operateUname;
+    }
+
+
+    public Integer getAlarmCode() {
+        return alarmCode;
+    }
+
+    public void setAlarmCode(Integer alarmCode) {
+        this.alarmCode = alarmCode;
+    }
+
+    public Integer getAlarmType() {
+        return alarmType;
+    }
+
+    public void setAlarmType(Integer alarmType) {
+        this.alarmType = alarmType;
     }
 
     public String getInputParam() {

@@ -82,6 +82,10 @@ public class JobBean {
     @Transient
     private String operateUname;
 
+
+    private Integer alarmCode;//告警码
+    private Integer alarmType;//告警方式
+
     public JobBean() {}
 
     public JobBean(Job job){

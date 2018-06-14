@@ -21,6 +21,7 @@
 package com.jobxhub.common;
 
 import com.jobxhub.common.util.CommonUtils;
+import com.jobxhub.common.util.EnumUtil;
 import com.jobxhub.common.util.PropertyPlaceholder;
 import com.jobxhub.common.util.SystemPropertyUtils;
 
@@ -403,7 +404,7 @@ public class Constants {
         }
     }
 
-    public enum ResultStatus {
+    public enum ResultStatus implements EnumUtil.CommonEnum {
         FAILED(0x0, "失败"),
         SUCCESSFUL(0x1, "成功"),
         KILLED(0x2, "被杀"),
@@ -432,6 +433,12 @@ public class Constants {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+
+        @Override
+        public int getCode() {
+            return status;
         }
     }
 
