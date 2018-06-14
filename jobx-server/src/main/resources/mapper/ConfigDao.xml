@@ -29,4 +29,10 @@
         </if>
 	</update>
 
+    <select id="getExecUser" resultType="java.lang.String">
+        select config_val
+        from t_config
+        where config_key="exec_user"
+    </select>
+
 </mapper>

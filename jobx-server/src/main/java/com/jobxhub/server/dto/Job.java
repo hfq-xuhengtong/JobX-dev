@@ -42,8 +42,11 @@ public class Job implements Serializable {
     private Long agentId;
     private String agentName;
     private String jobName;
-    private Integer cronType;
     private String cronExp;
+    /**
+     * 当前作业的执行身份
+     */
+    private String execUser;
     private String command;
     private String comment;
     private String successExit;
@@ -137,20 +140,20 @@ public class Job implements Serializable {
         this.jobName = jobName;
     }
 
-    public Integer getCronType() {
-        return cronType;
-    }
-
-    public void setCronType(Integer cronType) {
-        this.cronType = cronType;
-    }
-
     public String getCronExp() {
         return cronExp;
     }
 
     public void setCronExp(String cronExp) {
         this.cronExp = cronExp;
+    }
+
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
     }
 
     public String getCommand() {
@@ -257,6 +260,30 @@ public class Job implements Serializable {
         this.email = email;
     }
 
+    public String getCallbackURL() {
+        return callbackURL;
+    }
+
+    public void setCallbackURL(String callbackURL) {
+        this.callbackURL = callbackURL;
+    }
+
+    public Boolean getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Boolean cluster) {
+        this.cluster = cluster;
+    }
+
+    public List<Agent> getClusterAgent() {
+        return clusterAgent;
+    }
+
+    public void setClusterAgent(List<Agent> clusterAgent) {
+        this.clusterAgent = clusterAgent;
+    }
+
     public Integer getTimeout() {
         return timeout;
     }
@@ -297,49 +324,12 @@ public class Job implements Serializable {
         this.user = user;
     }
 
-    public String getCallbackURL() {
-        return callbackURL;
-    }
-
-    public void setCallbackURL(String callbackURL) {
-        this.callbackURL = callbackURL;
-    }
-
-    public Boolean getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Boolean cluster) {
-        this.cluster = cluster;
-    }
-
-    public List<Agent> getClusterAgent() {
-        return clusterAgent;
-    }
-
-    public void setClusterAgent(List<Agent> clusterAgent) {
-        this.clusterAgent = clusterAgent;
-    }
-
     public String getOperateUname() {
         return operateUname;
     }
 
-
-    public Integer getAlarmCode() {
-        return alarmCode;
-    }
-
-    public void setAlarmCode(Integer alarmCode) {
-        this.alarmCode = alarmCode;
-    }
-
-    public Integer getAlarmType() {
-        return alarmType;
-    }
-
-    public void setAlarmType(Integer alarmType) {
-        this.alarmType = alarmType;
+    public void setOperateUname(String operateUname) {
+        this.operateUname = operateUname;
     }
 
     public String getInputParam() {
@@ -350,11 +340,7 @@ public class Job implements Serializable {
         this.inputParam = inputParam;
     }
 
-    public void setOperateUname(String operateUname) {
-        this.operateUname = operateUname;
-    }
-
-    public void callBack(Response response,Constants.ExecType execType) {
+    public void callBack(Response response, Constants.ExecType execType) {
         if (execType.getStatus().equals(Constants.ExecType.API.getStatus())) {
             if (CommonUtils.notEmpty(this.getCallbackURL())) {
                 try {

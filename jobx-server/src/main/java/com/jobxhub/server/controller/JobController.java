@@ -29,6 +29,7 @@ import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.common.util.collection.ParamsMap;
 import com.jobxhub.server.annotation.RequestRepeat;
 import com.jobxhub.server.domain.JobBean;
+import com.jobxhub.server.dto.User;
 import com.jobxhub.server.support.JobXTools;
 import com.jobxhub.server.service.*;
 import com.jobxhub.server.tag.PageBean;
@@ -70,6 +71,9 @@ public class JobController extends BaseController {
 
     @Autowired
     private SchedulerService schedulerService;
+
+    @Autowired
+    private UserService userService;
 
     @RequestMapping("view.htm")
     public String view(HttpSession session, HttpServletRequest request, PageBean pageBean, Job job, Model model) {
@@ -124,6 +128,7 @@ public class JobController extends BaseController {
         }
         List<Agent> agents = agentService.getOwnerAgents(session);
         model.addAttribute("agents", agents);
+        model.addAttribute("execUser",userService.getExecUser(JobXTools.getUserId(session)));
         return "/job/add";
     }
 
@@ -140,13 +145,13 @@ public class JobController extends BaseController {
 
     @RequestMapping(value = "search.do", method = RequestMethod.POST)
     @ResponseBody
-    public PageBean<Job> search(HttpSession session, Long agentId, Integer  cronType, String jobName, Integer pageNo) {
+    public PageBean<Job> search(HttpSession session, Long agentId,String jobName, Integer pageNo) {
         PageBean pageBean = new PageBean<JobBean>(6);
         pageBean.setPageNo(pageNo == null?1:pageNo);
-        if (agentId == null && cronType == null && CommonUtils.isEmpty(jobName)) {
+        if (agentId == null && CommonUtils.isEmpty(jobName)) {
             return pageBean;
         }
-        return jobService.search(session,pageBean,agentId,cronType,jobName);
+        return jobService.search(session,pageBean,agentId,jobName);
     }
 
     @RequestMapping(value = "save.do", method = RequestMethod.POST)
@@ -165,7 +170,6 @@ public class JobController extends BaseController {
                     job,
                     jobParam,
                     "jobName",
-                    "cronType",
                     "cronExp",
                     "command",
                     "comment",
@@ -177,7 +181,8 @@ public class JobController extends BaseController {
                     "warning",
                     "mobile",
                     "email",
-                    "timeout"
+                    "timeout",
+                    "execUser"
             );
         }
 
@@ -276,7 +281,6 @@ public class JobController extends BaseController {
     public Status edit(HttpSession session, Job job) throws Exception {
         Job dbJob = jobService.getById(job.getJobId());
         if (!jobService.checkJobOwner(session, dbJob.getUserId())) return Status.FALSE;
-        dbJob.setCronType(job.getCronType());
         dbJob.setCronExp(job.getCronExp());
         dbJob.setCommand(DigestUtils.passBase64(job.getCommand()));
         dbJob.setJobName(job.getJobName());

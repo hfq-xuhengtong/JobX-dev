@@ -83,33 +83,6 @@
                     </div>
                 </div><br>
 
-                <div class="form-group cronExpDiv">
-                    <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-bookmark"></i>&nbsp;&nbsp;规则类型&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <div class="col-md-10">
-                        <label for="cronType0" class="radio-label"><input type="radio" name="cronType" value="0" id="cronType0" ${job.cronType eq 0 ? 'checked' : ''}>crontab&nbsp;&nbsp;&nbsp;</label>
-                        <label for="cronType1" class="radio-label"><input type="radio" name="cronType" value="1" id="cronType1" ${job.cronType eq 1 ? 'checked' : ''}>quartz</label>&nbsp;&nbsp;&nbsp;
-                        </br>
-                        <span class="tips" id="cronTip" tip="crontab: unix/linux的时间格式表达式">
-                             <c:if test="${job.cronType eq 0}">crontab: unix/linux的时间格式表达式 </c:if>
-                             <c:if test="${job.cronType eq 1}">quartz: quartz框架的时间格式表达式</c:if>
-                        </span>
-                    </div>
-                </div>
-                <br>
-
-                <div class="form-group cronExpDiv">
-                    <label for="cronExp" class="col-lab control-label wid150"><i class="glyphicon glyphicon-filter"></i>&nbsp;&nbsp;时间规则&nbsp;&nbsp;<b>*&nbsp;</b></label>
-                    <div class="col-md-10">
-                        <input type="text" class="form-control input-sm" id="cronExp" name="cronExp" value="${job.cronExp}">
-                        </br>
-                        <span class="tips" id="expTip" tip="crontab: unix/linux的时间格式表达式">
-                            <c:if test="${job.cronType eq 0}">crontab: 请采用unix/linux的时间格式表达式,如 00 01 * * *</c:if>
-                            <c:if test="${job.cronType eq 1}">quartz: 请采用quartz框架的时间格式表达式,如 0 0 10 L * ?</c:if>
-                        </span>
-                    </div>
-                </div>
-                <br>
-
                 <div class="form-group">
                     <label for="cmd" class="col-lab control-label wid150"><i class="glyphicon glyphicon-th-large"></i>&nbsp;&nbsp;执行命令&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">

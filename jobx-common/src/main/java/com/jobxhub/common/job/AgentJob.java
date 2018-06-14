@@ -19,14 +19,6 @@ public interface AgentJob {
 
     Response guid(Request request);
 
-    /**
-     * 扫描Agent里crontab已经定义的job
-     *
-     * @param request
-     * @return
-     */
-    Response scanCrontab(Request request);
-
     void restart(Request request);
 
     /**

@@ -217,7 +217,7 @@ public class AgentService implements ServerHandler, AgentJob {
 
         Integer timeout = request.getTimeOut();
 
-        String runAsUser = request.getParams().getString(Constants.PARAM_RUNAS_KEY);
+        String execUser = request.getParams().getString(Constants.PARAM_EXECUSER_KEY);
 
         if (logger.isInfoEnabled()) {
             logger.info("[JobX]:execute:{},pid:{}", command, pid);
@@ -225,7 +225,7 @@ public class AgentService implements ServerHandler, AgentJob {
 
         Response response = Response.response(request);
 
-        JobXProcess jobXProcess = new JobXProcess(command,timeout,pid,runAsUser);
+        JobXProcess jobXProcess = new JobXProcess(command,timeout,pid,execUser);
 
         processMap.put(pid,jobXProcess);
 
@@ -380,17 +380,20 @@ public class AgentService implements ServerHandler, AgentJob {
 
         String password = SystemPropertyUtils.get(Constants.PARAM_JOBX_PASSWORD_KEY);
 
-        String registryPath = String.format("%s/%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,password);
+        int platform = CommonUtils.getPlatform();
+        //mac_password_platform_host_port
+        String registryPath = String.format("%s/%s_%s_%s", Constants.ZK_REGISTRY_AGENT_PATH, machineId,password,platform);
         if (CommonUtils.isEmpty(host)) {
             if (logger.isWarnEnabled()) {
                 logger.warn("[JobX] agent host not input,auto register can not be run，you can add this agent by yourself");
             }
         } else {
-            //mac_password_host_port
-            registryPath = String.format("%s/%s_%s_%s_%s",
+            //mac_password_platform_host_port
+            registryPath = String.format("%s/%s_%s_%s_%s_%s",
                     Constants.ZK_REGISTRY_AGENT_PATH,
                     machineId,
                     password,
+                    platform,
                     host,
                     port);
         }

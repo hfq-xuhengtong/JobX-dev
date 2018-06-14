@@ -78,7 +78,7 @@
         <li><a href="">JobX</a></li>
         <li><a href="">系统设置</a></li>
     </ol>
-    <h4 class="page-title"><i class="fa fa-edit" aria-hidden="true" style="font-style:30px;"></i>&nbsp;修改设置</h4>
+    <h4 class="page-title"><i class="fa fa-edit" aria-hidden="true"></i>&nbsp;修改设置</h4>
 
     <div style="float: right;margin-top: 5px">
         <a onclick="goback();" class="btn btn-sm m-t-10" style="margin-right: 16px;margin-bottom: -4px"><i class="fa fa-mail-reply" aria-hidden="true"></i>&nbsp;返回</a>
@@ -90,7 +90,7 @@
             <form class="form-horizontal" role="form"  id="config" action="${contextPath}/config/edit.do" method="post"><br>
 
                 <div class="form-group">
-                    <label for="senderEmail" class="col-lab control-label"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;发件邮箱：</label>
+                    <label for="senderEmail" class="col-lab control-label"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;发件邮箱</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="senderEmail" name="senderEmail" value="${config.senderEmail}">
                         <span class="tips"><b>*&nbsp;</b>发件人的邮箱地址</span>
@@ -98,7 +98,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="smtpHost" class="col-lab control-label"><i class="glyphicon glyphicon-map-marker"></i>SMTP地址：</label>
+                    <label for="smtpHost" class="col-lab control-label"><i class="glyphicon glyphicon-map-marker"></i>SMTP地址</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="smtpHost" name="smtpHost" value="${config.smtpHost}">
                         <span class="tips"><b>*&nbsp;</b>发件SMTP地址</span>
@@ -107,7 +107,7 @@
 
 
                 <div class="form-group">
-                    <label for="smtpPort" class="col-lab control-label"><i class="glyphicon glyphicon-filter"></i>SMTP端口：</label>
+                    <label for="smtpPort" class="col-lab control-label"><i class="glyphicon glyphicon-filter"></i>SMTP端口</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="smtpPort" name="smtpPort" value="${config.smtpPort}">
                         <span class="tips"><b>*&nbsp;</b>发件SMTP（SSL协议）端口号</span>
@@ -116,7 +116,7 @@
 
 
                 <div class="form-group">
-                    <label for="password" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;邮箱密码：</label>
+                    <label for="password" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;邮箱密码</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="password" name="emailPassword" value="${config.emailPassword}">
                         <span class="tips"><b>*&nbsp;</b>发件邮箱账号的密码</span>
@@ -124,7 +124,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="sendUrl" class="col-lab control-label"><i class="glyphicon glyphicon-font"></i>&nbsp;&nbsp;发信URL：</label>
+                    <label for="sendUrl" class="col-lab control-label"><i class="glyphicon glyphicon-font"></i>&nbsp;&nbsp;发信URL</label>
                     <div class="col-md-10">
                         <textarea class="form-control input-sm" id="sendUrl" name="sendUrl"> ${config.sendUrl}</textarea>
                         <span class="tips"><b>*&nbsp;</b>短信发送服务所需的URL</span>
@@ -132,7 +132,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="template" class="col-lab control-label"><i class="glyphicon glyphicon-list-alt"></i>&nbsp;&nbsp;短信模板：</label>
+                    <label for="template" class="col-lab control-label"><i class="glyphicon glyphicon-list-alt"></i>&nbsp;&nbsp;短信模板</label>
                     <div class="col-md-10">
                         <textarea class="form-control input-sm" id="template" name="template">${config.template}</textarea>
                         <span class="tips"><b>*&nbsp;</b>运营商规定的企业发送短信格式模板</span>
@@ -140,7 +140,15 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="spaceTime" class="col-lab control-label"><i class="glyphicon glyphicon-time"></i>&nbsp;&nbsp;发送间隔：</label>
+                    <label for="execUser" class="col-lab control-label"><i class="fa fa-users"></i>&nbsp;&nbsp;执行用户</label>
+                    <div class="col-md-10">
+                        <textarea class="form-control input-sm" id="execUser" name="execUser"> ${config.execUser}</textarea>
+                        <span class="tips"><b>*&nbsp;</b>该平台执行命令的代理用户名,多个用户用","分隔</span>
+                    </div>
+                </div><br>
+
+                <div class="form-group">
+                    <label for="spaceTime" class="col-lab control-label"><i class="glyphicon glyphicon-time"></i>&nbsp;&nbsp;发送间隔</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="spaceTime" name="spaceTime" value="${config.spaceTime}">
                         <span class="tips"><b>*&nbsp;</b>同一执行器失联后告警邮件和短信发送后到下一次发送的时间间隔(分钟)</span>

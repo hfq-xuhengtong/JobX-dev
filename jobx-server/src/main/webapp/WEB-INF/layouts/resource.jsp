@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="description" content="jobx">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="keywords" content="jobx,crontab,a better crontab,Let's crontab easy">
+    <meta name="keywords" content="JobX,Let's scheduling easy">
     <meta name="author" content="author:benjobs,wechat:wolfboys,Created by 2016" />
 
     <!-- CSS -->
@@ -77,6 +77,16 @@
     <link rel="stylesheet" href="${contextPath}/static/js/cropper/cropper.css?resId=${resourceId}" type="text/css" />
     <script type="text/javascript" src="${contextPath}/static/js/cropper/cropper.js?resId=${resourceId}" ></script>
     <script type="text/javascript" src="${contextPath}/static/js/jobx.cropper.js?resId=${resourceId}" ></script>
+
+
+    <!--  Form Related -->
+    <script src="${contextPath}/static/js/chosen.min.js"></script> <!-- Custom Multi Select -->
+    <script src="${contextPath}/static/js/icheck.js"></script> <!-- Custom Checkbox + Radio -->
+    <script src="${contextPath}/static/js/autosize.min.js"></script> <!-- Textare autosize -->
+    <script src="${contextPath}/static/js/toggler.min.js"></script> <!-- Toggler -->
+    <script src="${contextPath}/static/js/input-mask.min.js"></script> <!-- Input Mask -->
+    <script src="${contextPath}/static/js/spinner.min.js"></script> <!-- Spinner -->
+    <script src="${contextPath}/static/js/slider.min.js"></script> <!-- Input Slider -->
 
     <!--flot
     <script type="text/javascript" src="${contextPath}/static/js/flot/jquery.flot.js?resId=${resourceId}" ></script>

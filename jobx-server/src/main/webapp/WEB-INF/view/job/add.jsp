@@ -7,6 +7,8 @@
 <html lang="en">
 <head>
 
+    <script type="text/javascript" src="${contextPath}/static/js/cron.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+
     <style type="text/css">
         .block-title {
             margin-bottom: 0px;
@@ -132,20 +134,31 @@
 
     <script type="text/javascript">
 
-
         $(document).ready(function(){
 
             window.jobxValidata = new Validata('${contextPath}');
+
+            var platform = $("#agentId").find("option:selected").attr("platform");
+            if (platform!=1) {
+                $("#execUserDiv").hide();
+            }else {
+                $("#execUserDiv").show();
+            }
 
             $(".depen-input").change(function () {
                 graph();
             });
 
-            $("#sagentId").change(function () {
-                changeUrl();
+            $("#agentId").change(function () {
+                var platform = $(this).find("option:selected").attr("platform");
+                if (platform!=1) {
+                    $("#execUserDiv").hide();
+                }else {
+                    $("#execUserDiv").show();
+                }
             });
 
-            $("#cronType").change(function () {
+            $("#sagentId").change(function () {
                 changeUrl();
             });
 
@@ -265,14 +278,12 @@
 
         function changeUrl() {
             var agentId = $("#sagentId").val();
-            var cronType = $("#cronType").val();
             var searchJobName = $("#searchJobName").val();
             ajax({
                 url:"${contextPath}/job/search.do",
                 type: "post",
                 data: {
                     "agentId":agentId,
-                    "cronType":cronType,
                     "jobName":searchJobName
                 }
             },function (pageBean) {
@@ -362,70 +373,11 @@
                     </div>
                 </div>
 
-                <div class="form-group cronExpDiv" style="display: none;">
-                    <label class="col-lab control-label wid150"><i class="glyphicon glyphicon-bookmark"></i>&nbsp;&nbsp;规则类型&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <div class="col-md-10">
-                        <label for="cronType0" class="radio-label"><input type="radio" name="cronType" value="0" id="cronType0">crontab&nbsp;&nbsp;&nbsp;</label>
-                        <label for="cronType1" class="radio-label"><input type="radio" name="cronType" value="1" id="cronType1" checked>quartz</label>&nbsp;&nbsp;&nbsp;
-                        </br><span class="tips" id="cronTip" tip="crontab: unix/linux的时间格式表达式">crontab: unix/linux的时间格式表达式</span>
-                    </div>
-                </div>
-
                 <div class="form-group cronExpDiv">
                     <label for="cronExp" class="col-lab control-label wid150"><i class="glyphicon glyphicon-filter"></i>&nbsp;&nbsp;时间规则&nbsp;&nbsp;<b>*&nbsp;</b></label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="cronExp" name="cronExp">
-                        <span class="tips" id="expTip" tip="请采用unix/linux的时间格式表达式,如 00 01 * * *">请采用unix/linux的时间格式表达式,如 00 01 * * *</span>
-                    </div>
-                </div>
-
-                <div id="cronSelector" class="form-group cronExpDiv" style="display: none;">
-                    <label class="col-lab control-label wid150">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                    <div class="col-md-10">
-                        <select id="year" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每年</option>
-                            <c:forEach var="i" begin="2018" end="2050" step="1">
-                                <option value="${i}">${i}年</option>
-                            </c:forEach>
-                        </select>
-                        <select id="month" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每月</option>
-                            <c:forEach var="i" begin="1" end="12" step="1">
-                                <option value="${i}">${i}月</option>
-                            </c:forEach>
-                        </select>
-                        <select id="day" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每日</option>
-                            <c:forEach var="i" begin="1" end="31" step="1">
-                                <option value="${i}">${i}日</option>
-                            </c:forEach>
-                        </select>
-                        <select id="week" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每星期</option>
-                            <c:forEach var="i" begin="1" end="7" step="1">
-                                <option value="${i}">星期${i}</option>
-                            </c:forEach>
-                        </select>
-                        <select id="hour" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每时</option>
-                            <c:forEach var="i" begin="0" end="23" step="1">
-                                <option value="${i}">${i}时</option>
-                            </c:forEach>
-                        </select>
-                        <select id="minutes" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" selected="selected">每分</option>
-                            <c:forEach var="i" begin="0" end="59" step="1">
-                                <option value="${i}">${i}分</option>
-                            </c:forEach>
-                        </select>
-                        <select id="seconds" size="8" multiple="multiple" style="width:75px;">
-                            <option value="*" >每秒</option>
-                            <c:forEach var="i" begin="0" end="59" step="1">
-                                <option value="${i}">${i}秒</option>
-                            </c:forEach>
-                        </select>
-                        &nbsp;&nbsp;
-                        <button type="button" class="btn btn-sm" id="slideUp-btn" style="vertical-align:top;">收起</button>
+                        <span class="tips" id="expTip" tip="请采用quartz框架的时间格式表达式">请采用quartz框架的时间格式表达式</span>
                     </div>
                 </div>
 
@@ -452,14 +404,14 @@
                                 <c:if test="${empty agent}">
                                     <select id="agentId" name="agentId" class="form-control m-b-10 input-sm">
                                         <c:forEach var="d" items="${agents}">
-                                            <option value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
+                                            <option platform=${d.platform} value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
                                         </c:forEach>
                                     </select>
                                 </c:if>
                                 <c:if test="${!empty agent}">
                                     <input type="hidden" id="agentId" name="agentId" value="${agent.agentId}">
                                     <input type="text" class="form-control input-sm" value="${agent.name}&nbsp;&nbsp;&nbsp;${agent.host}" readonly>
-                                    <font color="red">&nbsp;*只读</font>
+                                    <label color="red">&nbsp;*只读</label>
                                 </c:if>
                                 <span class="tips">&nbsp;&nbsp;要执行此作业的机器名称和Host</span>
                             </div>
@@ -473,6 +425,18 @@
                             </div>
                         </div>
 
+                        <div class="form-group" id="execUserDiv">
+                            <label for="execUser"  class="col-lab control-label wid150"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;执行身份&nbsp;&nbsp;<b>*&nbsp;</b></label>
+                            <div class="col-md-10">
+                                <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited select input-sm" multiple>
+                                    <c:forEach items="${execUser}" var="item">
+                                        <option value="${item}">${item}</option>
+                                    </c:forEach>
+                                </select>
+                                <div class="tips"><b>*&nbsp;</b>执行该作业的用户身份</div></br>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="successExit" class="col-lab control-label wid150"><i class="glyphicons glyphicons-tags"></i>&nbsp;&nbsp;成功标识&nbsp;&nbsp;<b>*&nbsp;</b></label>
                             <div class="col-md-10">
@@ -481,7 +445,6 @@
                             </div>
                         </div>
                     </div>
-
 
                     <div class="tab-pane fade in" id="flow">
                         <div class="form-group">
@@ -576,7 +539,7 @@
                 <div class="form-group">
                     <label for="comment" class="col-lab control-label wid150"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;描&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;述&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <textarea class="form-control input-sm" id="comment" name="comment" style="height: 50px;"></textarea>
+                        <textarea class="form-control input-sm" id="comment" name="comment" style="height: 100px;"></textarea>
                     </div>
                 </div>
 
@@ -699,13 +662,6 @@
                                     <option value="${d.agentId}" ${d.agentId eq agentId ? 'selected' : ''}>${d.name}</option>
                                 </c:forEach>
                             </select>
-                            &nbsp;&nbsp;&nbsp;
-                            <label for="cronType">规则类型：</label>
-                            <select id="cronType" name="cronType" class="select-jobx" style="width: 80px;">
-                                <option value="">全部</option>
-                                <option value="0" ${cronType eq 0 ? 'selected' : ''}>crontab</option>
-                                <option value="1" ${cronType eq 1 ? 'selected' : ''}>quartz</option>
-                            </select>
                             <input class="pull-right message-search" placeholder="根据作业名称搜索...." type="text" id="searchJobName">
                         </div>
                     </div>
@@ -741,8 +697,25 @@
             </div>
         </div>
     </div>
+    
+    <jsp:include page="/WEB-INF/layouts/cron.jsp"/>
 
 </section>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        /* Tag Select */
+        (function(){
+            /* Limited */
+            $(".tag-select-limited").chosen({
+                max_selected_options: 1
+            });
+
+            /* Overflow */
+            $('.overflow').niceScroll();
+        })();
+    });
+</script>
 
 </body>
 

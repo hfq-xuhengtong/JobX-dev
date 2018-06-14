@@ -21,10 +21,12 @@
 package com.jobxhub.server.dto;
 
 import com.google.common.base.Function;
+import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.server.domain.UserBean;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +48,7 @@ public class User implements Serializable {
     private String picExtName;
     private String headerPath;
     private List<Long> agentIds;
+    private List<String> execUser;
 
     public static Function<? super UserBean, ? extends User> transfer = new Function<UserBean, User>() {
         @Override
@@ -58,6 +61,9 @@ public class User implements Serializable {
 
     public User(UserBean user){
         BeanUtils.copyProperties(user,this);
+        if (user!=null&&user.getExecUser()!=null) {
+            this.execUser = Arrays.asList(user.getExecUser().split(","));
+        }
     }
 
     public Long getUserId() {
@@ -186,5 +192,13 @@ public class User implements Serializable {
 
     public void setAgentIds(List<Long> agentIds) {
         this.agentIds = agentIds;
+    }
+
+    public List<String> getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(List<String> execUser) {
+        this.execUser = execUser;
     }
 }

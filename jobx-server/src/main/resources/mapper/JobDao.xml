@@ -12,8 +12,8 @@
         <result column="job_name"       property="jobName"/>
         <result column="command"        property="command"/>
         <result column="comment"        property="comment"/>
+        <result column="exec_user"      property="execUser"/>
         <result column="cron_exp"       property="cronExp"/>
-        <result column="cron_type"      property="cronType"/>
         <result column="warning"        property="warning"/>
         <result column="email"          property="email"/>
         <result column="mobile"         property="mobile"/>
@@ -36,8 +36,8 @@
         j.job_name,
         j.command,
         j.comment,
+        j.exec_user,
         j.cron_exp,
-        j.cron_type,
         j.warning,
         j.email,
         j.mobile,
@@ -100,9 +100,6 @@
             <if test="pager.filter.job.agentId != null">
                 and j.agent_id = #{pager.filter.job.agentId}
             </if>
-            <if test="pager.filter.job.cronType != null">
-                and j.cron_type = #{pager.filter.job.cronType}
-            </if>
             <if test="pager.filter.job.jobType != null">
                 and j.job_type = #{pager.filter.job.jobType}
             </if>
@@ -125,9 +122,6 @@
             </if>
             <if test="filter.job.agentId != null">
                 and j.agent_id = #{filter.job.agentId}
-            </if>
-            <if test="filter.job.cronType != null">
-                and j.cron_type = #{filter.job.cronType}
             </if>
             <if test="filter.job.jobType != null">
                 and j.job_type = #{filter.job.jobType}
@@ -158,8 +152,8 @@
             job_name,
             command,
             comment,
+            exec_user,
             cron_exp,
-            cron_type,
             warning,
             email,
             mobile,
@@ -178,8 +172,8 @@
             #{jobName},
             #{command},
             #{comment},
+            #{execUser},
             #{cronExp},
-            #{cronType},
             #{warning},
             #{email},
             #{mobile},
@@ -203,8 +197,8 @@
             job_name      =     #{jobName},
             command       =     #{command},
             comment       =     #{comment},
+            exec_user     =     #{execUser},
             cron_exp      =     #{cronExp},
-            cron_type     =     #{cronType},
             warning       =     #{warning},
             email         =     #{email},
             mobile        =     #{mobile},

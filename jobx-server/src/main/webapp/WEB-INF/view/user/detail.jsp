@@ -157,25 +157,33 @@
             </tr>
 
             <tr>
-                <td class="item"><i class="glyphicon glyphicon-tag"></i>&nbsp;真实姓名：</td>
+                <td class="item"><i class="glyphicon glyphicon-tag"></i>&nbsp;真实姓名</td>
                 <td>${u.realName}</td>
             </tr>
 
             <tr>
-                <td class="item"><i class="glyphicon glyphicon-comment"></i>&nbsp;联系方式：</td>
+                <td class="item"><i class="glyphicon glyphicon-comment"></i>&nbsp;联系方式</td>
                 <td>${u.contact}</td>
             </tr>
 
             <tr>
-                <td class="item"><i class="glyphicon glyphicon-envelope"></i>&nbsp;电子邮箱：</td>
+                <td class="item"><i class="glyphicon glyphicon-envelope"></i>&nbsp;电子邮箱</td>
                 <td>${u.email}</td>
             </tr>
 
             <tr>
-                <td class="item"><i class="glyphicon glyphicon-magnet"></i>&nbsp;QQ&nbsp;号&nbsp;码：</td>
+                <td class="item"><i class="glyphicon glyphicon-magnet"></i>&nbsp;QQ&nbsp;号&nbsp;码</td>
                 <td>${u.qq}</td>
             </tr>
 
+            <tr>
+                <td class="item"><i class="fa fa-users"></i>&nbsp;执行用户</td>
+                <td>
+                    <c:forEach var="user" items="${u.execUser}">
+                        <span class="label label-info" style="font-size: 12px;">${user}</span>
+                    </c:forEach>
+                </td>
+            </tr>
 
             </tbody>
 

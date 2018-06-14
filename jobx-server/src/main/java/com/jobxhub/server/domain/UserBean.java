@@ -23,10 +23,12 @@
 package com.jobxhub.server.domain;
 
 import com.google.common.base.Function;
+import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.server.dto.User;
 import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Transient;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -64,10 +66,15 @@ public class UserBean {
     //头像文件的后缀名字
     private String picExtName;
 
+    private String execUser;
+
     public UserBean() {}
 
     public UserBean(User user){
         BeanUtils.copyProperties(user,this);
+        if (user!=null&&user.getExecUser()!=null) {
+            this.execUser = StringUtils.join(user.getExecUser(),",");
+        }
     }
 
     public static Function<? super User, ? extends UserBean> transfer = new Function<User, UserBean>() {
@@ -189,6 +196,14 @@ public class UserBean {
         this.picExtName = picExtName;
     }
 
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -204,7 +219,7 @@ public class UserBean {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "UserBean{" +
                 "userId=" + userId +
                 ", roleId=" + roleId +
                 ", userName='" + userName + '\'' +
@@ -217,9 +232,9 @@ public class UserBean {
                 ", createTime=" + createTime +
                 ", modifyTime=" + modifyTime +
                 ", roleName='" + roleName + '\'' +
-                ", headerPic=" + headerPic +
+                ", headerPic=" + Arrays.toString(headerPic) +
                 ", picExtName='" + picExtName + '\'' +
+                ", execUser='" + execUser + '\'' +
                 '}';
     }
-
 }
