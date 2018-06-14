@@ -91,7 +91,7 @@ public class Constants {
 
     public static final String PARAM_EXECTYPE_KEY = "execType";
 
-    public static final String PARAM_RUNAS_KEY = "runAsUser";
+    public static final String PARAM_EXECUSER_KEY = "runAsUser";
 
     public static final String PARAM_BACKUP_KEY = "backup";
 
@@ -195,7 +195,7 @@ public class Constants {
     /**
      * ExecuteUser lib
      */
-    public static final String JOBX_EXECUTE_AS_USER_LIB_PATH =  JOBX_HOME + "/lib/jobx-native-RELEASE.so";
+    public static final String JOBX_EXECUTE_AS_USER_LIB =  JOBX_HOME + "/bin/executor.so";
 
     public enum CachedProvider implements Serializable {
 
@@ -351,55 +351,6 @@ public class Constants {
 
         public void setDescription(String description) {
             this.description = description;
-        }
-    }
-
-    public enum CronType implements Serializable {
-
-        CRONTAB(0x0, "crontab", "crontab表达式"),
-        QUARTZ(0x1, "quartz", "quartz表达式");
-
-        private Integer type;
-        private String name;
-        private String description;
-
-        CronType(Integer type, String name, String description) {
-            this.type = type;
-            this.name = name;
-            this.description = description;
-        }
-
-        public Integer getType() {
-            return type;
-        }
-
-        public void setType(Integer type) {
-            this.type = type;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public static CronType getByType(Integer type) {
-            for (CronType cronType : CronType.values()) {
-                if (cronType.getType().equals(type)) {
-                    return cronType;
-                }
-            }
-            return null;
         }
     }
 

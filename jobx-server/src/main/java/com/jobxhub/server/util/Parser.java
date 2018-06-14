@@ -1,4 +1,25 @@
-package com.jobxhub.server.common;
+/**
+ * Copyright (c) 2015 The JobX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.jobxhub.server.util;
 /**
  * @Package com.jobxhub.server.common
  * @Title: Parser
@@ -10,8 +31,14 @@ package com.jobxhub.server.common;
 import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.server.dto.Job;
+import org.quartz.TriggerUtils;
+import org.quartz.impl.triggers.CronTriggerImpl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Descriptions: 参数替换工具类
@@ -141,16 +168,5 @@ public class Parser {
                 default:
                     return "";
         }
-    }
-
-    public static void main(String[] args) {
-        Job job=new Job();
-        job.setCommand("echo 1 $date 2 $user");
-        job.setJobName("test");
-        job.setJobId(1212L);
-        job.setUserId(2222L);
-        job.setInputParam("2018-3-4");
-        String parse = parse(job);
-        System.out.printf(parse);
     }
 }

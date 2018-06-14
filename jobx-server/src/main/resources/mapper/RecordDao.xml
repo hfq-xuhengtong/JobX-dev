@@ -184,8 +184,6 @@
             sum(case r.success when 4 then 1 else 0 end) lost,
             sum(case r.job_type when 0 then 1 else 0 end) singleton,
             sum(case r.job_type when 1 then 1 else 0 end) flow,
-            sum(case j.cron_type when 0 then 1 else 0 end) crontab,
-            sum(case j.cron_type when 1 then 1 else 0 end) quartz,
             sum(case r.exec_type when 0 then 1 else 0 end) auto,
             sum(case r.exec_type when 1 then 1 else 0 end) operator
         from  t_record r
@@ -209,8 +207,6 @@
             sum(case r.success when 4 then 1 else 0 end) lost,
             sum(case r.job_type when 0 then 1 else 0 end) singleton,
             sum(case r.job_type when 1 then 1 else 0 end) flow,
-            sum(case j.cron_type when 0 then 1 else 0 end) crontab,
-            sum(case j.cron_type when 1 then 1 else 0 end) quartz,
             sum(case r.exec_type when 0 then 1 else 0 end) auto,
             sum(case r.exec_type when 1 then 1 else 0 end) operator
         from  t_record r

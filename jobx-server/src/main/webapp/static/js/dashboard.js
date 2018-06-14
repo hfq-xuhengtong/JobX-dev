@@ -73,8 +73,6 @@ function JobXChart() {
             var lostSum = 0;
             var singleton = 0;
             var flow = 0;
-            var crontab = 0;
-            var quartz = 0;
             var rerun = 0;
             var auto = 0;
             var operator = 0;
@@ -95,8 +93,6 @@ function JobXChart() {
                 lostSum += parseInt(data[i].lost);
                 singleton += parseInt(data[i].singleton);
                 flow += parseInt(data[i].flow);
-                crontab += parseInt(data[i].crontab);
-                quartz += parseInt(data[i].quartz);
                 rerun += parseInt(data[i].rerun);
                 auto += parseInt(data[i].auto);
                 operator += parseInt(data[i].operator);
@@ -113,8 +109,6 @@ function JobXChart() {
                 "donutMap": donutMap,
                 "singleton": singleton,
                 "flow": flow,
-                "crontab": crontab,
-                "quartz": quartz,
                 "rerun": rerun,
                 "auto": auto,
                 "operator": operator

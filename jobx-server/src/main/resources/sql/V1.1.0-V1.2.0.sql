@@ -25,6 +25,7 @@ alter table `t_agent` change column `port` `port` int(10);
 alter table `t_agent` change column `proxyAgent` `proxy_id` bigint(20);
 alter table `t_agent` change column `status` `status` tinyint(1);
 alter table `t_agent` change column `updateTime` `update_time` datetime;
+alter table `t_agent` add column `platform` tinyint(1);
 alter table `t_agent` drop column `proxy`;
 
 --t_config
@@ -42,6 +43,7 @@ insert into `t_config1`(`config_key`,`config_val`,`comment`) select "send_url",`
 insert into `t_config1`(`config_key`,`config_val`,`comment`) select "space_time",`spaceTime`,"发送告警时间间隔" from `t_config`;
 insert into `t_config1`(`config_key`,`config_val`,`comment`) select "template",`template`,"发送短信的模板" from `t_config`;
 insert into `t_config1`(`config_key`,`config_val`,`comment`) select "version","V1.2.0","当前JobX版本号" from `t_config`;
+insert into `t_config1`(`config_key`,`config_val`,`comment`) values ("exec_user",null,"该平台执行任务的代理用户,多个用户用\",\"分隔");
 drop table `t_config`;
 alter table `t_config1` rename `t_config`;
 
@@ -59,7 +61,6 @@ alter table `t_job` change column `userId` `user_id` bigint(20);
 alter table `t_job` change column `jobType` `job_type` tinyint(1);
 alter table `t_job` change column `jobName` `job_name` varchar(50);
 alter table `t_job` change column `cronExp` `cron_exp` varchar(255);
-alter table `t_job` change column `cronType` `cron_type` tinyint(1);
 alter table `t_job` change column `emailAddress` `email` text;
 alter table `t_job` change column `mobiles` `mobile` text;
 alter table `t_job` change column `redo` `redo` bit(1);
@@ -72,6 +73,7 @@ alter table `t_job` change column `createType` `create_type` tinyint(1);
 alter table `t_job` add column `create_type` tinyint(1);
 alter table `t_job` add column  `token` varchar(64);
 alter table `t_job` add column `pause` bit(1);
+alter table `t_job` add column `exec_user` varchar(50);
 alter table `t_job` add index qa_agent_id (`agent_id`);
 update `t_job` set `pause`=0 where `pause` is null ;
 update `t_job` set `token`=MD5(RAND()) where `token` is null;
@@ -80,6 +82,7 @@ alter table `t_job` drop column `flowId`;
 alter table `t_job` drop column `flowNum`;
 alter table `t_job` drop column `lastChild`;
 alter table `t_job` drop column `runModel`;
+alter table `t_job` drop column `cronType`;
 
 --log
 alter table `t_log` change column `logId` `log_id` bigint(20) auto_increment;
@@ -148,6 +151,7 @@ alter table `t_user` change column `qq` `qq` varchar(20);
 alter table `t_user` change column `realName` `real_name` varchar(50);
 alter table `t_user` change column `roleId` `role_id` bigint(20);
 alter table `t_user` change column `salt` `salt` varchar(64);
+alter table `t_user` add column `exec_user` text;
 
 --t_user_agent
 create table `t_user_agent` (

@@ -38,9 +38,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by ChenHui on 2016/2/17.
@@ -240,5 +238,11 @@ public class ConfigService {
         return flag;
     }
 
-
+    public List<String> getExecUser() {
+        String execUser = configDao.getExecUser();
+        if (CommonUtils.notEmpty(execUser)) {
+            return Arrays.asList(execUser.split(","));
+        }
+        return Collections.emptyList();
+    }
 }

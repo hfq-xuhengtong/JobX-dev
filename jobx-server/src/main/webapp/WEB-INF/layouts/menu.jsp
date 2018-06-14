@@ -61,14 +61,6 @@
 						</div>
 					</div>
 					<div class="side-border">
-						<small>规则类型(crontab/quartz)</small>
-						<div class="progress progress-small">
-							<a href="#" data-toggle="tooltip" id="progress_model" class="tooltips progress-bar progress-bar-warning">
-								<span class="sr-only"></span>
-							</a>
-						</div>
-					</div>
-					<div class="side-border">
 						<small>重跑状态(非重跑/重跑)</small>
 						<div class="progress progress-small">
 							<a href="#" data-toggle="tooltip" id="progress_rerun" class="tooltips progress-bar progress-bar-success">

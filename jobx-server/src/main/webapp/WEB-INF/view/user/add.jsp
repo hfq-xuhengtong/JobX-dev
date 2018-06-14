@@ -64,7 +64,6 @@
             }
             $("#password").val(calcMD5(password));
 
-
             ajax({
                 type: "post",
                 url:"${contextPath}/user/checkname.do",
@@ -133,10 +132,6 @@
                 }
             });
 
-
-            $("#checkAllInput").next().attr("id","checkAll");
-            $(".each-box").next().addClass("each-btn");
-
             $("#role").change(function () {
                 if ($("#role").val() == 999){
                     $("#agentsDiv").hide();
@@ -145,47 +140,51 @@
                 }
             });
 
-            $("#checkAll").click(function () {
-
-                if ($("input[type='checkbox'][name='agentIds']").is(':checked')){
-
-                    $("#checkAllInput").prop("checked",false);
-                    $("#checkAll").parent().removeClass("checked");
-                    $("#checkAll").parent().attr("aria-checked",false);
-
-                    $(".each-box").prop("checked",false);
-                    $(".each-box").parent().removeClass("checked");
-                    $(".each-box").parent().attr("aria-checked",false);
+            var checkAll = function() {
+                var viewNode = $("#agentId-select").next().find(".filter-option");
+                var iradio = $("#checkAllInput").parent();
+                if (iradio.hasClass("checked")) {
+                    iradio.removeClass("checked");
+                    $("#agentId-select").next().find("li").each(function (i,e) {
+                        $(e).removeClass("selected");
+                    });
+                    viewNode.text("Nothing selected");
                 } else {
+                    iradio.addClass("checked");
+                    $("#agentId-select").next().find("li").each(function (i,e) {
+                        if (!$(e).hasClass("selected")) {
+                            $(e).addClass("selected");
+                        }
+                    });
 
-                    $("#checkAllInput").prop("checked",true);
-                    $("#checkAll").parent().removeClass("checked").addClass("checked");
-                    $("#checkAll").parent().attr("aria-checked",true);
+                    var countFilter = $("#agentId-select").attr("data-selected-text-format");
+                    if (countFilter) {
+                        countFilter = parseInt(countFilter.split(">")[1]);
+                    }
 
-                    $(".each-box").prop("checked",true);
-                    $(".each-box").parent().removeClass("checked").addClass("checked");
-                    $(".each-box").parent().attr("aria-checked",true);
-                    flag = true;
+                    var optLength = $("#agentId-select").find("option").length;
+
+                    if (countFilter<optLength) {
+                        viewNode.text( optLength+" of "+optLength+" selected");
+                    }else {
+                        var viewText = "";
+                        var limit = ", ";
+                        $("#agentId-select").find("option").each(function (i,e) {
+                            viewText+=$(e).text()+limit;
+                        })
+                        viewNode.text(viewText.substring(1,viewText.length-2));
+                    }
                 }
+            }
 
+            $(".checkAllInput").click(function () {
+                checkAll();
             });
 
-            $(".each-btn").click(function () {
-                if (flag){
-                    $("#checkAllInput").prop("checked",false);
-                    $("#checkAll").parent().removeClass("checked");
-                    $("#checkAll").parent().attr("aria-checked",false);
-                    flag = false;
-                }
-            });
-
-            $(window).on("load",function(){
-                $("#agent-content").mCustomScrollbar({
-                    theme:"dark"
-                });
+            $(".checkAllInput").find(".iCheck-helper").click(function () {
+                checkAll();
             });
         });
-
     </script>
 </head>
 
@@ -216,7 +215,7 @@
             <form class="form-horizontal" role="form" id="user" action="${contextPath}/user/add.do" method="post"><br>
 
                 <div class="form-group">
-                    <label for="name" class="col-lab control-label"><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;用&nbsp;&nbsp;户&nbsp;&nbsp;名：</label>
+                    <label for="name" class="col-lab control-label"><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="name" name="userName">
                         <span class="tips" id="checkname"><b>*&nbsp;</b>用户名必填</span>
@@ -224,31 +223,44 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="role" class="col-lab control-label"><i class="glyphicon glyphicon-random"></i>&nbsp;&nbsp;用户角色：</label>
+                    <label for="role" class="col-lab control-label"><i class="glyphicon glyphicon-random"></i>&nbsp;&nbsp;用户角色</label>
                     <div class="col-md-10">
-                        <select id="role" name="roleId" class="form-control m-b-10 input-sm">
+                        <select id="role" name="roleId" class="select input-sm">
                             <c:forEach var="r" items="${role}">
                                 <option value="${r.roleId}">${r.roleName}</option>
                             </c:forEach>
                         </select>
-                        <span class="tips"><b>*&nbsp;</b>角色决定用户的操作权限</span>
+                        <div class="tips"><b>*&nbsp;</b>角色决定用户的操作权限</div>
                     </div>
                 </div><br>
 
                 <div class="form-group" id="agentsDiv">
-                    <label class="col-lab control-label"><i class="fa fa-desktop" aria-hidden="true"></i>&nbsp;执行器组：</label>
+                    <label class="col-lab control-label"><i class="fa fa-desktop" aria-hidden="true"></i>&nbsp;执行器组</label>
                     <div class="col-md-10">
-                        <input type="checkbox" id="checkAllInput">全选<span class="tips">&nbsp;&nbsp;&nbsp;<b>*&nbsp;</b>此管理员可操作的执行器操组</span></br>
-                        <div class="form-control m-b-10 input-sm" id="agent-content" style="height: 150px;overflow: hidden;">
+                        <select id="agentId-select" class="select input-sm" name="agentIds"  multiple data-selected-text-format="count>3">
                             <c:forEach var="w" items="${agents}" varStatus="index">
-                                <input type="checkbox" name="agentIds" value="${w.agentId}" class="each-box form-control input-sm">${w.name}&nbsp;&nbsp;${w.host}<br>
+                                <option value="${w.agentId}">${w.name}(${w.host})</option>
                             </c:forEach>
-                        </div>
+                        </select>
+                        <%--<label for="checkAllInput" class="radio-label checkAllInput"><input type="radio" id="checkAllInput">全选</label>--%>
+                        <div class="tips"><b>*&nbsp;</b>此管理员可操作的执行器操组</div></br>
+                    </div>
+                </div>
+
+                <div class="form-group" id="userDiv">
+                    <label class="col-lab control-label"><i class="fa fa-users" aria-hidden="true"></i>&nbsp;执行用户</label>
+                    <div class="col-md-10">
+                        <select name="execUser" data-placeholder="选择执行任务的用户" class="tag-select-limited select input-sm" multiple>
+                            <c:forEach var="user" items="${execUser}" varStatus="index">
+                                <option value="${user}">${user}</option>
+                            </c:forEach>
+                        </select>
+                        <div class="tips"><b>*&nbsp;</b>此管理员可使用的所有的用户身份</div></br>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码：</label>
+                    <label for="password" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码</label>
                     <div class="col-md-10">
                         <input type="password" class="form-control input-sm" id="password" name="password">
                         <span class="tips" id="checkpassword"><b>*&nbsp;</b>密码必填，长度6-20位</span>
@@ -256,7 +268,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="pwd" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;确认密码：</label>
+                    <label for="pwd" class="col-lab control-label"><i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;确认密码</label>
                     <div class="col-md-10">
                         <input type="password" class="form-control input-sm" id="pwd">
                         <span class="tips" id="checkpwd"><b>*&nbsp;</b>必须与上密码一致</span>
@@ -264,7 +276,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="realName" class="col-lab control-label"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;真实姓名：</label>
+                    <label for="realName" class="col-lab control-label"><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;真实姓名</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="realName" name="realName">
                         <span class="tips"><b>*&nbsp;</b>真实姓名必填</span>
@@ -273,7 +285,7 @@
 
 
                 <div class="form-group">
-                    <label for="contact" class="col-lab control-label"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;联系方式：</label>
+                    <label for="contact" class="col-lab control-label"><i class="glyphicon glyphicon-comment"></i>&nbsp;&nbsp;联系方式</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="contact" name="contact">
                         <span class="tips">选填</span>
@@ -281,7 +293,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="email" class="col-lab control-label"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;电子邮箱：</label>
+                    <label for="email" class="col-lab control-label"><i class="glyphicon glyphicon-envelope"></i>&nbsp;&nbsp;电子邮箱</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="email" name="email">
                         <span class="tips">选填</span>
@@ -289,7 +301,7 @@
                 </div><br>
 
                 <div class="form-group">
-                    <label for="qq" class="col-lab control-label"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;QQ&nbsp;号&nbsp;码：</label>
+                    <label for="qq" class="col-lab control-label"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;QQ&nbsp;号&nbsp;码</label>
                     <div class="col-md-10">
                         <input type="text" class="form-control input-sm" id="qq" name="qq">
                         <span class="tips">选填</span>
@@ -307,6 +319,20 @@
     </div>
 
 </section>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        /* Tag Select */
+        (function(){
+            /* Limited */
+            $(".tag-select-limited").chosen({
+                max_selected_options: 99999
+            });
+            /* Overflow */
+            $('.overflow').niceScroll();
+        })();
+    });
+</script>
 
 
 </body>

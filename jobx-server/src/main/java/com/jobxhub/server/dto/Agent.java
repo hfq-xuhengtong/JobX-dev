@@ -42,6 +42,8 @@ public class Agent implements Serializable {
     private Long proxyId;
 
     private String host;
+    //agent系统平台,0:其他,1:unix内核系统,2:window
+    private Integer platform;
     private Integer port;
     private String name;
     private String password;
@@ -106,6 +108,14 @@ public class Agent implements Serializable {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
     }
 
     public Integer getPort() {
@@ -236,13 +246,14 @@ public class Agent implements Serializable {
         return getAgentId() != null ? getAgentId().hashCode() : 0;
     }
 
-
+    @Override
     public String toString() {
         return "Agent{" +
                 "agentId=" + agentId +
                 ", machineId='" + machineId + '\'' +
                 ", proxyId=" + proxyId +
                 ", host='" + host + '\'' +
+                ", platform=" + platform +
                 ", port=" + port +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +

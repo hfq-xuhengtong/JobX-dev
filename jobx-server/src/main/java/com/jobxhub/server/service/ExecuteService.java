@@ -31,7 +31,7 @@ import com.jobxhub.common.job.Response;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.IOUtils;
 import com.jobxhub.rpc.InvokeCallback;
-import com.jobxhub.server.common.Parser;
+import com.jobxhub.server.util.Parser;
 import com.jobxhub.server.job.JobXInvoker;
 import com.jobxhub.server.dto.Agent;
 import com.jobxhub.server.dto.Job;
@@ -111,6 +111,7 @@ public class ExecuteService {
                     request.putParam(Constants.PARAM_PID_KEY, record.getPid());
                     request.putParam(Constants.PARAM_SUCCESSEXIT_KEY, job.getSuccessExit());
                     request.putParam(Constants.PARAM_TIMEOUT_KEY, job.getTimeout());
+                    request.putParam(Constants.PARAM_EXECUSER_KEY, job.getExecUser());
                     caller.sentAsync(request,invokeCallback);
                 } catch (Exception e) {
                     if ( !(e instanceof PingException) ) {
@@ -272,32 +273,32 @@ public class ExecuteService {
                     status = ConnStatus.UNAUTHORIZED;
                 }
             }
+
+            //处理agent失联之后上报的log...
+            if (!response.getResult().isEmpty()) {
+                Map<String,String> result = response.getResult();
+                for (Map.Entry<String,String> entry:result.entrySet()) {
+                    if (entry.getKey().length() == 32) {
+                        String log = entry.getValue();
+                        if (CommonUtils.notEmpty(log)) {
+                            String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
+                            String message = logInfo[0];
+                            Integer exitCode = null;
+                            Long entTime = null;
+                            if (logInfo.length == 2) {
+                                exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
+                                entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
+                            }
+                            recordService.doLostLog(entry.getKey(),message,exitCode,entTime);
+                        }
+                    }
+                }
+            }
         }
 
         if (update) {
             agent.setStatus(status.getValue());
             agentService.updateStatus(agent);
-        }
-
-        //处理agent失联之后上报的log...
-        if (!response.getResult().isEmpty()) {
-            Map<String,String> result = response.getResult();
-            for (Map.Entry<String,String> entry:result.entrySet()) {
-                if (entry.getKey().length() == 32) {
-                    String log = entry.getValue();
-                    if (CommonUtils.notEmpty(log)) {
-                        String logInfo[] = log.split(IOUtils.FIELD_TERMINATED_BY);
-                        String message = logInfo[0];
-                        Integer exitCode = null;
-                        Long entTime = null;
-                        if (logInfo.length == 2) {
-                            exitCode = Integer.parseInt(logInfo[1].split(IOUtils.TAB)[0]);
-                            entTime = Long.parseLong(logInfo[1].split(IOUtils.TAB)[1]);
-                        }
-                        recordService.doLostLog(entry.getKey(),message,exitCode,entTime);
-                    }
-                }
-            }
         }
 
         return status;

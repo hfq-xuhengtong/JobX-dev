@@ -274,21 +274,23 @@ public class AgentService {
         }
     }
 
-    public List<Agent> transfer(String registryInfo) {
+    private List<Agent> transfer(String registryInfo) {
         if (CommonUtils.isEmpty(registryInfo)) return null;
         String[] array = registryInfo.split("_");
-        if (array.length != 2 && array.length != 4) {
+        if (array.length != 3 && array.length != 5) {
             return null;
         }
         String macId = array[0];
         String password = array[1];
+        String platform = array[2];
         Agent agent = new Agent();
-        if (array.length == 2) {
+        agent.setPlatform(Integer.parseInt(platform));
+        if (array.length == 3) {
             agent.setMachineId(macId);
             agent.setPassword(password);
         } else {
-            String host = array[2];
-            String port = array[3];
+            String host = array[3];
+            String port = array[4];
             agent.setMachineId(macId);
             agent.setPassword(password);
             agent.setHost(host);

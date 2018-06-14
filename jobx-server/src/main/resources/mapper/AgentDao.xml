@@ -8,6 +8,7 @@
         <result column="comment"       property="comment" />
         <result column="email"         property="email" />
         <result column="host"          property="host" />
+        <result column="platform"      property="platform" />
         <result column="machine_id"    property="machineId" />
         <result column="mobile"        property="mobile" />
         <result column="name"          property="name" />
@@ -25,6 +26,7 @@
         a.comment,
         a.email,
         a.host,
+        a.platform,
         a.machine_id,
         a.mobile,
         a.name,
@@ -137,6 +139,9 @@
             <if test="host != null" >
                 host,
             </if>
+            <if test="platform != null" >
+                platform,
+            </if>
             <if test="machineId != null" >
                 machine_id,
             </if>
@@ -178,6 +183,9 @@
             </if>
             <if test="host != null" >
                 #{host},
+            </if>
+            <if test="platform != null" >
+                #{platform},
             </if>
             <if test="machineId != null" >
                 #{machineId},

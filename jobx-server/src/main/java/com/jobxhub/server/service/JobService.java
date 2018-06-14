@@ -201,13 +201,12 @@ public class JobService {
         return Collections.EMPTY_LIST;
     }
 
-    public PageBean<Job> search(HttpSession session, PageBean pageBean, Long agentId, Integer cronType, String jobName) {
+    public PageBean<Job> search(HttpSession session, PageBean pageBean, Long agentId,String jobName) {
         Job job = new Job();
         if (!JobXTools.isPermission(session)) {
             job.setUserId(JobXTools.getUserId(session));
         }
         job.setAgentId(agentId);
-        job.setCronType(cronType);
         job.setJobName(jobName);
         pageBean.put("job", job);
 

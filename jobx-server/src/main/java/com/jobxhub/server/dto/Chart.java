@@ -55,10 +55,6 @@ public class Chart implements Serializable {
 
     private Integer flow;//流程任务
 
-    private Integer crontab;//crontab 类型
-
-    private Integer quartz;//quartz 类型
-
     private String date;//折线图横坐标时间 格式 yy-MM-dd
 
 
@@ -140,22 +136,6 @@ public class Chart implements Serializable {
 
     public void setFlow(Integer flow) {
         this.flow = flow;
-    }
-
-    public Integer getCrontab() {
-        return crontab;
-    }
-
-    public void setCrontab(Integer crontab) {
-        this.crontab = crontab;
-    }
-
-    public Integer getQuartz() {
-        return quartz;
-    }
-
-    public void setQuartz(Integer quartz) {
-        this.quartz = quartz;
     }
 
     public String getDate() {

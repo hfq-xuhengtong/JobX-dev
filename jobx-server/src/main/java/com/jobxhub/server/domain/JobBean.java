@@ -34,9 +34,12 @@ public class JobBean {
     private Long agentId;
 
     private String jobName;
-    private Integer cronType;
     private String cronExp;
 
+    /**
+     * 当前作业的执行身份
+     */
+    private String execUser;
     private String command;
 
     private String comment;
@@ -119,20 +122,20 @@ public class JobBean {
         this.jobName = jobName;
     }
 
-    public Integer getCronType() {
-        return cronType;
-    }
-
-    public void setCronType(Integer cronType) {
-        this.cronType = cronType;
-    }
-
     public String getCronExp() {
         return cronExp;
     }
 
     public void setCronExp(String cronExp) {
         this.cronExp = cronExp;
+    }
+
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
     }
 
     public String getCommand() {

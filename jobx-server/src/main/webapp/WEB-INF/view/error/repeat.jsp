@@ -81,13 +81,6 @@
                                 $("#progress_category").attr("data-original-title", job_category+"%").css("width", job_category + "%");
                             }
 
-                            var job_model = parseInt(parseFloat(data.crontab / (data.crontab + data.quartz)) * 100);
-                            if (isNaN(job_model)) {
-                                $("#progress_model").attr("data-original-title", 0).css("width", "0%");
-                            } else {
-                                $("#progress_model").attr("data-original-title", job_model+"%").css("width", job_model + "%");
-                            }
-
                             var job_rerun = parseInt(parseFloat((data.success + data.failure + data.killed - data.rerun) / (data.success + data.failure + data.killed)) * 100);
                             if (isNaN(job_rerun)) {
                                 $("#progress_rerun").attr("data-original-title", 0).css("width", "0%");

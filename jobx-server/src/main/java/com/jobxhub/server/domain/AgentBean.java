@@ -38,6 +38,7 @@ public class AgentBean {
     private Long proxyId;
 
     private String host;
+    private Integer platform;
     private Integer port;
     private String name;
     private String password;
@@ -94,6 +95,14 @@ public class AgentBean {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
     }
 
     public Integer getPort() {
@@ -193,11 +202,12 @@ public class AgentBean {
 
     @Override
     public String toString() {
-        return "Agent{" +
+        return "AgentBean{" +
                 "agentId=" + agentId +
                 ", machineId='" + machineId + '\'' +
                 ", proxyId=" + proxyId +
                 ", host='" + host + '\'' +
+                ", platform=" + platform +
                 ", port=" + port +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +

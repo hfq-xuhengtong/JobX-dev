@@ -34,6 +34,7 @@ public class UserAgent implements Serializable {
     private Long agentId;
     private String agentName;
     private String agentHost;
+    private Boolean ok;
 
     public static Function<? super UserAgentBean, ? extends UserAgent> transfer = new Function<UserAgentBean, UserAgent>() {
         @Override
@@ -101,3 +102,5 @@ public class UserAgent implements Serializable {
         this.agentHost = agentHost;
     }
 }
+
+
