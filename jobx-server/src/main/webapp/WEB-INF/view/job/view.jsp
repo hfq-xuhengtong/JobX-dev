@@ -17,6 +17,8 @@
 
     <script type="text/javascript" src="${contextPath}/static/js/clipboard.js?resId=${resourceId}"></script> <!-- jQuery Library -->
 
+    <script type="text/javascript" src="${contextPath}/static/js/cron.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -695,6 +697,8 @@
             </div>
         </div>
     </div>
+
+    <jsp:include page="/WEB-INF/layouts/cron.jsp"/>
 
 </section>
 
