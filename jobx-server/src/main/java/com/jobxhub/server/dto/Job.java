@@ -86,6 +86,8 @@ public class Job implements Serializable {
 
     }
 
+
+
     public static Function<? super JobBean, ? extends Job> transfer = new Function<JobBean, Job>() {
         @Override
         public Job apply(JobBean input) {
@@ -338,6 +340,23 @@ public class Job implements Serializable {
 
     public void setInputParam(String inputParam) {
         this.inputParam = inputParam;
+    }
+
+
+    public Integer getAlarmCode() {
+        return alarmCode;
+    }
+
+    public void setAlarmCode(Integer alarmCode) {
+        this.alarmCode = alarmCode;
+    }
+
+    public Integer getAlarmType() {
+        return alarmType;
+    }
+
+    public void setAlarmType(Integer alarmType) {
+        this.alarmType = alarmType;
     }
 
     public void callBack(Response response, Constants.ExecType execType) {
