@@ -539,7 +539,7 @@
                 <div class="form-group">
                     <label for="comment" class="col-lab control-label wid150"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;描&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;述&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <textarea class="form-control input-sm" id="comment" name="comment" style="height: 50px;"></textarea>
+                        <textarea class="form-control input-sm" id="comment" name="comment" style="height: 100px;"></textarea>
                     </div>
                 </div>
 
