@@ -72,6 +72,9 @@ public class JobController extends BaseController {
     @Autowired
     private SchedulerService schedulerService;
 
+    @Autowired
+    private UserService userService;
+
     @RequestMapping("view.htm")
     public String view(HttpSession session, HttpServletRequest request, PageBean pageBean, Job job, Model model) {
         jobService.getPageBean(session, pageBean, job);
@@ -125,6 +128,7 @@ public class JobController extends BaseController {
         }
         List<Agent> agents = agentService.getOwnerAgents(session);
         model.addAttribute("agents", agents);
+        model.addAttribute("execUser",userService.getExecUser(JobXTools.getUserId(session)));
         return "/job/add";
     }
 

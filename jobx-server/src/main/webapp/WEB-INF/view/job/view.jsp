@@ -21,97 +21,24 @@
 
     <script type="text/javascript">
 
-        $(document).ready(function () {
-
-            window.jobxValidata = new Validata('${contextPath}');
-
-            $("#redo1").next().on("click",toggle.count.show);
-            $("#redo0").next().on("click",toggle.count.hide);
-            $("#warning1").next().on("click",toggle.contact.show);
-            $("#warning0").next().on("click",toggle.contact.hide);
-
-            $("#command").blur(function () {
-                if ($("#command").val().length == 0) {
-                    jobx.tipError("#command", "执行命令不能为空,请填写执行命令");
-                } else {
-                    jobx.tipOk("#command");
-                }
-            }).focus(function () {
-                jobx.tipDefault("#command");
-            });
-
-            $("#runCount").blur(function () {
-                var redo =  $('input[type="radio"][name="itemRedo"]:checked').val();
-                var reg = /^[0-9]*[1-9][0-9]*$/;
-                if (redo == 1) {
-                    var _runCount = $("#runCount").val();
-                    if (!_runCount) {
-                        jobx.tipError("#runCount", "请填写重跑次数!");
-                        this.status = false;
-                    } else if (!reg.test(_runCount)) {
-                        jobx.tipError("#runCount", "截止重跑次数必须为正整数!");
-                        this.status = false;
-                    } else {
-                        jobx.tipOk("#runCount");
-                    }
-                }
-            });
-
-            $("#size").change(function () {
-                jobObj.changeUrl();
-            });
-            $("#sagentId").change(function () {
-                jobObj.changeUrl();
-            });
-            $("#jobType").change(function () {
-                jobObj.changeUrl();
-            });
-            $("#sredo").change(function () {
-                jobObj.changeUrl();
-            });
-            $("#keyWord").change(function () {
-                jobObj.changeUrl();
-            });
-        });
-
-        var toggle = {
-            count:{
-                show:function () {
-                    $(".countDiv1").show();
-                },
-                hide:function () {
-                    $(".countDiv1").hide();
-                }
-            },
-            contact:{
-                show:function () {
-                    $(".contact").show()
-                },
-                hide:function () {
-                    $(".contact").hide()
-                }
-            }
-        };
-
         var jobObj = {
+            
             save:function (job) {
+
                 var jobId = $("#id").val();
-                var jobVerify = new Validata('${contextPath}',jobId);
-                jobVerify.validata.init();
-                jobVerify.validata.jobName();
-                jobVerify.validata.cronExp();
-                jobVerify.validata.command();
-                jobVerify.validata.successExit();
-                jobVerify.validata.timeout();
-                jobVerify.validata.runCount();
-                jobVerify.validata.warning();
+                jobxValidata.validata.init();
+                jobxValidata.validata.jobName();
+                jobxValidata.validata.cronExp();
+                jobxValidata.validata.command();
+                jobxValidata.validata.successExit();
+                jobxValidata.validata.timeout();
+                jobxValidata.validata.runCount();
+                jobxValidata.validata.warning();
                 var valId = setInterval(function () {
-                    if (jobVerify.validata.jobNameRemote ) {
+                    if (jobxValidata.validata.jobNameRemote ) {
                         window.clearInterval(valId);
-                        if (jobVerify.validata.status) {
-
+                        if (jobxValidata.validata.status) {
                             var loading = new Loading();
-
                             var jobName = $("#jobName").val();
                             var jobId = $("#id").val();
                             var agentId = $("#agentId").val();
@@ -169,6 +96,10 @@
             },
 
             edit:function (id) {
+                if (window.jobxValidata!=null) {
+                    window.jobxValidata = null;
+                }
+                window.jobxValidata = new Validata('${contextPath}',id);
                 ajax({
                     type: "post",
                     url: "${contextPath}/job/editsingle.do",
@@ -400,6 +331,44 @@
                 });
             }
         }
+
+        $(document).ready(function () {
+            $("#size").change(function () {
+                jobObj.changeUrl();
+            });
+            $("#sagentId").change(function () {
+                jobObj.changeUrl();
+            });
+            $("#jobType").change(function () {
+                jobObj.changeUrl();
+            });
+            $("#sredo").change(function () {
+                jobObj.changeUrl();
+            });
+            $("#keyWord").change(function () {
+                jobObj.changeUrl();
+            });
+        });
+
+        var toggle = {
+            count:{
+                show:function () {
+                    $(".countDiv1").show();
+                },
+                hide:function () {
+                    $(".countDiv1").hide();
+                }
+            },
+            contact:{
+                show:function () {
+                    $(".contact").show()
+                },
+                hide:function () {
+                    $(".contact").hide()
+                }
+            }
+        };
+
     </script>
 </head>
 
@@ -561,8 +530,7 @@
             </tbody>
         </table>
 
-        <cron:pager href="${contextPath}/job/view.htm?agentId=${agentId}&jobName=${jobName}&redo=${redo}" id="${pageBean.pageNo}"
-                    size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
+        <cron:pager href="${contextPath}/job/view.htm?agentId=${agentId}&jobName=${jobName}&redo=${redo}" id="${pageBean.pageNo}" size="${pageBean.pageSize}" total="${pageBean.totalCount}"/>
 
     </div>
 

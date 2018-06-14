@@ -429,7 +429,7 @@
                             <label for="execUser"  class="col-lab control-label wid150"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;执行身份&nbsp;&nbsp;<b>*&nbsp;</b></label>
                             <div class="col-md-10">
                                 <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited select input-sm" multiple>
-                                    <c:forEach items="${jobx_user.execUser}" var="item">
+                                    <c:forEach items="${execUser}" var="item">
                                         <option value="${item}">${item}</option>
                                     </c:forEach>
                                 </select>

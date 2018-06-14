@@ -27,6 +27,7 @@ import com.jobxhub.common.Constants;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DigestUtils;
 import com.jobxhub.common.util.IOUtils;
+import com.jobxhub.common.util.StringUtils;
 import com.jobxhub.server.domain.UserBean;
 import com.jobxhub.server.dao.UserDao;
 import com.jobxhub.server.support.JobXTools;
@@ -39,10 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -163,6 +161,18 @@ public class UserService {
         return userDao.getCount(map) > 0;
     }
 
+    public List<String> getExecUser(Long userId) {
+        UserBean user = userDao.getById(userId);
+        if (user.getRoleId() == 999L) {
+            return configService.getExecUser();
+        }else {
+            String execUser = userDao.getExecUser(userId);
+            if (CommonUtils.notEmpty(execUser)) {
+                return Arrays.asList(execUser.split(","));
+            }
+        }
+        return Collections.EMPTY_LIST;
+    }
 }
 
 
