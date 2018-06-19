@@ -23,12 +23,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class AlarmListener implements ApplicationListener<AlarmEvent> {
 
-
     @Override
     @Async
     public void onApplicationEvent(AlarmEvent alarmEvent) {
         AlarmMessage alarmMessage = alarmEvent.getAlarmMessage();
-
         Alarm.AlarmType alarmType = alarmMessage.getAlarmType();//获取通知方式
         int[] scatter = alarmType.scatter();
         for(int code:scatter){

@@ -7,12 +7,11 @@ package com.jobxhub.server.alarm;
  * @version V1.0
  */
 
-import com.jobxhub.server.dto.Log;
-
 /**
  * @Descriptions: 发送消息的接口
  */
 public interface SendNotice {
 
     void send(AlarmMessage message);
+
 }

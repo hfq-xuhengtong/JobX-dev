@@ -10,8 +10,6 @@ package com.jobxhub.server.alarm;
 import com.jobxhub.common.job.Alarm;
 import com.jobxhub.server.dto.Job;
 
-import java.util.List;
-
 /**
  * @Descriptions:
  */

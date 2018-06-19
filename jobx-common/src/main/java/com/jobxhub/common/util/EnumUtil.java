@@ -7,7 +7,6 @@ package com.jobxhub.common.util;
  * @version V1.0
  */
 
-import com.jobxhub.common.Constants;
 import com.jobxhub.common.job.Alarm;
 
 /**

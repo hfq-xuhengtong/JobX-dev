@@ -7,10 +7,7 @@ package com.jobxhub.server.alarm;
  * @version V1.0
  */
 
-import com.jobxhub.server.dto.Log;
 import org.springframework.stereotype.Service;
-
-import javax.xml.ws.ServiceMode;
 
 /**
  * @Descriptions:

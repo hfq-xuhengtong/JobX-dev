@@ -285,4 +285,20 @@ public class JobBean {
     public void setOperateUname(String operateUname) {
         this.operateUname = operateUname;
     }
+
+    public Integer getAlarmCode() {
+        return alarmCode;
+    }
+
+    public void setAlarmCode(Integer alarmCode) {
+        this.alarmCode = alarmCode;
+    }
+
+    public Integer getAlarmType() {
+        return alarmType;
+    }
+
+    public void setAlarmType(Integer alarmType) {
+        this.alarmType = alarmType;
+    }
 }
