@@ -151,7 +151,7 @@ public class JobXRegistry {
 
                 lock.lock();
 
-                if (destroy) {
+                if (destroy||children==null) {
                     return;
                 }
 
@@ -199,15 +199,17 @@ public class JobXRegistry {
             public void childChanged(String path, List<String> children) {
 
                 try {
+
                     lock.lock();
+
+                    if (destroy||children == null) {
+                        return;
+                    }
 
                     preServerSize = serverSize;
 
                     serverSize = children.size();
 
-                    if (destroy) {
-                        return;
-                    }
                     servers = children;
                     //一致性哈希计算出每个Job落在哪个server上
                     ConsistentHash<String> hash = new ConsistentHash<String>(servers);
@@ -258,7 +260,7 @@ public class JobXRegistry {
 
                     try {
                         lock.lock();
-                        if (destroy) {
+                        if (destroy||children == null) {
                             return;
                         }
 
