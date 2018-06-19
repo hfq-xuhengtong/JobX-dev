@@ -95,7 +95,7 @@
         </if>
 
         <if test="pager.filter.record.queryDate !=null " >
-            and date_format(r.start_time,'%Y-%m-%d') = #{pager.filter.record.queryDate}
+            and r.start_time between #{pager.filter.record.queryDate} and date_add(#{pager.filter.record.queryDate}, interval 1 day)
         </if>
 
         <if test="pager.filter.userId !=null " >
@@ -142,7 +142,7 @@
         </if>
 
         <if test="filter.record.queryDate !=null " >
-            and date_format(r.start_time,'%Y-%m-%d') = #{filter.record.queryDate}
+            and r.start_time between #{filter.record.queryDate} and date_add(#{filter.record.queryDate}, interval 1 day)
         </if>
 
         <if test="filter.userId !=null " >
@@ -189,7 +189,7 @@
         from  t_record r
         left join t_job j
         on  r.job_id=j.job_id
-        where date_format(r.start_time,'%Y-%m-%d')
+        where r.start_time
         between #{filter.start} and #{filter.end}
         <if test="filter.userId!=null" >
             and r.user_id = #{filter.userId}
@@ -307,7 +307,7 @@
     </update>
 
     <delete id="delete">
-       delete from  t_record where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}
+       delete from t_record where start_time between #{start} and #{end}
     </delete>
 
     <select id="getMessage" resultType="com.jobxhub.server.domain.RecordMessageBean">
@@ -329,7 +329,7 @@
     </insert>
 
     <delete id="deleteMessage">
-       delete from t_record_message where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}
+       delete from t_record_message where start_time between #{start} and #{end}
     </delete>
 
 </mapper>

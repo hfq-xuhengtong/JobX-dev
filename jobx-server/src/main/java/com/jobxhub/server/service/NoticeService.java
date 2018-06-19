@@ -111,9 +111,7 @@ public class NoticeService {
             }
             try {
 
-                sendMessage(null, agent.getAgentId(),
-                        job.getEmail(), job.getMobile(),
-                        content);
+                //sendMessage(null, agent.getAgentId(),job.getEmail(), job.getMobile(),content);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -142,7 +140,7 @@ public class NoticeService {
         if (CommonUtils.notEmpty(email)) {
             try {
                 log.setType(Constants.MsgType.EMAIL.getValue());
-                /*HtmlEmail htmlEmail = new HtmlEmail();
+                HtmlEmail htmlEmail = new HtmlEmail();
                 htmlEmail.setCharset("UTF-8");
                 htmlEmail.setHostName(config.getSmtpHost());
                 htmlEmail.setSslSmtpPort(config.getSmtpPort().toString());
@@ -151,7 +149,7 @@ public class NoticeService {
                 htmlEmail.setSubject("jobx监控告警");
                 htmlEmail.setHtmlMsg(msgToHtml(content));
                 htmlEmail.addTo(email.split(","));
-                htmlEmail.send();*/
+                htmlEmail.send();
                 log.setReceiver(email);
                 logService.save(log);
             } catch (Exception e) {
