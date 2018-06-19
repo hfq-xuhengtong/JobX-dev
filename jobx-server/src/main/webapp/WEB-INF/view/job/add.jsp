@@ -402,7 +402,7 @@
                             <label for="agentId" class="col-lab control-label wid150"><i class="glyphicon glyphicon-leaf"></i>&nbsp;&nbsp;执&nbsp;&nbsp;行&nbsp;&nbsp;器&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                             <div class="col-md-10">
                                 <c:if test="${empty agent}">
-                                    <select id="agentId" name="agentId" class="form-control m-b-10 input-sm">
+                                    <select id="agentId" class="select input-sm" name="agentId"  multiple data-selected-text-format="count>2">
                                         <c:forEach var="d" items="${agents}">
                                             <option platform=${d.platform} value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
                                         </c:forEach>
@@ -413,7 +413,7 @@
                                     <input type="text" class="form-control input-sm" value="${agent.name}&nbsp;&nbsp;&nbsp;${agent.host}" readonly>
                                     <label color="red">&nbsp;*只读</label>
                                 </c:if>
-                                <span class="tips">&nbsp;&nbsp;要执行此作业的机器名称和Host</span>
+                                <div class="tips"><b>*&nbsp;</b>要执行作业的目标机器</div></br>
                             </div>
                         </div>
 
@@ -428,7 +428,7 @@
                         <div class="form-group" id="execUserDiv">
                             <label for="execUser"  class="col-lab control-label wid150"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;执行身份&nbsp;&nbsp;<b>*&nbsp;</b></label>
                             <div class="col-md-10">
-                                <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited select input-sm" multiple>
+                                <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited agentId select input-sm" multiple>
                                     <c:forEach items="${execUser}" var="item">
                                         <option value="${item}">${item}</option>
                                     </c:forEach>
@@ -710,7 +710,6 @@
             $(".tag-select-limited").chosen({
                 max_selected_options: 1
             });
-
             /* Overflow */
             $('.overflow').niceScroll();
         })();
