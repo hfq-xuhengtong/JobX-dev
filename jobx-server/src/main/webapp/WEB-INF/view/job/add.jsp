@@ -86,18 +86,6 @@
             stroke-width: 1px;
         }
 
-        .dropdown-menu {
-            background-color: rgba(0,0,0,0.8);
-        }
-
-        .dropdown-menu li a{
-            color: rgba(255,255,255,0.8);
-        }
-
-        .dropdown-menu li a:hover{
-            color: rgb(255,255,255);
-        }
-
         .modal-search {
             background-color: rgba(222, 222, 244, 0.40);
         }
