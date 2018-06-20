@@ -23,26 +23,30 @@
 package com.jobxhub.server.service;
 
 import com.jobxhub.common.Constants;
-import com.jobxhub.server.dto.Config;
-import com.jobxhub.server.dto.Log;
+import com.jobxhub.common.job.Alarm;
+import com.jobxhub.common.util.EnumUtil;
+import com.jobxhub.server.alarm.AlarmMessage;
+import com.jobxhub.server.dto.*;
 import com.jobxhub.server.domain.UserBean;
-import com.jobxhub.server.dto.Agent;
+import com.jobxhub.server.event.AlarmEvent;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.HtmlEmail;
 import com.jobxhub.common.util.CommonUtils;
 import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.common.util.HttpUtils;
-import com.jobxhub.server.dto.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import java.io.*;
 import java.util.*;
+import static com.jobxhub.common.job.Alarm.auth;
+import static com.jobxhub.common.job.Alarm.AlarmCode.*;
 
 /**
  * Created by benjobs on 16/3/18.
@@ -59,6 +63,9 @@ public class NoticeService {
 
     @Autowired
     private ServletContext servletContext;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private Template template;
 
@@ -103,7 +110,8 @@ public class NoticeService {
                 logger.info(content);
             }
             try {
-                //sendMessage(Arrays.asList(job.getUser()), agent.getAgentId(), job.getEmail(), job.getMobile(), content);
+
+                //sendMessage(null, agent.getAgentId(),job.getEmail(), job.getMobile(),content);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -115,7 +123,11 @@ public class NoticeService {
         return String.format(msgFormat, agent.getName(), agent.getHost(), agent.getPort(), message, DateUtils.formatFullDate(new Date()));
     }
 
-    public void sendMessage(List<UserBean> users, Long workId, String email, String mobile, String content) {
+    public void sendMessage(List<UserBean> users, Long workId, String email,String mobile, String content) {
+
+
+
+
         Log log = new Log();
         log.setIsread(false);
         log.setAgentId(workId);
@@ -166,6 +178,7 @@ public class NoticeService {
             e.printStackTrace(System.err);
         }
 
+
         //发送站内信
         log.setType(Constants.MsgType.WEBSITE.getValue());
         for (UserBean user : users) {
@@ -186,5 +199,41 @@ public class NoticeService {
         return writer.toString();
     }
 
+    /**
+     * 根据作业的执行结果进行通知
+     * @param job
+     * @param record
+     */
+    public void notice2(Job job, Record record) {
 
+        AlarmMessage alarmMessage=new AlarmMessage(job);
+        Integer success = record.getSuccess();//成功，失败
+        Constants.ResultStatus resultStatus = EnumUtil.getEnumBycode(Constants.ResultStatus.class, success);
+        Integer alarmCode = job.getAlarmCode();
+        boolean notice=false;
+        switch (resultStatus){
+            case FAILED ://失败
+                if(auth(alarmCode,FAIL.getCode())){//如果是失败通知
+                    notice=true;
+                }
+                System.out.println("ok");
+                break;
+            case SUCCESSFUL://成功
+                if(auth(alarmCode,SUCCESS.getCode())){//如果是成功通知
+                    notice=true;
+                }
+                break;
+            case TIMEOUT://超时
+                if(auth(alarmCode,TIMEOUT.getCode())){//如果是超时通知
+                    notice=true;
+                }
+                break;
+            default:
+                return;
+        }
+        if(notice){
+            AlarmEvent alarmEvent= new AlarmEvent(this,alarmMessage);
+            applicationContext.publishEvent(alarmEvent);
+        }
+    }
 }

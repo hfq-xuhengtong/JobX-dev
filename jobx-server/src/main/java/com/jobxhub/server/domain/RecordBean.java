@@ -22,11 +22,9 @@
 package com.jobxhub.server.domain;
 
 import com.google.common.base.Function;
-import com.jobxhub.common.util.DateUtils;
 import com.jobxhub.server.dto.Record;
 import org.springframework.beans.BeanUtils;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 public class RecordBean {
@@ -36,6 +34,7 @@ public class RecordBean {
     private Long agentId;
     private Long userId;
     private String command;
+    private String execUser;
     private Integer returnCode;
     private Integer success;
     private Date startTime;
@@ -111,6 +110,14 @@ public class RecordBean {
 
     public void setCommand(String command) {
         this.command = command;
+    }
+
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
     }
 
     public Integer getReturnCode() {

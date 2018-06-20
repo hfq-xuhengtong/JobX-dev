@@ -1816,3 +1816,12 @@ div.spinedit span:hover {
    border: 0;
 
 }
+
+.code{
+    font-size:11px;
+    color:#FFF;
+    border: none;
+    background: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

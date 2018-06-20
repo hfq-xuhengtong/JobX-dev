@@ -524,82 +524,6 @@ Validata.prototype.ready = function () {
     var warning = $('input[type="radio"][name="warning"]:checked').val();
     _this.toggle.contact(warning == 1);
 
-    $("#year,#month,#day,#week,#hour,#minutes,#seconds").click(function () {
-
-        $("#seconds").val()
-
-        var cronExp = "";
-        var year = $("#year").val();
-        var month = $("#month").val();
-        var day = $("#day").val();
-        var week = $("#week").val();
-        var hour = $("#hour").val();
-        var minutes = $("#minutes").val();
-        var seconds = $("#seconds").val();
-
-        if(seconds === null){
-            return;
-        }
-
-        if(year.length > 1 && year.indexOf("*") == 0){
-            year = year.toString().substr(2);
-        }
-        if(month.length > 1 && month.indexOf("*") == 0){
-            month = month.toString().substr(2);
-        }
-        if(day.length > 1 && day.indexOf("*") == 0){
-            day = day.toString().substr(2);
-        }
-        if(!week){week="*";}
-        if(week.length > 1 && week.indexOf("*") == 0){
-            week = week.toString().substr(2);
-        }
-        if(week>0){
-            week = parseInt(week)+1;
-            if(week==8) week=1;
-        }
-        if(hour.length > 1 && hour.indexOf("*") == 0){
-            hour = hour.toString().substr(2);
-        }
-        if(minutes.length > 1 && minutes.indexOf("*") == 0){
-            minutes = minutes.toString().substr(2);
-        }
-        if(seconds.length > 1 && seconds.indexOf("*") == 0){
-            seconds = seconds.toString().substr(2);
-        }
-        cronExp = seconds + " " + minutes + " " + hour + " " ;
-        if(week == "*"){
-            cronExp += day + " " + month + " ? ";
-        }else if(day == "*" && week != "*"){
-            cronExp += "? " + month + " " + week + " ";
-        }else if(day != "*" && week != "*"){
-            //alert("日期和星期不能同时选择!");
-            jobx.tipError($("#cronExp"),"日期和星期不能同时选择!");
-            $("#cronExp").val('');
-            _this.validata.status = false;
-            return;
-        }
-        cronExp += year;
-        $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ? *');
-        $("#cronExpInput").val(cronExp);
-        ajax({
-            type: "POST",
-            url: _this.contextPath+"/verify/recenttime.do",
-            data: {
-                "cronExp": cronExp
-            }
-        },function (data) {
-
-
-        },function () {
-        });
-    });
-
-    $("#slideUp-btn").click(function () {
-        $('#cronSelector').slideUp();
-        _this.validata.cronExp();
-    });
-
     $("#save-btn").click(function () {
         _this.validata.verify();
         if(_this.validata.status){
@@ -635,7 +559,9 @@ Validata.prototype.ready = function () {
     $("#cronExp").blur(function () {
         _this.validata.cronExp();
     }).focus(function () {
-        $('#cronSelector').modal("show");
+        new CronInput(_this.contextPath,function (exp) {
+           $("#cronExp").val(exp);
+        });
         $("#expTip").css("visibility","visible").html('请采用quartz框架的时间格式表达式,如 0 0 10 L * ?');
     }).bind('input propertychange change', function() {
         _this.validata.cronExp();

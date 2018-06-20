@@ -119,9 +119,9 @@ public class UserController extends BaseController {
 
         Map<String,Boolean> execUser = new HashMap<String,Boolean>(0);
         List<String> allExecUser = configService.getExecUser();
-        if (CommonUtils.notEmpty(user.getExecUser(),allExecUser)) {
+        if (CommonUtils.notEmpty(allExecUser)) {
             for (String _execUser:allExecUser) {
-                execUser.put(_execUser,user.getExecUser().contains(_execUser));
+                execUser.put(_execUser,user.getExecUser()!=null&&user.getExecUser().contains(_execUser));
             }
         }
         model.addAttribute("execUser",execUser);

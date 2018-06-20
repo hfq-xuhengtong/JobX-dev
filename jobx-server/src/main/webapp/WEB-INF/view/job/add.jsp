@@ -7,6 +7,8 @@
 <html lang="en">
 <head>
 
+    <script type="text/javascript" src="${contextPath}/static/js/cron.js?resId=${resourceId}"></script> <!-- jQuery Library -->
+
     <style type="text/css">
         .block-title {
             margin-bottom: 0px;
@@ -84,18 +86,6 @@
             stroke-width: 1px;
         }
 
-        .dropdown-menu {
-            background-color: rgba(0,0,0,0.8);
-        }
-
-        .dropdown-menu li a{
-            color: rgba(255,255,255,0.8);
-        }
-
-        .dropdown-menu li a:hover{
-            color: rgb(255,255,255);
-        }
-
         .modal-search {
             background-color: rgba(222, 222, 244, 0.40);
         }
@@ -123,24 +113,6 @@
 
         .tab-content{
             margin-bottom: -5px;
-        }
-
-        .cronSelector select {
-            width: 68px;
-        }
-
-        .cronSelector th{
-            text-align: center;
-        }
-
-        .recenttime tr td {
-            padding-left: 20px;
-            font-size: 13px;
-            padding-top: 4px;
-        }
-        .recenttime {
-            padding-top: 5px;
-            padding-bottom: 10px;
         }
     </style>
 
@@ -418,7 +390,7 @@
                             <label for="agentId" class="col-lab control-label wid150"><i class="glyphicon glyphicon-leaf"></i>&nbsp;&nbsp;执&nbsp;&nbsp;行&nbsp;&nbsp;器&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                             <div class="col-md-10">
                                 <c:if test="${empty agent}">
-                                    <select id="agentId" name="agentId" class="form-control m-b-10 input-sm">
+                                    <select id="agentId" class="select input-sm" name="agentId"  multiple data-selected-text-format="count>2">
                                         <c:forEach var="d" items="${agents}">
                                             <option platform=${d.platform} value="${d.agentId}">${d.host}&nbsp;(${d.name})</option>
                                         </c:forEach>
@@ -429,7 +401,7 @@
                                     <input type="text" class="form-control input-sm" value="${agent.name}&nbsp;&nbsp;&nbsp;${agent.host}" readonly>
                                     <label color="red">&nbsp;*只读</label>
                                 </c:if>
-                                <span class="tips">&nbsp;&nbsp;要执行此作业的机器名称和Host</span>
+                                <div class="tips"><b>*&nbsp;</b>要执行作业的目标机器</div></br>
                             </div>
                         </div>
 
@@ -444,8 +416,8 @@
                         <div class="form-group" id="execUserDiv">
                             <label for="execUser"  class="col-lab control-label wid150"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;执行身份&nbsp;&nbsp;<b>*&nbsp;</b></label>
                             <div class="col-md-10">
-                                <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited select input-sm" multiple>
-                                    <c:forEach items="${jobx_user.execUser}" var="item">
+                                <select id="execUser" name="execUser" data-placeholder="执行该作业的用户身份" class="tag-select-limited agentId select input-sm" multiple>
+                                    <c:forEach items="${execUser}" var="item">
                                         <option value="${item}">${item}</option>
                                     </c:forEach>
                                 </select>
@@ -555,7 +527,7 @@
                 <div class="form-group">
                     <label for="comment" class="col-lab control-label wid150"><i class="glyphicon glyphicon-magnet"></i>&nbsp;&nbsp;描&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;述&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                     <div class="col-md-10">
-                        <textarea class="form-control input-sm" id="comment" name="comment" style="height: 50px;"></textarea>
+                        <textarea class="form-control input-sm" id="comment" name="comment" style="height: 100px;"></textarea>
                     </div>
                 </div>
 
@@ -697,109 +669,6 @@
         </div>
     </div>
 
-    <div class="modal fade cronSelector" id="cronSelector" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-search">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close btn-float" data-dismiss="modal" aria-hidden="true"><i class="md md-close"></i></button>
-                    <h4>时间表达式</h4>
-                </div>
-                <div class="modal-body" style="padding: 0px;">
-                    <table class="table tile textured" style="font-size: 13px;">
-                        <thead>
-                        <tr>
-                            <th>年</th>
-                            <th>月</th>
-                            <th>日</th>
-                            <th>星期</th>
-                            <th>小时</th>
-                            <th>分钟</th>
-                            <th>秒</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>
-                                <select id="year" size="8" multiple="multiple" >
-                                    <option value="*" selected="selected">每年</option>
-                                    <c:forEach var="i" begin="2018" end="2050" step="1">
-                                        <option value="${i}">${i}年</option>
-                                    </c:forEach>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="month" size="8" multiple="multiple" >
-                                    <option value="*" selected="selected">每月</option>
-                                    <c:forEach var="i" begin="1" end="12" step="1">
-                                        <option value="${i}">${i}月</option>
-                                    </c:forEach>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="day" size="8" multiple="multiple" >
-                                    <option value="*" selected="selected">每日</option>
-                                    <c:forEach var="i" begin="1" end="31" step="1">
-                                        <option value="${i}">${i}日</option>
-                                    </c:forEach>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="week" size="8" multiple="multiple" >
-                                    <option value="*" selected="selected">每星期</option>
-                                    <c:forEach var="i" begin="1" end="7" step="1">
-                                        <option value="${i}">星期${i}</option>
-                                    </c:forEach>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="hour" size="8" multiple="multiple" >
-                                    <option value="*" selected="selected">每时</option>
-                                    <c:forEach var="i" begin="0" end="23" step="1">
-                                        <option value="${i}">${i}时</option>
-                                    </c:forEach>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="minutes" size="8" multiple="multiple" >
-                                    <option value="*" selected="selected">每分</option>
-                                    <c:forEach var="i" begin="0" end="59" step="1">
-                                        <option value="${i}">${i}分</option>
-                                    </c:forEach>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="seconds" size="8" multiple="multiple" >
-                                    <option value="*" >每秒</option>
-                                    <c:forEach var="i" begin="0" end="59" step="1">
-                                        <c:choose>
-                                            <c:when test="${i eq 0}">
-                                                <option selected value="${i}">${i}秒</option>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <option value="${i}">${i}秒</option>
-                                            </c:otherwise>
-                                        </c:choose>
-
-                                    </c:forEach>
-                                </select>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <label for="cronExpInput" class="col-lab control-label"><i class="glyphicon glyphicon-filter"></i>时间规则</label>
-                    <input type="text" class="form-control input-sm" id="cronExpInput">
-                    <table class="tile textured recenttime">
-                        <tr> <td>2018-06-13 19:26:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:27:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:28:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:29:00</td> </tr>
-                           <tr>  <td>2018-06-13 19:30:00</td> </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <%--选择已有作业弹窗--%>
     <div class="modal fade bs-example-modal-lg" id="existFlowModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -816,6 +685,8 @@
             </div>
         </div>
     </div>
+    
+    <jsp:include page="/WEB-INF/layouts/cron.jsp"/>
 
 </section>
 
@@ -827,7 +698,6 @@
             $(".tag-select-limited").chosen({
                 max_selected_options: 1
             });
-
             /* Overflow */
             $('.overflow').niceScroll();
         })();

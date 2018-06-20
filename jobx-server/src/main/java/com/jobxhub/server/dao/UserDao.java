@@ -44,4 +44,6 @@ public interface UserDao {
     void updatePassword(@Param("userId") Long userId, @Param("password") String password);
 
     void uploadImg(@Param("userId") Long userId, @Param("headerPic") byte[] headerPic);
+
+    String getExecUser(@Param("userId") Long userId);
 }

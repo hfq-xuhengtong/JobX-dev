@@ -135,7 +135,9 @@ alter table `t_record` drop column `flowNum`;
 alter table `t_record` drop column `redo`;
 alter table `t_record` drop column `runCount`;
 alter table `t_record` drop column `message`;
+alter table `t_record` add column `exec_user` varchar(50);
 alter table `t_record` add index qa_success(`success`);
+
                      
 --t_user
 alter table `t_user` change column `userId` `user_id` bigint(20) auto_increment;

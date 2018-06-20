@@ -41,6 +41,7 @@ public class Record implements Serializable {
     private Long agentId;
     private Long userId;
     private String command;
+    private String execUser;
     private Integer returnCode;
     private Integer success;
     private Date startTime;
@@ -88,6 +89,7 @@ public class Record implements Serializable {
         this.setAgentId(job.getAgentId());
         this.setUserId(job.getUserId());
         this.setCommand(job.getCommand());//执行的命令
+        this.setExecUser(job.getExecUser());
         this.setSuccess(Constants.ResultStatus.SUCCESSFUL.getStatus());
         this.setStatus(Constants.RunStatus.RUNNING.getStatus());//任务还未完成
         this.setPid(CommonUtils.uuid());
@@ -133,6 +135,14 @@ public class Record implements Serializable {
 
     public void setCommand(String command) {
         this.command = command;
+    }
+
+    public String getExecUser() {
+        return execUser;
+    }
+
+    public void setExecUser(String execUser) {
+        this.execUser = execUser;
     }
 
     public Integer getReturnCode() {

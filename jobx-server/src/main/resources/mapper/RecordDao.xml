@@ -7,6 +7,7 @@
         <result column="record_id"          property="recordId"/>
         <result column="agent_id"           property="agentId"/>
         <result column="command"            property="command"/>
+        <result column="exec_user"          property="execUser"/>
         <result column="start_time"         property="startTime"/>
         <result column="end_time"           property="endTime"/>
         <result column="exec_type"          property="execType"/>
@@ -31,6 +32,7 @@
         r.record_id,
         r.agent_id,
         r.command,
+        r.exec_user,
         r.start_time,
         r.exec_type,
         r.group_id,
@@ -95,7 +97,7 @@
         </if>
 
         <if test="pager.filter.record.queryDate !=null " >
-            and date_format(r.start_time,'%Y-%m-%d') = #{pager.filter.record.queryDate}
+            and r.start_time between #{pager.filter.record.queryDate} and date_add(#{pager.filter.record.queryDate}, interval 1 day)
         </if>
 
         <if test="pager.filter.userId !=null " >
@@ -142,7 +144,7 @@
         </if>
 
         <if test="filter.record.queryDate !=null " >
-            and date_format(r.start_time,'%Y-%m-%d') = #{filter.record.queryDate}
+            and r.start_time between #{filter.record.queryDate} and date_add(#{filter.record.queryDate}, interval 1 day)
         </if>
 
         <if test="filter.userId !=null " >
@@ -189,7 +191,7 @@
         from  t_record r
         left join t_job j
         on  r.job_id=j.job_id
-        where date_format(r.start_time,'%Y-%m-%d')
+        where r.start_time
         between #{filter.start} and #{filter.end}
         <if test="filter.userId!=null" >
             and r.user_id = #{filter.userId}
@@ -269,6 +271,7 @@
             user_id,
             job_id,
             job_type,
+            exec_user,
             parent_id,
             pid,
             redo_num,
@@ -285,6 +288,7 @@
             #{userId},
             #{jobId},
             #{jobType},
+            #{execUser},
             #{parentId},
             #{pid},
             #{redoNum},
@@ -293,8 +297,6 @@
             #{success}
         );
     </insert>
-
-
 
     <update id="update" parameterType="com.jobxhub.server.domain.RecordBean">
         update t_record
@@ -307,7 +309,7 @@
     </update>
 
     <delete id="delete">
-       delete from  t_record where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}
+       delete from t_record where start_time between #{start} and #{end}
     </delete>
 
     <select id="getMessage" resultType="com.jobxhub.server.domain.RecordMessageBean">
@@ -329,7 +331,7 @@
     </insert>
 
     <delete id="deleteMessage">
-       delete from t_record_message where date_format(start_time,'%Y-%m-%d') between #{start} and #{end}
+       delete from t_record_message where start_time between #{start} and #{end}
     </delete>
 
 </mapper>
