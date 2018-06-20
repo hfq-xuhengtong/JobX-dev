@@ -7,6 +7,7 @@
         <result column="record_id"          property="recordId"/>
         <result column="agent_id"           property="agentId"/>
         <result column="command"            property="command"/>
+        <result column="exec_user"          property="execUser"/>
         <result column="start_time"         property="startTime"/>
         <result column="end_time"           property="endTime"/>
         <result column="exec_type"          property="execType"/>
@@ -31,6 +32,7 @@
         r.record_id,
         r.agent_id,
         r.command,
+        r.exec_user,
         r.start_time,
         r.exec_type,
         r.group_id,
@@ -269,6 +271,7 @@
             user_id,
             job_id,
             job_type,
+            exec_user,
             parent_id,
             pid,
             redo_num,
@@ -285,6 +288,7 @@
             #{userId},
             #{jobId},
             #{jobType},
+            #{execUser},
             #{parentId},
             #{pid},
             #{redoNum},
@@ -293,8 +297,6 @@
             #{success}
         );
     </insert>
-
-
 
     <update id="update" parameterType="com.jobxhub.server.domain.RecordBean">
         update t_record

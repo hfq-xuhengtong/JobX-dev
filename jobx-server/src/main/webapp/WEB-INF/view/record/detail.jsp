@@ -35,16 +35,15 @@
                     <c:if test="${empty record.jobName}">batchJob</c:if>
                     <c:if test="${!empty record.jobName}">${record.jobName}</c:if>
                 </td>
-                <td><i class="glyphicon glyphicon-th-large"></i>&nbsp;执行命令</td>
-                <td>${cron:escapeHtml(record.command)}</td>
+                <td><i class="glyphicon glyphicon-leaf"></i>&nbsp;执&nbsp;&nbsp;行&nbsp;&nbsp;器</td>
+                <td>${record.agentName}</td>
             </tr>
 
             <tr>
-                <td><i class="glyphicon glyphicon-leaf"></i>&nbsp;执&nbsp;&nbsp;行&nbsp;&nbsp;器</td>
-                <td>${record.agentName}</td>
-
                 <td><i class="glyphicon glyphicon-user"></i>&nbsp;作&nbsp;&nbsp;业&nbsp;&nbsp;人</td>
                 <td>${record.operateUname}</td>
+                <td><i class="glyphicon glyphicon-user"></i>&nbsp;执行身份</td>
+                <td>${record.execUser}</td>
             </tr>
             <tr>
                 <td><i class="glyphicon glyphicon-hdd"></i>&nbsp;机&nbsp;&nbsp;器&nbsp;&nbsp;IP</td>
@@ -95,8 +94,15 @@
 
             <tr>
                 <td colspan="4">
+                    <i class="glyphicon glyphicon-th-large"></i>&nbsp;执行命令</p>
+                    <pre class="code">${record.execUser}</pre>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
                     <i class="glyphicon glyphicon-envelope"></i>&nbsp;<strong>返回信息</strong></p>
-                    <pre id="pre" style="font-size:11px;color:#FFF;border: none;background: none;white-space: pre-wrap;word-wrap: break-word;">${record.message}</pre>
+                    <pre id="pre" class="code">${record.message}</pre>
                 </td>
             </tr>
             </tbody>
