@@ -79,8 +79,6 @@
         <zkclient.version>0.10</zkclient.version>
         <jetty.version>9.4.8.v20171121</jetty.version>
         <tomcat.version>8.0.32</tomcat.version>
-        <hadoop.version>2.7.3</hadoop.version>
-        <hbase.version>1.3.0</hbase.version>
         <asm.version>6.0</asm.version>
     </properties>
 
@@ -729,21 +727,6 @@
                 <artifactId>sigar</artifactId>
                 <version>1.6.4</version>
             </dependency>
-
-            <!-- Hadoop 2.7.3 -->
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-hdfs</artifactId>
-                <version>${hadoop.version}</version>
-            </dependency>
-
-            <!-- HBase 1.3.0 -->
-            <dependency>
-                <groupId>org.apache.hbase</groupId>
-                <artifactId>hbase-client</artifactId>
-                <version>${hbase.version}</version>
-            </dependency>
-
         </dependencies>
 
     </dependencyManagement>

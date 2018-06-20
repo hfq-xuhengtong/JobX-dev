@@ -61,15 +61,11 @@ public class AgentService implements ServerHandler, AgentJob {
 
     private static ZookeeperRegistry registry = null;
 
-    private boolean log2hbase;
-
     public AgentService() {
         String registryAddress = SystemPropertyUtils.get(Constants.PARAM_JOBX_REGISTRY_KEY);
         URL url = URL.valueOf(registryAddress);
         ZookeeperTransporter transporter =  ExtensionLoader.load(ZookeeperTransporter.class);
         registry = new ZookeeperRegistry(url,transporter);
-        log2hbase = PropertiesLoader.getBoolean(Constants.PARAM_LOG2HBASE_KEY);
-        //read lost log...
         File filePath = new File(Constants.JOBX_LOG_PATH);
         for (File file:filePath.listFiles()) {
             if (file.getName().matches("^\\.[a-z0-9]{32}\\.log$")) {
