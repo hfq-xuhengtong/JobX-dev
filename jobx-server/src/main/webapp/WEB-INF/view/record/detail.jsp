@@ -87,16 +87,13 @@
                     <c:if test="${record.execType eq 3}">重跑</c:if>
                     <c:if test="${record.execType eq 4}">现场</c:if>
                 </td>
-
                 <td><i class="glyphicon glyphicon-repeat"></i>&nbsp;重跑次数</td>
                 <td>${record.redoCount}</td>
             </tr>
 
             <tr>
-                <td colspan="4">
-                    <i class="glyphicon glyphicon-th-large"></i>&nbsp;执行命令</p>
-                    <pre class="code">${record.execUser}</pre>
-                </td>
+                <td ><i class="glyphicon glyphicon-th-large"></i>&nbsp;执行命令 </td>
+                <td colspan="3" style="width: 75%"><pre class="code" style="padding: 0px;">${record.command}</pre></td>
             </tr>
 
             <tr>
